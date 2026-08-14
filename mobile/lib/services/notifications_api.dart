@@ -13,4 +13,9 @@ class NotificationsApi {
 
   Future<void> markRead(String id) => _dio.patch('/notifications/$id/read');
   Future<void> markAllRead() => _dio.patch('/notifications/read-all');
+
+  Future<void> registerDeviceToken(String token, String platform) =>
+      _dio.post('/notifications/device-token', data: {'token': token, 'platform': platform});
+
+  Future<void> unregisterDeviceToken(String token) => _dio.delete('/notifications/device-token/$token');
 }

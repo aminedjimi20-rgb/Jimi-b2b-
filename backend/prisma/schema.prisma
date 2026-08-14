@@ -40,6 +40,7 @@ model User {
   client        Client?
   refreshTokens RefreshToken[]
   notifications Notification[]
+  deviceTokens  DeviceToken[]
   permissions   UserPermission[] // extension future (EMPLOYEE)
   deliveries    Delivery[]       @relation("DeliveryPerson") // extension future
 
@@ -380,6 +381,25 @@ model Favorite {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, productId])
+}
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+  WEB
+}
+
+// FCM push tokens — a user can be logged in on several devices at once.
+model DeviceToken {
+  id        String         @id @default(cuid())
+  userId    String
+  token     String         @unique
+  platform  DevicePlatform
+  createdAt DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────

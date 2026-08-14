@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
@@ -10,17 +13,39 @@ import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../cart/cart_controller.dart';
 import 'client_product_detail_screen.dart';
+import 'image_search_screen.dart';
+import 'voice_search_button.dart';
 
 final _categoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) => ref.watch(categoriesApiProvider).list());
 
 final _searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 final _selectedCategoryProvider = StateProvider.autoDispose<String?>((ref) => null);
 
+/// True whenever the current catalog listing came from the local cache
+/// instead of a live network response — drives the "Mode hors-ligne" banner.
+final _catalogIsOfflineProvider = StateProvider.autoDispose<bool>((ref) => false);
+
 final _catalogProvider = FutureProvider.autoDispose<List<ClientProduct>>((ref) async {
   final q = ref.watch(_searchQueryProvider);
   final categoryId = ref.watch(_selectedCategoryProvider);
-  final result = await ref.watch(productsApiProvider).searchCatalog(q: q, categoryId: categoryId, pageSize: 100);
-  return result.items;
+  final db = ref.watch(appDatabaseProvider);
+
+  try {
+    final result = await ref.watch(productsApiProvider).searchCatalog(q: q, categoryId: categoryId, pageSize: 100);
+    ref.read(_catalogIsOfflineProvider.notifier).state = false;
+    unawaited(db.cacheCatalog(result.items.map((p) => p.toJson()).toList()));
+    return result.items;
+  } catch (_) {
+    ref.read(_catalogIsOfflineProvider.notifier).state = true;
+    final cached = await db.readCachedCatalog();
+    final items = cached.map((j) => ClientProduct.fromJson(j)).toList();
+    final ql = q.toLowerCase();
+    return items.where((p) {
+      final matchesQ = ql.isEmpty || p.nom.toLowerCase().contains(ql) || p.code.toLowerCase().contains(ql);
+      final matchesCat = categoryId == null || p.categoryId == categoryId;
+      return matchesQ && matchesCat;
+    }).toList();
+  }
 });
 
 class ClientCatalogScreen extends ConsumerStatefulWidget {
@@ -45,9 +70,18 @@ class _ClientCatalogScreenState extends ConsumerState<ClientCatalogScreen> {
     final categories = ref.watch(_categoriesProvider);
     final selectedCategory = ref.watch(_selectedCategoryProvider);
 
+    final isOffline = ref.watch(_catalogIsOfflineProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catalogue'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.camera_alt_outlined),
+            tooltip: 'Rechercher par photo',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImageSearchScreen())),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(
@@ -59,6 +93,12 @@ class _ClientCatalogScreenState extends ConsumerState<ClientCatalogScreen> {
                 hintText: 'Nom, code, catégorie...',
                 hintStyle: const TextStyle(color: Colors.white70),
                 prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                suffixIcon: VoiceSearchButton(
+                  onResult: (text) {
+                    _searchController.text = text;
+                    ref.read(_searchQueryProvider.notifier).state = text;
+                  },
+                ),
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.15),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
@@ -71,6 +111,17 @@ class _ClientCatalogScreenState extends ConsumerState<ClientCatalogScreen> {
       ),
       body: Column(
         children: [
+          if (isOffline)
+            Container(
+              width: double.infinity,
+              color: AppTheme.warning,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: const Text(
+                'Mode hors-ligne — catalogue en cache, prix/stock non actualisés',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
           categories.when(
             data: (cats) => SizedBox(
               height: 44,

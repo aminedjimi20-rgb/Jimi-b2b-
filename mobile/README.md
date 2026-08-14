@@ -21,17 +21,51 @@ physique ou pour l'API de production, passez `--dart-define=API_BASE_URL=...`.
 ```
 lib/
   core/            Config, client API (Dio + refresh JWT), stockage sécurisé
-                    des tokens, contrôleur d'authentification, thème
+                    des tokens, contrôleur d'authentification, thème,
+                    offline (SQLite + file de sync), push (FCM optionnel)
   models/          Modèles de données (parsing JSON du backend)
   services/        Un client par ressource API (ProductsApi, OrdersApi, ...)
   features/
     auth/          Écran de connexion
     admin/         Espace Admin (dashboard, produits, commandes, clients,
                     stock, promotions, export)
-    client/        Espace Client (catalogue, panier, commandes, favoris,
-                    profil)
+    client/        Espace Client (catalogue, recherche photo/voix, panier,
+                    commandes, favoris, profil)
     shared/        Notifications (écran commun aux deux rôles)
 ```
+
+## Offline & synchronisation
+
+- **Catalogue** : chaque recherche réussie met en cache les produits
+  (SQLite, `core/offline/app_database.dart`) ; si le réseau échoue, l'écran
+  Catalogue retombe sur le cache local avec un bandeau "Mode hors-ligne".
+- **Panier** : persisté en local, survit à un redémarrage de l'app.
+- **Commande hors-ligne** : si l'appareil est hors-ligne à la validation du
+  panier, la commande est mise en file d'attente locale
+  (`pending_orders`) au lieu d'être perdue — écran de confirmation dédié
+  (`OfflineOrderQueuedScreen`), visible aussi dans l'onglet Commandes. Dès
+  que la connectivité revient (`connectivity_plus`), `SyncService` renvoie
+  automatiquement chaque commande en attente via l'API normale (qui
+  recalcule prix/stock à ce moment-là — jamais figés côté mobile).
+
+## Recherche par photo / voix
+
+- **Photo** (`features/client/catalog/image_search_screen.dart`) : le
+  client prend une photo ou en choisit une dans la galerie, l'app l'envoie
+  à `POST /products/catalog/search-image` et affiche les produits les plus
+  proches avec un score de similarité (voir `backend` — hash perceptuel).
+- **Voix** (`voice_search_button.dart`, bouton micro dans la barre de
+  recherche du catalogue) : transcription 100% sur l'appareil
+  (`speech_to_text`), le texte reconnu alimente ensuite la recherche texte
+  classique — aucun audio n'est envoyé au serveur.
+
+## Notifications push (optionnel)
+
+Fonctionne sans aucune configuration : les notifications restent
+disponibles in-app. Pour activer le push FCM, voir `docs/DEPLOYMENT.md` §2
+— aucun fichier `google-services.json`/plugin Gradle requis côté Android,
+l'initialisation Firebase se fait par options explicites
+(`--dart-define=FIREBASE_*`, voir `lib/core/config/app_config.dart`).
 
 ## Sécurité
 
@@ -51,5 +85,6 @@ affiche simplement ce que l'API a déjà limité.
 - [x] Espace Client : catalogue (recherche texte + filtres), fiche produit,
       panier, commande (paiement + livraison), historique + "commander à
       nouveau", favoris, profil (crédit, notifications)
-- [ ] Offline/synchronisation, recherche par image/voix, notifications push
-      (FCM) — Phase 7
+- [x] Offline/synchronisation (cache catalogue, panier persisté, file de
+      commandes hors-ligne), recherche par image/voix, notifications push
+      (FCM, optionnel)

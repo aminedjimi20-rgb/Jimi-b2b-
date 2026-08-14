@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/offline/connectivity_provider.dart';
+import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../models/order.dart';
@@ -9,6 +12,7 @@ import '../../../services/orders_api.dart';
 import '../../../services/service_providers.dart';
 import '../orders/client_order_detail_screen.dart';
 import 'cart_controller.dart';
+import 'offline_order_queued_screen.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -36,6 +40,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       _error = null;
     });
 
+    final payload = {
+      'items': cart.map((l) => {'productId': l.product.id, 'quantite': l.quantite}).toList(),
+      'paymentMethod': _paymentMethod,
+      'adresseLivraison': _adresse.text.trim(),
+      'telephoneContact': _telephone.text.trim(),
+      if (_notes.text.trim().isNotEmpty) 'notes': _notes.text.trim(),
+    };
+
+    final online = await isCurrentlyOnline();
+    if (!online) {
+      await _queueOffline(payload);
+      return;
+    }
+
     try {
       final order = await ref.read(ordersApiProvider).create(
             items: cart.map((l) => OrderItemInput(productId: l.product.id, quantite: l.quantite)).toList(),
@@ -48,10 +66,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ClientOrderDetailScreen(orderId: order.id)));
       }
-    } catch (e) {
-      setState(() => _error = e is ApiException ? e.message : 'Erreur lors de la commande.');
+    } on ApiException catch (e) {
+      setState(() => _error = e.message);
+    } catch (_) {
+      // Not a clean API error (e.g. connection dropped mid-request even
+      // though the device reported "online") — don't lose the order, queue it.
+      await _queueOffline(payload);
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _queueOffline(Map<String, dynamic> payload) async {
+    await ref.read(appDatabaseProvider).queuePendingOrder(const Uuid().v4(), payload);
+    ref.read(cartControllerProvider.notifier).clear();
+    if (mounted) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const OfflineOrderQueuedScreen()));
     }
   }
 

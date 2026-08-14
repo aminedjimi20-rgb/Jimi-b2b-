@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/offline/app_database.dart';
+import '../../../core/providers.dart';
 import '../../../models/product.dart';
 
 class CartLine {
@@ -10,12 +12,26 @@ class CartLine {
   double get sousTotal => product.prix * quantite;
 }
 
-/// In-memory cart, scoped to the logged-in client's session. Prices shown
-/// here are always the ones already resolved by the backend for this
-/// client (see ClientProduct.prix) — the cart never recomputes a price
-/// itself, and order creation re-resolves prices server-side anyway.
+/// Cart, persisted to local SQLite so it survives app restarts and works
+/// fully offline — every mutation writes through to AppDatabase. Prices
+/// shown here are always the ones already resolved by the backend for
+/// this client (see ClientProduct.prix); the cart never recomputes a
+/// price itself, and order creation re-resolves prices server-side anyway.
 class CartController extends StateNotifier<List<CartLine>> {
-  CartController() : super([]);
+  CartController(this._db) : super([]) {
+    _hydrate();
+  }
+
+  final AppDatabase _db;
+
+  Future<void> _hydrate() async {
+    final rows = await _db.readCart();
+    state = rows.map((r) => CartLine(product: ClientProduct.fromJson(r.product), quantite: r.quantite)).toList();
+  }
+
+  void _persist() {
+    _db.saveCart(state.map((l) => (product: l.product.toJson(), quantite: l.quantite)).toList());
+  }
 
   void add(ClientProduct product, {int? quantite}) {
     final qty = quantite ?? product.minCommande;
@@ -27,6 +43,7 @@ class CartController extends StateNotifier<List<CartLine>> {
     } else {
       state = [...state, CartLine(product: product, quantite: qty)];
     }
+    _persist();
   }
 
   void updateQuantity(String productId, int quantite) {
@@ -38,16 +55,23 @@ class CartController extends StateNotifier<List<CartLine>> {
       for (final line in state)
         if (line.product.id == productId) (CartLine(product: line.product, quantite: quantite)) else line,
     ];
+    _persist();
   }
 
   void remove(String productId) {
     state = state.where((l) => l.product.id != productId).toList();
+    _persist();
   }
 
-  void clear() => state = [];
+  void clear() {
+    state = [];
+    _persist();
+  }
 
   double get total => state.fold(0, (sum, line) => sum + line.sousTotal);
   int get itemCount => state.fold(0, (sum, line) => sum + line.quantite);
 }
 
-final cartControllerProvider = StateNotifierProvider<CartController, List<CartLine>>((ref) => CartController());
+final cartControllerProvider = StateNotifierProvider<CartController, List<CartLine>>((ref) {
+  return CartController(ref.watch(appDatabaseProvider));
+});

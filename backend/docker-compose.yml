@@ -1,0 +1,49 @@
+# Self-hosted single-machine deployment: Postgres + the JIMI B2B API.
+# `docker compose up -d` then run the seed once (see DEPLOYMENT.md).
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jimi
+      POSTGRES_PASSWORD: jimi
+      POSTGRES_DB: jimi_b2b
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jimi -d jimi_b2b"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://jimi:jimi@postgres:5432/jimi_b2b?schema=public"
+      JWT_ACCESS_SECRET: "${JWT_ACCESS_SECRET:?set a real secret in .env}"
+      JWT_REFRESH_SECRET: "${JWT_REFRESH_SECRET:?set a real secret in .env}"
+      JWT_ACCESS_EXPIRES_IN: "15m"
+      JWT_REFRESH_EXPIRES_IN: "30d"
+      PORT: 3000
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-}"
+      FIREBASE_SERVICE_ACCOUNT_PATH: "${FIREBASE_SERVICE_ACCOUNT_PATH:-}"
+      BACKUP_DIR: "/data/backups"
+      SEED_ADMIN_EMAIL: "${SEED_ADMIN_EMAIL:-admin@jimi-b2b.local}"
+      SEED_ADMIN_PASSWORD: "${SEED_ADMIN_PASSWORD:?set a real admin password in .env}"
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
+      - backups_data:/data/backups
+      # To enable push notifications, uncomment and point both sides at your
+      # Firebase service account JSON, matching FIREBASE_SERVICE_ACCOUNT_PATH above:
+      # - ./firebase-service-account.json:/app/firebase-service-account.json:ro
+
+volumes:
+  postgres_data:
+  uploads_data:
+  backups_data:

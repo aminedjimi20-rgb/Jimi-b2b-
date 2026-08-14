@@ -56,4 +56,23 @@ class ProductsApi {
     final res = await _dio.get('/products/catalog/$id');
     return ClientProduct.fromJson(res.data as Map<String, dynamic>);
   }
+
+  /// Search by photo — the mobile app takes/picks a picture and the backend
+  /// matches it against stored product photo hashes (see docs/ARCHITECTURE.md §8).
+  Future<List<ImageSearchResult>> searchByImage(String filePath) async {
+    final formData = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final res = await _dio.post('/products/catalog/search-image', data: formData);
+    return (res.data as List<dynamic>)
+        .map((e) => ImageSearchResult(
+              product: ClientProduct.fromJson(e as Map<String, dynamic>),
+              matchScore: e['matchScore'] as int,
+            ))
+        .toList();
+  }
+}
+
+class ImageSearchResult {
+  ImageSearchResult({required this.product, required this.matchScore});
+  final ClientProduct product;
+  final int matchScore;
 }

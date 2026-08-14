@@ -266,19 +266,27 @@ EN_ATTENTE → CONFIRMEE → PREPARATION → PRETE → EXPEDIEE → LIVREE
 ## 12. Feuille de route de développement (phases)
 
 - **Phase 0** ✅ Architecture + schéma DB (ce document + `DATABASE.md`)
-- **Phase 1** — Backend : Auth, Users/Clients, rôles, guards, serializers
+- **Phase 1** ✅ Backend : Auth, Users/Clients, rôles, guards, serializers
   sécurisés
-- **Phase 2** — Backend : Produits, Catégories, Pricing (grilles + prix
+- **Phase 2** ✅ Backend : Produits, Catégories, Pricing (grilles + prix
   personnalisés), Promotions
-- **Phase 3** — Backend : Commandes, Stock, Paiements/Crédit,
+- **Phase 3** ✅ Backend : Commandes, Stock, Paiements/Crédit,
   Notifications, Statistiques
-- **Phase 4** — Mobile : squelette Flutter, auth, navigation par rôle
-- **Phase 5** — Mobile : espace Admin (produits, clients, commandes,
+- **Phase 4** ✅ Mobile : squelette Flutter, auth, navigation par rôle
+- **Phase 5** ✅ Mobile : espace Admin (produits, clients, commandes,
   stock, stats)
-- **Phase 6** — Mobile : espace Client (catalogue, panier, commandes,
+- **Phase 6** ✅ Mobile : espace Client (catalogue, panier, commandes,
   favoris, recherche)
-- **Phase 7** — Offline/Sync, recherche image/voix, notifications push
-- **Phase 8** — Export/Backup, durcissement sécurité, tests, déploiement
+- **Phase 7** ✅ Offline/Sync (cache catalogue, panier persisté, file de
+  commandes hors-ligne), recherche image (hash perceptuel) et voix
+  (on-device), notifications push (FCM, optionnel)
+- **Phase 8** ✅ Export/Backup (`pg_dump` planifié + à la demande,
+  restauration en CLI), durcissement sécurité (helmet, CORS allowlist,
+  throttle renforcé sur `/auth/login`), Docker/déploiement (voir
+  `DEPLOYMENT.md`)
+
+Tests automatisés (unitaires/E2E) et CI restent hors scope de cette
+implémentation initiale — recommandés avant une mise en production réelle.
 
 Ce document sert de référence pour toutes les phases suivantes — toute
 fonctionnalité listée dans la demande initiale doit être traçable ici avant

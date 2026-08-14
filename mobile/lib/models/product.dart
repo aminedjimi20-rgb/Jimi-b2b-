@@ -12,6 +12,8 @@ class ProductImage {
         url: json['url'] as String,
         isPrimary: json['isPrimary'] as bool? ?? false,
       );
+
+  Map<String, dynamic> toJson() => {'id': id, 'url': url, 'isPrimary': isPrimary};
 }
 
 class PriceTier {
@@ -28,6 +30,8 @@ class PriceTier {
       );
 
   String get label => qteMax == null ? '$qteMin+' : '$qteMin-$qteMax';
+
+  Map<String, dynamic> toJson() => {'qteMin': qteMin, 'qteMax': qteMax, 'prix': prix};
 }
 
 /// Full product as seen by ADMIN — includes cost/margin/exact stock.
@@ -150,4 +154,23 @@ class ClientProduct {
         images: (json['images'] as List<dynamic>? ?? []).map((e) => ProductImage.fromJson(e as Map<String, dynamic>)).toList(),
         grilleQuantite: (json['grilleQuantite'] as List<dynamic>? ?? []).map((e) => PriceTier.fromJson(e as Map<String, dynamic>)).toList(),
       );
+
+  /// Round-trips through ClientProduct.fromJson — used to persist the cart
+  /// and the offline catalog cache locally (see lib/core/offline).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nom': nom,
+        'code': code,
+        'categoryId': categoryId,
+        'description': description,
+        'taille': taille,
+        'couleur': couleur,
+        'marque': marque,
+        'prix': prix,
+        'prixSource': prixSource,
+        'minCommande': minCommande,
+        'disponibilite': disponibilite,
+        'images': images.map((i) => i.toJson()).toList(),
+        'grilleQuantite': grilleQuantite.map((t) => t.toJson()).toList(),
+      };
 }

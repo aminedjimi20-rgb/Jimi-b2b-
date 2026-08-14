@@ -22,7 +22,7 @@ L'API écoute sur `http://localhost:3000/api`.
 | `auth` | Login, refresh token (rotation), logout |
 | `clients` | Admin crée/gère les comptes clients ; client consulte son propre profil |
 | `categories` | Arborescence catégories |
-| `products` | CRUD Admin (avec prixAchat/stockReel) + catalogue Client (prix résolu, stock dérivé) |
+| `products` | CRUD Admin (avec prixAchat/stockReel) + catalogue Client (prix résolu, stock dérivé) + recherche par photo (hash perceptuel, `image-hash.util.ts`) |
 | `pricing` | `PricingService` — résolution du prix (promo > prix perso > palier > normal), seule source de vérité |
 | `promotions` | Promotions ciblées produit/client |
 | `favorites` | Produits favoris du client |
@@ -30,9 +30,13 @@ L'API écoute sur `http://localhost:3000/api`.
 | `orders` | Cycle de vie de la commande, transitions de statut validées, mouvements de stock automatiques |
 | `stock` | Mouvements manuels (Entrée/Sortie/Retour/Ajustement), historique, alerte stock faible |
 | `payments` | Règlements clients, mise à jour du solde crédit |
-| `notifications` | Notifications in-app (nouvelle commande, statut, stock faible) |
+| `notifications` | Notifications in-app + push FCM optionnel (`push.service.ts`, no-op sans config), enregistrement des tokens d'appareil |
 | `stats` | Dashboard Admin (CA, bénéfice, marge, top produits/clients, stock faible) |
 | `export` | Export Excel (produits, commandes, clients) |
+| `backup` | Sauvegardes `pg_dump` planifiées + à la demande (Admin), téléchargement ; restauration volontairement en CLI seule (`scripts/restore.sh`), jamais en API |
+
+Déploiement (Docker, variables d'environnement, checklist sécurité, build
+mobile, Firebase) : voir [`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
 
 ## Garantie de sécurité vérifiée
 

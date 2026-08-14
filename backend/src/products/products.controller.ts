@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
@@ -56,6 +58,14 @@ export class ProductsController {
   @Get('catalog/search')
   searchCatalog(@CurrentUser() user: AuthenticatedUser, @Query() query: SearchCatalogDto) {
     return this.productsService.searchCatalogForClient(user.clientId!, query);
+  }
+
+  @Roles('CLIENT')
+  @Post('catalog/search-image')
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } }))
+  searchByImage(@CurrentUser() user: AuthenticatedUser, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Aucune image reçue.');
+    return this.productsService.searchByImage(user.clientId!, file.buffer);
   }
 
   @Roles('CLIENT')

@@ -1,11 +1,23 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../services/notifications_api.dart';
 import 'api/api_client.dart';
 import 'auth/auth_controller.dart';
 import 'auth/token_storage.dart';
 import 'config/app_config.dart';
+import 'offline/app_database.dart';
+import 'push/push_service.dart';
+
+final appDatabaseProvider = Provider<AppDatabase>((ref) => AppDatabase());
+
+/// Lets any layer (push snackbars, global error banners) show UI without
+/// needing a BuildContext under the current Navigator.
+final scaffoldMessengerKeyProvider = Provider<GlobalKey<ScaffoldMessengerState>>((ref) {
+  return GlobalKey<ScaffoldMessengerState>();
+});
 
 final tokenStorageProvider = Provider<TokenStorage>((ref) {
   return TokenStorage(const FlutterSecureStorage());
@@ -29,3 +41,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 final dioProvider = Provider<Dio>((ref) => ref.watch(apiClientProvider).dio);
+
+final pushServiceProvider = Provider<PushService>((ref) {
+  return PushService(NotificationsApi(ref.watch(dioProvider)), ref.watch(scaffoldMessengerKeyProvider));
+});

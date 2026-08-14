@@ -1,16 +1,25 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService } from '../pricing/pricing.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchCatalogDto } from './dto/search-catalog.dto';
 import { toAdminProductDTO, toClientProductDTO } from './dto/product-response.dto';
+import { computeImageHash, hammingDistance } from './image-hash.util';
 
 const PRODUCT_INCLUDE = { images: true, priceTiers: true } as const;
 
+// A dHash is 64 bits; empirically a Hamming distance under ~12 means
+// "visually similar enough to be the same or a related product photo".
+const IMAGE_SEARCH_MAX_DISTANCE = 16;
+
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
+
   constructor(
     private prisma: PrismaService,
     private pricing: PricingService,
@@ -21,6 +30,8 @@ export class ProductsService {
   async create(dto: CreateProductDto) {
     const existing = await this.prisma.product.findUnique({ where: { code: dto.code } });
     if (existing) throw new ConflictException('Ce code produit existe déjà.');
+
+    const imageInputs = await this.buildImageCreateInputs(dto.imageUrls ?? [], true);
 
     const product = await this.prisma.product.create({
       data: {
@@ -37,9 +48,8 @@ export class ProductsService {
         stockMinimum: dto.stockMinimum,
         minCommande: dto.minCommande,
         actif: dto.actif ?? true,
-        images: dto.imageUrls
-          ? { create: dto.imageUrls.map((url, i) => ({ url, isPrimary: i === 0 })) }
-          : undefined,
+        imageHash: imageInputs[0]?.hash,
+        images: imageInputs.length ? { create: imageInputs } : undefined,
         priceTiers: dto.priceTiers ? { create: dto.priceTiers } : undefined,
       },
       include: PRODUCT_INCLUDE,
@@ -63,6 +73,8 @@ export class ProductsService {
       if (codeTaken) throw new ConflictException('Ce code produit existe déjà.');
     }
 
+    const imageInputs = await this.buildImageCreateInputs(dto.imageUrls ?? [], false);
+
     const product = await this.prisma.product.update({
       where: { id },
       data: {
@@ -83,7 +95,7 @@ export class ProductsService {
         // trail always explains every change in real quantity.
         // New photos are appended (not a replace) — removing a photo is a
         // separate explicit action, never implied by an unrelated edit.
-        images: dto.imageUrls?.length ? { create: dto.imageUrls.map((url) => ({ url, isPrimary: false })) } : undefined,
+        images: imageInputs.length ? { create: imageInputs } : undefined,
       },
       include: PRODUCT_INCLUDE,
     });
@@ -175,6 +187,80 @@ export class ProductsService {
     const price = await this.pricing.resolvePrice(clientId, productId, product.minCommande);
     const status = this.pricing.stockStatus(product.stockReel, product.stockMinimum);
     return toClientProductDTO(product, price, status);
+  }
+
+  /** Client uploads a photo of a product they're holding — matched against stored product photo hashes. */
+  async searchByImage(clientId: string, buffer: Buffer) {
+    const queryHash = await computeImageHash(buffer);
+
+    const images = await this.prisma.productImage.findMany({
+      where: { hash: { not: null }, product: { actif: true } },
+      select: { hash: true, productId: true },
+    });
+
+    const bestDistanceByProduct = new Map<string, number>();
+    for (const img of images) {
+      const distance = hammingDistance(queryHash, img.hash!);
+      const current = bestDistanceByProduct.get(img.productId);
+      if (current === undefined || distance < current) bestDistanceByProduct.set(img.productId, distance);
+    }
+
+    const matches = [...bestDistanceByProduct.entries()]
+      .filter(([, distance]) => distance <= IMAGE_SEARCH_MAX_DISTANCE)
+      .sort((a, b) => a[1] - b[1])
+      .slice(0, 10);
+
+    if (matches.length === 0) return [];
+
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: matches.map(([productId]) => productId) } },
+      include: PRODUCT_INCLUDE,
+    });
+
+    const distanceByProductId = new Map(matches);
+    const results = await Promise.all(
+      products.map(async (product) => {
+        const price = await this.pricing.resolvePrice(clientId, product.id, product.minCommande);
+        const status = this.pricing.stockStatus(product.stockReel, product.stockMinimum);
+        const distance = distanceByProductId.get(product.id)!;
+        return { ...toClientProductDTO(product, price, status), matchScore: Math.round((1 - distance / 64) * 100) };
+      }),
+    );
+
+    return results.sort((a, b) => b.matchScore - a.matchScore);
+  }
+
+  /**
+   * Computes a perceptual hash for each newly uploaded image so it can
+   * later be matched by ProductsService.searchByImage. Only images that
+   * were uploaded through UploadsController (and therefore live under
+   * ./uploads/products locally) can be hashed here; an externally hosted
+   * URL is stored as-is with no hash (search-by-image just won't match it).
+   */
+  private async buildImageCreateInputs(urls: string[], primaryFirst: boolean) {
+    const inputs = await Promise.all(
+      urls.map(async (url, i) => {
+        const hash = await this.tryComputeHashForUrl(url);
+        return { url, isPrimary: primaryFirst && i === 0, hash };
+      }),
+    );
+    return inputs;
+  }
+
+  private async tryComputeHashForUrl(url: string): Promise<string | null> {
+    try {
+      const pathname = new URL(url, 'http://localhost').pathname;
+      const prefix = '/uploads/products/';
+      if (!pathname.startsWith(prefix)) return null;
+
+      const filename = pathname.slice(prefix.length);
+      const localPath = join(process.cwd(), 'uploads', 'products', filename);
+      const buffer = await readFile(localPath);
+      return computeImageHash(buffer);
+    } catch (error) {
+      this.logger.warn(`Impossible de calculer le hash d'image pour ${url}: ${(error as Error).message}`);
+      return null;
+    }
   }
 
   private async assertProductExists(id: string) {
