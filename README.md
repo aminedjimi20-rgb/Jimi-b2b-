@@ -18,9 +18,9 @@ docs/      Architecture, schéma de base de données, feuille de route
 - [x] Phase 1 — Backend : Auth, Users, Clients, rôles/guards
 - [x] Phase 2 — Backend : Produits, Catégories, Pricing, Promotions
 - [x] Phase 3 — Backend : Commandes, Stock, Paiements, Notifications, Stats, Export
-- [ ] Phase 4 — Mobile : squelette Flutter, auth, navigation par rôle
-- [ ] Phase 5 — Mobile : espace Admin
-- [ ] Phase 6 — Mobile : espace Client
+- [x] Phase 4 — Mobile : squelette Flutter, auth, navigation par rôle
+- [x] Phase 5 — Mobile : espace Admin
+- [x] Phase 6 — Mobile : espace Client
 - [ ] Phase 7 — Offline/Sync, recherche image/voix, notifications push
 - [ ] Phase 8 — Export/Backup, durcissement, déploiement
 

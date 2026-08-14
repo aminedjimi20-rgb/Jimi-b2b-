@@ -1,0 +1,148 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/api/api_exception.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../models/order.dart';
+import '../../../services/orders_api.dart';
+import '../../../services/service_providers.dart';
+import '../orders/client_order_detail_screen.dart';
+import 'cart_controller.dart';
+
+class CheckoutScreen extends ConsumerStatefulWidget {
+  const CheckoutScreen({super.key});
+
+  @override
+  ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
+}
+
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _adresse = TextEditingController();
+  final _telephone = TextEditingController();
+  final _notes = TextEditingController();
+  String _paymentMethod = 'ESPECES';
+  bool _submitting = false;
+  String? _error;
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final cart = ref.read(cartControllerProvider);
+    if (cart.isEmpty) return;
+
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+
+    try {
+      final order = await ref.read(ordersApiProvider).create(
+            items: cart.map((l) => OrderItemInput(productId: l.product.id, quantite: l.quantite)).toList(),
+            paymentMethod: _paymentMethod,
+            adresseLivraison: _adresse.text.trim(),
+            telephoneContact: _telephone.text.trim(),
+            notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+          );
+      ref.read(cartControllerProvider.notifier).clear();
+      if (mounted) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ClientOrderDetailScreen(orderId: order.id)));
+      }
+    } catch (e) {
+      setState(() => _error = e is ApiException ? e.message : 'Erreur lors de la commande.');
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _adresse.dispose();
+    _telephone.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = ref.watch(cartControllerProvider);
+    final total = cart.fold<double>(0, (sum, l) => sum + l.sousTotal);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Finaliser la commande')),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Récapitulatif (${cart.length} article(s))', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...cart.map((l) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text('${l.quantite} × ${l.product.nom}')),
+                              Text(formatMoney(l.sousTotal)),
+                            ],
+                          ),
+                        )),
+                    const Divider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Total', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(formatMoney(total), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _adresse,
+              decoration: const InputDecoration(labelText: 'Adresse de livraison'),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _telephone,
+              decoration: const InputDecoration(labelText: 'Téléphone de contact'),
+              keyboardType: TextInputType.phone,
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Champ requis' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(controller: _notes, decoration: const InputDecoration(labelText: 'Notes (optionnel)'), maxLines: 2),
+            const SizedBox(height: 20),
+            Text('Méthode de paiement', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            ...kPaymentMethods.map((m) => RadioListTile<String>(
+                  contentPadding: EdgeInsets.zero,
+                  value: m,
+                  groupValue: _paymentMethod,
+                  title: Text(paymentMethodLabel(m)),
+                  onChanged: (v) => setState(() => _paymentMethod = v!),
+                )),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: const TextStyle(color: AppTheme.danger)),
+            ],
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _submitting ? null : _submit,
+              child: _submitting
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Confirmer la commande'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

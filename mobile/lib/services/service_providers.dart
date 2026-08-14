@@ -1,0 +1,26 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/providers.dart';
+import 'categories_api.dart';
+import 'clients_api.dart';
+import 'favorites_api.dart';
+import 'notifications_api.dart';
+import 'orders_api.dart';
+import 'payments_api.dart';
+import 'products_api.dart';
+import 'promotions_api.dart';
+import 'stats_api.dart';
+import 'stock_api.dart';
+import 'uploads_api.dart';
+
+final categoriesApiProvider = Provider((ref) => CategoriesApi(ref.watch(dioProvider)));
+final productsApiProvider = Provider((ref) => ProductsApi(ref.watch(dioProvider)));
+final ordersApiProvider = Provider((ref) => OrdersApi(ref.watch(dioProvider)));
+final clientsApiProvider = Provider((ref) => ClientsApi(ref.watch(dioProvider)));
+final stockApiProvider = Provider((ref) => StockApi(ref.watch(dioProvider)));
+final paymentsApiProvider = Provider((ref) => PaymentsApi(ref.watch(dioProvider)));
+final favoritesApiProvider = Provider((ref) => FavoritesApi(ref.watch(dioProvider)));
+final statsApiProvider = Provider((ref) => StatsApi(ref.watch(dioProvider)));
+final notificationsApiProvider = Provider((ref) => NotificationsApi(ref.watch(dioProvider)));
+final promotionsApiProvider = Provider((ref) => PromotionsApi(ref.watch(dioProvider)));
+final uploadsApiProvider = Provider((ref) => UploadsApi(ref.watch(dioProvider)));

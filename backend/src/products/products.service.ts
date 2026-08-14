@@ -81,6 +81,9 @@ export class ProductsService {
         // stockReel is intentionally NOT editable here — it only changes via
         // recorded StockMovement entries (see StockService), so the audit
         // trail always explains every change in real quantity.
+        // New photos are appended (not a replace) — removing a photo is a
+        // separate explicit action, never implied by an unrelated edit.
+        images: dto.imageUrls?.length ? { create: dto.imageUrls.map((url) => ({ url, isPrimary: false })) } : undefined,
       },
       include: PRODUCT_INCLUDE,
     });
