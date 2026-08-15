@@ -8,7 +8,9 @@ import { OrderStatusValue } from './dto/update-order-status.dto';
 import { toAdminOrderDTO, toClientOrderDTO } from './dto/order-response.dto';
 
 const ORDER_INCLUDE = {
-  items: { include: { product: { select: { id: true, nom: true, code: true } } } },
+  items: {
+    include: { product: { select: { id: true, nom: true, code: true, images: { select: { url: true, isPrimary: true } } } } },
+  },
   client: { select: { raisonSociale: true, telephone: true } },
 } as const;
 
@@ -33,12 +35,15 @@ export class OrdersService {
 
   // ── CLIENT ───────────────────────────────────────────────────────────
 
-  async createForClient(clientId: string, dto: CreateOrderDto) {
+  // `options.remisePourcentage` is only ever passed by the ADMIN counter-sale
+  // route (see OrdersController.createForAdmin) — a client's own CreateOrderDto
+  // has no such field, so a client can never discount their own order.
+  async createForClient(clientId: string, dto: CreateOrderDto, options?: { remisePourcentage?: number }) {
     const order = await this.prisma.$transaction(async (tx) => {
       const client = await tx.client.findUnique({ where: { id: clientId } });
       if (!client) throw new NotFoundException('Client introuvable.');
 
-      let total = new Prisma.Decimal(0);
+      let subtotal = new Prisma.Decimal(0);
       const itemsData: { productId: string; quantite: number; prixUnitaire: Prisma.Decimal }[] = [];
 
       for (const line of dto.items) {
@@ -56,9 +61,12 @@ export class OrdersService {
         }
 
         const resolved = await this.pricing.resolvePrice(clientId, product.id, line.quantite);
-        total = total.plus(resolved.prix.mul(line.quantite));
+        subtotal = subtotal.plus(resolved.prix.mul(line.quantite));
         itemsData.push({ productId: product.id, quantite: line.quantite, prixUnitaire: resolved.prix });
       }
+
+      const remise = options?.remisePourcentage;
+      const total = remise ? subtotal.mul(new Prisma.Decimal(100).minus(remise)).div(100) : subtotal;
 
       if (dto.paymentMethod === 'CREDIT') {
         const nouveauSolde = client.soldeCredit.plus(total);
@@ -72,12 +80,14 @@ export class OrdersService {
       const created = await tx.order.create({
         data: {
           reference,
+          nom: dto.nom,
           clientId,
           paymentMethod: dto.paymentMethod,
           adresseLivraison: dto.adresseLivraison,
           telephoneContact: dto.telephoneContact,
           notes: dto.notes,
           total,
+          remisePourcentage: remise,
           items: { create: itemsData },
         },
         include: ORDER_INCLUDE,
@@ -194,6 +204,35 @@ export class OrdersService {
     }
 
     return this.findOneForAdmin(id);
+  }
+
+  async updatePayment(id: string, estPayee: boolean) {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) throw new NotFoundException('Commande introuvable.');
+    await this.prisma.order.update({ where: { id }, data: { estPayee } });
+    return this.findOneForAdmin(id);
+  }
+
+  // Stock/credit were committed at creation time (not at shipment), so any
+  // order still "in flight" (not yet ANNULEE — already reversed — nor
+  // EXPEDIEE/LIVREE — goods physically gone) must have its effects undone
+  // before the row disappears, exactly like cancelling it would.
+  async remove(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!order) throw new NotFoundException('Commande introuvable.');
+
+    const reversible: OrderStatus[] = ['EN_ATTENTE', 'CONFIRMEE', 'PREPARATION', 'PRETE'];
+    await this.prisma.$transaction(async (tx) => {
+      if (reversible.includes(order.status)) {
+        for (const item of order.items) {
+          await tx.product.update({ where: { id: item.productId }, data: { stockReel: { increment: item.quantite } } });
+        }
+        if (order.paymentMethod === 'CREDIT') {
+          await tx.client.update({ where: { id: order.clientId }, data: { soldeCredit: { decrement: order.total } } });
+        }
+      }
+      await tx.order.delete({ where: { id } });
+    });
   }
 
   private generateReference(): string {

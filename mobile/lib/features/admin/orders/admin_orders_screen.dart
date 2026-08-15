@@ -67,14 +67,26 @@ class AdminOrdersScreen extends ConsumerWidget {
                       final o = items[i];
                       return Card(
                         child: ListTile(
-                          title: Text(o.reference, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(
+                            o.nom != null && o.nom!.isNotEmpty ? '${o.nom} (${o.reference})' : o.reference,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           subtitle: Text('${o.clientNom ?? ''} · ${formatDate(o.createdAt)}'),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(formatMoney(o.total), style: const TextStyle(fontWeight: FontWeight.bold)),
-                              _StatusBadge(status: o.status),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _PaymentBadge(estPayee: o.estPayee),
+                                  const SizedBox(width: 4),
+                                  _StatusBadge(status: o.status),
+                                ],
+                              ),
                             ],
                           ),
                           onTap: () async {
@@ -106,6 +118,22 @@ class _FilterChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(label: Text(label), selected: selected, onSelected: (_) => onTap()),
+    );
+  }
+}
+
+class _PaymentBadge extends StatelessWidget {
+  const _PaymentBadge({required this.estPayee});
+  final bool estPayee;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = estPayee ? AppTheme.success : AppTheme.danger;
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+      child: Text(estPayee ? 'Payée' : 'Non payée', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }
 }

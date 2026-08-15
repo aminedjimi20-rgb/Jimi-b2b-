@@ -26,14 +26,17 @@ export class StockReceiptsService {
 
     const reference = this.generateReference();
     let total = new Prisma.Decimal(0);
+    let totalAchat = new Prisma.Decimal(0);
     const itemsData = dto.items.map((item) => {
       const quantite = item.cartons * item.unitesParCarton;
       total = total.plus(new Prisma.Decimal(item.prixVente).mul(quantite));
+      totalAchat = totalAchat.plus(new Prisma.Decimal(item.prixAchat).mul(quantite));
       return {
         productId: item.productId,
         cartons: item.cartons,
         unitesParCarton: item.unitesParCarton,
         quantite,
+        prixAchat: item.prixAchat,
         prixVente: item.prixVente,
       };
     });
@@ -45,6 +48,7 @@ export class StockReceiptsService {
           fabricantId: dto.fabricantId,
           notes: dto.notes,
           total,
+          totalAchat,
           items: { create: itemsData },
         },
       });
@@ -80,6 +84,22 @@ export class StockReceiptsService {
     const receipt = await this.prisma.stockReceipt.findUnique({ where: { id }, include: RECEIPT_INCLUDE });
     if (!receipt) throw new NotFoundException('Bon de réception introuvable.');
     return toStockReceiptDTO(receipt);
+  }
+
+  // Undoes the stock this receipt had added, then deletes it. If some of
+  // that stock has since been sold, stockReel can end up below the amount
+  // this receipt contributed — that's an accurate signal to recount, not
+  // an error, so it's allowed to go negative rather than blocked.
+  async remove(id: string) {
+    const receipt = await this.prisma.stockReceipt.findUnique({ where: { id }, include: { items: true } });
+    if (!receipt) throw new NotFoundException('Bon de réception introuvable.');
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of receipt.items) {
+        await tx.product.update({ where: { id: item.productId }, data: { stockReel: { decrement: item.quantite } } });
+      }
+      await tx.stockReceipt.delete({ where: { id } });
+    });
   }
 
   private generateReference(): string {

@@ -9,7 +9,9 @@ class StockReceiptItemView {
     required this.cartons,
     required this.unitesParCarton,
     required this.quantite,
+    required this.prixAchat,
     required this.prixVente,
+    required this.sousTotalAchat,
     required this.sousTotal,
   });
 
@@ -20,7 +22,9 @@ class StockReceiptItemView {
   final int cartons;
   final int unitesParCarton;
   final int quantite;
+  final double prixAchat;
   final double prixVente;
+  final double sousTotalAchat;
   final double sousTotal;
 
   factory StockReceiptItemView.fromJson(Map<String, dynamic> json) => StockReceiptItemView(
@@ -31,7 +35,9 @@ class StockReceiptItemView {
         cartons: json['cartons'] as int,
         unitesParCarton: json['unitesParCarton'] as int,
         quantite: json['quantite'] as int,
+        prixAchat: parseDecimal(json['prixAchat']),
         prixVente: parseDecimal(json['prixVente']),
+        sousTotalAchat: parseDecimal(json['sousTotalAchat']),
         sousTotal: parseDecimal(json['sousTotal']),
       );
 }
@@ -44,6 +50,7 @@ class StockReceiptView {
     required this.fabricantNom,
     this.notes,
     required this.total,
+    required this.totalAchat,
     required this.items,
     required this.createdAt,
   });
@@ -54,6 +61,7 @@ class StockReceiptView {
   final String fabricantNom;
   final String? notes;
   final double total;
+  final double totalAchat;
   final List<StockReceiptItemView> items;
   final DateTime createdAt;
 
@@ -64,6 +72,7 @@ class StockReceiptView {
         fabricantNom: json['fabricantNom'] as String,
         notes: json['notes'] as String?,
         total: parseDecimal(json['total']),
+        totalAchat: parseDecimal(json['totalAchat']),
         items: (json['items'] as List<dynamic>? ?? [])
             .map((e) => StockReceiptItemView.fromJson(e as Map<String, dynamic>))
             .toList(),

@@ -11,6 +11,7 @@ export function toStockReceiptDTO(receipt: ReceiptWithRelations) {
     fabricantNom: receipt.fabricant.nom,
     notes: receipt.notes,
     total: receipt.total,
+    totalAchat: receipt.totalAchat,
     createdAt: receipt.createdAt,
     items: receipt.items.map((item) => ({
       productId: item.productId,
@@ -20,7 +21,9 @@ export function toStockReceiptDTO(receipt: ReceiptWithRelations) {
       cartons: item.cartons,
       unitesParCarton: item.unitesParCarton,
       quantite: item.quantite,
+      prixAchat: item.prixAchat,
       prixVente: item.prixVente,
+      sousTotalAchat: item.prixAchat.mul(item.quantite),
       sousTotal: item.prixVente.mul(item.quantite),
     })),
   };

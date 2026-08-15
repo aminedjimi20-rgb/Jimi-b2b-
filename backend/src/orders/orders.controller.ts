@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -7,6 +7,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AdminCreateOrderDto } from './dto/admin-create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { UpdateOrderPaymentDto } from './dto/update-order-payment.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -44,8 +45,8 @@ export class OrdersController {
   @Roles('ADMIN')
   @Post('admin')
   createForAdmin(@Body() dto: AdminCreateOrderDto) {
-    const { clientId, ...orderDto } = dto;
-    return this.ordersService.createForClient(clientId, orderDto);
+    const { clientId, remisePourcentage, ...orderDto } = dto;
+    return this.ordersService.createForClient(clientId, orderDto, { remisePourcentage });
   }
 
   @Roles('ADMIN')
@@ -64,5 +65,17 @@ export class OrdersController {
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto.status);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id/payment')
+  updatePayment(@Param('id') id: string, @Body() dto: UpdateOrderPaymentDto) {
+    return this.ordersService.updatePayment(id, dto.estPayee);
+  }
+
+  @Roles('ADMIN')
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.ordersService.remove(id);
   }
 }

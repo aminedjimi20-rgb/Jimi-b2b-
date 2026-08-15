@@ -16,10 +16,28 @@ final _clientsForOrderProvider = FutureProvider.autoDispose<List<ClientView>>((r
 final _productsForOrderProvider = FutureProvider.autoDispose<List<AdminProduct>>((ref) => ref.watch(productsApiProvider).listAdmin());
 
 class _OrderLine {
-  _OrderLine(this.product, this.quantite);
+  _OrderLine(this.product, int initialQuantite) : quantite = initialQuantite {
+    if (product.uniteParCarton != null && product.uniteParCarton! > 1) {
+      final cartons = (initialQuantite / product.uniteParCarton!).ceil();
+      cartonsController = TextEditingController(text: '$cartons');
+    }
+  }
+
   final AdminProduct product;
   int quantite;
+  TextEditingController? cartonsController;
+
+  bool get usesCartons => cartonsController != null;
+
+  void updateFromCartons(String text) {
+    final cartons = int.tryParse(text) ?? 0;
+    quantite = cartons * (product.uniteParCarton ?? 1);
+  }
+
+  void dispose() => cartonsController?.dispose();
 }
+
+const _remisePresets = [0.0, 5.0, 10.0];
 
 /// Counter sale — Admin builds an order directly for a walk-in client
 /// (clients who come to the store) instead of the client ordering themselves.
@@ -37,11 +55,20 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
   String _paymentMethod = 'ESPECES';
   final _adresse = TextEditingController();
   final _telephone = TextEditingController();
+  final _nom = TextEditingController();
   final _notes = TextEditingController();
+  final _remiseCustom = TextEditingController();
+  double? _remisePourcentage;
+  bool _remiseCustomSelected = false;
   bool _saving = false;
   String? _error;
 
-  double get _total => _lines.fold(0.0, (sum, l) => sum + l.product.prixVente * l.quantite);
+  double get _subtotal => _lines.fold(0.0, (sum, l) => sum + l.product.prixVente * l.quantite);
+  double get _total {
+    final remise = _remisePourcentage;
+    if (remise == null || remise <= 0) return _subtotal;
+    return _subtotal * (100 - remise) / 100;
+  }
 
   Future<void> _pickClient() async {
     final clients = await ref.read(_clientsForOrderProvider.future);
@@ -111,6 +138,8 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
             paymentMethod: _paymentMethod,
             adresseLivraison: _adresse.text.trim(),
             telephoneContact: _telephone.text.trim(),
+            nom: _nom.text.trim().isEmpty ? null : _nom.text.trim(),
+            remisePourcentage: _remisePourcentage,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
           );
       if (mounted) {
@@ -125,9 +154,14 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
 
   @override
   void dispose() {
+    for (final line in _lines) {
+      line.dispose();
+    }
     _adresse.dispose();
     _telephone.dispose();
+    _nom.dispose();
     _notes.dispose();
+    _remiseCustom.dispose();
     super.dispose();
   }
 
@@ -165,45 +199,112 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
                 child: ListTile(
                   title: Text(line.product.nom),
                   subtitle: Text(formatMoney(line.product.prixVente)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => setState(() {
-                          if (line.quantite > 1) {
-                            line.quantite--;
-                          } else {
-                            _lines.remove(line);
-                          }
-                        }),
-                      ),
-                      Text('${line.quantite}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () => setState(() => line.quantite++),
-                      ),
-                    ],
-                  ),
+                  trailing: line.usesCartons
+                      ? SizedBox(
+                          width: 130,
+                          child: TextField(
+                            controller: line.cartonsController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              labelText: 'Cartons',
+                              helperText: '= ${line.quantite} pièces',
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.close, size: 18),
+                                onPressed: () => setState(() {
+                                  line.dispose();
+                                  _lines.remove(line);
+                                }),
+                              ),
+                            ),
+                            onChanged: (v) => setState(() => line.updateFromCartons(v)),
+                          ),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () => setState(() {
+                                if (line.quantite > 1) {
+                                  line.quantite--;
+                                } else {
+                                  _lines.remove(line);
+                                }
+                              }),
+                            ),
+                            Text('${line.quantite}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () => setState(() => line.quantite++),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ),
           if (_lines.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text('Remise', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final preset in _remisePresets)
+                  ChoiceChip(
+                    label: Text(preset == 0 ? 'Aucune' : '$preset%'),
+                    selected: !_remiseCustomSelected && _remisePourcentage == preset,
+                    onSelected: (_) => setState(() {
+                      _remiseCustomSelected = false;
+                      _remisePourcentage = preset == 0 ? null : preset;
+                    }),
+                  ),
+                ChoiceChip(
+                  label: const Text('Autre'),
+                  selected: _remiseCustomSelected,
+                  onSelected: (_) => setState(() => _remiseCustomSelected = true),
+                ),
+              ],
+            ),
+            if (_remiseCustomSelected) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _remiseCustom,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Remise personnalisée (%)', isDense: true),
+                onChanged: (v) => setState(() => _remisePourcentage = double.tryParse(v)),
+              ),
+            ],
             const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  const Text('Total estimé', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(formatMoney(_total), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                  if (_remisePourcentage != null && _remisePourcentage! > 0)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Sous-total'),
+                        Text(formatMoney(_subtotal)),
+                      ],
+                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total estimé', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(formatMoney(_total), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                    ],
+                  ),
                 ],
               ),
             ),
           ],
           const SizedBox(height: 20),
-          Text('Paiement & livraison', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text('Détails de la commande', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
+          TextFormField(controller: _nom, decoration: const InputDecoration(labelText: 'Nom de la commande (optionnel)')),
+          const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _paymentMethod,
             decoration: const InputDecoration(labelText: 'Méthode de paiement'),

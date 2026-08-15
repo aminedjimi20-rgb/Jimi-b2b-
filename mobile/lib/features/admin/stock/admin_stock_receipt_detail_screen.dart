@@ -34,6 +34,41 @@ class AdminStockReceiptDetailScreen extends ConsumerStatefulWidget {
 
 class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceiptDetailScreen> {
   bool _generating = false;
+  bool _deleting = false;
+
+  Future<void> _confirmDelete(StockReceiptView receipt) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer ce bon ?'),
+        content: Text(
+          'Le bon ${receipt.reference} sera supprimé et le stock qu\'il avait ajouté (${receipt.items.fold(0, (s, i) => s + i.quantite)} pièces) sera retiré. Cette action est irréversible.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _deleting = true);
+    try {
+      await ref.read(stockReceiptsApiProvider).remove(receipt.id);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _deleting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e is ApiException ? e.message : 'Erreur lors de la suppression.')),
+        );
+      }
+    }
+  }
 
   Future<void> _generateAndSharePdf(StockReceiptView receipt) async {
     setState(() => _generating = true);
@@ -105,7 +140,14 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
             pw.SizedBox(height: 12),
             pw.Align(
               alignment: pw.Alignment.centerRight,
-              child: pw.Text('Total: ${formatMoney(receipt.total)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text('Total achat: ${formatMoney(receipt.totalAchat)}', style: const pw.TextStyle(fontSize: 11)),
+                  pw.SizedBox(height: 2),
+                  pw.Text('Total vente: ${formatMoney(receipt.total)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                ],
+              ),
             ),
           ],
         ),
@@ -141,12 +183,24 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
         title: const Text('Bon de réception'),
         actions: [
           receipt.maybeWhen(
-            data: (r) => IconButton(
-              icon: _generating
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.picture_as_pdf_outlined),
-              tooltip: 'Générer le PDF',
-              onPressed: _generating ? null : () => _generateAndSharePdf(r),
+            data: (r) => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: _generating
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.picture_as_pdf_outlined),
+                  tooltip: 'Générer le PDF',
+                  onPressed: _generating ? null : () => _generateAndSharePdf(r),
+                ),
+                IconButton(
+                  icon: _deleting
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.delete_outline),
+                  tooltip: 'Supprimer',
+                  onPressed: _deleting ? null : () => _confirmDelete(r),
+                ),
+              ],
             ),
             orElse: () => const SizedBox.shrink(),
           ),
@@ -204,11 +258,23 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total achat (ce que ça a coûté)'),
+                      Text(formatMoney(r.totalAchat), style: const TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total vente', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                    ],
+                  ),
                 ],
               ),
             ),

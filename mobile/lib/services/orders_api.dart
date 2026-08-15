@@ -21,6 +21,7 @@ class OrdersApi {
     required String paymentMethod,
     required String adresseLivraison,
     required String telephoneContact,
+    String? nom,
     String? notes,
   }) async {
     final res = await _dio.post('/orders', data: {
@@ -28,6 +29,7 @@ class OrdersApi {
       'paymentMethod': paymentMethod,
       'adresseLivraison': adresseLivraison,
       'telephoneContact': telephoneContact,
+      if (nom != null && nom.isNotEmpty) 'nom': nom,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
     });
     return OrderView.fromJson(res.data as Map<String, dynamic>);
@@ -51,12 +53,15 @@ class OrdersApi {
   // ── ADMIN ────────────────────────────────────────────────────────────
 
   /// Counter sale — Admin places an order directly for a walk-in client.
+  /// `remisePourcentage` is admin-only — there is no client-facing equivalent.
   Future<OrderView> createForAdmin({
     required String clientId,
     required List<OrderItemInput> items,
     required String paymentMethod,
     required String adresseLivraison,
     required String telephoneContact,
+    String? nom,
+    double? remisePourcentage,
     String? notes,
   }) async {
     final res = await _dio.post('/orders/admin', data: {
@@ -65,6 +70,8 @@ class OrdersApi {
       'paymentMethod': paymentMethod,
       'adresseLivraison': adresseLivraison,
       'telephoneContact': telephoneContact,
+      if (nom != null && nom.isNotEmpty) 'nom': nom,
+      if (remisePourcentage != null && remisePourcentage > 0) 'remisePourcentage': remisePourcentage,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
     });
     return OrderView.fromJson(res.data as Map<String, dynamic>);
@@ -84,4 +91,11 @@ class OrdersApi {
     final res = await _dio.patch('/orders/$id/status', data: {'status': status});
     return OrderView.fromJson(res.data as Map<String, dynamic>);
   }
+
+  Future<OrderView> updatePayment(String id, bool estPayee) async {
+    final res = await _dio.patch('/orders/$id/payment', data: {'estPayee': estPayee});
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<void> remove(String id) => _dio.delete('/orders/$id');
 }

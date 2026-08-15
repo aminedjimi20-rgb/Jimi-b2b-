@@ -59,7 +59,10 @@ class AdminStockReceiptsScreen extends ConsumerWidget {
                     title: Text(r.reference),
                     subtitle: Text('${r.fabricantNom} · ${formatDate(r.createdAt)} · ${r.items.length} article${r.items.length == 1 ? '' : 's'}'),
                     trailing: Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: r.id))),
+                    onTap: () async {
+                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: r.id)));
+                      ref.invalidate(_stockReceiptsProvider);
+                    },
                   ),
                 );
               },

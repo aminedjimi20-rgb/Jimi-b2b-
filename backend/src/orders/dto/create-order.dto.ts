@@ -11,6 +11,10 @@ class OrderItemInputDto {
 }
 
 export class CreateOrderDto {
+  @IsOptional()
+  @IsString()
+  nom?: string;
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

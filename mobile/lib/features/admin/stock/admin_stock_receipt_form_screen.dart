@@ -21,19 +21,23 @@ class _ReceiptLine {
       : product = product,
         cartons = TextEditingController(text: '1'),
         unitesParCarton = TextEditingController(text: '${product.uniteParCarton ?? 1}'),
+        prixAchat = TextEditingController(text: product.prixAchat.toString()),
         prixVente = TextEditingController(text: product.prixVente.toString());
 
   final AdminProduct product;
   final TextEditingController cartons;
   final TextEditingController unitesParCarton;
+  final TextEditingController prixAchat;
   final TextEditingController prixVente;
 
   int get quantite => (int.tryParse(cartons.text) ?? 0) * (int.tryParse(unitesParCarton.text) ?? 0);
+  double get sousTotalAchat => quantite * (double.tryParse(prixAchat.text) ?? 0);
   double get sousTotal => quantite * (double.tryParse(prixVente.text) ?? 0);
 
   void dispose() {
     cartons.dispose();
     unitesParCarton.dispose();
+    prixAchat.dispose();
     prixVente.dispose();
   }
 }
@@ -56,6 +60,7 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
   String? _error;
 
   double get _total => _lines.fold(0.0, (sum, l) => sum + l.sousTotal);
+  double get _totalAchat => _lines.fold(0.0, (sum, l) => sum + l.sousTotalAchat);
 
   Future<void> _pickFabricant() async {
     final fabricants = await ref.read(_fabricantsForReceiptProvider.future);
@@ -108,12 +113,19 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
     for (final line in _lines) {
       final cartons = int.tryParse(line.cartons.text);
       final unites = int.tryParse(line.unitesParCarton.text);
-      final prix = double.tryParse(line.prixVente.text);
-      if (cartons == null || cartons < 1 || unites == null || unites < 1 || prix == null || prix < 0) {
+      final prixAchat = double.tryParse(line.prixAchat.text);
+      final prixVente = double.tryParse(line.prixVente.text);
+      if (cartons == null || cartons < 1 || unites == null || unites < 1 || prixAchat == null || prixAchat < 0 || prixVente == null || prixVente < 0) {
         setState(() => _error = 'Vérifiez les cartons / unités / prix de "${line.product.nom}".');
         return;
       }
-      items.add(StockReceiptItemInput(productId: line.product.id, cartons: cartons, unitesParCarton: unites, prixVente: prix));
+      items.add(StockReceiptItemInput(
+        productId: line.product.id,
+        cartons: cartons,
+        unitesParCarton: unites,
+        prixAchat: prixAchat,
+        prixVente: prixVente,
+      ));
     }
 
     setState(() {
@@ -185,11 +197,23 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
             const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  const Text('Total', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(formatMoney(_total), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total achat (ce que ça coûte)'),
+                      Text(formatMoney(_totalAchat), style: const TextStyle(fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total vente', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(formatMoney(_total), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -252,6 +276,19 @@ class _ReceiptLineCard extends StatelessWidget {
                     onChanged: (_) => onChanged(),
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: line.prixAchat,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(labelText: 'Prix achat', isDense: true),
+                    onChanged: (_) => onChanged(),
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
@@ -266,7 +303,10 @@ class _ReceiptLineCard extends StatelessWidget {
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerRight,
-              child: Text('Qté: ${line.quantite} — ${formatMoney(line.sousTotal)}', style: const TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                'Qté: ${line.quantite} — achat ${formatMoney(line.sousTotalAchat)} — vente ${formatMoney(line.sousTotal)}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { StockReceiptsService } from './stock-receipts.service';
 import { CreateStockReceiptDto } from './dto/create-stock-receipt.dto';
@@ -21,5 +21,10 @@ export class StockReceiptsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.stockReceiptsService.findOne(id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.stockReceiptsService.remove(id);
   }
 }

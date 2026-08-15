@@ -47,6 +47,7 @@ class OrderItemView {
     required this.productId,
     required this.nom,
     required this.code,
+    this.imageUrl,
     required this.quantite,
     required this.prixUnitaire,
     required this.sousTotal,
@@ -55,6 +56,7 @@ class OrderItemView {
   final String productId;
   final String nom;
   final String code;
+  final String? imageUrl;
   final int quantite;
   final double prixUnitaire;
   final double sousTotal;
@@ -63,6 +65,7 @@ class OrderItemView {
         productId: json['productId'] as String,
         nom: json['nom'] as String,
         code: json['code'] as String,
+        imageUrl: json['imageUrl'] as String?,
         quantite: json['quantite'] as int,
         prixUnitaire: parseDecimal(json['prixUnitaire']),
         sousTotal: parseDecimal(json['sousTotal']),
@@ -73,8 +76,11 @@ class OrderView {
   OrderView({
     required this.id,
     required this.reference,
+    this.nom,
     required this.status,
     required this.paymentMethod,
+    required this.estPayee,
+    this.remisePourcentage,
     this.clientNom,
     this.clientTelephone,
     required this.adresseLivraison,
@@ -87,8 +93,11 @@ class OrderView {
 
   final String id;
   final String reference;
+  final String? nom;
   final String status;
   final String paymentMethod;
+  final bool estPayee;
+  final double? remisePourcentage;
   final String? clientNom;
   final String? clientTelephone;
   final String adresseLivraison;
@@ -101,8 +110,11 @@ class OrderView {
   factory OrderView.fromJson(Map<String, dynamic> json) => OrderView(
         id: json['id'] as String,
         reference: json['reference'] as String,
+        nom: json['nom'] as String?,
         status: json['status'] as String,
         paymentMethod: json['paymentMethod'] as String,
+        estPayee: json['estPayee'] as bool? ?? false,
+        remisePourcentage: json['remisePourcentage'] == null ? null : parseDecimal(json['remisePourcentage']),
         clientNom: json['clientNom'] as String?,
         clientTelephone: json['clientTelephone'] as String?,
         adresseLivraison: json['adresseLivraison'] as String,

@@ -15,6 +15,10 @@ class StockReceiptItemInputDto {
 
   @IsNumber()
   @Min(0)
+  prixAchat!: number;
+
+  @IsNumber()
+  @Min(0)
   prixVente!: number;
 }
 

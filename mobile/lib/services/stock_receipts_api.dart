@@ -7,18 +7,21 @@ class StockReceiptItemInput {
     required this.productId,
     required this.cartons,
     required this.unitesParCarton,
+    required this.prixAchat,
     required this.prixVente,
   });
 
   final String productId;
   final int cartons;
   final int unitesParCarton;
+  final double prixAchat;
   final double prixVente;
 
   Map<String, dynamic> toJson() => {
         'productId': productId,
         'cartons': cartons,
         'unitesParCarton': unitesParCarton,
+        'prixAchat': prixAchat,
         'prixVente': prixVente,
       };
 }
@@ -49,4 +52,6 @@ class StockReceiptsApi {
     final res = await _dio.get('/stock-receipts/$id');
     return StockReceiptView.fromJson(res.data as Map<String, dynamic>);
   }
+
+  Future<void> remove(String id) => _dio.delete('/stock-receipts/$id');
 }

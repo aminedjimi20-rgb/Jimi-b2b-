@@ -1,6 +1,8 @@
-import { Client, Order, OrderItem, Product } from '@prisma/client';
+import { Client, Order, OrderItem, Product, ProductImage } from '@prisma/client';
 
-type OrderItemWithProduct = OrderItem & { product: Pick<Product, 'id' | 'nom' | 'code'> };
+type OrderItemWithProduct = OrderItem & {
+  product: Pick<Product, 'id' | 'nom' | 'code'> & { images: Pick<ProductImage, 'url' | 'isPrimary'>[] };
+};
 type OrderWithRelations = Order & { items: OrderItemWithProduct[]; client?: Pick<Client, 'raisonSociale' | 'telephone'> };
 
 function mapItems(items: OrderItemWithProduct[]) {
@@ -8,6 +10,7 @@ function mapItems(items: OrderItemWithProduct[]) {
     productId: item.productId,
     nom: item.product.nom,
     code: item.product.code,
+    imageUrl: item.product.images.find((i) => i.isPrimary)?.url ?? item.product.images[0]?.url ?? null,
     quantite: item.quantite,
     prixUnitaire: item.prixUnitaire,
     sousTotal: item.prixUnitaire.mul(item.quantite),
@@ -19,8 +22,11 @@ export function toAdminOrderDTO(order: OrderWithRelations) {
   return {
     id: order.id,
     reference: order.reference,
+    nom: order.nom,
     status: order.status,
     paymentMethod: order.paymentMethod,
+    estPayee: order.estPayee,
+    remisePourcentage: order.remisePourcentage,
     clientId: order.clientId,
     clientNom: order.client?.raisonSociale,
     clientTelephone: order.client?.telephone,
@@ -39,8 +45,10 @@ export function toClientOrderDTO(order: OrderWithRelations) {
   return {
     id: order.id,
     reference: order.reference,
+    nom: order.nom,
     status: order.status,
     paymentMethod: order.paymentMethod,
+    estPayee: order.estPayee,
     adresseLivraison: order.adresseLivraison,
     telephoneContact: order.telephoneContact,
     notes: order.notes,
