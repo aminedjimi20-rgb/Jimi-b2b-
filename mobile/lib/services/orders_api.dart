@@ -50,6 +50,26 @@ class OrdersApi {
 
   // ── ADMIN ────────────────────────────────────────────────────────────
 
+  /// Counter sale — Admin places an order directly for a walk-in client.
+  Future<OrderView> createForAdmin({
+    required String clientId,
+    required List<OrderItemInput> items,
+    required String paymentMethod,
+    required String adresseLivraison,
+    required String telephoneContact,
+    String? notes,
+  }) async {
+    final res = await _dio.post('/orders/admin', data: {
+      'clientId': clientId,
+      'items': items.map((e) => e.toJson()).toList(),
+      'paymentMethod': paymentMethod,
+      'adresseLivraison': adresseLivraison,
+      'telephoneContact': telephoneContact,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+    });
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
   Future<List<OrderView>> listAdmin({String? status}) async {
     final res = await _dio.get('/orders', queryParameters: {if (status != null) 'status': status});
     return (res.data as List<dynamic>).map((e) => OrderView.fromJson(e as Map<String, dynamic>)).toList();

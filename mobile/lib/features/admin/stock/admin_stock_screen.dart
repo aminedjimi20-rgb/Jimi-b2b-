@@ -29,23 +29,43 @@ String _movementLabel(String type) {
 }
 
 class AdminStockScreen extends ConsumerStatefulWidget {
-  const AdminStockScreen({super.key});
+  /// `initialProduct` pre-selects a product and switches to a quick
+  /// "Ajustement" — used from the product edit form to fix a stock typo
+  /// without leaving to hunt for the product in the dropdown. In that mode
+  /// the screen pops back (with `true`) after a successful save instead of
+  /// staying open, since the caller only wants the one correction.
+  const AdminStockScreen({super.key, this.initialProduct});
+
+  final AdminProduct? initialProduct;
 
   @override
   ConsumerState<AdminStockScreen> createState() => _AdminStockScreenState();
 }
 
 class _AdminStockScreenState extends ConsumerState<AdminStockScreen> {
-  AdminProduct? _selectedProduct;
+  // Held by id rather than instance: `initialProduct` comes from a separate
+  // fetch than `_productsForStockProvider`'s list, so the objects are never
+  // `==`-identical — matching by id is what lets the dropdown show it selected.
+  String? _selectedProductId;
   String _type = 'ENTREE';
   final _quantite = TextEditingController();
   final _motif = TextEditingController();
   bool _saving = false;
   String? _error;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialProduct != null) {
+      _selectedProductId = widget.initialProduct!.id;
+      _type = 'AJUSTEMENT';
+      _quantite.text = widget.initialProduct!.stockReel.toString();
+    }
+  }
+
   Future<void> _submit() async {
     final qty = int.tryParse(_quantite.text);
-    if (_selectedProduct == null || qty == null) {
+    if (_selectedProductId == null || qty == null) {
       setState(() => _error = 'Sélectionnez un produit et une quantité valide.');
       return;
     }
@@ -55,12 +75,16 @@ class _AdminStockScreenState extends ConsumerState<AdminStockScreen> {
     });
     try {
       await ref.read(stockApiProvider).createMovement(
-            StockMovementInput(productId: _selectedProduct!.id, type: _type, quantite: qty, motif: _motif.text.trim()),
+            StockMovementInput(productId: _selectedProductId!, type: _type, quantite: qty, motif: _motif.text.trim()),
           );
       ref.invalidate(_productsForStockProvider);
       _quantite.clear();
       _motif.clear();
       if (mounted) {
+        if (widget.initialProduct != null) {
+          Navigator.of(context).pop(true);
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mouvement de stock enregistré.')));
       }
     } catch (e) {
@@ -92,11 +116,11 @@ class _AdminStockScreenState extends ConsumerState<AdminStockScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      DropdownButtonFormField<AdminProduct>(
-                        initialValue: _selectedProduct,
+                      DropdownButtonFormField<String>(
+                        initialValue: items.any((p) => p.id == _selectedProductId) ? _selectedProductId : null,
                         decoration: const InputDecoration(labelText: 'Produit'),
-                        items: items.map((p) => DropdownMenuItem(value: p, child: Text('${p.nom} (stock: ${p.stockReel})'))).toList(),
-                        onChanged: (v) => setState(() => _selectedProduct = v),
+                        items: items.map((p) => DropdownMenuItem(value: p.id, child: Text('${p.nom} (stock: ${p.stockReel})'))).toList(),
+                        onChanged: (v) => setState(() => _selectedProductId = v),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(

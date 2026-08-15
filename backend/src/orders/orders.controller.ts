@@ -5,6 +5,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { AdminCreateOrderDto } from './dto/admin-create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Controller('orders')
@@ -38,6 +39,14 @@ export class OrdersController {
   }
 
   // ── ADMIN ────────────────────────────────────────────────────────────
+
+  // Counter sale: Admin places an order directly for a walk-in client.
+  @Roles('ADMIN')
+  @Post('admin')
+  createForAdmin(@Body() dto: AdminCreateOrderDto) {
+    const { clientId, ...orderDto } = dto;
+    return this.ordersService.createForClient(clientId, orderDto);
+  }
 
   @Roles('ADMIN')
   @Get()

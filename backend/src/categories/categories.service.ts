@@ -6,8 +6,12 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.category.findMany({ orderBy: { nom: 'asc' } });
+  async findAll() {
+    const categories = await this.prisma.category.findMany({
+      orderBy: { nom: 'asc' },
+      include: { _count: { select: { products: true } } },
+    });
+    return categories.map(({ _count, ...c }) => ({ ...c, productCount: _count.products }));
   }
 
   async create(dto: CreateCategoryDto) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
@@ -40,12 +41,40 @@ class AdminOrderDetailScreen extends ConsumerWidget {
     }
   }
 
+  void _shareBon(OrderView o) {
+    final buffer = StringBuffer()
+      ..writeln('JIMI B2B — Bon de commande')
+      ..writeln(o.reference)
+      ..writeln('---')
+      ..writeln('Client: ${o.clientNom ?? '-'}')
+      ..writeln('Téléphone: ${o.telephoneContact}')
+      ..writeln('Adresse: ${o.adresseLivraison}')
+      ..writeln('Date: ${formatDate(o.createdAt)}')
+      ..writeln('Paiement: ${paymentMethodLabel(o.paymentMethod)}')
+      ..writeln('---');
+    for (final item in o.items) {
+      buffer.writeln('${item.nom} x${item.quantite} = ${formatMoney(item.sousTotal)}');
+    }
+    buffer
+      ..writeln('---')
+      ..writeln('Total: ${formatMoney(o.total)}');
+    Share.share(buffer.toString(), subject: 'Bon de commande ${o.reference}');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(_adminOrderProvider(orderId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Détail commande')),
+      appBar: AppBar(
+        title: const Text('Détail commande'),
+        actions: [
+          order.maybeWhen(
+            data: (o) => IconButton(icon: const Icon(Icons.share_outlined), tooltip: 'Partager le bon', onPressed: () => _shareBon(o)),
+            orElse: () => const SizedBox.shrink(),
+          ),
+        ],
+      ),
       body: AsyncValueWidget<OrderView>(
         value: order,
         onRetry: () => ref.invalidate(_adminOrderProvider(orderId)),

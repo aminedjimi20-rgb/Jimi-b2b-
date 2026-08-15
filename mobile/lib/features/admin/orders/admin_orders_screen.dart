@@ -6,6 +6,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
+import 'admin_create_order_screen.dart';
 import 'admin_order_detail_screen.dart';
 
 final _statusFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
@@ -25,6 +26,14 @@ class AdminOrdersScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Commandes')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminCreateOrderScreen()));
+          ref.invalidate(_adminOrdersProvider);
+        },
+        icon: const Icon(Icons.point_of_sale_outlined),
+        label: const Text('Commande comptoir'),
+      ),
       body: Column(
         children: [
           SizedBox(

@@ -9,14 +9,18 @@ import '../../../core/theme/app_theme.dart';
 import '../../../models/category.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
+import '../stock/admin_stock_screen.dart';
 
 final _categoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) => ref.watch(categoriesApiProvider).list());
 
 /// Create/edit product form — Admin only. `productId` null means "create".
+/// `initialCategoryId` pre-selects a category when creating from a category
+/// "folder" (ignored in edit mode, where the loaded product's category wins).
 class AdminProductFormScreen extends ConsumerStatefulWidget {
-  const AdminProductFormScreen({super.key, this.productId});
+  const AdminProductFormScreen({super.key, this.productId, this.initialCategoryId});
 
   final String? productId;
+  final String? initialCategoryId;
 
   @override
   ConsumerState<AdminProductFormScreen> createState() => _AdminProductFormScreenState();
@@ -52,18 +56,25 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
   final List<ProductImage> _existingImages = [];
   final List<_TierInput> _tiers = [];
 
+  AdminProduct? _product;
+
   bool get _isEdit => widget.productId != null;
 
   @override
   void initState() {
     super.initState();
-    if (_isEdit) _loadProduct();
+    if (_isEdit) {
+      _loadProduct();
+    } else if (widget.initialCategoryId != null) {
+      _categoryId = widget.initialCategoryId;
+    }
   }
 
   Future<void> _loadProduct() async {
     setState(() => _loading = true);
     try {
       final p = await ref.read(productsApiProvider).getAdmin(widget.productId!);
+      _product = p;
       _nom.text = p.nom;
       _code.text = p.code;
       _description.text = p.description ?? '';
@@ -84,6 +95,14 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _adjustStock() async {
+    if (_product == null) return;
+    final adjusted = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => AdminStockScreen(initialProduct: _product)),
+    );
+    if (adjusted == true) await _loadProduct();
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -256,7 +275,14 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'Stock initial',
-                            helperText: _isEdit ? 'Modifiable via Stock > Mouvements' : null,
+                            helperText: _isEdit ? 'Corrigez une erreur avec le bouton Ajuster' : null,
+                            suffixIcon: _isEdit
+                                ? IconButton(
+                                    icon: const Icon(Icons.tune),
+                                    tooltip: 'Ajuster le stock',
+                                    onPressed: _adjustStock,
+                                  )
+                                : null,
                           ),
                           validator: _requiredInt,
                         ),

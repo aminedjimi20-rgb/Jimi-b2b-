@@ -76,6 +76,11 @@ class AdminProduct {
   final List<ProductImage> images;
   final List<PriceTier> priceTiers;
 
+  String? get primaryImageUrl {
+    if (images.isEmpty) return null;
+    return images.firstWhere((i) => i.isPrimary, orElse: () => images.first).url;
+  }
+
   factory AdminProduct.fromJson(Map<String, dynamic> json) => AdminProduct(
         id: json['id'] as String,
         nom: json['nom'] as String,
