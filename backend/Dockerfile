@@ -19,7 +19,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json tsconfig.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
