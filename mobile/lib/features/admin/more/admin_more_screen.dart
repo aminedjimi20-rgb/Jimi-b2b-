@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../shared/notifications_screen.dart';
+import '../categories/admin_categories_screen.dart';
 import '../promotions/admin_promotions_screen.dart';
 import '../stock/admin_stock_screen.dart';
 import 'admin_export_screen.dart';
@@ -17,6 +18,12 @@ class AdminMoreScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Plus')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.category_outlined),
+            title: const Text('Catégories'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminCategoriesScreen())),
+          ),
           ListTile(
             leading: const Icon(Icons.inventory_outlined),
             title: const Text('Stock (mouvements & alertes)'),
