@@ -37,6 +37,10 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  fabricantId?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @IsOptional()
@@ -70,6 +74,11 @@ export class CreateProductDto {
   @IsInt()
   @Min(1)
   minCommande!: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  uniteParCarton?: number;
 
   @IsOptional()
   @IsBoolean()

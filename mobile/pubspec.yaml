@@ -50,6 +50,7 @@ dependencies:
   firebase_core: ^3.8.1
   firebase_messaging: ^15.1.6
   uuid: ^4.5.1
+  pdf: ^3.11.1
 
 dev_dependencies:
   flutter_test:

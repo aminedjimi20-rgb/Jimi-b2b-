@@ -7,12 +7,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 import { CategoriesModule } from './categories/categories.module';
+import { FabricantsModule } from './fabricants/fabricants.module';
 import { ProductsModule } from './products/products.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { OrdersModule } from './orders/orders.module';
 import { StockModule } from './stock/stock.module';
+import { StockReceiptsModule } from './stock-receipts/stock-receipts.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { StatsModule } from './stats/stats.module';
@@ -31,12 +33,14 @@ import { RolesGuard } from './common/guards/roles.guard';
     AuthModule,
     ClientsModule,
     CategoriesModule,
+    FabricantsModule,
     ProductsModule,
     PromotionsModule,
     FavoritesModule,
     UploadsModule,
     OrdersModule,
     StockModule,
+    StockReceiptsModule,
     PaymentsModule,
     StatsModule,
     ExportModule,

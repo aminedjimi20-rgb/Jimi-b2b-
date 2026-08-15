@@ -10,7 +10,7 @@ import { SearchCatalogDto } from './dto/search-catalog.dto';
 import { toAdminProductDTO, toClientProductDTO } from './dto/product-response.dto';
 import { computeImageHash, hammingDistance } from './image-hash.util';
 
-const PRODUCT_INCLUDE = { images: true, priceTiers: true } as const;
+const PRODUCT_INCLUDE = { images: true, priceTiers: true, fabricant: true } as const;
 
 // A dHash is 64 bits; empirically a Hamming distance under ~12 means
 // "visually similar enough to be the same or a related product photo".
@@ -38,6 +38,7 @@ export class ProductsService {
         nom: dto.nom,
         code: dto.code,
         categoryId: dto.categoryId,
+        fabricantId: dto.fabricantId,
         description: dto.description,
         taille: dto.taille,
         couleur: dto.couleur,
@@ -47,6 +48,7 @@ export class ProductsService {
         stockReel: dto.stockReel,
         stockMinimum: dto.stockMinimum,
         minCommande: dto.minCommande,
+        uniteParCarton: dto.uniteParCarton,
         actif: dto.actif ?? true,
         imageHash: imageInputs[0]?.hash,
         images: imageInputs.length ? { create: imageInputs } : undefined,
@@ -81,6 +83,7 @@ export class ProductsService {
         nom: dto.nom,
         code: dto.code,
         categoryId: dto.categoryId,
+        fabricantId: dto.fabricantId,
         description: dto.description,
         taille: dto.taille,
         couleur: dto.couleur,
@@ -89,6 +92,7 @@ export class ProductsService {
         prixVente: dto.prixVente,
         stockMinimum: dto.stockMinimum,
         minCommande: dto.minCommande,
+        uniteParCarton: dto.uniteParCarton,
         actif: dto.actif,
         // stockReel is intentionally NOT editable here — it only changes via
         // recorded StockMovement entries (see StockService), so the audit

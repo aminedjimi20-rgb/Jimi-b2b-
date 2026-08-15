@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../shared/notifications_screen.dart';
 import '../categories/admin_categories_screen.dart';
 import '../promotions/admin_promotions_screen.dart';
+import '../stock/admin_stock_receipts_screen.dart';
 import '../stock/admin_stock_screen.dart';
 import 'admin_export_screen.dart';
 
@@ -29,6 +30,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Stock (mouvements & alertes)'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminStockScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.local_shipping_outlined),
+            title: const Text('Réceptions fournisseurs (bons)'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminStockReceiptsScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.local_offer_outlined),

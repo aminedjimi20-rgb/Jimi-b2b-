@@ -41,6 +41,8 @@ class AdminProduct {
     required this.nom,
     required this.code,
     required this.categoryId,
+    this.fabricantId,
+    this.fabricantNom,
     this.description,
     this.taille,
     this.couleur,
@@ -52,6 +54,7 @@ class AdminProduct {
     required this.stockReel,
     required this.stockMinimum,
     required this.minCommande,
+    this.uniteParCarton,
     required this.actif,
     required this.images,
     required this.priceTiers,
@@ -61,6 +64,8 @@ class AdminProduct {
   final String nom;
   final String code;
   final String categoryId;
+  final String? fabricantId;
+  final String? fabricantNom;
   final String? description;
   final String? taille;
   final String? couleur;
@@ -72,6 +77,7 @@ class AdminProduct {
   final int stockReel;
   final int stockMinimum;
   final int minCommande;
+  final int? uniteParCarton;
   final bool actif;
   final List<ProductImage> images;
   final List<PriceTier> priceTiers;
@@ -86,6 +92,8 @@ class AdminProduct {
         nom: json['nom'] as String,
         code: json['code'] as String,
         categoryId: json['categoryId'] as String,
+        fabricantId: json['fabricantId'] as String?,
+        fabricantNom: json['fabricantNom'] as String?,
         description: json['description'] as String?,
         taille: json['taille'] as String?,
         couleur: json['couleur'] as String?,
@@ -97,6 +105,7 @@ class AdminProduct {
         stockReel: json['stockReel'] as int,
         stockMinimum: json['stockMinimum'] as int,
         minCommande: json['minCommande'] as int,
+        uniteParCarton: json['uniteParCarton'] as int?,
         actif: json['actif'] as bool,
         images: (json['images'] as List<dynamic>? ?? []).map((e) => ProductImage.fromJson(e as Map<String, dynamic>)).toList(),
         priceTiers: (json['priceTiers'] as List<dynamic>? ?? []).map((e) => PriceTier.fromJson(e as Map<String, dynamic>)).toList(),

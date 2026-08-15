@@ -1,7 +1,7 @@
-import { Prisma, PriceTier, Product, ProductImage } from '@prisma/client';
+import { Fabricant, Prisma, PriceTier, Product, ProductImage } from '@prisma/client';
 import { ResolvedPrice } from '../../pricing/pricing.service';
 
-type ProductWithRelations = Product & { images: ProductImage[]; priceTiers: PriceTier[] };
+type ProductWithRelations = Product & { images: ProductImage[]; priceTiers: PriceTier[]; fabricant?: Fabricant | null };
 
 /**
  * Allow-list mapper — Admin sees the full financial picture: purchase
@@ -19,6 +19,8 @@ export function toAdminProductDTO(product: ProductWithRelations) {
     nom: product.nom,
     code: product.code,
     categoryId: product.categoryId,
+    fabricantId: product.fabricantId,
+    fabricantNom: product.fabricant?.nom ?? null,
     description: product.description,
     taille: product.taille,
     couleur: product.couleur,
@@ -30,6 +32,7 @@ export function toAdminProductDTO(product: ProductWithRelations) {
     stockReel: product.stockReel,
     stockMinimum: product.stockMinimum,
     minCommande: product.minCommande,
+    uniteParCarton: product.uniteParCarton,
     actif: product.actif,
     images: product.images.map((img) => ({ id: img.id, url: img.url, isPrimary: img.isPrimary })),
     priceTiers: product.priceTiers.map((t) => ({ id: t.id, qteMin: t.qteMin, qteMax: t.qteMax, prix: t.prix })),

@@ -7,20 +7,26 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/category.dart';
+import '../../../models/fabricant.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
+import '../fabricants/fabricant_dialog.dart';
 import '../stock/admin_stock_screen.dart';
 
 final _categoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) => ref.watch(categoriesApiProvider).list());
+final _fabricantsProvider = FutureProvider.autoDispose<List<Fabricant>>((ref) => ref.watch(fabricantsApiProvider).list());
 
 /// Create/edit product form — Admin only. `productId` null means "create".
 /// `initialCategoryId` pre-selects a category when creating from a category
-/// "folder" (ignored in edit mode, where the loaded product's category wins).
+/// "folder", and `initialFabricantId` when creating a new article from a
+/// goods-receipt ("bon de réception") for a given fabricant. Both are
+/// ignored in edit mode, where the loaded product's own values win.
 class AdminProductFormScreen extends ConsumerStatefulWidget {
-  const AdminProductFormScreen({super.key, this.productId, this.initialCategoryId});
+  const AdminProductFormScreen({super.key, this.productId, this.initialCategoryId, this.initialFabricantId});
 
   final String? productId;
   final String? initialCategoryId;
+  final String? initialFabricantId;
 
   @override
   ConsumerState<AdminProductFormScreen> createState() => _AdminProductFormScreenState();
@@ -46,8 +52,10 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
   final _stockReel = TextEditingController(text: '0');
   final _stockMinimum = TextEditingController(text: '0');
   final _minCommande = TextEditingController(text: '1');
+  final _uniteParCarton = TextEditingController();
 
   String? _categoryId;
+  String? _fabricantId;
   bool _actif = true;
   bool _loading = false;
   bool _saving = false;
@@ -65,8 +73,9 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
     super.initState();
     if (_isEdit) {
       _loadProduct();
-    } else if (widget.initialCategoryId != null) {
+    } else {
       _categoryId = widget.initialCategoryId;
+      _fabricantId = widget.initialFabricantId;
     }
   }
 
@@ -86,7 +95,9 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
       _stockReel.text = p.stockReel.toString();
       _stockMinimum.text = p.stockMinimum.toString();
       _minCommande.text = p.minCommande.toString();
+      _uniteParCarton.text = p.uniteParCarton?.toString() ?? '';
       _categoryId = p.categoryId;
+      _fabricantId = p.fabricantId;
       _actif = p.actif;
       _existingImages.addAll(p.images);
       _tiers.addAll(p.priceTiers.map((t) => _TierInput(qteMin: '${t.qteMin}', qteMax: t.qteMax?.toString() ?? '', prix: '${t.prix}')));
@@ -108,6 +119,14 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
   Future<void> _pickImage(ImageSource source) async {
     final picked = await ImagePicker().pickImage(source: source, imageQuality: 85, maxWidth: 1600);
     if (picked != null) setState(() => _newLocalImagePaths.add(picked.path));
+  }
+
+  Future<void> _openCreateFabricantDialog() async {
+    final created = await showCreateFabricantDialog(context, ref);
+    if (created != null) {
+      ref.invalidate(_fabricantsProvider);
+      setState(() => _fabricantId = created.id);
+    }
   }
 
   Future<void> _save() async {
@@ -142,6 +161,7 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
         'nom': _nom.text.trim(),
         'code': _code.text.trim(),
         'categoryId': _categoryId,
+        'fabricantId': _fabricantId,
         'description': _description.text.trim().isEmpty ? null : _description.text.trim(),
         'taille': _taille.text.trim().isEmpty ? null : _taille.text.trim(),
         'couleur': _couleur.text.trim().isEmpty ? null : _couleur.text.trim(),
@@ -150,6 +170,7 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
         'prixVente': double.parse(_prixVente.text),
         'stockMinimum': int.parse(_stockMinimum.text),
         'minCommande': int.parse(_minCommande.text),
+        'uniteParCarton': _uniteParCarton.text.trim().isEmpty ? null : int.tryParse(_uniteParCarton.text.trim()),
         'actif': _actif,
         if (uploadedUrls.isNotEmpty) 'imageUrls': uploadedUrls,
         if (!_isEdit) ...{
@@ -174,7 +195,20 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
 
   @override
   void dispose() {
-    for (final c in [_nom, _code, _description, _taille, _couleur, _marque, _prixAchat, _prixVente, _stockReel, _stockMinimum, _minCommande]) {
+    for (final c in [
+      _nom,
+      _code,
+      _description,
+      _taille,
+      _couleur,
+      _marque,
+      _prixAchat,
+      _prixVente,
+      _stockReel,
+      _stockMinimum,
+      _minCommande,
+      _uniteParCarton,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -183,6 +217,7 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(_categoriesProvider);
+    final fabricants = ref.watch(_fabricantsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(_isEdit ? 'Modifier le produit' : 'Nouveau produit')),
@@ -222,6 +257,29 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
                     ),
                     loading: () => const LinearProgressIndicator(),
                     error: (_, __) => const Text('Impossible de charger les catégories.'),
+                  ),
+                  const SizedBox(height: 12),
+                  fabricants.when(
+                    data: (fabs) => Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            initialValue: fabs.any((f) => f.id == _fabricantId) ? _fabricantId : null,
+                            decoration: const InputDecoration(labelText: 'Fabricant (optionnel)'),
+                            items: fabs.map((f) => DropdownMenuItem(value: f.id, child: Text(f.nom))).toList(),
+                            onChanged: (v) => setState(() => _fabricantId = v),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add_business_outlined),
+                          tooltip: 'Nouveau fabricant',
+                          onPressed: _openCreateFabricantDialog,
+                        ),
+                      ],
+                    ),
+                    loading: () => const LinearProgressIndicator(),
+                    error: (_, __) => const Text('Impossible de charger les fabricants.'),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -299,11 +357,25 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
                     ],
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _minCommande,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Minimum de commande'),
-                    validator: _requiredInt,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _minCommande,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Minimum de commande'),
+                          validator: _requiredInt,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _uniteParCarton,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Unités par carton (optionnel)'),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
