@@ -1,4 +1,5 @@
 import { Fabricant, Product, ProductImage, StockReceipt, StockReceiptItem } from '@prisma/client';
+import { clampedRemainder, computePaymentStatus } from '../../common/payment-status.util';
 
 type ItemWithProduct = StockReceiptItem & { product: Product & { images: ProductImage[] } };
 type ReceiptWithRelations = StockReceipt & { fabricant: Fabricant; items: ItemWithProduct[] };
@@ -12,6 +13,9 @@ export function toStockReceiptDTO(receipt: ReceiptWithRelations) {
     notes: receipt.notes,
     total: receipt.total,
     totalAchat: receipt.totalAchat,
+    montantPaye: receipt.montantPaye,
+    montantRestant: clampedRemainder(receipt.totalAchat, receipt.montantPaye),
+    statutPaiement: computePaymentStatus(receipt.montantPaye, receipt.totalAchat),
     createdAt: receipt.createdAt,
     items: receipt.items.map((item) => ({
       productId: item.productId,

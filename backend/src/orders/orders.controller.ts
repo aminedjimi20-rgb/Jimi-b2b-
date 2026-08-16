@@ -7,7 +7,6 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AdminCreateOrderDto } from './dto/admin-create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { UpdateOrderPaymentDto } from './dto/update-order-payment.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -45,8 +44,8 @@ export class OrdersController {
   @Roles('ADMIN')
   @Post('admin')
   createForAdmin(@Body() dto: AdminCreateOrderDto) {
-    const { clientId, remisePourcentage, ...orderDto } = dto;
-    return this.ordersService.createForClient(clientId, orderDto, { remisePourcentage });
+    const { clientId, remisePourcentage, fraisLivraison, ...orderDto } = dto;
+    return this.ordersService.createForClient(clientId, orderDto, { remisePourcentage, fraisLivraison });
   }
 
   @Roles('ADMIN')
@@ -72,12 +71,6 @@ export class OrdersController {
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto.status);
-  }
-
-  @Roles('ADMIN')
-  @Patch(':id/payment')
-  updatePayment(@Param('id') id: string, @Body() dto: UpdateOrderPaymentDto) {
-    return this.ordersService.updatePayment(id, dto.estPayee);
   }
 
   // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.

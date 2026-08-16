@@ -1,4 +1,5 @@
-import { Client, Order, OrderItem, Product, ProductImage } from '@prisma/client';
+import { Client, Order, OrderItem, Prisma, Product, ProductImage } from '@prisma/client';
+import { clampedRemainder, computePaymentStatus } from '../../common/payment-status.util';
 
 type OrderItemWithProduct = OrderItem & {
   product: Pick<Product, 'id' | 'nom' | 'code'> & { images: Pick<ProductImage, 'url' | 'isPrimary'>[] };
@@ -17,6 +18,11 @@ function mapItems(items: OrderItemWithProduct[]) {
   }));
 }
 
+/** Sum of line totals, independent of remise/fraisLivraison — the "avant remise" line of the bon. */
+function computeSousTotal(items: OrderItemWithProduct[]) {
+  return items.reduce((sum, item) => sum.plus(item.prixUnitaire.mul(item.quantite)), new Prisma.Decimal(0));
+}
+
 /** Admin view — includes the client's identity, contact and every commercial detail. */
 export function toAdminOrderDTO(order: OrderWithRelations) {
   return {
@@ -25,15 +31,19 @@ export function toAdminOrderDTO(order: OrderWithRelations) {
     nom: order.nom,
     status: order.status,
     paymentMethod: order.paymentMethod,
-    estPayee: order.estPayee,
+    sousTotal: computeSousTotal(order.items),
     remisePourcentage: order.remisePourcentage,
+    fraisLivraison: order.fraisLivraison,
+    total: order.total,
+    montantPaye: order.montantPaye,
+    montantRestant: clampedRemainder(order.total, order.montantPaye),
+    statutPaiement: computePaymentStatus(order.montantPaye, order.total),
     clientId: order.clientId,
     clientNom: order.client?.raisonSociale,
     clientTelephone: order.client?.telephone,
     adresseLivraison: order.adresseLivraison,
     telephoneContact: order.telephoneContact,
     notes: order.notes,
-    total: order.total,
     items: mapItems(order.items),
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
@@ -48,11 +58,15 @@ export function toClientOrderDTO(order: OrderWithRelations) {
     nom: order.nom,
     status: order.status,
     paymentMethod: order.paymentMethod,
-    estPayee: order.estPayee,
+    sousTotal: computeSousTotal(order.items),
+    fraisLivraison: order.fraisLivraison,
+    total: order.total,
+    montantPaye: order.montantPaye,
+    montantRestant: clampedRemainder(order.total, order.montantPaye),
+    statutPaiement: computePaymentStatus(order.montantPaye, order.total),
     adresseLivraison: order.adresseLivraison,
     telephoneContact: order.telephoneContact,
     notes: order.notes,
-    total: order.total,
     items: mapItems(order.items),
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,

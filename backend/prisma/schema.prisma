@@ -137,6 +137,7 @@ model Fabricant {
 
   products Product[]
   receipts StockReceipt[]
+  payments Payment[]
 
   @@index([nom])
   @@index([deletedAt])
@@ -298,9 +299,10 @@ model Order {
   paymentMethod     PaymentMethod
   adresseLivraison  String
   telephoneContact  String
-  total             Decimal       @db.Decimal(12, 2) // calculé serveur, jamais fourni par le client
+  total             Decimal       @db.Decimal(12, 2) // sous-total après remise + fraisLivraison — calculé serveur
   remisePourcentage Decimal?      @db.Decimal(5, 2) // remise ADMIN uniquement — jamais pilotable par le client
-  estPayee          Boolean       @default(false)
+  fraisLivraison    Decimal       @default(0) @db.Decimal(12, 2) // ADMIN uniquement, affiché séparément dans le bon
+  montantPaye       Decimal       @default(0) @db.Decimal(12, 2) // somme des Payment liés — statut dérivé (voir order-response.dto)
   deletedAt         DateTime? // corbeille — null = actif
   notes             String?
   createdAt         DateTime      @default(now())
@@ -369,7 +371,8 @@ model StockReceipt {
   reference   String    @unique // ex: BR-2026-0001
   fabricantId String
   total       Decimal   @db.Decimal(12, 2) // total au prix de vente — calculé serveur
-  totalAchat  Decimal   @default(0) @db.Decimal(12, 2) // total au prix d'achat — ce que ça a réellement coûté
+  totalAchat  Decimal   @default(0) @db.Decimal(12, 2) // total au prix d'achat — ce que ça a réellement coûté (= ce qui est dû au fournisseur)
+  montantPaye Decimal   @default(0) @db.Decimal(12, 2) // somme des Payment liés — statut dérivé (voir stock-receipt-response.dto)
   notes       String?
   deletedAt   DateTime? // corbeille — null = actif
   createdAt   DateTime  @default(now())
@@ -377,6 +380,7 @@ model StockReceipt {
   fabricant  Fabricant          @relation(fields: [fabricantId], references: [id])
   items      StockReceiptItem[]
   stockMoves StockMovement[]
+  payments   Payment[]
 
   @@index([fabricantId])
   @@index([deletedAt])
@@ -408,20 +412,29 @@ enum PaymentStatus {
   REJETE
 }
 
+// Money ledger in BOTH directions — money IN from a Client (clientId set,
+// orderId optional) or money OUT to a Fabricant (fabricantId set,
+// stockReceiptId optional). Exactly one of clientId/fabricantId is set,
+// enforced in PaymentsService (not expressible as a Prisma-level constraint).
 model Payment {
-  id        String        @id @default(cuid())
-  clientId  String
-  orderId   String?
-  montant   Decimal       @db.Decimal(12, 2)
-  method    PaymentMethod
-  status    PaymentStatus @default(EN_ATTENTE)
-  provider  String? // extension future : "baridimob", "stripe", "cib", ...
-  createdAt DateTime      @default(now())
+  id             String        @id @default(cuid())
+  clientId       String?
+  orderId        String?
+  fabricantId    String?
+  stockReceiptId String?
+  montant        Decimal       @db.Decimal(12, 2)
+  method         PaymentMethod
+  status         PaymentStatus @default(EN_ATTENTE)
+  provider       String? // extension future : "baridimob", "stripe", "cib", ...
+  createdAt      DateTime      @default(now())
 
-  client Client @relation(fields: [clientId], references: [id])
-  order  Order? @relation(fields: [orderId], references: [id])
+  client       Client?       @relation(fields: [clientId], references: [id])
+  order        Order?        @relation(fields: [orderId], references: [id])
+  fabricant    Fabricant?    @relation(fields: [fabricantId], references: [id])
+  stockReceipt StockReceipt? @relation(fields: [stockReceiptId], references: [id])
 
   @@index([clientId])
+  @@index([fabricantId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────

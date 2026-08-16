@@ -17,8 +17,8 @@ export class PaymentsController {
 
   @Roles('ADMIN')
   @Get()
-  findAll(@Query('clientId') clientId?: string) {
-    return this.paymentsService.findAllForAdmin(clientId);
+  findAll(@Query('clientId') clientId?: string, @Query('fabricantId') fabricantId?: string) {
+    return this.paymentsService.findAllForAdmin(clientId, fabricantId);
   }
 
   @Roles('CLIENT')

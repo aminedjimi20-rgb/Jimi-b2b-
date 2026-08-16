@@ -58,16 +58,18 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
   final _nom = TextEditingController();
   final _notes = TextEditingController();
   final _remiseCustom = TextEditingController();
+  final _fraisLivraison = TextEditingController();
   double? _remisePourcentage;
   bool _remiseCustomSelected = false;
   bool _saving = false;
   String? _error;
 
   double get _subtotal => _lines.fold(0.0, (sum, l) => sum + l.product.prixVente * l.quantite);
+  double get _fraisLivraisonValue => double.tryParse(_fraisLivraison.text.replaceAll(',', '.')) ?? 0;
   double get _total {
     final remise = _remisePourcentage;
-    if (remise == null || remise <= 0) return _subtotal;
-    return _subtotal * (100 - remise) / 100;
+    final apresRemise = (remise == null || remise <= 0) ? _subtotal : _subtotal * (100 - remise) / 100;
+    return apresRemise + _fraisLivraisonValue;
   }
 
   Future<void> _pickClient() async {
@@ -140,6 +142,7 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
             telephoneContact: _telephone.text.trim(),
             nom: _nom.text.trim().isEmpty ? null : _nom.text.trim(),
             remisePourcentage: _remisePourcentage,
+            fraisLivraison: _fraisLivraisonValue > 0 ? _fraisLivraisonValue : null,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
           );
       if (mounted) {
@@ -162,6 +165,7 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
     _nom.dispose();
     _notes.dispose();
     _remiseCustom.dispose();
+    _fraisLivraison.dispose();
     super.dispose();
   }
 
@@ -276,17 +280,32 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
                 onChanged: (v) => setState(() => _remisePourcentage = double.tryParse(v)),
               ),
             ],
+            const SizedBox(height: 12),
+            TextField(
+              controller: _fraisLivraison,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Frais de livraison (optionnel)', isDense: true),
+              onChanged: (_) => setState(() {}),
+            ),
             const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 children: [
-                  if (_remisePourcentage != null && _remisePourcentage! > 0)
+                  if ((_remisePourcentage != null && _remisePourcentage! > 0) || _fraisLivraisonValue > 0)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Sous-total'),
                         Text(formatMoney(_subtotal)),
+                      ],
+                    ),
+                  if (_fraisLivraisonValue > 0)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Frais de livraison'),
+                        Text(formatMoney(_fraisLivraisonValue)),
                       ],
                     ),
                   Row(

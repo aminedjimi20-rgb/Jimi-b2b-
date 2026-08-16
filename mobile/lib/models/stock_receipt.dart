@@ -51,6 +51,9 @@ class StockReceiptView {
     this.notes,
     required this.total,
     required this.totalAchat,
+    required this.montantPaye,
+    required this.montantRestant,
+    required this.statutPaiement,
     required this.items,
     required this.createdAt,
   });
@@ -62,6 +65,9 @@ class StockReceiptView {
   final String? notes;
   final double total;
   final double totalAchat;
+  final double montantPaye;
+  final double montantRestant;
+  final String statutPaiement;
   final List<StockReceiptItemView> items;
   final DateTime createdAt;
 
@@ -73,6 +79,9 @@ class StockReceiptView {
         notes: json['notes'] as String?,
         total: parseDecimal(json['total']),
         totalAchat: parseDecimal(json['totalAchat']),
+        montantPaye: parseDecimal(json['montantPaye']),
+        montantRestant: parseDecimal(json['montantRestant']),
+        statutPaiement: json['statutPaiement'] as String? ?? 'NON_PAYE',
         items: (json['items'] as List<dynamic>? ?? [])
             .map((e) => StockReceiptItemView.fromJson(e as Map<String, dynamic>))
             .toList(),

@@ -53,7 +53,7 @@ class OrdersApi {
   // ── ADMIN ────────────────────────────────────────────────────────────
 
   /// Counter sale — Admin places an order directly for a walk-in client.
-  /// `remisePourcentage` is admin-only — there is no client-facing equivalent.
+  /// `remisePourcentage`/`fraisLivraison` are admin-only — no client-facing equivalent.
   Future<OrderView> createForAdmin({
     required String clientId,
     required List<OrderItemInput> items,
@@ -62,6 +62,7 @@ class OrdersApi {
     required String telephoneContact,
     String? nom,
     double? remisePourcentage,
+    double? fraisLivraison,
     String? notes,
   }) async {
     final res = await _dio.post('/orders/admin', data: {
@@ -72,6 +73,7 @@ class OrdersApi {
       'telephoneContact': telephoneContact,
       if (nom != null && nom.isNotEmpty) 'nom': nom,
       if (remisePourcentage != null && remisePourcentage > 0) 'remisePourcentage': remisePourcentage,
+      if (fraisLivraison != null && fraisLivraison > 0) 'fraisLivraison': fraisLivraison,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
     });
     return OrderView.fromJson(res.data as Map<String, dynamic>);
@@ -89,11 +91,6 @@ class OrdersApi {
 
   Future<OrderView> updateStatus(String id, String status) async {
     final res = await _dio.patch('/orders/$id/status', data: {'status': status});
-    return OrderView.fromJson(res.data as Map<String, dynamic>);
-  }
-
-  Future<OrderView> updatePayment(String id, bool estPayee) async {
-    final res = await _dio.patch('/orders/$id/payment', data: {'estPayee': estPayee});
     return OrderView.fromJson(res.data as Map<String, dynamic>);
   }
 

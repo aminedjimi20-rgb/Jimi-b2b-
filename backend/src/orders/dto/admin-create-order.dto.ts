@@ -15,4 +15,9 @@ export class AdminCreateOrderDto extends CreateOrderDto {
   @Min(0)
   @Max(100)
   remisePourcentage?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fraisLivraison?: number;
 }

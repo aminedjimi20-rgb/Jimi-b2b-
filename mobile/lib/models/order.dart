@@ -23,6 +23,18 @@ String orderStatusLabel(String status) {
   }
 }
 
+String paymentStatusLabel(String status) {
+  switch (status) {
+    case 'PAYE':
+      return 'Payée';
+    case 'PARTIEL':
+      return 'Partiellement payée';
+    case 'NON_PAYE':
+    default:
+      return 'Non payée';
+  }
+}
+
 const kPaymentMethods = ['ESPECES', 'VIREMENT', 'BARIDIMOB', 'LIVRAISON', 'CREDIT'];
 
 String paymentMethodLabel(String method) {
@@ -79,8 +91,13 @@ class OrderView {
     this.nom,
     required this.status,
     required this.paymentMethod,
-    required this.estPayee,
+    required this.sousTotal,
     this.remisePourcentage,
+    required this.fraisLivraison,
+    required this.montantPaye,
+    required this.montantRestant,
+    required this.statutPaiement,
+    this.clientId,
     this.clientNom,
     this.clientTelephone,
     required this.adresseLivraison,
@@ -96,8 +113,13 @@ class OrderView {
   final String? nom;
   final String status;
   final String paymentMethod;
-  final bool estPayee;
+  final double sousTotal;
   final double? remisePourcentage;
+  final double fraisLivraison;
+  final double montantPaye;
+  final double montantRestant;
+  final String statutPaiement;
+  final String? clientId;
   final String? clientNom;
   final String? clientTelephone;
   final String adresseLivraison;
@@ -113,8 +135,13 @@ class OrderView {
         nom: json['nom'] as String?,
         status: json['status'] as String,
         paymentMethod: json['paymentMethod'] as String,
-        estPayee: json['estPayee'] as bool? ?? false,
+        sousTotal: parseDecimal(json['sousTotal']),
         remisePourcentage: json['remisePourcentage'] == null ? null : parseDecimal(json['remisePourcentage']),
+        fraisLivraison: parseDecimal(json['fraisLivraison']),
+        montantPaye: parseDecimal(json['montantPaye']),
+        montantRestant: parseDecimal(json['montantRestant']),
+        statutPaiement: json['statutPaiement'] as String? ?? 'NON_PAYE',
+        clientId: json['clientId'] as String?,
         clientNom: json['clientNom'] as String?,
         clientTelephone: json['clientTelephone'] as String?,
         adresseLivraison: json['adresseLivraison'] as String,

@@ -82,7 +82,7 @@ class AdminOrdersScreen extends ConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _PaymentBadge(estPayee: o.estPayee),
+                                  _PaymentBadge(status: o.statutPaiement),
                                   const SizedBox(width: 4),
                                   _StatusBadge(status: o.status),
                                 ],
@@ -123,17 +123,27 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _PaymentBadge extends StatelessWidget {
-  const _PaymentBadge({required this.estPayee});
-  final bool estPayee;
+  const _PaymentBadge({required this.status});
+  final String status;
+
+  Color get _color {
+    switch (status) {
+      case 'PAYE':
+        return AppTheme.success;
+      case 'PARTIEL':
+        return AppTheme.warning;
+      default:
+        return AppTheme.danger;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final color = estPayee ? AppTheme.success : AppTheme.danger;
     return Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(estPayee ? 'Payée' : 'Non payée', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+      decoration: BoxDecoration(color: _color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+      child: Text(paymentStatusLabel(status), style: TextStyle(color: _color, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }
 }

@@ -78,11 +78,30 @@ class ClientOrderDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(formatMoney(o.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                  if (o.fraisLivraison > 0)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [const Text('Frais de livraison'), Text(formatMoney(o.fraisLivraison))],
+                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(formatMoney(o.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                    ],
+                  ),
+                  if (o.montantPaye > 0)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [const Text('Payé'), Text(formatMoney(o.montantPaye), style: const TextStyle(color: AppTheme.success))],
+                    ),
+                  if (o.montantRestant > 0)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [const Text('Reste à payer'), Text(formatMoney(o.montantRestant), style: const TextStyle(color: AppTheme.danger))],
+                    ),
                 ],
               ),
             ),

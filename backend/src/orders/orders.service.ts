@@ -41,7 +41,11 @@ export class OrdersService {
   // `options.remisePourcentage` is only ever passed by the ADMIN counter-sale
   // route (see OrdersController.createForAdmin) — a client's own CreateOrderDto
   // has no such field, so a client can never discount their own order.
-  async createForClient(clientId: string, dto: CreateOrderDto, options?: { remisePourcentage?: number }) {
+  async createForClient(
+    clientId: string,
+    dto: CreateOrderDto,
+    options?: { remisePourcentage?: number; fraisLivraison?: number },
+  ) {
     const order = await this.prisma.$transaction(async (tx) => {
       const client = await tx.client.findUnique({ where: { id: clientId } });
       if (!client) throw new NotFoundException('Client introuvable.');
@@ -69,7 +73,9 @@ export class OrdersService {
       }
 
       const remise = options?.remisePourcentage;
-      const total = remise ? subtotal.mul(new Prisma.Decimal(100).minus(remise)).div(100) : subtotal;
+      const fraisLivraison = new Prisma.Decimal(options?.fraisLivraison ?? 0);
+      const totalApresRemise = remise ? subtotal.mul(new Prisma.Decimal(100).minus(remise)).div(100) : subtotal;
+      const total = totalApresRemise.plus(fraisLivraison);
 
       if (dto.paymentMethod === 'CREDIT') {
         const nouveauSolde = client.soldeCredit.plus(total);
@@ -91,6 +97,7 @@ export class OrdersService {
           notes: dto.notes,
           total,
           remisePourcentage: remise,
+          fraisLivraison,
           items: { create: itemsData },
         },
         include: ORDER_INCLUDE,
@@ -206,13 +213,6 @@ export class OrdersService {
       );
     }
 
-    return this.findOneForAdmin(id);
-  }
-
-  async updatePayment(id: string, estPayee: boolean) {
-    const order = await this.prisma.order.findUnique({ where: { id } });
-    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
-    await this.prisma.order.update({ where: { id }, data: { estPayee } });
     return this.findOneForAdmin(id);
   }
 

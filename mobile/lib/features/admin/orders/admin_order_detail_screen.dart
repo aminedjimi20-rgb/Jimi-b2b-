@@ -44,7 +44,7 @@ class AdminOrderDetailScreen extends ConsumerStatefulWidget {
 
 class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen> {
   bool _generating = false;
-  bool _togglingPayment = false;
+  bool _recordingPayment = false;
   bool _deleting = false;
 
   Future<void> _updateStatus(String status) async {
@@ -58,17 +58,28 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
     }
   }
 
-  Future<void> _togglePayment(OrderView o) async {
-    setState(() => _togglingPayment = true);
+  Future<void> _recordPayment(OrderView o) async {
+    final result = await showDialog<_PaymentInput>(
+      context: context,
+      builder: (ctx) => _RecordPaymentDialog(maxMontant: o.montantRestant),
+    );
+    if (result == null) return;
+
+    setState(() => _recordingPayment = true);
     try {
-      await ref.read(ordersApiProvider).updatePayment(widget.orderId, !o.estPayee);
+      await ref.read(paymentsApiProvider).create(
+            clientId: o.clientId,
+            orderId: o.id,
+            montant: result.montant,
+            method: result.method,
+          );
       ref.invalidate(_adminOrderProvider(widget.orderId));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
       }
     } finally {
-      if (mounted) setState(() => _togglingPayment = false);
+      if (mounted) setState(() => _recordingPayment = false);
     }
   }
 
@@ -131,7 +142,7 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             pw.Text('Téléphone: ${o.telephoneContact}'),
             pw.Text('Adresse: ${o.adresseLivraison}'),
             pw.Text('Date: ${formatDate(o.createdAt)}'),
-            pw.Text('Paiement: ${paymentMethodLabel(o.paymentMethod)} — ${o.estPayee ? 'Payée' : 'Non payée'}'),
+            pw.Text('Paiement: ${paymentMethodLabel(o.paymentMethod)} — ${paymentStatusLabel(o.statutPaiement)}'),
             if (o.notes != null && o.notes!.isNotEmpty) pw.Text('Notes: ${o.notes}'),
             pw.SizedBox(height: 16),
             pw.Table(
@@ -177,9 +188,14 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
+                  pw.Text('Sous-total: ${formatMoney(o.sousTotal)}', style: const pw.TextStyle(fontSize: 11)),
                   if (o.remisePourcentage != null && o.remisePourcentage! > 0)
                     pw.Text('Remise: ${o.remisePourcentage}%', style: const pw.TextStyle(fontSize: 11)),
+                  if (o.fraisLivraison > 0)
+                    pw.Text('Frais de livraison: ${formatMoney(o.fraisLivraison)}', style: const pw.TextStyle(fontSize: 11)),
                   pw.Text('Total: ${formatMoney(o.total)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Payé: ${formatMoney(o.montantPaye)}', style: const pw.TextStyle(fontSize: 11)),
+                  pw.Text('Reste à payer: ${formatMoney(o.montantRestant)}', style: const pw.TextStyle(fontSize: 11)),
                 ],
               ),
             ),
@@ -261,12 +277,13 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                       runSpacing: 8,
                       children: [
                         _StatusChip(label: orderStatusLabel(o.status), color: AppTheme.primary),
-                        GestureDetector(
-                          onTap: _togglingPayment ? null : () => _togglePayment(o),
-                          child: _StatusChip(
-                            label: _togglingPayment ? '...' : (o.estPayee ? 'Payée' : 'Non payée — toucher pour changer'),
-                            color: o.estPayee ? AppTheme.success : AppTheme.danger,
-                          ),
+                        _StatusChip(
+                          label: paymentStatusLabel(o.statutPaiement),
+                          color: o.statutPaiement == 'PAYE'
+                              ? AppTheme.success
+                              : o.statutPaiement == 'PARTIEL'
+                                  ? AppTheme.warning
+                                  : AppTheme.danger,
                         ),
                       ],
                     ),
@@ -278,6 +295,7 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                     _InfoRow(label: 'Date', value: formatDate(o.createdAt)),
                     if (o.remisePourcentage != null && o.remisePourcentage! > 0)
                       _InfoRow(label: 'Remise', value: '${o.remisePourcentage}%'),
+                    if (o.fraisLivraison > 0) _InfoRow(label: 'Frais de livraison', value: formatMoney(o.fraisLivraison)),
                     if (o.notes != null && o.notes!.isNotEmpty) _InfoRow(label: 'Notes', value: o.notes!),
                   ],
                 ),
@@ -300,14 +318,29 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(formatMoney(o.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                  _TotalRow(label: 'Sous-total', value: o.sousTotal),
+                  if (o.fraisLivraison > 0) _TotalRow(label: 'Frais de livraison', value: o.fraisLivraison),
+                  _TotalRow(label: 'Total', value: o.total, bold: true, color: AppTheme.primary),
+                  _TotalRow(label: 'Payé', value: o.montantPaye, color: AppTheme.success),
+                  _TotalRow(label: 'Reste à payer', value: o.montantRestant, color: o.montantRestant > 0 ? AppTheme.danger : AppTheme.success),
                 ],
               ),
             ),
+            if (o.montantRestant > 0) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _recordingPayment ? null : () => _recordPayment(o),
+                  icon: _recordingPayment
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.payments_outlined),
+                  label: const Text('Enregistrer un paiement'),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             if ((_nextStatuses[o.status] ?? []).isNotEmpty) ...[
               Text('Changer le statut', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -364,6 +397,94 @@ class _StatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
       child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _TotalRow extends StatelessWidget {
+  const _TotalRow({required this.label, required this.value, this.bold = false, this.color});
+  final String label;
+  final double value;
+  final bool bold;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal, fontSize: bold ? 16 : 14, color: color);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(formatMoney(value), style: style),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentInput {
+  _PaymentInput(this.montant, this.method);
+  final double montant;
+  final String method;
+}
+
+class _RecordPaymentDialog extends StatefulWidget {
+  const _RecordPaymentDialog({required this.maxMontant});
+  final double maxMontant;
+
+  @override
+  State<_RecordPaymentDialog> createState() => _RecordPaymentDialogState();
+}
+
+class _RecordPaymentDialogState extends State<_RecordPaymentDialog> {
+  late final TextEditingController _montant = TextEditingController(text: widget.maxMontant.toStringAsFixed(0));
+  String _method = 'ESPECES';
+  String? _error;
+
+  @override
+  void dispose() {
+    _montant.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final value = double.tryParse(_montant.text.replaceAll(',', '.'));
+    if (value == null || value <= 0) {
+      setState(() => _error = 'Montant invalide.');
+      return;
+    }
+    Navigator.pop(context, _PaymentInput(value, _method));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Enregistrer un paiement'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Reste à payer: ${formatMoney(widget.maxMontant)}', style: TextStyle(color: Colors.grey[600])),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _montant,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: 'Montant reçu', errorText: _error),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _method,
+            decoration: const InputDecoration(labelText: 'Méthode'),
+            items: kPaymentMethods.map((m) => DropdownMenuItem(value: m, child: Text(paymentMethodLabel(m)))).toList(),
+            onChanged: (v) => setState(() => _method = v!),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+        ElevatedButton(onPressed: _submit, child: const Text('Enregistrer')),
+      ],
     );
   }
 }
