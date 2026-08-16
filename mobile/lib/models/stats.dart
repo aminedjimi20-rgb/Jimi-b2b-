@@ -45,12 +45,24 @@ class LowStockItem {
       );
 }
 
+class DashboardSeriesPoint {
+  DashboardSeriesPoint({required this.date, required this.chiffreAffaires});
+  final DateTime date;
+  final double chiffreAffaires;
+
+  factory DashboardSeriesPoint.fromJson(Map<String, dynamic> json) => DashboardSeriesPoint(
+        date: DateTime.parse(json['date'] as String),
+        chiffreAffaires: parseDecimal(json['chiffreAffaires']),
+      );
+}
+
 class DashboardStats {
   DashboardStats({
     required this.chiffreAffaires,
     required this.benefice,
     required this.margePourcentage,
     required this.nombreCommandes,
+    required this.series,
     required this.topProduits,
     required this.topClients,
     required this.stockFaible,
@@ -60,6 +72,7 @@ class DashboardStats {
   final double benefice;
   final double margePourcentage;
   final int nombreCommandes;
+  final List<DashboardSeriesPoint> series;
   final List<TopProductStat> topProduits;
   final List<TopClientStat> topClients;
   final List<LowStockItem> stockFaible;
@@ -69,6 +82,7 @@ class DashboardStats {
         benefice: parseDecimal(json['benefice']),
         margePourcentage: parseDecimal(json['margePourcentage']),
         nombreCommandes: json['nombreCommandes'] as int,
+        series: (json['series'] as List<dynamic>? ?? []).map((e) => DashboardSeriesPoint.fromJson(e as Map<String, dynamic>)).toList(),
         topProduits: (json['topProduits'] as List<dynamic>? ?? []).map((e) => TopProductStat.fromJson(e as Map<String, dynamic>)).toList(),
         topClients: (json['topClients'] as List<dynamic>? ?? []).map((e) => TopClientStat.fromJson(e as Map<String, dynamic>)).toList(),
         stockFaible: (json['stockFaible'] as List<dynamic>? ?? []).map((e) => LowStockItem.fromJson(e as Map<String, dynamic>)).toList(),

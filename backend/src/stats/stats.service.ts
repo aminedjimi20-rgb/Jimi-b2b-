@@ -31,11 +31,16 @@ export class StatsService {
     let benefice = new Prisma.Decimal(0);
     const parProduit = new Map<string, { nom: string; quantite: number; ca: Prisma.Decimal }>();
     const parClient = new Map<string, { nom: string; ca: Prisma.Decimal }>();
+    // Daily CA bucket for the dashboard's chart — key is an ISO date (YYYY-MM-DD), UTC.
+    const parJour = new Map<string, Prisma.Decimal>();
 
     for (const order of orders) {
       const produitsCA = order.items.reduce((sum, item) => sum.plus(item.prixUnitaire.mul(item.quantite)), new Prisma.Decimal(0));
       chiffreAffaires = chiffreAffaires.plus(produitsCA);
       fraisLivraisonTotal = fraisLivraisonTotal.plus(order.fraisLivraison);
+
+      const jourKey = order.createdAt.toISOString().slice(0, 10);
+      parJour.set(jourKey, (parJour.get(jourKey) ?? new Prisma.Decimal(0)).plus(produitsCA));
 
       const clientEntry = parClient.get(order.clientId) ?? { nom: order.client.raisonSociale, ca: new Prisma.Decimal(0) };
       clientEntry.ca = clientEntry.ca.plus(produitsCA);
@@ -71,6 +76,9 @@ export class StatsService {
       benefice,
       margePourcentage,
       nombreCommandes: orders.length,
+      series: [...parJour.entries()]
+        .map(([date, ca]) => ({ date, chiffreAffaires: ca }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
       topProduits: [...parProduit.entries()]
         .map(([productId, v]) => ({ productId, ...v }))
         .sort((a, b) => b.quantite - a.quantite)
