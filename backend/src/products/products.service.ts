@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
@@ -228,6 +228,52 @@ export class ProductsService {
     const product = await this.prisma.product.findUnique({ where: { id }, include: PRODUCT_INCLUDE });
     if (!product || product.deletedAt || !product.actif) throw new NotFoundException('Produit introuvable.');
     return toEmployeeProductDTO(product, await this.computeDerivedInfo(id));
+  }
+
+  /**
+   * Search-first article picker for the bon d'entrée (Phase 38) — never
+   * returns the full catalog unprompted, only matches for `q` (nom/code).
+   * `canVoirPrixVente` redacts prixVente when the Admin hasn't granted it —
+   * enforced here, not just hidden in the UI.
+   */
+  async searchForEmployee(employeeId: string, q: string) {
+    const employee = await this.prisma.employee.findUnique({ where: { id: employeeId }, select: { canVoirPrixVente: true } });
+    const canVoirPrixVente = employee?.canVoirPrixVente ?? false;
+    const products = await this.prisma.product.findMany({
+      where: {
+        deletedAt: null,
+        actif: true,
+        OR: [
+          { nom: { contains: q, mode: 'insensitive' } },
+          { code: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      include: PRODUCT_INCLUDE,
+      take: 30,
+      orderBy: { nom: 'asc' },
+    });
+    const results = await Promise.all(products.map(async (p) => toEmployeeProductDTO(p, await this.computeDerivedInfo(p.id))));
+    if (canVoirPrixVente) return results;
+    return results.map((r) => ({ ...r, prixVente: null }));
+  }
+
+  /** Le nouvel article est créé sans stock (0) — le stock réel est ajouté au moment de la confirmation du bon d'entrée, jamais deux fois. */
+  async createForEmployee(employeeId: string, dto: CreateProductDto) {
+    const employee = await this.prisma.employee.findUnique({ where: { id: employeeId } });
+    if (!employee?.canCreerProduit) {
+      throw new ForbiddenException("Vous n'avez pas la permission de créer un nouveau produit.");
+    }
+    return this.create({ ...dto, stockReel: 0, actif: true });
+  }
+
+  /** prixAchat n'est honoré que si l'Admin a explicitement accordé canModifierPrixAchat — jamais implicite. */
+  async updateForEmployee(employeeId: string, id: string, dto: UpdateProductDto) {
+    const employee = await this.prisma.employee.findUnique({ where: { id: employeeId } });
+    if (!employee?.canModifierProduit) {
+      throw new ForbiddenException("Vous n'avez pas la permission de modifier un produit.");
+    }
+    const safeDto = employee.canModifierPrixAchat ? dto : { ...dto, prixAchat: undefined };
+    return this.update(id, safeDto);
   }
 
   private sortProducts<

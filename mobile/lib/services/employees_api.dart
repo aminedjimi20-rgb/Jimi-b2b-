@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../models/employee.dart';
+import '../models/employee_permissions.dart';
 
 class EmployeesApi {
   EmployeesApi(this._dio);
@@ -21,12 +22,9 @@ class EmployeesApi {
     return EmployeeView.fromJson(res.data as Map<String, dynamic>);
   }
 
-  /// Admin-only visibility toggles — enforced server-side (see backend order/client DTOs), not just hidden in the UI.
-  Future<EmployeeView> updatePermissions(String id, {required bool canSeeClientPhone, required bool canSeeClientAddress}) async {
-    final res = await _dio.patch('/employees/$id', data: {
-      'canSeeClientPhone': canSeeClientPhone,
-      'canSeeClientAddress': canSeeClientAddress,
-    });
+  /// Admin-only visibility/permission toggles — enforced server-side, not just hidden in the UI.
+  Future<EmployeeView> updatePermissions(String id, Map<String, bool> permissions) async {
+    final res = await _dio.patch('/employees/$id', data: permissions);
     return EmployeeView.fromJson(res.data as Map<String, dynamic>);
   }
 
@@ -41,4 +39,11 @@ class EmployeesApi {
   Future<void> restore(String id) => _dio.post('/employees/$id/restore');
 
   Future<void> permanentDelete(String id) => _dio.delete('/employees/$id/permanent');
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  Future<EmployeePermissions> myPermissions() async {
+    final res = await _dio.get('/employees/staff/me');
+    return EmployeePermissions.fromJson(res.data as Map<String, dynamic>);
+  }
 }

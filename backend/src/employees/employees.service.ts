@@ -57,6 +57,30 @@ export class EmployeesService {
     return toAdminEmployeeDTO(employee);
   }
 
+  /**
+   * An Employee reading their own granted permissions — purely a UX
+   * convenience (show/hide the "Bon d'entrée" entry point etc). The real
+   * enforcement always happens server-side in each service, never here.
+   */
+  async findMyPermissions(id: string) {
+    const employee = await this.prisma.employee.findUnique({
+      where: { id },
+      select: {
+        canSeeClientPhone: true,
+        canSeeClientAddress: true,
+        canCreateBonEntree: true,
+        canModifierPrixAchat: true,
+        canVoirPrixVente: true,
+        canCreerProduit: true,
+        canCreerFournisseur: true,
+        canModifierProduit: true,
+        canModifierBonApresConfirmation: true,
+      },
+    });
+    if (!employee) throw new NotFoundException('Employé introuvable.');
+    return employee;
+  }
+
   async update(id: string, dto: UpdateEmployeeDto) {
     await this.assertActiveExists(id);
     const employee = await this.prisma.employee.update({ where: { id }, data: dto, include: EMPLOYEE_INCLUDE_USER });

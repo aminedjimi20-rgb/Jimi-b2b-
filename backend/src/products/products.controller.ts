@@ -59,10 +59,12 @@ export class ProductsController {
     return this.productsService.findAllForEmployee(sortBy);
   }
 
+  // Must come before 'staff/:id' so "search"/"search-image" aren't swallowed as an id param.
   @Roles('EMPLOYEE')
-  @Get('staff/:id')
-  findOneEmployee(@Param('id') id: string) {
-    return this.productsService.findOneForEmployee(id);
+  @Get('staff/search')
+  searchForEmployee(@CurrentUser() user: AuthenticatedUser, @Query('q') q: string) {
+    if (!q || !q.trim()) return [];
+    return this.productsService.searchForEmployee(user.employeeId!, q.trim());
   }
 
   @Roles('EMPLOYEE')
@@ -71,6 +73,24 @@ export class ProductsController {
   searchByImageEmployee(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Aucune image reçue.');
     return this.productsService.searchByImageForEmployee(file.buffer);
+  }
+
+  @Roles('EMPLOYEE')
+  @Post('staff')
+  createForEmployee(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProductDto) {
+    return this.productsService.createForEmployee(user.employeeId!, dto);
+  }
+
+  @Roles('EMPLOYEE')
+  @Patch('staff/:id')
+  updateForEmployee(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() dto: UpdateProductDto) {
+    return this.productsService.updateForEmployee(user.employeeId!, id, dto);
+  }
+
+  @Roles('EMPLOYEE')
+  @Get('staff/:id')
+  findOneEmployee(@Param('id') id: string) {
+    return this.productsService.findOneForEmployee(id);
   }
 
   @Roles('ADMIN')

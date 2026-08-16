@@ -85,6 +85,25 @@ class ProductsApi {
         .toList();
   }
 
+  /// Search-first article picker for the bon d'entrée (Phase 38) — never
+  /// browses the full catalog, only matches for `q`.
+  Future<List<EmployeeProduct>> searchStaff(String q) async {
+    final res = await _dio.get('/products/staff/search', queryParameters: {'q': q});
+    return (res.data as List<dynamic>).map((e) => EmployeeProduct.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// Requires canCreerProduit — enforced server-side. Created with stockReel=0; the actual stock is added when the bon d'entrée is confirmed.
+  Future<EmployeeProduct> createStaff(Map<String, dynamic> payload) async {
+    final res = await _dio.post('/products/staff', data: payload);
+    return EmployeeProduct.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  /// Requires canModifierProduit — prixAchat is silently ignored server-side unless canModifierPrixAchat is also granted.
+  Future<EmployeeProduct> updateStaff(String id, Map<String, dynamic> payload) async {
+    final res = await _dio.patch('/products/staff/$id', data: payload);
+    return EmployeeProduct.fromJson(res.data as Map<String, dynamic>);
+  }
+
   // ── CLIENT ───────────────────────────────────────────────────────────
 
   Future<({List<ClientProduct> items, int total})> searchCatalog({

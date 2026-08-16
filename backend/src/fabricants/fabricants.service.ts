@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
@@ -80,6 +80,26 @@ export class FabricantsService {
 
   async create(dto: CreateFabricantDto) {
     return this.prisma.fabricant.create({ data: dto });
+  }
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+  // Used to pick/create a fournisseur while building a bon d'entrée (Phase 38).
+
+  /** Never notesInternes (Admin-only commentary) — safe list for the fournisseur picker. */
+  async findAllForEmployee() {
+    return this.prisma.fabricant.findMany({
+      where: { deletedAt: null },
+      orderBy: { nom: 'asc' },
+      select: { id: true, nom: true, telephone: true, adresse: true, email: true },
+    });
+  }
+
+  async createForEmployee(employeeId: string, dto: CreateFabricantDto) {
+    const employee = await this.prisma.employee.findUnique({ where: { id: employeeId } });
+    if (!employee?.canCreerFournisseur) {
+      throw new ForbiddenException("Vous n'avez pas la permission de créer un fournisseur.");
+    }
+    return this.create(dto);
   }
 
   async update(id: string, dto: Partial<CreateFabricantDto>) {

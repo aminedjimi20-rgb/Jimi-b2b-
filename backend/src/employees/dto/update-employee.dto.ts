@@ -18,4 +18,33 @@ export class UpdateEmployeeDto {
   @IsOptional()
   @IsBoolean()
   canSeeClientAddress?: boolean;
+
+  // Bon d'entrée (Phase 38) — voir schema.prisma Employee pour le détail de chaque permission.
+  @IsOptional()
+  @IsBoolean()
+  canCreateBonEntree?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  canModifierPrixAchat?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  canVoirPrixVente?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  canCreerProduit?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  canCreerFournisseur?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  canModifierProduit?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  canModifierBonApresConfirmation?: boolean;
 }

@@ -50,11 +50,11 @@ model User {
   // created by an Admin (client/employee onboarding) or that existed before
   // this feature stays fully usable with zero migration side-effects; only
   // the new self-registration flow (register()) explicitly sets this false.
-  emailVerified               Boolean   @default(true)
-  emailVerificationTokenHash  String?   @unique
-  emailVerificationExpiresAt  DateTime?
-  passwordResetTokenHash      String?   @unique
-  passwordResetExpiresAt      DateTime?
+  emailVerified              Boolean   @default(true)
+  emailVerificationTokenHash String?   @unique
+  emailVerificationExpiresAt DateTime?
+  passwordResetTokenHash     String?   @unique
+  passwordResetExpiresAt     DateTime?
 
   client        Client?
   employee      Employee?
@@ -85,9 +85,22 @@ model Employee {
   canSeeClientPhone   Boolean @default(false)
   canSeeClientAddress Boolean @default(false)
 
+  // Bon d'entrée (Phase 38) — chacun off par défaut, l'employé ne peut
+  // créer un bon d'entrée ni aucune de ces actions sans octroi explicite
+  // de l'Admin. Vérifié serveur (stock-receipts.service.ts), jamais
+  // seulement masqué côté mobile.
+  canCreateBonEntree              Boolean @default(false)
+  canModifierPrixAchat            Boolean @default(false)
+  canVoirPrixVente                Boolean @default(false)
+  canCreerProduit                 Boolean @default(false)
+  canCreerFournisseur             Boolean @default(false)
+  canModifierProduit              Boolean @default(false)
+  canModifierBonApresConfirmation Boolean @default(false)
+
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders          Order[]
   productRequests ProductRequest[]
+  stockReceipts   StockReceipt[]
 
   @@index([deletedAt])
 }
@@ -154,7 +167,7 @@ model Client {
 // ─────────────────────────────────────────────────────────────────────────
 
 model Category {
-  id        String     @id @default(cuid())
+  id        String    @id @default(cuid())
   nom       String
   parentId  String?
   deletedAt DateTime? // corbeille — null = actif
@@ -164,9 +177,9 @@ model Category {
   visibleToClient   Boolean @default(true)
   visibleToEmployee Boolean @default(true)
 
-  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children  Category[] @relation("CategoryTree")
-  products  Product[]
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
 
   @@unique([nom, parentId])
   @@index([deletedAt])
@@ -376,8 +389,9 @@ model Transporteur {
   deletedAt DateTime? // corbeille — null = actif
   createdAt DateTime  @default(now())
 
-  rates  DeliveryRate[]
-  orders Order[]
+  rates         DeliveryRate[]
+  orders        Order[]
+  stockReceipts StockReceipt[]
 
   @@index([nom])
   @@index([deletedAt])
@@ -440,9 +454,9 @@ model Order {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  client       Client            @relation(fields: [clientId], references: [id])
-  transporteur Transporteur?     @relation(fields: [transporteurId], references: [id])
-  employee     Employee?         @relation(fields: [employeeId], references: [id])
+  client       Client           @relation(fields: [clientId], references: [id])
+  transporteur Transporteur?    @relation(fields: [transporteurId], references: [id])
+  employee     Employee?        @relation(fields: [employeeId], references: [id])
   items        OrderItem[]
   stockMoves   StockMovement[]
   payments     Payment[]
@@ -518,25 +532,56 @@ model StockMovement {
 // Bon de réception — marchandise reçue d'un Fabricant. Chaque ligne crée un
 // StockMovement ENTREE (traçabilité), et garde un instantané des cartons /
 // unités par carton / prix vente au moment de la réception pour le PDF.
-model StockReceipt {
-  id                String    @id @default(cuid())
-  reference         String    @unique // ex: BR-2026-0001
-  fabricantId       String
-  total             Decimal   @db.Decimal(12, 2) // total au prix de vente — calculé serveur
-  totalAchat        Decimal   @default(0) @db.Decimal(12, 2) // sous-total au prix d'achat AVANT remise — voir remisePourcentage pour le montant réellement dû
-  remisePourcentage Decimal?  @db.Decimal(5, 2) // remise fournisseur négociée sur ce bon — le montant dû/reste à payer se calcule après remise (voir stock-receipt-response.dto)
-  montantPaye       Decimal   @default(0) @db.Decimal(12, 2) // somme des Payment liés — statut dérivé (voir stock-receipt-response.dto)
-  notes             String?
-  deletedAt         DateTime? // corbeille — null = actif
-  createdAt         DateTime  @default(now())
+enum StockReceiptStatus {
+  BROUILLON // saisi mais pas encore confirmé — AUCUN effet sur le stock/le fournisseur
+  CONFIRMEE // stock incrémenté, coût produit synchronisé, paiement fournisseur enregistré
+  ANNULEE // brouillon abandonné ou bon confirmé annulé (stock repris si besoin)
+}
 
-  fabricant  Fabricant          @relation(fields: [fabricantId], references: [id])
-  items      StockReceiptItem[]
-  stockMoves StockMovement[]
-  payments   Payment[]
+model StockReceipt {
+  id                   String             @id @default(cuid())
+  reference            String             @unique // ex: BR-2026-0001
+  fabricantId          String
+  status               StockReceiptStatus @default(CONFIRMEE) // ADMIN crée toujours CONFIRMEE (comportement historique inchangé) ; un Employé crée toujours BROUILLON — voir Phase 38
+  employeeId           String? // employé qui a créé ce bon (null = créé par l'Admin) — pour "mes bons" et l'audit
+  numeroBonFournisseur String? // référence papier du fournisseur, distincte de `reference` (la nôtre)
+  total                Decimal            @db.Decimal(12, 2) // total au prix de vente — calculé serveur
+  totalAchat           Decimal            @default(0) @db.Decimal(12, 2) // sous-total au prix d'achat AVANT remise — voir remisePourcentage pour le montant réellement dû
+  remisePourcentage    Decimal?           @db.Decimal(5, 2) // remise fournisseur négociée sur ce bon — le montant dû/reste à payer se calcule après remise (voir stock-receipt-response.dto)
+  transporteurId       String? // optionnel — voir Transporteur/DeliveryRate, activé par la case "Livraison"
+  destination          String?
+  fraisLivraison       Decimal            @default(0) @db.Decimal(12, 2)
+  montantPaye          Decimal            @default(0) @db.Decimal(12, 2) // somme des Payment liés — statut dérivé (voir stock-receipt-response.dto)
+  notes                String?
+  deletedAt            DateTime? // corbeille — null = actif
+  createdAt            DateTime           @default(now())
+
+  fabricant    Fabricant               @relation(fields: [fabricantId], references: [id])
+  employee     Employee?               @relation(fields: [employeeId], references: [id])
+  transporteur Transporteur?           @relation(fields: [transporteurId], references: [id])
+  items        StockReceiptItem[]
+  stockMoves   StockMovement[]
+  payments     Payment[]
+  changeLogs   StockReceiptChangeLog[]
 
   @@index([fabricantId])
+  @@index([employeeId])
   @@index([deletedAt])
+  @@index([status])
+}
+
+// Une entrée par modification Admin/Employé d'un bon d'entrée (création,
+// confirmation, correction après confirmation) — même logique que
+// OrderChangeLog (Phase 27).
+model StockReceiptChangeLog {
+  id             String   @id @default(cuid())
+  stockReceiptId String
+  summary        String
+  createdAt      DateTime @default(now())
+
+  stockReceipt StockReceipt @relation(fields: [stockReceiptId], references: [id], onDelete: Cascade)
+
+  @@index([stockReceiptId])
 }
 
 model StockReceiptItem {

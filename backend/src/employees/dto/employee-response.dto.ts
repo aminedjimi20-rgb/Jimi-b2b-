@@ -13,6 +13,13 @@ export function toAdminEmployeeDTO(employee: EmployeeWithUser) {
     status: employee.user.status,
     canSeeClientPhone: employee.canSeeClientPhone,
     canSeeClientAddress: employee.canSeeClientAddress,
+    canCreateBonEntree: employee.canCreateBonEntree,
+    canModifierPrixAchat: employee.canModifierPrixAchat,
+    canVoirPrixVente: employee.canVoirPrixVente,
+    canCreerProduit: employee.canCreerProduit,
+    canCreerFournisseur: employee.canCreerFournisseur,
+    canModifierProduit: employee.canModifierProduit,
+    canModifierBonApresConfirmation: employee.canModifierBonApresConfirmation,
     createdAt: employee.createdAt,
   };
 }

@@ -53,4 +53,23 @@ class FabricantsApi {
   Future<void> restore(String id) => _dio.post('/fabricants/$id/restore');
 
   Future<void> permanentDelete(String id) => _dio.delete('/fabricants/$id/permanent');
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+  // Only for picking/creating a fournisseur while building a bon d'entrée (Phase 38).
+
+  Future<List<Fabricant>> listStaff() async {
+    final res = await _dio.get('/fabricants/staff');
+    return (res.data as List<dynamic>).map((e) => Fabricant.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// Requires the Admin to have granted canCreerFournisseur — enforced server-side.
+  Future<Fabricant> createStaff(String nom, {String? telephone, String? adresse, String? email}) async {
+    final res = await _dio.post('/fabricants/staff', data: {
+      'nom': nom,
+      if (telephone != null && telephone.isNotEmpty) 'telephone': telephone,
+      if (adresse != null && adresse.isNotEmpty) 'adresse': adresse,
+      if (email != null && email.isNotEmpty) 'email': email,
+    });
+    return Fabricant.fromJson(res.data as Map<String, dynamic>);
+  }
 }

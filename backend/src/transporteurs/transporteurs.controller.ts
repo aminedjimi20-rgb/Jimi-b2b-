@@ -9,6 +9,9 @@ import { SetDeliveryRateDto } from './dto/set-delivery-rate.dto';
 export class TransporteursController {
   constructor(private transporteursService: TransporteursService) {}
 
+  // Read-only — an Employee needs the transporteur list to fill the
+  // livraison section of a counter order or a bon d'entrée (Phase 38).
+  @Roles('ADMIN', 'EMPLOYEE')
   @Get()
   findAll() {
     return this.transporteursService.findAll();

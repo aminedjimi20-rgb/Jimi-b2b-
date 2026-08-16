@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -9,6 +11,13 @@ import { UpdateEmployeeStatusDto } from './dto/update-employee-status.dto';
 @Roles('ADMIN')
 export class EmployeesController {
   constructor(private employeesService: EmployeesService) {}
+
+  // Must come before ':id' — an Employee reading their own granted permissions.
+  @Roles('EMPLOYEE')
+  @Get('staff/me')
+  findMyPermissions(@CurrentUser() user: AuthenticatedUser) {
+    return this.employeesService.findMyPermissions(user.employeeId!);
+  }
 
   @Post()
   create(@Body() dto: CreateEmployeeDto) {

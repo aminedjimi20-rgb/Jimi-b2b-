@@ -94,33 +94,87 @@ class AdminEmployeesScreen extends ConsumerWidget {
   Future<void> _showPermissionsDialog(BuildContext context, WidgetRef ref, EmployeeView e) async {
     bool canSeeClientPhone = e.canSeeClientPhone;
     bool canSeeClientAddress = e.canSeeClientAddress;
+    bool canCreateBonEntree = e.canCreateBonEntree;
+    bool canModifierPrixAchat = e.canModifierPrixAchat;
+    bool canVoirPrixVente = e.canVoirPrixVente;
+    bool canCreerProduit = e.canCreerProduit;
+    bool canCreerFournisseur = e.canCreerFournisseur;
+    bool canModifierProduit = e.canModifierProduit;
+    bool canModifierBonApresConfirmation = e.canModifierBonApresConfirmation;
 
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           title: Text('Permissions — ${e.nom}'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Par défaut, un employé ne voit jamais le téléphone ni l\'adresse du client sur un bon.',
-                style: TextStyle(fontSize: 13),
-              ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Voir le téléphone du client'),
-                value: canSeeClientPhone,
-                onChanged: (v) => setDialogState(() => canSeeClientPhone = v),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Voir l\'adresse du client'),
-                value: canSeeClientAddress,
-                onChanged: (v) => setDialogState(() => canSeeClientAddress = v),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Par défaut, un employé ne voit jamais le téléphone ni l\'adresse du client sur un bon.',
+                  style: TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Voir le téléphone du client'),
+                  value: canSeeClientPhone,
+                  onChanged: (v) => setDialogState(() => canSeeClientPhone = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Voir l\'adresse du client'),
+                  value: canSeeClientAddress,
+                  onChanged: (v) => setDialogState(() => canSeeClientAddress = v),
+                ),
+                const Divider(),
+                Text('Bon d\'entrée (réception fournisseur)', style: Theme.of(context).textTheme.labelLarge),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Créer un bon d\'entrée'),
+                  value: canCreateBonEntree,
+                  onChanged: (v) => setDialogState(() => canCreateBonEntree = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Modifier le prix d\'achat'),
+                  value: canModifierPrixAchat,
+                  onChanged: (v) => setDialogState(() => canModifierPrixAchat = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Voir le prix de vente'),
+                  value: canVoirPrixVente,
+                  onChanged: (v) => setDialogState(() => canVoirPrixVente = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Créer un nouveau produit'),
+                  value: canCreerProduit,
+                  onChanged: (v) => setDialogState(() => canCreerProduit = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Créer un nouveau fournisseur'),
+                  value: canCreerFournisseur,
+                  onChanged: (v) => setDialogState(() => canCreerFournisseur = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Modifier un produit existant'),
+                  value: canModifierProduit,
+                  onChanged: (v) => setDialogState(() => canModifierProduit = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Modifier un bon après confirmation'),
+                  value: canModifierBonApresConfirmation,
+                  onChanged: (v) => setDialogState(() => canModifierBonApresConfirmation = v),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
@@ -131,11 +185,17 @@ class AdminEmployeesScreen extends ConsumerWidget {
     );
 
     if (saved == true) {
-      await ref.read(employeesApiProvider).updatePermissions(
-            e.id,
-            canSeeClientPhone: canSeeClientPhone,
-            canSeeClientAddress: canSeeClientAddress,
-          );
+      await ref.read(employeesApiProvider).updatePermissions(e.id, {
+        'canSeeClientPhone': canSeeClientPhone,
+        'canSeeClientAddress': canSeeClientAddress,
+        'canCreateBonEntree': canCreateBonEntree,
+        'canModifierPrixAchat': canModifierPrixAchat,
+        'canVoirPrixVente': canVoirPrixVente,
+        'canCreerProduit': canCreerProduit,
+        'canCreerFournisseur': canCreerFournisseur,
+        'canModifierProduit': canModifierProduit,
+        'canModifierBonApresConfirmation': canModifierBonApresConfirmation,
+      });
       ref.invalidate(adminEmployeesProvider);
     }
   }

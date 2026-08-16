@@ -46,14 +46,22 @@ class StockReceiptView {
   StockReceiptView({
     required this.id,
     required this.reference,
+    this.status = 'CONFIRMEE',
     required this.fabricantId,
     required this.fabricantNom,
+    this.employeeId,
+    this.employeeNom,
+    this.numeroBonFournisseur,
     this.notes,
     required this.total,
     required this.totalAchat,
     this.remisePourcentage,
     required this.montantRemise,
     required this.totalApresRemise,
+    this.transporteurId,
+    this.transporteurNom,
+    this.destination,
+    this.fraisLivraison = 0,
     required this.montantPaye,
     required this.montantRestant,
     required this.statutPaiement,
@@ -63,31 +71,49 @@ class StockReceiptView {
 
   final String id;
   final String reference;
+  final String status; // BROUILLON | CONFIRMEE | ANNULEE
   final String fabricantId;
   final String fabricantNom;
+  final String? employeeId;
+  final String? employeeNom;
+  final String? numeroBonFournisseur;
   final String? notes;
   final double total;
   final double totalAchat; // sous-total achat AVANT remise
   final double? remisePourcentage;
   final double montantRemise;
   final double totalApresRemise; // montant réellement dû — base du "reste à payer"
+  final String? transporteurId;
+  final String? transporteurNom;
+  final String? destination;
+  final double fraisLivraison;
   final double montantPaye;
   final double montantRestant;
   final String statutPaiement;
   final List<StockReceiptItemView> items;
   final DateTime createdAt;
 
+  bool get isBrouillon => status == 'BROUILLON';
+
   factory StockReceiptView.fromJson(Map<String, dynamic> json) => StockReceiptView(
         id: json['id'] as String,
         reference: json['reference'] as String,
+        status: json['status'] as String? ?? 'CONFIRMEE',
         fabricantId: json['fabricantId'] as String,
         fabricantNom: json['fabricantNom'] as String,
+        employeeId: json['employeeId'] as String?,
+        employeeNom: json['employeeNom'] as String?,
+        numeroBonFournisseur: json['numeroBonFournisseur'] as String?,
         notes: json['notes'] as String?,
         total: parseDecimal(json['total']),
         totalAchat: parseDecimal(json['totalAchat']),
         remisePourcentage: json['remisePourcentage'] == null ? null : parseDecimal(json['remisePourcentage']),
         montantRemise: parseDecimal(json['montantRemise']),
         totalApresRemise: json['totalApresRemise'] == null ? parseDecimal(json['totalAchat']) : parseDecimal(json['totalApresRemise']),
+        transporteurId: json['transporteurId'] as String?,
+        transporteurNom: json['transporteurNom'] as String?,
+        destination: json['destination'] as String?,
+        fraisLivraison: parseDecimal(json['fraisLivraison']),
         montantPaye: parseDecimal(json['montantPaye']),
         montantRestant: parseDecimal(json['montantRestant']),
         statutPaiement: json['statutPaiement'] as String? ?? 'NON_PAYE',

@@ -6,18 +6,28 @@ import '../../core/theme/app_theme.dart';
 import '../auth/change_password_screen.dart';
 import '../shared/drafts_screen.dart';
 import '../shared/notifications_screen.dart';
+import 'bon_entree/employee_bon_entree_list_screen.dart';
 import 'employee_image_search_screen.dart';
 import 'employee_request_product_screen.dart';
+import 'employee_session.dart';
 
 class EmployeeMoreScreen extends ConsumerWidget {
   const EmployeeMoreScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final permissions = ref.watch(employeePermissionsProvider).valueOrNull;
     return Scaffold(
       appBar: AppBar(title: const Text('Plus')),
       body: ListView(
         children: [
+          if (permissions != null && (permissions.canCreateBonEntree || permissions.canModifierBonApresConfirmation))
+            ListTile(
+              leading: const Icon(Icons.move_to_inbox_outlined),
+              title: const Text('Bon d\'entrée'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmployeeBonEntreeListScreen())),
+            ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
             title: const Text('Notifications'),

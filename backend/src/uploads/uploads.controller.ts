@@ -13,9 +13,12 @@ const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
  * adapter in production — the response contract ({ url }) stays the same
  * so ProductsModule never needs to change.
  */
-@Roles('ADMIN')
 @Controller('uploads')
 export class UploadsController {
+  // Employee needs this too — creating a new article inline in a bon
+  // d'entrée (Phase 38) still requires canCreerProduit on the actual
+  // product-creation endpoint; the upload itself is harmless either way.
+  @Roles('ADMIN', 'EMPLOYEE')
   @Post('product-image')
   @UseInterceptors(
     FileInterceptor('file', {

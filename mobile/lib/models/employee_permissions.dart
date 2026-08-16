@@ -1,11 +1,8 @@
-class EmployeeView {
-  EmployeeView({
-    required this.id,
-    required this.nom,
-    this.telephone,
-    this.email,
-    this.phone,
-    this.status,
+/// The logged-in Employee's own granted permissions (Phase 38) — purely a
+/// UX convenience to show/hide entry points (e.g. "Bon d'entrée"); the real
+/// enforcement always happens server-side, never here.
+class EmployeePermissions {
+  EmployeePermissions({
     this.canSeeClientPhone = false,
     this.canSeeClientAddress = false,
     this.canCreateBonEntree = false,
@@ -17,12 +14,6 @@ class EmployeeView {
     this.canModifierBonApresConfirmation = false,
   });
 
-  final String id;
-  final String nom;
-  final String? telephone;
-  final String? email;
-  final String? phone;
-  final String? status;
   final bool canSeeClientPhone;
   final bool canSeeClientAddress;
   final bool canCreateBonEntree;
@@ -33,13 +24,7 @@ class EmployeeView {
   final bool canModifierProduit;
   final bool canModifierBonApresConfirmation;
 
-  factory EmployeeView.fromJson(Map<String, dynamic> json) => EmployeeView(
-        id: json['id'] as String,
-        nom: json['nom'] as String,
-        telephone: json['telephone'] as String?,
-        email: json['email'] as String?,
-        phone: json['phone'] as String?,
-        status: json['status'] as String?,
+  factory EmployeePermissions.fromJson(Map<String, dynamic> json) => EmployeePermissions(
         canSeeClientPhone: json['canSeeClientPhone'] as bool? ?? false,
         canSeeClientAddress: json['canSeeClientAddress'] as bool? ?? false,
         canCreateBonEntree: json['canCreateBonEntree'] as bool? ?? false,
