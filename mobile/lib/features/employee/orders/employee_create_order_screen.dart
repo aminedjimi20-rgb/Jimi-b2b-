@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/drafts/form_draft_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/draft_resume_banner.dart';
 import '../../../models/client.dart';
 import '../../../models/employee_product.dart';
 import '../../../models/order.dart';
@@ -12,6 +14,8 @@ import '../../../models/transporteur.dart';
 import '../../../services/orders_api.dart';
 import '../../../services/service_providers.dart';
 import 'employee_order_detail_screen.dart';
+
+const _draftFormKey = 'employee_create_order';
 
 final _clientsForEmployeeOrderProvider = FutureProvider.autoDispose<List<ClientView>>((ref) => ref.watch(clientsApiProvider).listStaff());
 final _productsForEmployeeOrderProvider = FutureProvider.autoDispose<List<EmployeeProduct>>((ref) => ref.watch(productsApiProvider).listStaff());
@@ -63,6 +67,85 @@ class _EmployeeCreateOrderScreenState extends ConsumerState<EmployeeCreateOrderS
   String? _error;
   Transporteur? _transporteur;
   String? _destination;
+
+  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
+  bool _draftChecked = false;
+  Map<String, dynamic>? _pendingDraft;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDraft();
+  }
+
+  Future<void> _loadDraft() async {
+    final draft = await _draftStore.load();
+    if (!mounted) return;
+    setState(() {
+      _pendingDraft = draft;
+      _draftChecked = true;
+    });
+  }
+
+  Map<String, dynamic> _currentDraftData() => {
+        'clientId': _client?.id,
+        'items': _lines.map((l) => {'productId': l.product.id, 'quantite': l.quantite}).toList(),
+        'paymentMethod': _paymentMethod,
+        'adresseLivraison': _adresse.text,
+        'telephoneContact': _telephone.text,
+        'nom': _nom.text,
+        'notes': _notes.text,
+        'fraisLivraison': _fraisLivraison.text,
+        'transporteurId': _transporteur?.id,
+        'destination': _destination,
+      };
+
+  Future<void> _resumeDraft(Map<String, dynamic> data) async {
+    final clients = await ref.read(_clientsForEmployeeOrderProvider.future);
+    final products = await ref.read(_productsForEmployeeOrderProvider.future);
+    final transporteurs = await ref.read(_transporteursForEmployeeOrderProvider.future);
+    if (!mounted) return;
+
+    final clientId = data['clientId'] as String?;
+    ClientView? client;
+    for (final c in clients) {
+      if (c.id == clientId) client = c;
+    }
+
+    final lines = <_OrderLine>[];
+    for (final item in (data['items'] as List<dynamic>? ?? [])) {
+      EmployeeProduct? product;
+      for (final p in products) {
+        if (p.id == item['productId']) product = p;
+      }
+      if (product != null) lines.add(_OrderLine(product, item['quantite'] as int));
+    }
+
+    final transporteurId = data['transporteurId'] as String?;
+    Transporteur? transporteur;
+    for (final t in transporteurs) {
+      if (t.id == transporteurId) transporteur = t;
+    }
+
+    setState(() {
+      _client = client;
+      for (final l in _lines) {
+        l.dispose();
+      }
+      _lines
+        ..clear()
+        ..addAll(lines);
+      _paymentMethod = data['paymentMethod'] as String? ?? _paymentMethod;
+      _adresse.text = data['adresseLivraison'] as String? ?? '';
+      _telephone.text = data['telephoneContact'] as String? ?? '';
+      _nom.text = data['nom'] as String? ?? '';
+      _notes.text = data['notes'] as String? ?? '';
+      _fraisLivraison.text = data['fraisLivraison'] as String? ?? '';
+      _transporteur = transporteur;
+      _destination = data['destination'] as String?;
+      _pendingDraft = null;
+    });
+  }
 
   double get _subtotal => _lines.fold(0.0, (sum, l) => sum + l.product.prixVente * l.quantite);
   double get _fraisLivraisonValue => double.tryParse(_fraisLivraison.text.replaceAll(',', '.')) ?? 0;
@@ -168,6 +251,7 @@ class _EmployeeCreateOrderScreenState extends ConsumerState<EmployeeCreateOrderS
             destination: _destination,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
           );
+      await _draftStore.clear();
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => EmployeeOrderDetailScreen(orderId: order.id)));
       }
@@ -188,16 +272,29 @@ class _EmployeeCreateOrderScreenState extends ConsumerState<EmployeeCreateOrderS
     _nom.dispose();
     _notes.dispose();
     _fraisLivraison.dispose();
+    _draftStore.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_draftChecked && _pendingDraft == null) {
+      _draftStore.save(_currentDraftData());
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Commande au comptoir')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
+          if (_pendingDraft != null)
+            DraftResumeBanner(
+              onResume: () => _resumeDraft(_pendingDraft!),
+              onDismiss: () {
+                _draftStore.clear();
+                setState(() => _pendingDraft = null);
+              },
+            ),
           Text('Client', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(

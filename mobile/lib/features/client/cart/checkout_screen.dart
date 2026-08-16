@@ -3,16 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/drafts/form_draft_store.dart';
 import '../../../core/offline/connectivity_provider.dart';
 import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/draft_resume_banner.dart';
 import '../../../models/order.dart';
 import '../../../services/orders_api.dart';
 import '../../../services/service_providers.dart';
 import '../orders/client_order_detail_screen.dart';
 import 'cart_controller.dart';
 import 'offline_order_queued_screen.dart';
+
+const _draftFormKey = 'client_checkout';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -29,6 +33,42 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String _paymentMethod = 'ESPECES';
   bool _submitting = false;
   String? _error;
+
+  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
+  bool _draftChecked = false;
+  Map<String, dynamic>? _pendingDraft;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDraft();
+  }
+
+  Future<void> _loadDraft() async {
+    final draft = await _draftStore.load();
+    if (!mounted) return;
+    setState(() {
+      _pendingDraft = draft;
+      _draftChecked = true;
+    });
+  }
+
+  Map<String, dynamic> _currentDraftData() => {
+        'adresseLivraison': _adresse.text,
+        'telephoneContact': _telephone.text,
+        'notes': _notes.text,
+        'paymentMethod': _paymentMethod,
+      };
+
+  void _resumeDraft(Map<String, dynamic> data) {
+    setState(() {
+      _adresse.text = data['adresseLivraison'] as String? ?? '';
+      _telephone.text = data['telephoneContact'] as String? ?? '';
+      _notes.text = data['notes'] as String? ?? '';
+      _paymentMethod = data['paymentMethod'] as String? ?? _paymentMethod;
+      _pendingDraft = null;
+    });
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -63,6 +103,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
           );
       ref.read(cartControllerProvider.notifier).clear();
+      await _draftStore.clear();
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ClientOrderDetailScreen(orderId: order.id)));
       }
@@ -80,6 +121,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Future<void> _queueOffline(Map<String, dynamic> payload) async {
     await ref.read(appDatabaseProvider).queuePendingOrder(const Uuid().v4(), payload);
     ref.read(cartControllerProvider.notifier).clear();
+    await _draftStore.clear();
     if (mounted) {
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const OfflineOrderQueuedScreen()));
     }
@@ -90,6 +132,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _adresse.dispose();
     _telephone.dispose();
     _notes.dispose();
+    _draftStore.dispose();
     super.dispose();
   }
 
@@ -98,6 +141,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cart = ref.watch(cartControllerProvider);
     final total = cart.fold<double>(0, (sum, l) => sum + l.sousTotal);
 
+    if (_draftChecked && _pendingDraft == null) {
+      _draftStore.save(_currentDraftData());
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Finaliser la commande')),
       body: Form(
@@ -105,6 +152,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (_pendingDraft != null)
+              DraftResumeBanner(
+                onResume: () => _resumeDraft(_pendingDraft!),
+                onDismiss: () {
+                  _draftStore.clear();
+                  setState(() => _pendingDraft = null);
+                },
+              ),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),

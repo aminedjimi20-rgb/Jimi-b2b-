@@ -19,7 +19,7 @@ class AppDatabase {
     final path = join(await getDatabasesPath(), 'jimi_b2b.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE cached_catalog (
@@ -42,9 +42,23 @@ class AppDatabase {
             createdAt INTEGER NOT NULL
           )
         ''');
+        await db.execute(_formDraftsTable);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(_formDraftsTable);
+        }
       },
     );
   }
+
+  static const _formDraftsTable = '''
+    CREATE TABLE form_drafts (
+      formKey TEXT PRIMARY KEY,
+      dataJson TEXT NOT NULL,
+      updatedAt INTEGER NOT NULL
+    )
+  ''';
 
   // ── Catalog cache ────────────────────────────────────────────────────
 
@@ -116,5 +130,36 @@ class AppDatabase {
   Future<void> removePendingOrder(String localId) async {
     final db = await database;
     await db.delete('pending_orders', where: 'id = ?', whereArgs: [localId]);
+  }
+
+  // ── Form drafts ──────────────────────────────────────────────────────
+  //
+  // Auto-saved as the user fills a long form (counter sale, product sheet,
+  // stock receipt...) so an accidental navigation/app-kill doesn't lose the
+  // work — restored (with confirmation) next time that same form opens,
+  // and cleared once the form is actually submitted. `formKey` scopes
+  // drafts per form kind, same as `cart_items`/`pending_orders` above —
+  // this table isn't user-scoped either, consistent with the rest of this
+  // local cache (not cleared on logout).
+
+  Future<void> saveDraft(String formKey, Map<String, dynamic> data) async {
+    final db = await database;
+    await db.insert(
+      'form_drafts',
+      {'formKey': formKey, 'dataJson': jsonEncode(data), 'updatedAt': DateTime.now().millisecondsSinceEpoch},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> readDraft(String formKey) async {
+    final db = await database;
+    final rows = await db.query('form_drafts', where: 'formKey = ?', whereArgs: [formKey], limit: 1);
+    if (rows.isEmpty) return null;
+    return jsonDecode(rows.first['dataJson'] as String) as Map<String, dynamic>;
+  }
+
+  Future<void> clearDraft(String formKey) async {
+    final db = await database;
+    await db.delete('form_drafts', where: 'formKey = ?', whereArgs: [formKey]);
   }
 }
