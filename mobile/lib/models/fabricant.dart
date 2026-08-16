@@ -1,12 +1,22 @@
 import 'parsing.dart';
 
 class Fabricant {
-  Fabricant({required this.id, required this.nom, this.telephone, this.adresse, this.productCount = 0});
+  Fabricant({
+    required this.id,
+    required this.nom,
+    this.telephone,
+    this.adresse,
+    this.email,
+    this.notesInternes,
+    this.productCount = 0,
+  });
 
   final String id;
   final String nom;
   final String? telephone;
   final String? adresse;
+  final String? email;
+  final String? notesInternes;
   final int productCount;
 
   factory Fabricant.fromJson(Map<String, dynamic> json) => Fabricant(
@@ -14,6 +24,8 @@ class Fabricant {
         nom: json['nom'] as String,
         telephone: json['telephone'] as String?,
         adresse: json['adresse'] as String?,
+        email: json['email'] as String?,
+        notesInternes: json['notesInternes'] as String?,
         productCount: json['productCount'] as int? ?? 0,
       );
 }
@@ -103,6 +115,8 @@ class FabricantDetail {
     required this.nom,
     this.telephone,
     this.adresse,
+    this.email,
+    this.notesInternes,
     required this.createdAt,
     required this.totalAchat,
     required this.totalPaye,
@@ -116,6 +130,8 @@ class FabricantDetail {
   final String nom;
   final String? telephone;
   final String? adresse;
+  final String? email;
+  final String? notesInternes;
   final DateTime createdAt;
   final double totalAchat;
   final double totalPaye;
@@ -129,6 +145,8 @@ class FabricantDetail {
         nom: json['nom'] as String,
         telephone: json['telephone'] as String?,
         adresse: json['adresse'] as String?,
+        email: json['email'] as String?,
+        notesInternes: json['notesInternes'] as String?,
         createdAt: parseDateOrNull(json['createdAt']) ?? DateTime.now(),
         totalAchat: parseDecimal(json['totalAchat']),
         totalPaye: parseDecimal(json['totalPaye']),

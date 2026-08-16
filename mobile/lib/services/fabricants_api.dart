@@ -11,14 +11,25 @@ class FabricantsApi {
     return (res.data as List<dynamic>).map((e) => Fabricant.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<Fabricant> create(String nom, {String? telephone, String? adresse}) async {
+  Future<Fabricant> create(String nom, {String? telephone, String? adresse, String? email, String? notesInternes}) async {
     final res = await _dio.post('/fabricants', data: {
       'nom': nom,
       if (telephone != null && telephone.isNotEmpty) 'telephone': telephone,
       if (adresse != null && adresse.isNotEmpty) 'adresse': adresse,
+      if (email != null && email.isNotEmpty) 'email': email,
+      if (notesInternes != null && notesInternes.isNotEmpty) 'notesInternes': notesInternes,
     });
     return Fabricant.fromJson(res.data as Map<String, dynamic>);
   }
+
+  Future<void> update(String id, {String? nom, String? telephone, String? adresse, String? email, String? notesInternes}) =>
+      _dio.patch('/fabricants/$id', data: {
+        if (nom != null) 'nom': nom,
+        if (telephone != null) 'telephone': telephone,
+        if (adresse != null) 'adresse': adresse,
+        if (email != null) 'email': email,
+        if (notesInternes != null) 'notesInternes': notesInternes,
+      });
 
   Future<FabricantDetail> getOne(String id) async {
     final res = await _dio.get('/fabricants/$id');

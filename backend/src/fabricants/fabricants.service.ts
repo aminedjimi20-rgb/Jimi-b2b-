@@ -38,6 +38,8 @@ export class FabricantsService {
       nom: fabricant.nom,
       telephone: fabricant.telephone,
       adresse: fabricant.adresse,
+      email: fabricant.email,
+      notesInternes: fabricant.notesInternes,
       createdAt: fabricant.createdAt,
       totalAchat,
       totalPaye,

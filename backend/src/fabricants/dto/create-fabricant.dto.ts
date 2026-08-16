@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateFabricantDto {
   @IsString()
@@ -11,4 +11,12 @@ export class CreateFabricantDto {
   @IsOptional()
   @IsString()
   adresse?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  notesInternes?: string;
 }

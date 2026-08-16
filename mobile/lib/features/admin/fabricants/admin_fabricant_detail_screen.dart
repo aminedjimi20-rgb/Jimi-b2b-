@@ -63,6 +63,71 @@ class _AdminFabricantDetailScreenState extends ConsumerState<AdminFabricantDetai
     }
   }
 
+  Future<void> _editFabricant(FabricantDetail f) async {
+    final nom = TextEditingController(text: f.nom);
+    final telephone = TextEditingController(text: f.telephone ?? '');
+    final adresse = TextEditingController(text: f.adresse ?? '');
+    final email = TextEditingController(text: f.email ?? '');
+    final notes = TextEditingController(text: f.notesInternes ?? '');
+    String? error;
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Modifier le fournisseur'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: nom, decoration: const InputDecoration(labelText: 'Nom')),
+                const SizedBox(height: 12),
+                TextField(controller: telephone, decoration: const InputDecoration(labelText: 'Téléphone')),
+                const SizedBox(height: 12),
+                TextField(controller: adresse, decoration: const InputDecoration(labelText: 'Adresse')),
+                const SizedBox(height: 12),
+                TextField(controller: email, decoration: const InputDecoration(labelText: 'Email')),
+                const SizedBox(height: 12),
+                TextField(controller: notes, decoration: const InputDecoration(labelText: 'Notes internes'), maxLines: 3),
+                if (error != null) ...[
+                  const SizedBox(height: 8),
+                  Text(error!, style: const TextStyle(color: AppTheme.danger)),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+            ElevatedButton(
+              onPressed: () async {
+                if (nom.text.trim().isEmpty) {
+                  setDialogState(() => error = 'Le nom est requis.');
+                  return;
+                }
+                try {
+                  await ref.read(fabricantsApiProvider).update(
+                        f.id,
+                        nom: nom.text.trim(),
+                        telephone: telephone.text.trim(),
+                        adresse: adresse.text.trim(),
+                        email: email.text.trim(),
+                        notesInternes: notes.text.trim(),
+                      );
+                  if (ctx.mounted) Navigator.pop(ctx, true);
+                } catch (e) {
+                  setDialogState(() => error = e is ApiException ? e.message : 'Erreur.');
+                }
+              },
+              child: const Text('Enregistrer'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (saved == true) _invalidate();
+  }
+
   Future<void> _addProduct(FabricantDetail f) async {
     final products = await ref.read(productsApiProvider).listAdmin();
     if (!mounted) return;
@@ -119,12 +184,18 @@ class _AdminFabricantDetailScreenState extends ConsumerState<AdminFabricantDetai
           title: Text(detail.valueOrNull?.nom ?? 'Fournisseur'),
           actions: [
             detail.maybeWhen(
-              data: (f) => IconButton(
-                icon: _deleting
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.delete_outline),
-                tooltip: 'Supprimer',
-                onPressed: _deleting ? null : () => _confirmDelete(f),
+              data: (f) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Modifier', onPressed: () => _editFabricant(f)),
+                  IconButton(
+                    icon: _deleting
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.delete_outline),
+                    tooltip: 'Supprimer',
+                    onPressed: _deleting ? null : () => _confirmDelete(f),
+                  ),
+                ],
               ),
               orElse: () => const SizedBox.shrink(),
             ),
@@ -160,7 +231,7 @@ class _FabricantSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contact = [fabricant.telephone, fabricant.adresse].where((s) => s != null && s.isNotEmpty).join(' · ');
+    final contact = [fabricant.telephone, fabricant.adresse, fabricant.email].where((s) => s != null && s.isNotEmpty).join(' · ');
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Padding(

@@ -172,12 +172,14 @@ model Category {
 
 // Fournisseur/fabricant — d'où vient la marchandise reçue via un StockReceipt.
 model Fabricant {
-  id        String    @id @default(cuid())
-  nom       String
-  telephone String?
-  adresse   String?
-  deletedAt DateTime? // corbeille — null = actif
-  createdAt DateTime  @default(now())
+  id            String    @id @default(cuid())
+  nom           String
+  telephone     String?
+  adresse       String?
+  email         String?
+  notesInternes String? // visible Admin uniquement, comme Client.notesInternes
+  deletedAt     DateTime? // corbeille — null = actif
+  createdAt     DateTime  @default(now())
 
   products Product[]
   receipts StockReceipt[]
