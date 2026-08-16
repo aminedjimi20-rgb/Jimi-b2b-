@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import { toAdminClientDTO, toSelfClientDTO } from './dto/client-response.dto';
+import { toAdminClientDTO, toEmployeeClientDTO, toSelfClientDTO } from './dto/client-response.dto';
 
 const CLIENT_INCLUDE_USER = {
   user: { select: { email: true, phone: true, status: true } },
@@ -57,6 +57,16 @@ export class ClientsService {
       orderBy: { raisonSociale: 'asc' },
     });
     return clients.map(toAdminClientDTO);
+  }
+
+  /** Employee picking a client for an on-site order — identity/contact only, no credit exposure. */
+  async findAllForEmployee() {
+    const clients = await this.prisma.client.findMany({
+      where: { deletedAt: null },
+      include: CLIENT_INCLUDE_USER,
+      orderBy: { raisonSociale: 'asc' },
+    });
+    return clients.map(toEmployeeClientDTO);
   }
 
   async findOneForAdmin(clientId: string) {

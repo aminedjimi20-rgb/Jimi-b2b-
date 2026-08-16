@@ -45,5 +45,21 @@ export function toSelfClientDTO(client: ClientWithUser) {
   };
 }
 
+/**
+ * Allow-list mapper — an Employee picking a client for an on-site order.
+ * Just enough to identify/contact the client; no credit exposure or
+ * internal notes (Admin-only, same rule as everywhere else).
+ */
+export function toEmployeeClientDTO(client: ClientWithUser) {
+  return {
+    id: client.id,
+    raisonSociale: client.raisonSociale,
+    telephone: client.telephone,
+    adresse: client.adresse,
+    ville: client.ville,
+  };
+}
+
 export type AdminClientDTO = ReturnType<typeof toAdminClientDTO>;
 export type SelfClientDTO = ReturnType<typeof toSelfClientDTO>;
+export type EmployeeClientDTO = ReturnType<typeof toEmployeeClientDTO>;

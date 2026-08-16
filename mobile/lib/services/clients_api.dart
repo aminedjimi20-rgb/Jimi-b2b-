@@ -45,6 +45,14 @@ class ClientsApi {
 
   Future<void> permanentDelete(String id) => _dio.delete('/clients/$id/permanent');
 
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  /// Restricted list for picking a client on an on-site order — no credit exposure (see ClientsService.findAllForEmployee).
+  Future<List<ClientView>> listStaff() async {
+    final res = await _dio.get('/clients/staff');
+    return (res.data as List<dynamic>).map((e) => ClientView.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   // ── CLIENT (self) ────────────────────────────────────────────────────
 
   Future<ClientView> myProfile() async {

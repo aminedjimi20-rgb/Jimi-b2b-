@@ -30,6 +30,13 @@ export class ClientsController {
     return this.clientsService.findTrash();
   }
 
+  // Must come before ':id' so "staff" isn't swallowed as an id param.
+  @Roles('EMPLOYEE')
+  @Get('staff')
+  findAllEmployee() {
+    return this.clientsService.findAllForEmployee();
+  }
+
   @Roles('ADMIN')
   @Get(':id')
   findOne(@Param('id') id: string) {

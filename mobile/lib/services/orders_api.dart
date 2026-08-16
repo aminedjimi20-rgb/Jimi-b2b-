@@ -123,4 +123,56 @@ class OrdersApi {
   Future<void> restore(String id) => _dio.post('/orders/$id/restore');
 
   Future<void> permanentDelete(String id) => _dio.delete('/orders/$id/permanent');
+
+  /// ADMIN assigns (or clears, employeeId=null) which employee prepares this order.
+  Future<OrderView> assignEmployee(String id, String? employeeId) async {
+    final res = await _dio.patch('/orders/$id/assign', data: {'employeeId': employeeId});
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  /// Counter sale placed by an Employee — auto-assigned to them. No remisePourcentage (Admin-only).
+  Future<OrderView> createForEmployee({
+    required String clientId,
+    required List<OrderItemInput> items,
+    required String paymentMethod,
+    required String adresseLivraison,
+    required String telephoneContact,
+    String? nom,
+    double? fraisLivraison,
+    String? transporteurId,
+    String? destination,
+    String? notes,
+  }) async {
+    final res = await _dio.post('/orders/staff', data: {
+      'clientId': clientId,
+      'items': items.map((e) => e.toJson()).toList(),
+      'paymentMethod': paymentMethod,
+      'adresseLivraison': adresseLivraison,
+      'telephoneContact': telephoneContact,
+      if (nom != null && nom.isNotEmpty) 'nom': nom,
+      if (fraisLivraison != null && fraisLivraison > 0) 'fraisLivraison': fraisLivraison,
+      if (transporteurId != null) 'transporteurId': transporteurId,
+      if (destination != null && destination.isNotEmpty) 'destination': destination,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+    });
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<List<OrderView>> mineEmployee() async {
+    final res = await _dio.get('/orders/staff/mine');
+    return (res.data as List<dynamic>).map((e) => OrderView.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<OrderView> mineOneEmployee(String id) async {
+    final res = await _dio.get('/orders/staff/mine/$id');
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  /// Employees can only move an order to PREPARATION/PRETE — everything else (confirm, cancel, ship) is Admin-only.
+  Future<OrderView> updateStatusEmployee(String id, String status) async {
+    final res = await _dio.patch('/orders/staff/$id/status', data: {'status': status});
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
 }

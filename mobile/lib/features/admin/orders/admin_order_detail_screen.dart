@@ -14,8 +14,10 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../models/employee.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
+import '../employees/admin_employees_screen.dart' show adminEmployeesProvider;
 
 // Mirrors OrdersService.NEXT_STATUS on the backend — used only to decide
 // which action buttons to show; the backend re-validates the transition
@@ -50,6 +52,47 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
   Future<void> _updateStatus(String status) async {
     try {
       await ref.read(ordersApiProvider).updateStatus(widget.orderId, status);
+      ref.invalidate(_adminOrderProvider(widget.orderId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+      }
+    }
+  }
+
+  Future<void> _pickEmployee(OrderView o) async {
+    final employees = await ref.read(adminEmployeesProvider.future);
+    if (!mounted) return;
+
+    final selected = await showModalBottomSheet<Object?>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Aucun employé (retirer l\'assignation)'),
+              onTap: () => Navigator.pop(ctx, const _NoEmployee()),
+            ),
+            const Divider(height: 1),
+            for (final e in employees)
+              ListTile(
+                leading: const Icon(Icons.badge_outlined),
+                title: Text(e.nom),
+                subtitle: Text(e.phone ?? '-'),
+                selected: e.id == o.employeeId,
+                onTap: () => Navigator.pop(ctx, e),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (selected == null) return;
+
+    try {
+      final employeeId = selected is EmployeeView ? selected.id : null;
+      await ref.read(ordersApiProvider).assignEmployee(o.id, employeeId);
       ref.invalidate(_adminOrderProvider(widget.orderId));
     } catch (e) {
       if (mounted) {
@@ -301,8 +344,18 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                     if (o.transporteurNom != null) _InfoRow(label: 'Transporteur', value: o.transporteurNom!),
                     if (o.destination != null && o.destination!.isNotEmpty) _InfoRow(label: 'Destination', value: o.destination!),
                     if (o.notes != null && o.notes!.isNotEmpty) _InfoRow(label: 'Notes', value: o.notes!),
+                    _InfoRow(label: 'Employé', value: o.employeeNom ?? 'Non assignée'),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _pickEmployee(o),
+                icon: const Icon(Icons.badge_outlined),
+                label: Text(o.employeeNom == null ? 'Assigner un employé' : 'Changer d\'employé'),
               ),
             ),
             const SizedBox(height: 16),
@@ -368,6 +421,10 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
       ),
     );
   }
+}
+
+class _NoEmployee {
+  const _NoEmployee();
 }
 
 class _InfoRow extends StatelessWidget {

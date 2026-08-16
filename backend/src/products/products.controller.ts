@@ -28,11 +28,27 @@ export class ProductsController {
     return this.productsService.findAllForAdmin(categoryId, sortBy);
   }
 
-  // Must come before ':id' so "trash" isn't swallowed as an id param.
+  // Must come before ':id' so "trash"/"staff" aren't swallowed as an id param.
   @Roles('ADMIN')
   @Get('trash')
   findTrash() {
     return this.productsService.findTrash();
+  }
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+  // Same restriction as the client: never prixAchat/marge. Sees real stock
+  // (needed to prepare/sell) and the normal price — no per-client pricing.
+
+  @Roles('EMPLOYEE')
+  @Get('staff')
+  findAllEmployee() {
+    return this.productsService.findAllForEmployee();
+  }
+
+  @Roles('EMPLOYEE')
+  @Get('staff/:id')
+  findOneEmployee(@Param('id') id: string) {
+    return this.productsService.findOneForEmployee(id);
   }
 
   @Roles('ADMIN')

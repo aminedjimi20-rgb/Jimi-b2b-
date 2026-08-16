@@ -10,6 +10,7 @@ import 'features/admin/admin_shell.dart';
 import 'features/auth/login_screen.dart';
 import 'features/client/client_shell.dart';
 import 'features/client/orders/client_orders_screen.dart';
+import 'features/employee/employee_shell.dart';
 
 /// App root — the ONLY place that decides which shell to show, based on
 /// AuthController's state. Role-based navigation is a UX convenience:
@@ -64,6 +65,7 @@ class _JimiAppState extends ConsumerState<JimiApp> {
         AuthUnauthenticated() => const LoginScreen(),
         AuthAuthenticated(role: UserRole.admin) => const AdminShell(),
         AuthAuthenticated(role: UserRole.client) => const ClientShell(),
+        AuthAuthenticated(role: UserRole.employee) => const EmployeeShell(),
       },
     );
   }

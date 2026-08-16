@@ -5,7 +5,7 @@ import '../api/api_exception.dart';
 import '../providers.dart';
 import 'token_storage.dart';
 
-enum UserRole { admin, client }
+enum UserRole { admin, client, employee }
 
 UserRole? _roleFromString(String? value) {
   switch (value) {
@@ -13,6 +13,8 @@ UserRole? _roleFromString(String? value) {
       return UserRole.admin;
     case 'CLIENT':
       return UserRole.client;
+    case 'EMPLOYEE':
+      return UserRole.employee;
     default:
       return null;
   }

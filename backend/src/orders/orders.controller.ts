@@ -6,6 +6,8 @@ import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AdminCreateOrderDto } from './dto/admin-create-order.dto';
+import { EmployeeCreateOrderDto } from './dto/employee-create-order.dto';
+import { AssignEmployeeDto } from './dto/assign-employee.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Controller('orders')
@@ -36,6 +38,34 @@ export class OrdersController {
   @Post(':id/reorder')
   reorder(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.ordersService.reorder(user.clientId!, id);
+  }
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+  // Never sees another employee's/client's other orders, never sets
+  // remisePourcentage, and can only move an order into PREPARATION/PRETE.
+
+  @Roles('EMPLOYEE')
+  @Post('staff')
+  createForEmployee(@CurrentUser() user: AuthenticatedUser, @Body() dto: EmployeeCreateOrderDto) {
+    return this.ordersService.createForEmployee(user.employeeId!, dto);
+  }
+
+  @Roles('EMPLOYEE')
+  @Get('staff/mine')
+  findMineEmployee(@CurrentUser() user: AuthenticatedUser) {
+    return this.ordersService.findAllForEmployee(user.employeeId!);
+  }
+
+  @Roles('EMPLOYEE')
+  @Get('staff/mine/:id')
+  findMineOneEmployee(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.ordersService.findOneForEmployee(user.employeeId!, id);
+  }
+
+  @Roles('EMPLOYEE')
+  @Patch('staff/:id/status')
+  updateStatusEmployee(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+    return this.ordersService.updateStatusForEmployee(user.employeeId!, id, dto.status);
   }
 
   // ── ADMIN ────────────────────────────────────────────────────────────
@@ -87,6 +117,12 @@ export class OrdersController {
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto.status);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id/assign')
+  assignEmployee(@Param('id') id: string, @Body() dto: AssignEmployeeDto) {
+    return this.ordersService.assignEmployee(id, dto.employeeId ?? null);
   }
 
   // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.

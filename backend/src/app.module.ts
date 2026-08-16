@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SequencesModule } from './common/sequences/sequences.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
+import { EmployeesModule } from './employees/employees.module';
 import { CategoriesModule } from './categories/categories.module';
 import { FabricantsModule } from './fabricants/fabricants.module';
 import { ProductsModule } from './products/products.module';
@@ -36,6 +37,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     NotificationsModule,
     AuthModule,
     ClientsModule,
+    EmployeesModule,
     CategoriesModule,
     FabricantsModule,
     ProductsModule,

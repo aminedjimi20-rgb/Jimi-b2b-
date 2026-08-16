@@ -1,4 +1,4 @@
-import { Client, Order, OrderItem, Prisma, Product, ProductImage, Transporteur } from '@prisma/client';
+import { Client, Employee, Order, OrderItem, Prisma, Product, ProductImage, Transporteur } from '@prisma/client';
 import { clampedRemainder, computePaymentStatus } from '../../common/payment-status.util';
 
 type OrderItemWithProduct = OrderItem & {
@@ -8,6 +8,7 @@ type OrderWithRelations = Order & {
   items: OrderItemWithProduct[];
   client?: Pick<Client, 'raisonSociale' | 'telephone'>;
   transporteur?: Pick<Transporteur, 'nom'> | null;
+  employee?: Pick<Employee, 'nom'> | null;
 };
 
 function mapItems(items: OrderItemWithProduct[]) {
@@ -51,6 +52,8 @@ export function toAdminOrderDTO(order: OrderWithRelations) {
     adresseLivraison: order.adresseLivraison,
     telephoneContact: order.telephoneContact,
     notes: order.notes,
+    employeeId: order.employeeId,
+    employeeNom: order.employee?.nom ?? null,
     items: mapItems(order.items),
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
@@ -73,6 +76,38 @@ export function toClientOrderDTO(order: OrderWithRelations) {
     montantPaye: order.montantPaye,
     montantRestant: clampedRemainder(order.total, order.montantPaye),
     statutPaiement: computePaymentStatus(order.montantPaye, order.total),
+    adresseLivraison: order.adresseLivraison,
+    telephoneContact: order.telephoneContact,
+    notes: order.notes,
+    items: mapItems(order.items),
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+  };
+}
+
+/**
+ * Employee view — enough to prepare/deliver an assigned or self-created
+ * order (client identity, items, totals). Deliberately omits
+ * remisePourcentage: applying a discount stays an Admin-only decision, an
+ * employee never sees or controls it, mirroring the client's own DTO.
+ */
+export function toEmployeeOrderDTO(order: OrderWithRelations) {
+  return {
+    id: order.id,
+    reference: order.reference,
+    nom: order.nom,
+    status: order.status,
+    paymentMethod: order.paymentMethod,
+    sousTotal: computeSousTotal(order.items),
+    fraisLivraison: order.fraisLivraison,
+    transporteurNom: order.transporteur?.nom ?? null,
+    destination: order.destination,
+    total: order.total,
+    montantPaye: order.montantPaye,
+    montantRestant: clampedRemainder(order.total, order.montantPaye),
+    statutPaiement: computePaymentStatus(order.montantPaye, order.total),
+    clientNom: order.client?.raisonSociale,
+    clientTelephone: order.client?.telephone,
     adresseLivraison: order.adresseLivraison,
     telephoneContact: order.telephoneContact,
     notes: order.notes,

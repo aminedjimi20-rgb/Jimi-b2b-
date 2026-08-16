@@ -7,6 +7,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/category.dart';
 import '../../../models/client.dart';
+import '../../../models/employee.dart';
 import '../../../models/fabricant.dart';
 import '../../../models/order.dart';
 import '../../../models/product.dart';
@@ -21,6 +22,7 @@ final _categoriesTrashProvider = FutureProvider.autoDispose<List<Category>>((ref
 final _ordersTrashProvider = FutureProvider.autoDispose<List<OrderView>>((ref) => ref.watch(ordersApiProvider).trash());
 final _receiptsTrashProvider = FutureProvider.autoDispose<List<StockReceiptView>>((ref) => ref.watch(stockReceiptsApiProvider).trash());
 final _transporteursTrashProvider = FutureProvider.autoDispose<List<Transporteur>>((ref) => ref.watch(transporteursApiProvider).trash());
+final _employeesTrashProvider = FutureProvider.autoDispose<List<EmployeeView>>((ref) => ref.watch(employeesApiProvider).trash());
 
 /// Corbeille — items moved here by "Supprimer" across the app can be
 /// restored or erased for good, one tab per entity type.
@@ -30,7 +32,7 @@ class AdminTrashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 7,
+      length: 8,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Corbeille'),
@@ -44,6 +46,7 @@ class AdminTrashScreen extends StatelessWidget {
               Tab(text: 'Commandes'),
               Tab(text: 'Bons réception'),
               Tab(text: 'Transporteurs'),
+              Tab(text: 'Employés'),
             ],
           ),
         ),
@@ -118,6 +121,16 @@ class AdminTrashScreen extends StatelessWidget {
               onPermanentDelete: (ref, id) => ref.read(transporteursApiProvider).permanentDelete(id),
               entityLabel: 'ce transporteur',
               emptyText: 'Corbeille des transporteurs vide.',
+            ),
+            _TrashList<EmployeeView>(
+              provider: _employeesTrashProvider,
+              idOf: (e) => e.id,
+              titleOf: (e) => e.nom,
+              subtitleOf: (e) => e.phone ?? '-',
+              onRestore: (ref, id) => ref.read(employeesApiProvider).restore(id),
+              onPermanentDelete: (ref, id) => ref.read(employeesApiProvider).permanentDelete(id),
+              entityLabel: 'cet employé',
+              emptyText: 'Corbeille des employés vide.',
             ),
           ],
         ),

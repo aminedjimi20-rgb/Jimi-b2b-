@@ -106,6 +106,8 @@ class OrderView {
     required this.adresseLivraison,
     required this.telephoneContact,
     this.notes,
+    this.employeeId,
+    this.employeeNom,
     required this.total,
     required this.items,
     required this.createdAt,
@@ -131,6 +133,8 @@ class OrderView {
   final String adresseLivraison;
   final String telephoneContact;
   final String? notes;
+  final String? employeeId;
+  final String? employeeNom;
   final double total;
   final List<OrderItemView> items;
   final DateTime createdAt;
@@ -156,6 +160,8 @@ class OrderView {
         adresseLivraison: json['adresseLivraison'] as String,
         telephoneContact: json['telephoneContact'] as String,
         notes: json['notes'] as String?,
+        employeeId: json['employeeId'] as String?,
+        employeeNom: json['employeeNom'] as String?,
         total: parseDecimal(json['total']),
         items: (json['items'] as List<dynamic>? ?? []).map((e) => OrderItemView.fromJson(e as Map<String, dynamic>)).toList(),
         createdAt: parseDateOrNull(json['createdAt']) ?? DateTime.now(),

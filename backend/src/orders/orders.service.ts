@@ -7,7 +7,7 @@ import { SequencesService } from '../common/sequences/sequences.service';
 import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatusValue } from './dto/update-order-status.dto';
-import { toAdminOrderDTO, toClientOrderDTO } from './dto/order-response.dto';
+import { toAdminOrderDTO, toClientOrderDTO, toEmployeeOrderDTO } from './dto/order-response.dto';
 
 const ORDER_INCLUDE = {
   items: {
@@ -15,6 +15,7 @@ const ORDER_INCLUDE = {
   },
   client: { select: { raisonSociale: true, telephone: true } },
   transporteur: { select: { nom: true } },
+  employee: { select: { nom: true } },
 } as const;
 
 // Allowed forward transitions. ANNULEE is reachable from any state before EXPEDIEE.
@@ -45,7 +46,13 @@ export class OrdersService {
   async createForClient(
     clientId: string,
     dto: CreateOrderDto,
-    options?: { remisePourcentage?: number; fraisLivraison?: number; transporteurId?: string; destination?: string },
+    options?: {
+      remisePourcentage?: number;
+      fraisLivraison?: number;
+      transporteurId?: string;
+      destination?: string;
+      employeeId?: string;
+    },
   ) {
     const order = await this.prisma.$transaction(async (tx) => {
       const client = await tx.client.findUnique({ where: { id: clientId } });
@@ -101,6 +108,7 @@ export class OrdersService {
           fraisLivraison,
           transporteurId: options?.transporteurId,
           destination: options?.destination,
+          employeeId: options?.employeeId,
           items: { create: itemsData },
         },
         include: ORDER_INCLUDE,
@@ -134,6 +142,51 @@ export class OrdersService {
     await this.checkLowStock(order.items.map((i) => i.productId));
 
     return toClientOrderDTO(order);
+  }
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  /** Counter sale placed by an Employee — auto-assigned to them, no remisePourcentage (Admin-only). */
+  async createForEmployee(employeeId: string, dto: { clientId: string; fraisLivraison?: number; transporteurId?: string; destination?: string } & CreateOrderDto) {
+    const { clientId, fraisLivraison, transporteurId, destination, ...orderDto } = dto;
+    const created = await this.createForClient(clientId, orderDto, { fraisLivraison, transporteurId, destination, employeeId });
+    return this.findOneForEmployee(employeeId, created.id);
+  }
+
+  async findAllForEmployee(employeeId: string) {
+    const orders = await this.prisma.order.findMany({
+      where: { employeeId, deletedAt: null },
+      include: ORDER_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+    return orders.map(toEmployeeOrderDTO);
+  }
+
+  async findOneForEmployee(employeeId: string, id: string) {
+    const order = await this.prisma.order.findFirst({ where: { id, employeeId, deletedAt: null }, include: ORDER_INCLUDE });
+    if (!order) throw new NotFoundException('Commande introuvable.');
+    return toEmployeeOrderDTO(order);
+  }
+
+  /** An employee only prepares — moving to PREPARATION/PRETE. Everything else (confirm, cancel, ship) stays Admin-only. */
+  async updateStatusForEmployee(employeeId: string, orderId: string, nextStatus: OrderStatusValue) {
+    const EMPLOYEE_ALLOWED_STATUSES: OrderStatus[] = ['PREPARATION', 'PRETE'];
+    if (!EMPLOYEE_ALLOWED_STATUSES.includes(nextStatus as OrderStatus)) {
+      throw new ForbiddenException("Un employé ne peut mettre une commande qu'en préparation ou prête.");
+    }
+    const order = await this.prisma.order.findFirst({ where: { id: orderId, employeeId, deletedAt: null } });
+    if (!order) throw new NotFoundException('Commande introuvable.');
+
+    await this.updateStatus(orderId, nextStatus);
+    return this.findOneForEmployee(employeeId, orderId);
+  }
+
+  /** ADMIN assigns (or clears, with employeeId=null) which employee prepares this order. */
+  async assignEmployee(orderId: string, employeeId: string | null) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
+    await this.prisma.order.update({ where: { id: orderId }, data: { employeeId } });
+    return this.findOneForAdmin(orderId);
   }
 
   async findAllForClient(clientId: string) {

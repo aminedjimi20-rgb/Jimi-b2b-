@@ -47,13 +47,31 @@ model User {
   updatedAt    DateTime   @updatedAt
 
   client        Client?
+  employee      Employee?
   refreshTokens RefreshToken[]
   notifications Notification[]
   deviceTokens  DeviceToken[]
-  permissions   UserPermission[] // extension future (EMPLOYEE)
+  permissions   UserPermission[] // extension future (permissions fines par employé)
   deliveries    Delivery[]       @relation("DeliveryPerson") // extension future
 
   @@index([role])
+}
+
+// Compte employé — accès restreint : jamais prixAchat/marge, jamais les
+// commandes/infos des autres clients. Prépare des commandes assignées ou en
+// crée au comptoir (qui restent EN_ATTENTE tant que l'Admin ne les confirme pas).
+model Employee {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  nom       String
+  telephone String?
+  deletedAt DateTime? // corbeille — null = actif
+  createdAt DateTime  @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([deletedAt])
 }
 
 model RefreshToken {
@@ -383,6 +401,7 @@ model Order {
   fraisLivraison    Decimal       @default(0) @db.Decimal(12, 2) // ADMIN uniquement, affiché séparément dans le bon
   transporteurId    String? // optionnel — voir Transporteur/DeliveryRate
   destination       String? // ville/zone de livraison, pour l'historique et le tarif
+  employeeId        String? // employé assigné pour la préparation — voir Employee
   montantPaye       Decimal       @default(0) @db.Decimal(12, 2) // somme des Payment liés — statut dérivé (voir order-response.dto)
   deletedAt         DateTime? // corbeille — null = actif
   notes             String?
@@ -391,6 +410,7 @@ model Order {
 
   client       Client          @relation(fields: [clientId], references: [id])
   transporteur Transporteur?   @relation(fields: [transporteurId], references: [id])
+  employee     Employee?       @relation(fields: [employeeId], references: [id])
   items        OrderItem[]
   stockMoves   StockMovement[]
   payments     Payment[]

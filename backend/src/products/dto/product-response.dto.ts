@@ -110,5 +110,35 @@ export function toClientProductDTO(
   };
 }
 
+/**
+ * Allow-list mapper — Employee view (preparing/counter-selling orders).
+ * Sees real stock (needed to prepare/sell) and the normal sale price, but
+ * NEVER prixAchat/marge — that stays Admin-only, same rule as the client.
+ */
+export function toEmployeeProductDTO(product: ProductWithRelations, derived: ProductDerivedInfo) {
+  return {
+    id: product.id,
+    nom: product.nom,
+    code: product.code,
+    categoryId: product.categoryId,
+    fabricantNom: product.fabricant?.nom ?? null,
+    description: product.description,
+    taille: product.taille,
+    couleur: product.couleur,
+    marque: product.marque,
+    prixVente: product.prixVente,
+    stockReel: product.stockReel,
+    stockMinimum: product.stockMinimum,
+    minCommande: product.minCommande,
+    uniteParCarton: product.uniteParCarton,
+    estNouveau: product.estNouveau,
+    estSaisonnier: product.estSaisonnier,
+    estPromo: derived.estPromo,
+    images: product.images.map((img) => ({ id: img.id, url: img.url, isPrimary: img.isPrimary })),
+    priceTiers: product.priceTiers.map((t) => ({ id: t.id, qteMin: t.qteMin, qteMax: t.qteMax, prix: t.prix })),
+  };
+}
+
 export type AdminProductDTO = ReturnType<typeof toAdminProductDTO>;
 export type ClientProductDTO = ReturnType<typeof toClientProductDTO>;
+export type EmployeeProductDTO = ReturnType<typeof toEmployeeProductDTO>;

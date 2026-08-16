@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../models/employee_product.dart';
 import '../models/product.dart';
 
 class ProductsApi {
@@ -45,6 +46,13 @@ class ProductsApi {
 
   Future<void> setCustomPrice(String productId, String clientId, double prix) =>
       _dio.post('/products/$productId/custom-price', data: {'clientId': clientId, 'prix': prix});
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  Future<List<EmployeeProduct>> listStaff() async {
+    final res = await _dio.get('/products/staff');
+    return (res.data as List<dynamic>).map((e) => EmployeeProduct.fromJson(e as Map<String, dynamic>)).toList();
+  }
 
   // ── CLIENT ───────────────────────────────────────────────────────────
 

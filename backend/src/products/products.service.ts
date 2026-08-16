@@ -8,7 +8,7 @@ import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchCatalogDto } from './dto/search-catalog.dto';
-import { ProductDerivedInfo, toAdminProductDTO, toClientProductDTO } from './dto/product-response.dto';
+import { ProductDerivedInfo, toAdminProductDTO, toClientProductDTO, toEmployeeProductDTO } from './dto/product-response.dto';
 import { computeImageHash, hammingDistance } from './image-hash.util';
 import { computeActivePromoInfo, productHasActivePromo } from '../promotions/active-promotions.util';
 
@@ -180,6 +180,23 @@ export class ProductsService {
     const product = await this.prisma.product.findUnique({ where: { id }, include: PRODUCT_INCLUDE });
     if (!product || product.deletedAt) throw new NotFoundException('Produit introuvable.');
     return toAdminProductDTO(product, await this.computeDerivedInfo(id));
+  }
+
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  async findAllForEmployee() {
+    const products = await this.prisma.product.findMany({
+      where: { deletedAt: null, actif: true },
+      include: PRODUCT_INCLUDE,
+      orderBy: { nom: 'asc' },
+    });
+    return Promise.all(products.map(async (p) => toEmployeeProductDTO(p, await this.computeDerivedInfo(p.id))));
+  }
+
+  async findOneForEmployee(id: string) {
+    const product = await this.prisma.product.findUnique({ where: { id }, include: PRODUCT_INCLUDE });
+    if (!product || product.deletedAt || !product.actif) throw new NotFoundException('Produit introuvable.');
+    return toEmployeeProductDTO(product, await this.computeDerivedInfo(id));
   }
 
   private sortProducts<T extends { product: { nom: string; stockReel: number; prixVente: Prisma.Decimal; estNouveau: boolean; estSaisonnier: boolean }; dto: { dernierChangementPrix: Date | null; dernierArrivage: Date | null } }>(
