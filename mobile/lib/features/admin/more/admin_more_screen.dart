@@ -9,6 +9,7 @@ import '../employees/admin_employees_screen.dart';
 import '../fabricants/admin_fabricants_screen.dart';
 import '../price_categories/admin_price_categories_screen.dart';
 import '../product_requests/admin_product_requests_screen.dart';
+import '../products/admin_image_search_screen.dart';
 import '../promotions/admin_promotions_screen.dart';
 import '../stock/admin_stock_receipts_screen.dart';
 import '../stock/admin_stock_screen.dart';
@@ -67,6 +68,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Demandes de produits'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminProductRequestsScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.camera_alt_outlined),
+            title: const Text('Recherche générale par photo'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminImageSearchScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.sell_outlined),

@@ -47,6 +47,20 @@ class ProductsApi {
   Future<void> setCustomPrice(String productId, String clientId, double prix) =>
       _dio.post('/products/$productId/custom-price', data: {'clientId': clientId, 'prix': prix});
 
+  /// Photo search for internal use (checking a product exists before adding
+  /// it to a bon de réception, browsing the product list by photo, or a
+  /// general search) — full admin shape (prixAchat/marge included).
+  Future<List<AdminImageSearchResult>> searchByImageAdmin(String filePath) async {
+    final formData = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final res = await _dio.post('/products/search-image', data: formData);
+    return (res.data as List<dynamic>)
+        .map((e) => AdminImageSearchResult(
+              product: AdminProduct.fromJson(e as Map<String, dynamic>),
+              matchScore: e['matchScore'] as int,
+            ))
+        .toList();
+  }
+
   // ── EMPLOYEE ─────────────────────────────────────────────────────────
 
   Future<List<EmployeeProduct>> listStaff() async {
@@ -95,5 +109,11 @@ class ProductsApi {
 class ImageSearchResult {
   ImageSearchResult({required this.product, required this.matchScore});
   final ClientProduct product;
+  final int matchScore;
+}
+
+class AdminImageSearchResult {
+  AdminImageSearchResult({required this.product, required this.matchScore});
+  final AdminProduct product;
   final int matchScore;
 }

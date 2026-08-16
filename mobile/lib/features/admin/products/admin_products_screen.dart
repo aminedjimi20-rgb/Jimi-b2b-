@@ -6,6 +6,7 @@ import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../categories/admin_categories_screen.dart';
 import 'admin_category_products_screen.dart';
+import 'admin_image_search_screen.dart';
 import 'admin_product_detail_screen.dart';
 import 'admin_product_form_screen.dart';
 import 'admin_product_sort.dart';
@@ -70,6 +71,11 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
       appBar: AppBar(
         title: const Text('Produits'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.camera_alt_outlined),
+            tooltip: 'Rechercher par photo',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminImageSearchScreen())),
+          ),
           ProductSortMenuButton(value: sortBy, onChanged: (v) => ref.read(_productSortProvider.notifier).state = v),
         ],
         bottom: PreferredSize(

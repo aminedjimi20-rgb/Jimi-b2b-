@@ -28,11 +28,25 @@ export class ProductsController {
     return this.productsService.findAllForAdmin(categoryId, sortBy);
   }
 
-  // Must come before ':id' so "trash"/"staff" aren't swallowed as an id param.
+  // Must come before ':id' so "trash"/"staff"/"search-image" aren't swallowed as an id param.
   @Roles('ADMIN')
   @Get('trash')
   findTrash() {
     return this.productsService.findTrash();
+  }
+
+  /**
+   * Photo search for internal use — checking whether a product already
+   * exists before adding it to a bon de réception, browsing the product
+   * list by photo, or a general "what is this" search. Full admin shape
+   * (prixAchat/marge included), so this must stay Admin-only.
+   */
+  @Roles('ADMIN')
+  @Post('search-image')
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } }))
+  searchByImageAdmin(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Aucune image reçue.');
+    return this.productsService.searchByImageForAdmin(file.buffer);
   }
 
   // ── EMPLOYEE ─────────────────────────────────────────────────────────

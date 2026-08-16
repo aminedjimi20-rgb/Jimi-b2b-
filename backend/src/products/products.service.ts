@@ -359,25 +359,7 @@ export class ProductsService {
 
   /** Client uploads a photo of a product they're holding — matched against stored product photo hashes. */
   async searchByImage(clientId: string, buffer: Buffer) {
-    const queryHash = await computeImageHash(buffer);
-
-    const images = await this.prisma.productImage.findMany({
-      where: { hash: { not: null }, product: { actif: true, deletedAt: null } },
-      select: { hash: true, productId: true },
-    });
-
-    const bestDistanceByProduct = new Map<string, number>();
-    for (const img of images) {
-      const distance = hammingDistance(queryHash, img.hash!);
-      const current = bestDistanceByProduct.get(img.productId);
-      if (current === undefined || distance < current) bestDistanceByProduct.set(img.productId, distance);
-    }
-
-    const matches = [...bestDistanceByProduct.entries()]
-      .filter(([, distance]) => distance <= IMAGE_SEARCH_MAX_DISTANCE)
-      .sort((a, b) => a[1] - b[1])
-      .slice(0, 10);
-
+    const matches = await this.matchProductsByImage(buffer);
     if (matches.length === 0) return [];
 
     const products = await this.prisma.product.findMany({
@@ -401,6 +383,61 @@ export class ProductsService {
     );
 
     return results.sort((a, b) => b.matchScore - a.matchScore);
+  }
+
+  /**
+   * Admin/staff variant of searchByImage — same perceptual-hash matching,
+   * but the full admin product shape (prixAchat/marge included) since this
+   * is used from internal tools: checking whether a product already exists
+   * before adding it to a bon de réception, browsing the product list by
+   * photo, or a general "what is this" search. Never exposed to Client.
+   */
+  async searchByImageForAdmin(buffer: Buffer) {
+    const matches = await this.matchProductsByImage(buffer);
+    if (matches.length === 0) return [];
+
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: matches.map(([productId]) => productId) } },
+      include: PRODUCT_INCLUDE,
+    });
+
+    const distanceByProductId = new Map(matches);
+    const promoInfo = await computeActivePromoInfo(this.prisma);
+    const results = products.map((product) => {
+      const distance = distanceByProductId.get(product.id)!;
+      return {
+        ...toAdminProductDTO(product, {
+          dernierChangementPrix: null,
+          dernierArrivage: null,
+          estPromo: productHasActivePromo(promoInfo, product.id),
+        }),
+        matchScore: Math.round((1 - distance / 64) * 100),
+      };
+    });
+
+    return results.sort((a, b) => b.matchScore - a.matchScore);
+  }
+
+  /** Shared core of searchByImage/searchByImageForAdmin — hashes the query photo and returns the best-matching productIds, closest first. */
+  private async matchProductsByImage(buffer: Buffer) {
+    const queryHash = await computeImageHash(buffer);
+
+    const images = await this.prisma.productImage.findMany({
+      where: { hash: { not: null }, product: { actif: true, deletedAt: null } },
+      select: { hash: true, productId: true },
+    });
+
+    const bestDistanceByProduct = new Map<string, number>();
+    for (const img of images) {
+      const distance = hammingDistance(queryHash, img.hash!);
+      const current = bestDistanceByProduct.get(img.productId);
+      if (current === undefined || distance < current) bestDistanceByProduct.set(img.productId, distance);
+    }
+
+    return [...bestDistanceByProduct.entries()]
+      .filter(([, distance]) => distance <= IMAGE_SEARCH_MAX_DISTANCE)
+      .sort((a, b) => a[1] - b[1])
+      .slice(0, 10);
   }
 
   /**

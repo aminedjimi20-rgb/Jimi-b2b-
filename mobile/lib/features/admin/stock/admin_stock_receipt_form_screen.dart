@@ -9,6 +9,7 @@ import '../../../models/product.dart';
 import '../../../services/stock_receipts_api.dart';
 import '../../../services/service_providers.dart';
 import '../fabricants/fabricant_dialog.dart';
+import '../products/admin_image_search_screen.dart';
 import '../products/admin_product_form_screen.dart';
 import '../products/admin_product_tile.dart';
 import 'admin_stock_receipt_detail_screen.dart';
@@ -80,6 +81,17 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
       context: context,
       isScrollControlled: true,
       builder: (ctx) => _ProductPickerSheet(products: products),
+    );
+    if (selected == null) return;
+    setState(() => _lines.add(_ReceiptLine(selected)));
+  }
+
+  /// Photo search before adding an article — helps confirm the product
+  /// isn't already in the catalog under a different name/code, avoiding
+  /// an accidental duplicate.
+  Future<void> _addExistingArticleByPhoto() async {
+    final selected = await Navigator.of(context).push<AdminProduct>(
+      MaterialPageRoute(builder: (_) => const AdminImageSearchScreen(selectMode: true)),
     );
     if (selected == null) return;
     setState(() => _lines.add(_ReceiptLine(selected)));
@@ -184,6 +196,11 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
                 spacing: 4,
                 children: [
                   TextButton.icon(onPressed: _addExistingArticle, icon: const Icon(Icons.add), label: const Text('Existant')),
+                  TextButton.icon(
+                    onPressed: _addExistingArticleByPhoto,
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: const Text('Par photo'),
+                  ),
                   TextButton.icon(onPressed: _addNewArticle, icon: const Icon(Icons.add_box_outlined), label: const Text('Nouvel article')),
                 ],
               ),
