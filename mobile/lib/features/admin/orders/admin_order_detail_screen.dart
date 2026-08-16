@@ -20,6 +20,7 @@ import '../../../models/employee.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
 import '../employees/admin_employees_screen.dart' show adminEmployeesProvider;
+import '../invoices/admin_invoice_detail_screen.dart';
 
 // Mirrors OrdersService.NEXT_STATUS on the backend — used only to decide
 // which action buttons to show; the backend re-validates the transition
@@ -48,9 +49,26 @@ class AdminOrderDetailScreen extends ConsumerStatefulWidget {
 
 class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen> {
   bool _generating = false;
+  bool _generatingInvoice = false;
   bool _recordingPayment = false;
   bool _deleting = false;
   bool _reactivating = false;
+
+  Future<void> _generateInvoice(OrderView o) async {
+    setState(() => _generatingInvoice = true);
+    try {
+      final invoice = await ref.read(invoicesApiProvider).generateFromOrder(o.id);
+      if (mounted) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminInvoiceDetailScreen(invoiceId: invoice.id)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur lors de la génération de la facture.')));
+      }
+    } finally {
+      if (mounted) setState(() => _generatingInvoice = false);
+    }
+  }
 
   Future<void> _updateStatus(String status) async {
     try {
@@ -296,6 +314,14 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
             data: (o) => Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (o.status != 'EN_ATTENTE' && o.status != 'ANNULEE')
+                  IconButton(
+                    icon: _generatingInvoice
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.receipt_long_outlined),
+                    tooltip: 'Générer la facture',
+                    onPressed: _generatingInvoice ? null : () => _generateInvoice(o),
+                  ),
                 IconButton(
                   icon: _generating
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))

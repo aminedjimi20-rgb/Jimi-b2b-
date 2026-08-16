@@ -7,6 +7,7 @@ import 'clients_api.dart';
 import 'employees_api.dart';
 import 'fabricants_api.dart';
 import 'favorites_api.dart';
+import 'invoices_api.dart';
 import 'notifications_api.dart';
 import 'orders_api.dart';
 import 'payments_api.dart';
@@ -25,6 +26,7 @@ final categoriesApiProvider = Provider((ref) => CategoriesApi(ref.watch(dioProvi
 final fabricantsApiProvider = Provider((ref) => FabricantsApi(ref.watch(dioProvider)));
 final productsApiProvider = Provider((ref) => ProductsApi(ref.watch(dioProvider)));
 final ordersApiProvider = Provider((ref) => OrdersApi(ref.watch(dioProvider)));
+final invoicesApiProvider = Provider((ref) => InvoicesApi(ref.watch(dioProvider)));
 final clientsApiProvider = Provider((ref) => ClientsApi(ref.watch(dioProvider)));
 final employeesApiProvider = Provider((ref) => EmployeesApi(ref.watch(dioProvider)));
 final stockApiProvider = Provider((ref) => StockApi(ref.watch(dioProvider)));

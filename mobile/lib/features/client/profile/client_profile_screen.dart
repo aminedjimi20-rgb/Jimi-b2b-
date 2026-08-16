@@ -10,6 +10,7 @@ import '../../../services/service_providers.dart';
 import '../../auth/change_password_screen.dart';
 import '../../shared/notifications_screen.dart';
 import '../favorites/client_favorites_screen.dart';
+import '../invoices/client_invoices_screen.dart';
 import '../orders/client_orders_screen.dart';
 import '../product_requests/client_my_requests_screen.dart';
 
@@ -76,6 +77,12 @@ class ClientProfileScreen extends ConsumerWidget {
                     title: const Text('Mes favoris'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClientFavoritesScreen())),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.receipt_long_outlined),
+                    title: const Text('Mes factures'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClientInvoicesScreen())),
                   ),
                   ListTile(
                     leading: const Icon(Icons.add_a_photo_outlined),

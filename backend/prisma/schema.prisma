@@ -143,6 +143,7 @@ model Client {
   promotions      PromotionClient[]
   payments        Payment[]
   productRequests ProductRequest[]
+  invoices        Invoice[]
 
   @@index([raisonSociale])
   @@index([deletedAt])
@@ -368,6 +369,9 @@ model PromotionClient {
 model Transporteur {
   id        String    @id @default(cuid())
   nom       String
+  chauffeur String? // nom du chauffeur habituel
+  vehicule  String? // ex: "Camion 10T", immatriculation
+  tonnage   Decimal?  @db.Decimal(8, 2) // capacité de charge en tonnes
   deletedAt DateTime? // corbeille — null = actif
   createdAt DateTime  @default(now())
 
@@ -442,6 +446,7 @@ model Order {
   stockMoves   StockMovement[]
   payments     Payment[]
   delivery     Delivery?
+  invoice      Invoice?
 
   @@index([clientId])
   @@index([status])
@@ -545,6 +550,22 @@ enum PaymentStatus {
 // orderId optional) or money OUT to a Fabricant (fabricantId set,
 // stockReceiptId optional). Exactly one of clientId/fabricantId is set,
 // enforced in PaymentsService (not expressible as a Prisma-level constraint).
+model Invoice {
+  id        String    @id @default(cuid())
+  reference String    @unique // ex: FAC-2026-0001
+  orderId   String    @unique // une facture = une commande confirmée, formalisée pour la comptabilité
+  clientId  String // dénormalisé depuis order.clientId — filtrage/liste sans jointure
+  total     Decimal   @db.Decimal(12, 2) // instantané de order.total au moment de la génération
+  deletedAt DateTime? // corbeille — null = actif
+  createdAt DateTime  @default(now())
+
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@index([clientId])
+  @@index([deletedAt])
+}
+
 model Payment {
   id             String        @id @default(cuid())
   clientId       String?

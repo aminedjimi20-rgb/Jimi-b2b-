@@ -9,6 +9,7 @@ import '../../../models/category.dart';
 import '../../../models/client.dart';
 import '../../../models/employee.dart';
 import '../../../models/fabricant.dart';
+import '../../../models/invoice.dart';
 import '../../../models/order.dart';
 import '../../../models/product.dart';
 import '../../../models/product_request.dart';
@@ -26,6 +27,7 @@ final _transporteursTrashProvider = FutureProvider.autoDispose<List<Transporteur
 final _employeesTrashProvider = FutureProvider.autoDispose<List<EmployeeView>>((ref) => ref.watch(employeesApiProvider).trash());
 final _productRequestsTrashProvider =
     FutureProvider.autoDispose<List<ProductRequestView>>((ref) => ref.watch(productRequestsApiProvider).trash());
+final _invoicesTrashProvider = FutureProvider.autoDispose<List<InvoiceView>>((ref) => ref.watch(invoicesApiProvider).trash());
 
 /// Corbeille — items moved here by "Supprimer" across the app can be
 /// restored or erased for good, one tab per entity type.
@@ -35,7 +37,7 @@ class AdminTrashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 9,
+      length: 10,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Corbeille'),
@@ -51,6 +53,7 @@ class AdminTrashScreen extends StatelessWidget {
               Tab(text: 'Transporteurs'),
               Tab(text: 'Employés'),
               Tab(text: 'Demandes produits'),
+              Tab(text: 'Factures'),
             ],
           ),
         ),
@@ -145,6 +148,16 @@ class AdminTrashScreen extends StatelessWidget {
               onPermanentDelete: (ref, id) => ref.read(productRequestsApiProvider).permanentDelete(id),
               entityLabel: 'cette demande de produit',
               emptyText: 'Corbeille des demandes de produits vide.',
+            ),
+            _TrashList<InvoiceView>(
+              provider: _invoicesTrashProvider,
+              idOf: (i) => i.id,
+              titleOf: (i) => i.reference,
+              subtitleOf: (i) => '${i.order.clientNom ?? '-'} · ${formatMoney(i.total)}',
+              onRestore: (ref, id) => ref.read(invoicesApiProvider).restore(id),
+              onPermanentDelete: (ref, id) => ref.read(invoicesApiProvider).permanentDelete(id),
+              entityLabel: 'cette facture',
+              emptyText: 'Corbeille des factures vide.',
             ),
           ],
         ),

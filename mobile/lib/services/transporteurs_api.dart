@@ -21,6 +21,16 @@ class TransporteursApi {
     return Transporteur.fromJson(res.data as Map<String, dynamic>);
   }
 
+  Future<Transporteur> update(String id, {String? nom, String? chauffeur, String? vehicule, double? tonnage}) async {
+    final res = await _dio.patch('/transporteurs/$id', data: {
+      if (nom != null) 'nom': nom,
+      'chauffeur': chauffeur,
+      'vehicule': vehicule,
+      'tonnage': tonnage,
+    });
+    return Transporteur.fromJson(res.data as Map<String, dynamic>);
+  }
+
   Future<void> setRate(String transporteurId, String destination, double prix) =>
       _dio.post('/transporteurs/$transporteurId/rates', data: {'destination': destination, 'prix': prix});
 

@@ -68,6 +68,7 @@ class _EmployeeCreateOrderScreenState extends ConsumerState<EmployeeCreateOrderS
   String? _error;
   Transporteur? _transporteur;
   String? _destination;
+  bool _livraisonActive = false;
 
   late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
   bool _draftChecked = false;
@@ -144,6 +145,7 @@ class _EmployeeCreateOrderScreenState extends ConsumerState<EmployeeCreateOrderS
       _fraisLivraison.text = data['fraisLivraison'] as String? ?? '';
       _transporteur = transporteur;
       _destination = data['destination'] as String?;
+      _livraisonActive = transporteur != null || (data['destination'] as String?)?.isNotEmpty == true || _fraisLivraison.text.isNotEmpty;
       _pendingDraft = null;
     });
   }
@@ -369,33 +371,50 @@ class _EmployeeCreateOrderScreenState extends ConsumerState<EmployeeCreateOrderS
               ),
             ),
           if (_lines.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _pickTransporteur,
-                    icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                    label: Text(_transporteur?.nom ?? 'Transporteur', overflow: TextOverflow.ellipsis),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _transporteur == null ? null : _pickDestination,
-                    icon: const Icon(Icons.place_outlined, size: 18),
-                    label: Text(_destination ?? 'Destination', overflow: TextOverflow.ellipsis),
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _fraisLivraison,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Frais de livraison (optionnel)', isDense: true),
-              onChanged: (_) => setState(() {}),
+            CheckboxListTile(
+              value: _livraisonActive,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: const Text('Livraison'),
+              onChanged: (v) => setState(() {
+                _livraisonActive = v ?? false;
+                if (!_livraisonActive) {
+                  _transporteur = null;
+                  _destination = null;
+                  _fraisLivraison.clear();
+                }
+              }),
             ),
+            if (_livraisonActive) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _pickTransporteur,
+                      icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                      label: Text(_transporteur?.nom ?? 'Transporteur', overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _transporteur == null ? null : _pickDestination,
+                      icon: const Icon(Icons.place_outlined, size: 18),
+                      label: Text(_destination ?? 'Destination', overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _fraisLivraison,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Frais de livraison (optionnel)', isDense: true),
+                onChanged: (_) => setState(() {}),
+              ),
+            ],
             const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),

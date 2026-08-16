@@ -18,6 +18,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { ProductRequestsModule } from './product-requests/product-requests.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { OrdersModule } from './orders/orders.module';
+import { InvoicesModule } from './invoices/invoices.module';
 import { StockModule } from './stock/stock.module';
 import { StockReceiptsModule } from './stock-receipts/stock-receipts.module';
 import { TransporteursModule } from './transporteurs/transporteurs.module';
@@ -50,6 +51,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     ProductRequestsModule,
     UploadsModule,
     OrdersModule,
+    InvoicesModule,
     StockModule,
     StockReceiptsModule,
     TransporteursModule,

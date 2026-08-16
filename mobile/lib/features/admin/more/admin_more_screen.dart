@@ -9,6 +9,7 @@ import '../categories/admin_categories_screen.dart';
 import '../dashboard/admin_dashboard_screen.dart';
 import '../employees/admin_employees_screen.dart';
 import '../fabricants/admin_fabricants_screen.dart';
+import '../invoices/admin_invoices_screen.dart';
 import '../price_categories/admin_price_categories_screen.dart';
 import '../product_requests/admin_product_requests_screen.dart';
 import '../products/admin_image_search_screen.dart';
@@ -94,6 +95,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Historique des livraisons'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminDeliveryHistoryScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: const Text('Factures'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminInvoicesScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
