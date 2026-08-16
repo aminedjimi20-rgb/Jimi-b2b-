@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/date_grouping.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
+import '../bons_search/admin_bons_search_screen.dart';
 import 'admin_create_order_screen.dart';
 import 'admin_order_detail_screen.dart';
 
@@ -16,16 +18,32 @@ final _adminOrdersProvider = FutureProvider.autoDispose<List<OrderView>>((ref) {
   return ref.watch(ordersApiProvider).listAdmin(status: status);
 });
 
-class AdminOrdersScreen extends ConsumerWidget {
+class AdminOrdersScreen extends ConsumerStatefulWidget {
   const AdminOrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminOrdersScreen> createState() => _AdminOrdersScreenState();
+}
+
+class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
     final orders = ref.watch(_adminOrdersProvider);
     final selectedStatus = ref.watch(_statusFilterProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Commandes')),
+      appBar: AppBar(
+        title: const Text('Commandes'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Recherche globale des bons',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminBonsSearchScreen())),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminCreateOrderScreen()));
@@ -36,6 +54,13 @@ class AdminOrdersScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: TextField(
+              decoration: const InputDecoration(hintText: 'Rechercher par référence, nom, client...', prefixIcon: Icon(Icons.search), isDense: true),
+              onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+            ),
+          ),
           SizedBox(
             height: 48,
             child: ListView(
@@ -58,44 +83,62 @@ class AdminOrdersScreen extends ConsumerWidget {
                 value: orders,
                 onRetry: () => ref.invalidate(_adminOrdersProvider),
                 data: (items) {
-                  if (items.isEmpty) return const Center(child: Text('Aucune commande.'));
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, i) {
-                      final o = items[i];
-                      return Card(
-                        child: ListTile(
-                          title: Text(
-                            o.nom != null && o.nom!.isNotEmpty ? '${o.nom} (${o.reference})' : o.reference,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text('${o.clientNom ?? ''} · ${formatDate(o.createdAt)}'),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(formatMoney(o.total), style: const TextStyle(fontWeight: FontWeight.bold)),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _PaymentBadge(status: o.statutPaiement),
-                                  const SizedBox(width: 4),
-                                  _StatusBadge(status: o.status),
-                                ],
-                              ),
-                            ],
-                          ),
-                          onTap: () async {
-                            await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminOrderDetailScreen(orderId: o.id)));
-                            ref.invalidate(_adminOrdersProvider);
-                          },
+                  final filtered = _query.isEmpty
+                      ? items
+                      : items
+                          .where((o) =>
+                              o.reference.toLowerCase().contains(_query) ||
+                              (o.nom ?? '').toLowerCase().contains(_query) ||
+                              (o.clientNom ?? '').toLowerCase().contains(_query) ||
+                              o.telephoneContact.toLowerCase().contains(_query))
+                          .toList();
+                  if (filtered.isEmpty) {
+                    return Center(child: Text(items.isEmpty ? 'Aucune commande.' : 'Aucun résultat pour "$_query".'));
+                  }
+                  final groups = groupByDateLabel(filtered, (o) => o.createdAt);
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                    children: [
+                      for (final entry in groups.entries) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8, top: 4),
+                          child: Text(entry.key, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[700])),
                         ),
-                      );
-                    },
+                        ...entry.value.map((o) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Card(
+                                child: ListTile(
+                                  title: Text(
+                                    o.nom != null && o.nom!.isNotEmpty ? '${o.nom} (${o.reference})' : o.reference,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text('${o.clientNom ?? ''} · ${formatDate(o.createdAt)}'),
+                                  trailing: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(formatMoney(o.total), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _PaymentBadge(status: o.statutPaiement),
+                                          const SizedBox(width: 4),
+                                          _StatusBadge(status: o.status),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () async {
+                                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminOrderDetailScreen(orderId: o.id)));
+                                    ref.invalidate(_adminOrdersProvider);
+                                  },
+                                ),
+                              ),
+                            )),
+                      ],
+                    ],
                   );
                 },
               ),

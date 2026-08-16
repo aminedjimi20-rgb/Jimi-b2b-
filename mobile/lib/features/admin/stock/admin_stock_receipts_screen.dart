@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/date_grouping.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/stock_receipt.dart';
 import '../../../services/service_providers.dart';
+import '../bons_search/admin_bons_search_screen.dart';
 import 'admin_stock_receipt_detail_screen.dart';
 import 'admin_stock_receipt_form_screen.dart';
 
@@ -21,7 +23,16 @@ class AdminStockReceiptsScreen extends ConsumerWidget {
     final receipts = ref.watch(_stockReceiptsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Réceptions fournisseurs')),
+      appBar: AppBar(
+        title: const Text('Réceptions fournisseurs'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Recherche globale des bons',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminBonsSearchScreen())),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminStockReceiptFormScreen()));
@@ -47,25 +58,32 @@ class AdminStockReceiptsScreen extends ConsumerWidget {
                 ),
               );
             }
-            return ListView.separated(
+            final groups = groupByDateLabel(items, (r) => r.createdAt);
+            return ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, i) {
-                final r = items[i];
-                return Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.inventory_2_outlined),
-                    title: Text(r.reference),
-                    subtitle: Text('${r.fabricantNom} · ${formatDate(r.createdAt)} · ${r.items.length} article${r.items.length == 1 ? '' : 's'}'),
-                    trailing: Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: r.id)));
-                      ref.invalidate(_stockReceiptsProvider);
-                    },
+              children: [
+                for (final entry in groups.entries) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8, top: 4),
+                    child: Text(entry.key, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[700])),
                   ),
-                );
-              },
+                  ...entry.value.map((r) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.inventory_2_outlined),
+                            title: Text(r.reference),
+                            subtitle: Text('${r.fabricantNom} · ${formatDate(r.createdAt)} · ${r.items.length} article${r.items.length == 1 ? '' : 's'}'),
+                            trailing: Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold)),
+                            onTap: () async {
+                              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: r.id)));
+                              ref.invalidate(_stockReceiptsProvider);
+                            },
+                          ),
+                        ),
+                      )),
+                ],
+              ],
             );
           },
         ),
