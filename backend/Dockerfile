@@ -18,6 +18,12 @@ FROM node:22-slim AS runtime
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
+# Every date shown in the app (bons, historique, notifications) must read in
+# Algeria local time — fixing it at the process level means every DateTime
+# formatting call (backend logs, generated PDFs' server-side timestamps, and
+# Node's own Date defaults) is correct without threading a timezone through
+# each call site individually.
+ENV TZ=Africa/Algiers
 
 COPY package.json package-lock.json tsconfig.json ./
 RUN npm ci --omit=dev

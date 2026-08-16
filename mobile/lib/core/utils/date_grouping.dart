@@ -15,7 +15,10 @@ Map<String, List<T>> groupByDateLabel<T>(List<T> items, DateTime Function(T) dat
 
   final groups = <String, List<T>>{};
   for (final item in items) {
-    final d = dateOf(item);
+    // .toLocal() — dateOf(item) is a raw UTC DateTime from the backend;
+    // comparing it against `now` (local) without converting first can
+    // misfile items into the wrong day/week near midnight.
+    final d = dateOf(item).toLocal();
     final day = DateTime(d.year, d.month, d.day);
     final String label;
     if (day == today) {
