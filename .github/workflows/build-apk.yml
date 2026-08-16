@@ -10,7 +10,7 @@ on:
       api_base_url:
         description: "Backend API base URL (e.g. https://api.votre-domaine.com/api)"
         required: false
-        default: "http://10.0.2.2:3000/api"
+        default: "https://jimi-b2b-production.up.railway.app/api"
   push:
     branches: [main, master]
     paths:
@@ -40,7 +40,7 @@ jobs:
       - name: Build release APK
         run: |
           flutter build apk --release \
-            --dart-define=API_BASE_URL="${{ github.event.inputs.api_base_url || 'http://10.0.2.2:3000/api' }}"
+            --dart-define=API_BASE_URL="${{ github.event.inputs.api_base_url || 'https://jimi-b2b-production.up.railway.app/api' }}"
 
       - uses: actions/upload-artifact@v4
         with:
