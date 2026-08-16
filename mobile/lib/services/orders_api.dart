@@ -136,6 +136,38 @@ class OrdersApi {
     return OrderView.fromJson(res.data as Map<String, dynamic>);
   }
 
+  /// Corrects an already-placed order (items/amounts), at any status except ANNULEE.
+  Future<OrderView> adminEdit(
+    String id, {
+    required List<OrderItemInput> items,
+    required String adresseLivraison,
+    required String telephoneContact,
+    String? nom,
+    double? remisePourcentage,
+    double? fraisLivraison,
+    String? transporteurId,
+    String? destination,
+    String? notes,
+  }) async {
+    final res = await _dio.patch('/orders/$id/admin-edit', data: {
+      'items': items.map((e) => e.toJson()).toList(),
+      'adresseLivraison': adresseLivraison,
+      'telephoneContact': telephoneContact,
+      if (nom != null && nom.isNotEmpty) 'nom': nom,
+      if (remisePourcentage != null) 'remisePourcentage': remisePourcentage,
+      if (fraisLivraison != null) 'fraisLivraison': fraisLivraison,
+      if (transporteurId != null) 'transporteurId': transporteurId,
+      if (destination != null && destination.isNotEmpty) 'destination': destination,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+    });
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<List<OrderChangeLogEntry>> getHistory(String id) async {
+    final res = await _dio.get('/orders/$id/history');
+    return (res.data as List<dynamic>).map((e) => OrderChangeLogEntry.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   // ── EMPLOYEE ─────────────────────────────────────────────────────────
 
   /// Counter sale placed by an Employee — auto-assigned to them. No remisePourcentage (Admin-only).

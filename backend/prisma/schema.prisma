@@ -439,14 +439,15 @@ model Order {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  client       Client          @relation(fields: [clientId], references: [id])
-  transporteur Transporteur?   @relation(fields: [transporteurId], references: [id])
-  employee     Employee?       @relation(fields: [employeeId], references: [id])
+  client       Client            @relation(fields: [clientId], references: [id])
+  transporteur Transporteur?     @relation(fields: [transporteurId], references: [id])
+  employee     Employee?         @relation(fields: [employeeId], references: [id])
   items        OrderItem[]
   stockMoves   StockMovement[]
   payments     Payment[]
   delivery     Delivery?
   invoice      Invoice?
+  changeLogs   OrderChangeLog[]
 
   @@index([clientId])
   @@index([status])
@@ -462,6 +463,22 @@ model OrderItem {
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
+
+// Une entrée par modification Admin d'une commande déjà confirmée/prête/
+// livrée — résumé lisible du changement (articles/montants). Cascade avec
+// la commande : si celle-ci est un jour définitivement supprimée, il n'y a
+// plus rien à auditer (contrairement à Payment, qui reste une preuve
+// financière indépendante).
+model OrderChangeLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  summary   String
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
 }

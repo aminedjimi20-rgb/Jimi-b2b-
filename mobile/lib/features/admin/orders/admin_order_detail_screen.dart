@@ -21,6 +21,8 @@ import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
 import '../employees/admin_employees_screen.dart' show adminEmployeesProvider;
 import '../invoices/admin_invoice_detail_screen.dart';
+import 'admin_order_edit_screen.dart';
+import 'admin_order_history_screen.dart';
 
 // Mirrors OrdersService.NEXT_STATUS on the backend — used only to decide
 // which action buttons to show; the backend re-validates the transition
@@ -335,6 +337,22 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                       : const Icon(Icons.delete_outline),
                   tooltip: 'Supprimer',
                   onPressed: _deleting ? null : () => _confirmDelete(o),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) async {
+                    if (value == 'edit') {
+                      final changed = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => AdminOrderEditScreen(order: o)));
+                      if (changed == true) ref.invalidate(_adminOrderProvider(widget.orderId));
+                    } else if (value == 'history') {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) => AdminOrderHistoryScreen(orderId: o.id, reference: o.reference)));
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (o.status != 'ANNULEE')
+                      const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Icons.edit_outlined), title: Text('Modifier'))),
+                    const PopupMenuItem(value: 'history', child: ListTile(leading: Icon(Icons.history), title: Text('Historique'))),
+                  ],
                 ),
               ],
             ),

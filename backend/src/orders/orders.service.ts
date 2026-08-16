@@ -6,6 +6,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { SequencesService } from '../common/sequences/sequences.service';
 import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { AdminEditOrderDto } from './dto/admin-edit-order.dto';
 import { OrderStatusValue } from './dto/update-order-status.dto';
 import { toAdminOrderDTO, toClientOrderDTO, toEmployeeOrderDTO } from './dto/order-response.dto';
 
@@ -339,6 +340,129 @@ export class OrdersService {
     });
 
     return this.findOneForAdmin(id);
+  }
+
+  /**
+   * Admin correction of an already-placed order — items and amounts, at
+   * ANY status except ANNULEE (reactivate first). Recomputes stock by the
+   * per-product delta between old and new quantities (works whether the
+   * order already shipped or not — the point is to make stock match what
+   * actually happened), recomputes the CREDIT balance by the total delta,
+   * and appends a human-readable entry to OrderChangeLog so every edit is
+   * traceable, mirroring how bons already track their status history.
+   */
+  async adminUpdateItems(id: string, dto: AdminEditOrderDto) {
+    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
+    if (order.status === 'ANNULEE') {
+      throw new BadRequestException('Réactivez la commande avant de la modifier.');
+    }
+
+    const oldQtyByProduct = new Map(order.items.map((i) => [i.productId, i.quantite]));
+    const oldNameByProduct = new Map(order.items.map((i) => [i.productId, i.product.nom]));
+
+    let subtotal = new Prisma.Decimal(0);
+    const newItemsData: { productId: string; quantite: number; prixUnitaire: Prisma.Decimal }[] = [];
+    const newQtyByProduct = new Map<string, number>();
+    const nameByProduct = new Map(oldNameByProduct);
+
+    for (const line of dto.items) {
+      const product = await this.prisma.product.findUnique({ where: { id: line.productId } });
+      if (!product || !product.actif || product.deletedAt) {
+        throw new BadRequestException(`Produit introuvable ou indisponible: ${line.productId}`);
+      }
+      const resolved = await this.pricing.resolvePrice(order.clientId, product.id, line.quantite);
+      subtotal = subtotal.plus(resolved.prix.mul(line.quantite));
+      newItemsData.push({ productId: product.id, quantite: line.quantite, prixUnitaire: resolved.prix });
+      newQtyByProduct.set(product.id, line.quantite);
+      nameByProduct.set(product.id, product.nom);
+    }
+
+    const remise = dto.remisePourcentage ?? order.remisePourcentage ?? undefined;
+    const fraisLivraison = new Prisma.Decimal(dto.fraisLivraison ?? order.fraisLivraison);
+    const totalApresRemise = remise ? subtotal.mul(new Prisma.Decimal(100).minus(remise)).div(100) : subtotal;
+    const newTotal = totalApresRemise.plus(fraisLivraison);
+
+    const changes: string[] = [];
+    const productIds = new Set([...oldQtyByProduct.keys(), ...newQtyByProduct.keys()]);
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const productId of productIds) {
+        const oldQty = oldQtyByProduct.get(productId) ?? 0;
+        const newQty = newQtyByProduct.get(productId) ?? 0;
+        const delta = newQty - oldQty;
+        if (delta === 0) continue;
+
+        const nom = nameByProduct.get(productId) ?? productId;
+        if (oldQty === 0) changes.push(`+ ${nom} (qté ${newQty})`);
+        else if (newQty === 0) changes.push(`- ${nom} (retiré, était ${oldQty})`);
+        else changes.push(`${nom}: ${oldQty} → ${newQty}`);
+
+        if (delta > 0) {
+          const product = await tx.product.findUnique({ where: { id: productId } });
+          if (!product || product.stockReel < delta) {
+            throw new BadRequestException(`Stock insuffisant pour "${nom}" pour appliquer cette modification.`);
+          }
+        }
+        await tx.product.update({ where: { id: productId }, data: { stockReel: { decrement: delta } } });
+        await tx.stockMovement.create({
+          data: {
+            productId,
+            type: 'AJUSTEMENT',
+            quantite: Math.abs(delta),
+            orderId: id,
+            motif: `Modification ${order.reference}`,
+          },
+        });
+      }
+
+      if (!order.total.equals(newTotal) && order.paymentMethod === 'CREDIT') {
+        const creditDelta = newTotal.minus(order.total);
+        const client = await tx.client.findUnique({ where: { id: order.clientId } });
+        if (client) {
+          const nouveauSolde = client.soldeCredit.plus(creditDelta);
+          if (creditDelta.greaterThan(0) && nouveauSolde.greaterThan(client.limiteCredit)) {
+            throw new BadRequestException('Modification impossible : limite de crédit du client dépassée.');
+          }
+          await tx.client.update({ where: { id: order.clientId }, data: { soldeCredit: nouveauSolde } });
+        }
+      }
+
+      if (!order.total.equals(newTotal)) {
+        changes.push(`Total: ${order.total} → ${newTotal} DA`);
+      }
+
+      await tx.orderItem.deleteMany({ where: { orderId: id } });
+      await tx.order.update({
+        where: { id },
+        data: {
+          nom: dto.nom,
+          adresseLivraison: dto.adresseLivraison,
+          telephoneContact: dto.telephoneContact,
+          notes: dto.notes,
+          remisePourcentage: remise,
+          fraisLivraison,
+          transporteurId: dto.transporteurId,
+          destination: dto.destination,
+          total: newTotal,
+          items: { create: newItemsData },
+        },
+      });
+
+      if (changes.length > 0) {
+        await tx.orderChangeLog.create({ data: { orderId: id, summary: changes.join(' · ') } });
+      }
+    });
+
+    return this.findOneForAdmin(id);
+  }
+
+  async getHistory(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
+
+    const logs = await this.prisma.orderChangeLog.findMany({ where: { orderId: id }, orderBy: { createdAt: 'desc' } });
+    return logs.map((l) => ({ id: l.id, summary: l.summary, createdAt: l.createdAt }));
   }
 
   // ── Corbeille ────────────────────────────────────────────────────────

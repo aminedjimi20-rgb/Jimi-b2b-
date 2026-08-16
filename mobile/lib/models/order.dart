@@ -84,6 +84,20 @@ class OrderItemView {
       );
 }
 
+class OrderChangeLogEntry {
+  OrderChangeLogEntry({required this.id, required this.summary, required this.createdAt});
+
+  final String id;
+  final String summary;
+  final DateTime createdAt;
+
+  factory OrderChangeLogEntry.fromJson(Map<String, dynamic> json) => OrderChangeLogEntry(
+        id: json['id'] as String,
+        summary: json['summary'] as String,
+        createdAt: parseDateOrNull(json['createdAt']) ?? DateTime.now(),
+      );
+}
+
 class OrderView {
   OrderView({
     required this.id,

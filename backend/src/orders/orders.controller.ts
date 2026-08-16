@@ -6,6 +6,7 @@ import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AdminCreateOrderDto } from './dto/admin-create-order.dto';
+import { AdminEditOrderDto } from './dto/admin-edit-order.dto';
 import { EmployeeCreateOrderDto } from './dto/employee-create-order.dto';
 import { AssignEmployeeDto } from './dto/assign-employee.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -123,6 +124,20 @@ export class OrdersController {
   @Patch(':id/assign')
   assignEmployee(@Param('id') id: string, @Body() dto: AssignEmployeeDto) {
     return this.ordersService.assignEmployee(id, dto.employeeId ?? null);
+  }
+
+  // Corrects an already-placed order — items/amounts, at any status except
+  // ANNULEE — see OrdersService.adminUpdateItems for the stock/credit math.
+  @Roles('ADMIN')
+  @Patch(':id/admin-edit')
+  adminEdit(@Param('id') id: string, @Body() dto: AdminEditOrderDto) {
+    return this.ordersService.adminUpdateItems(id, dto);
+  }
+
+  @Roles('ADMIN')
+  @Get(':id/history')
+  getHistory(@Param('id') id: string) {
+    return this.ordersService.getHistory(id);
   }
 
   // Un-cancels an order (ANNULEE -> EN_ATTENTE) — a mis-click on "Annuler" shouldn't be a dead end.
