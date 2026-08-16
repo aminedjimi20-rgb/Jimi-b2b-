@@ -13,6 +13,11 @@ final employeeOrdersProvider = FutureProvider.autoDispose<List<OrderView>>((ref)
   return ref.watch(ordersApiProvider).mineEmployee();
 });
 
+// Un bon LIVREE/ANNULEE est "ancien" — masqué par défaut pour garder la
+// liste centrée sur ce qui reste à traiter, réactivable d'un clic.
+const _kClosedStatuses = {'LIVREE', 'ANNULEE'};
+final _hideOldOrdersProvider = StateProvider.autoDispose<bool>((ref) => true);
+
 /// "Mes commandes" — only orders assigned to this employee (auto-assigned on
 /// self-created counter sales, or manually assigned by the Admin). Never
 /// shows other employees'/clients' orders — the backend already scopes this
@@ -23,9 +28,19 @@ class EmployeeOrdersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(employeeOrdersProvider);
+    final hideOld = ref.watch(_hideOldOrdersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mes commandes')),
+      appBar: AppBar(
+        title: const Text('Mes commandes'),
+        actions: [
+          IconButton(
+            icon: Icon(hideOld ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+            tooltip: hideOld ? 'Afficher les anciens bons' : 'Masquer les anciens bons',
+            onPressed: () => ref.read(_hideOldOrdersProvider.notifier).state = !hideOld,
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmployeeCreateOrderScreen())),
         icon: const Icon(Icons.add),
@@ -36,13 +51,19 @@ class EmployeeOrdersScreen extends ConsumerWidget {
         child: AsyncValueWidget<List<OrderView>>(
           value: orders,
           onRetry: () => ref.invalidate(employeeOrdersProvider),
-          data: (items) {
+          data: (allItems) {
+            final items = hideOld ? allItems.where((o) => !_kClosedStatuses.contains(o.status)).toList() : allItems;
             if (items.isEmpty) {
               return ListView(
-                children: const [
+                children: [
                   Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text('Aucune commande assignée pour le moment.', textAlign: TextAlign.center),
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      hideOld && allItems.isNotEmpty
+                          ? 'Aucun bon en cours — les anciens bons sont masqués.'
+                          : 'Aucune commande assignée pour le moment.',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
               );
