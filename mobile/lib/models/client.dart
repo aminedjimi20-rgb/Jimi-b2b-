@@ -14,6 +14,7 @@ class ClientView {
     required this.soldeCredit,
     this.priceCategoryId,
     this.priceCategoryNom,
+    this.orderByCarton = false,
     this.notesInternes,
   });
 
@@ -29,6 +30,7 @@ class ClientView {
   final double soldeCredit;
   final String? priceCategoryId;
   final String? priceCategoryNom;
+  final bool orderByCarton;
   final String? notesInternes;
 
   factory ClientView.fromJson(Map<String, dynamic> json) => ClientView(
@@ -44,6 +46,7 @@ class ClientView {
         soldeCredit: parseDecimal(json['soldeCredit']),
         priceCategoryId: json['priceCategoryId'] as String?,
         priceCategoryNom: json['priceCategoryNom'] as String?,
+        orderByCarton: json['orderByCarton'] as bool? ?? false,
         notesInternes: json['notesInternes'] as String?,
       );
 }

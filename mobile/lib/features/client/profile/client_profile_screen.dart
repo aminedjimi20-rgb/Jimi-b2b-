@@ -10,25 +10,24 @@ import '../../../services/service_providers.dart';
 import '../../auth/change_password_screen.dart';
 import '../../shared/drafts_screen.dart';
 import '../../shared/notifications_screen.dart';
+import '../client_session.dart';
 import '../favorites/client_favorites_screen.dart';
 import '../invoices/client_invoices_screen.dart';
 import '../orders/client_orders_screen.dart';
 import '../product_requests/client_my_requests_screen.dart';
-
-final _myProfileProvider = FutureProvider.autoDispose<ClientView>((ref) => ref.watch(clientsApiProvider).myProfile());
 
 class ClientProfileScreen extends ConsumerWidget {
   const ClientProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(_myProfileProvider);
+    final profile = ref.watch(clientProfileProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mon compte')),
       body: AsyncValueWidget<ClientView>(
         value: profile,
-        onRetry: () => ref.invalidate(_myProfileProvider),
+        onRetry: () => ref.invalidate(clientProfileProvider),
         data: (c) => ListView(
           padding: const EdgeInsets.all(16),
           children: [

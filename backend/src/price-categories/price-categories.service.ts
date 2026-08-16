@@ -20,12 +20,15 @@ export class PriceCategoriesService {
   async create(dto: CreatePriceCategoryDto) {
     const existing = await this.prisma.priceCategory.findUnique({ where: { nom: dto.nom } });
     if (existing) throw new ConflictException('Cette catégorie de prix existe déjà.');
-    return this.prisma.priceCategory.create({ data: { nom: dto.nom } });
+    return this.prisma.priceCategory.create({ data: { nom: dto.nom, orderByCarton: dto.orderByCarton ?? false } });
   }
 
-  async rename(id: string, nom: string) {
+  async update(id: string, dto: Partial<CreatePriceCategoryDto>) {
     await this.assertExists(id);
-    return this.prisma.priceCategory.update({ where: { id }, data: { nom } });
+    return this.prisma.priceCategory.update({
+      where: { id },
+      data: { nom: dto.nom, orderByCarton: dto.orderByCarton },
+    });
   }
 
   async remove(id: string) {

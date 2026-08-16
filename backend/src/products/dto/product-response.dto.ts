@@ -98,6 +98,9 @@ export function toClientProductDTO(
     prix: resolved.prix,
     prixSource: resolved.source,
     minCommande: product.minCommande,
+    // Packaging info only (never stock exact) — needed to order by carton
+    // when the client's price category is a wholesale one (see Phase 30).
+    uniteParCarton: product.uniteParCarton,
     disponibilite: stockStatus,
     // Badges — purely informational, never expose purchase price/margin/stock exact.
     estNouveau: product.estNouveau,

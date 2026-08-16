@@ -19,21 +19,36 @@ class AdminPriceCategoriesScreen extends ConsumerWidget {
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
-    final nom = await showDialog<String>(
+    var orderByCarton = false;
+    final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Nouvelle catégorie de prix'),
-        content: TextField(controller: controller, decoration: const InputDecoration(labelText: 'Nom (ex: Gros, VIP...)')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Créer')),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Nouvelle catégorie de prix'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: controller, decoration: const InputDecoration(labelText: 'Nom (ex: Gros, VIP...)')),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Commande par carton'),
+                subtitle: const Text('Grossiste — sinon commande à l\'unité (détail)'),
+                value: orderByCarton,
+                onChanged: (v) => setState(() => orderByCarton = v),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+            ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Créer')),
+          ],
+        ),
       ),
     );
-    if (nom == null || nom.isEmpty) return;
+    if (result != true || controller.text.trim().isEmpty) return;
 
     try {
-      await ref.read(priceCategoriesApiProvider).create(nom);
+      await ref.read(priceCategoriesApiProvider).create(controller.text.trim(), orderByCarton: orderByCarton);
       ref.invalidate(_priceCategoriesProvider);
     } catch (e) {
       if (context.mounted) {
@@ -42,23 +57,38 @@ class AdminPriceCategoriesScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _rename(BuildContext context, WidgetRef ref, PriceCategory category) async {
+  Future<void> _edit(BuildContext context, WidgetRef ref, PriceCategory category) async {
     final controller = TextEditingController(text: category.nom);
-    final nom = await showDialog<String>(
+    var orderByCarton = category.orderByCarton;
+    final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Renommer'),
-        content: TextField(controller: controller, decoration: const InputDecoration(labelText: 'Nom')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
-          ElevatedButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Enregistrer')),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Modifier la catégorie'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: controller, decoration: const InputDecoration(labelText: 'Nom')),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Commande par carton'),
+                subtitle: const Text('Grossiste — sinon commande à l\'unité (détail)'),
+                value: orderByCarton,
+                onChanged: (v) => setState(() => orderByCarton = v),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+            ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enregistrer')),
+          ],
+        ),
       ),
     );
-    if (nom == null || nom.isEmpty || nom == category.nom) return;
+    if (result != true || controller.text.trim().isEmpty) return;
 
     try {
-      await ref.read(priceCategoriesApiProvider).rename(category.id, nom);
+      await ref.read(priceCategoriesApiProvider).update(category.id, nom: controller.text.trim(), orderByCarton: orderByCarton);
       ref.invalidate(_priceCategoriesProvider);
     } catch (e) {
       if (context.mounted) {
@@ -133,10 +163,11 @@ class AdminPriceCategoriesScreen extends ConsumerWidget {
                 child: ListTile(
                   leading: const Icon(Icons.sell_outlined),
                   title: Text(c.nom),
+                  subtitle: Text(c.orderByCarton ? 'Grossiste — commande par carton' : 'Détail — commande à l\'unité'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Renommer', onPressed: () => _rename(context, ref, c)),
+                      IconButton(icon: const Icon(Icons.edit_outlined), tooltip: 'Modifier', onPressed: () => _edit(context, ref, c)),
                       IconButton(
                         icon: const Icon(Icons.delete_outline),
                         tooltip: 'Supprimer',

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../client_session.dart';
 import 'cart_controller.dart';
 import 'checkout_screen.dart';
 
@@ -13,6 +14,7 @@ class ClientCartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartControllerProvider);
     final cartNotifier = ref.read(cartControllerProvider.notifier);
+    final orderByCarton = ref.watch(clientProfileProvider).valueOrNull?.orderByCarton ?? false;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Panier')),
@@ -24,6 +26,11 @@ class ClientCartScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (context, i) {
                 final line = cart[i];
+                final uniteParCarton = line.product.uniteParCarton;
+                final usesCartons = orderByCarton && uniteParCarton != null && uniteParCarton > 1;
+                final step = usesCartons ? uniteParCarton : 1;
+                final cartons = usesCartons ? (line.quantite / uniteParCarton).round() : null;
+
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -35,6 +42,7 @@ class ClientCartScreen extends ConsumerWidget {
                             children: [
                               Text(line.product.nom, style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text(formatMoney(line.product.prix), style: TextStyle(color: Colors.grey[600])),
+                              if (usesCartons) Text('($cartons carton${cartons == 1 ? '' : 's'})', style: TextStyle(color: Colors.grey[500], fontSize: 11)),
                             ],
                           ),
                         ),
@@ -45,12 +53,12 @@ class ClientCartScreen extends ConsumerWidget {
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.remove, size: 18),
-                                onPressed: () => cartNotifier.updateQuantity(line.product.id, line.quantite - 1),
+                                onPressed: () => cartNotifier.updateQuantity(line.product.id, line.quantite - step),
                               ),
                               Text('${line.quantite}', style: const TextStyle(fontWeight: FontWeight.bold)),
                               IconButton(
                                 icon: const Icon(Icons.add, size: 18),
-                                onPressed: () => cartNotifier.updateQuantity(line.product.id, line.quantite + 1),
+                                onPressed: () => cartNotifier.updateQuantity(line.product.id, line.quantite + step),
                               ),
                             ],
                           ),

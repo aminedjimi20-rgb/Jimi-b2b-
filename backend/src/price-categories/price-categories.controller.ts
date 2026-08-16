@@ -19,8 +19,8 @@ export class PriceCategoriesController {
   }
 
   @Patch(':id')
-  rename(@Param('id') id: string, @Body() dto: CreatePriceCategoryDto) {
-    return this.priceCategoriesService.rename(id, dto.nom);
+  update(@Param('id') id: string, @Body() dto: Partial<CreatePriceCategoryDto>) {
+    return this.priceCategoriesService.update(id, dto);
   }
 
   @Delete(':id')

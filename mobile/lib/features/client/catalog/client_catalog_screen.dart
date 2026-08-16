@@ -13,6 +13,7 @@ import '../../../models/category.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../cart/cart_controller.dart';
+import '../client_session.dart';
 import '../product_requests/client_request_product_screen.dart';
 import 'client_product_detail_screen.dart';
 import 'image_search_screen.dart';
@@ -202,6 +203,9 @@ class _ProductCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canOrder = product.disponibilite != 'RUPTURE';
+    final profile = ref.watch(clientProfileProvider).valueOrNull;
+    final orderByCarton = profile?.orderByCarton ?? false;
+    final usesCartons = orderByCarton && product.uniteParCarton != null && product.uniteParCarton! > 1;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -263,13 +267,16 @@ class _ProductCard extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(padding: EdgeInsets.zero, textStyle: const TextStyle(fontSize: 12)),
                   onPressed: canOrder
                       ? () {
-                          ref.read(cartControllerProvider.notifier).add(product);
+                          ref.read(cartControllerProvider.notifier).add(product, quantite: usesCartons ? product.uniteParCarton : null);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${product.nom} ajouté au panier'), duration: const Duration(seconds: 1)),
+                            SnackBar(
+                              content: Text(usesCartons ? '${product.nom} — 1 carton ajouté' : '${product.nom} ajouté au panier'),
+                              duration: const Duration(seconds: 1),
+                            ),
                           );
                         }
                       : null,
-                  child: Text(canOrder ? 'Ajouter' : 'Indisponible'),
+                  child: Text(canOrder ? (usesCartons ? 'Ajouter 1 carton' : 'Ajouter') : 'Indisponible'),
                 ),
               ),
             ),

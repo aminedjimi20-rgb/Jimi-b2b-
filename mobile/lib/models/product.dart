@@ -163,6 +163,7 @@ class ClientProduct {
     required this.prix,
     required this.prixSource,
     required this.minCommande,
+    this.uniteParCarton,
     required this.disponibilite,
     required this.estNouveau,
     required this.estSaisonnier,
@@ -182,6 +183,7 @@ class ClientProduct {
   final double prix;
   final String prixSource;
   final int minCommande;
+  final int? uniteParCarton;
   final String disponibilite;
   final bool estNouveau;
   final bool estSaisonnier;
@@ -206,6 +208,7 @@ class ClientProduct {
         prix: parseDecimal(json['prix']),
         prixSource: json['prixSource'] as String,
         minCommande: json['minCommande'] as int,
+        uniteParCarton: json['uniteParCarton'] as int?,
         disponibilite: json['disponibilite'] as String,
         estNouveau: json['estNouveau'] as bool? ?? false,
         estSaisonnier: json['estSaisonnier'] as bool? ?? false,
@@ -228,6 +231,7 @@ class ClientProduct {
         'prix': prix,
         'prixSource': prixSource,
         'minCommande': minCommande,
+        'uniteParCarton': uniteParCarton,
         'disponibilite': disponibilite,
         'estNouveau': estNouveau,
         'estSaisonnier': estSaisonnier,

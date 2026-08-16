@@ -42,6 +42,11 @@ export function toSelfClientDTO(client: ClientWithUser) {
     phone: client.user.phone,
     limiteCredit: client.limiteCredit,
     soldeCredit: client.soldeCredit,
+    priceCategoryId: client.priceCategoryId,
+    priceCategoryNom: client.priceCategory?.nom ?? null,
+    // Grossiste (commande par carton) vs détail (par unité) — pilote le
+    // mode de saisie de quantité dans le catalogue/panier (voir Phase 30).
+    orderByCarton: client.priceCategory?.orderByCarton ?? false,
   };
 }
 

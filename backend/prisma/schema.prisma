@@ -278,9 +278,10 @@ model ClientProductPrice {
 // une catégorie et paie automatiquement le prix défini pour cette catégorie
 // sur chaque produit (voir ProductSalePrice), sans configuration par client.
 model PriceCategory {
-  id        String   @id @default(cuid())
-  nom       String   @unique
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  nom           String   @unique
+  orderByCarton Boolean  @default(false) // grossiste (commande par carton) vs détail (par unité) — pilote le mode de saisie côté client
+  createdAt     DateTime @default(now())
 
   salePrices ProductSalePrice[]
   clients    Client[]
