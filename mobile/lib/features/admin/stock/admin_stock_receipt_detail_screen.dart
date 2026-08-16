@@ -19,6 +19,7 @@ import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/order.dart';
 import '../../../models/stock_receipt.dart';
 import '../../../services/service_providers.dart';
+import '../products/admin_product_detail_screen.dart';
 
 final _receiptProvider = FutureProvider.autoDispose.family<StockReceiptView, String>((ref, id) {
   return ref.watch(stockReceiptsApiProvider).getOne(id);
@@ -291,7 +292,21 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                           ),
                           title: Text(item.nom),
                           subtitle: Text('${item.cartons} cartons x ${item.unitesParCarton} = ${item.quantite} · ${formatMoney(item.prixVente)}'),
-                          trailing: Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          trailing: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),
+                              InkWell(
+                                onTap: () => Navigator.of(context)
+                                    .push(MaterialPageRoute(builder: (_) => AdminProductDetailScreen(productId: item.productId))),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('Détails', style: TextStyle(fontSize: 11, color: AppTheme.primary)),
+                                ),
+                              ),
+                            ],
+                          ),
                         ))
                     .toList(),
               ),

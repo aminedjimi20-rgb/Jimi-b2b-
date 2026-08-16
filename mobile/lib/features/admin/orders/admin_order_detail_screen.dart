@@ -21,6 +21,7 @@ import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
 import '../employees/admin_employees_screen.dart' show adminEmployeesProvider;
 import '../invoices/admin_invoice_detail_screen.dart';
+import '../products/admin_product_detail_screen.dart';
 import 'admin_order_edit_screen.dart';
 import 'admin_order_history_screen.dart';
 
@@ -441,7 +442,21 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                           ),
                           title: Text(item.nom),
                           subtitle: Text('${item.code} · Qté: ${item.quantite} × ${formatMoney(item.prixUnitaire)}'),
-                          trailing: Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          trailing: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),
+                              InkWell(
+                                onTap: () => Navigator.of(context)
+                                    .push(MaterialPageRoute(builder: (_) => AdminProductDetailScreen(productId: item.productId))),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('Détails', style: TextStyle(fontSize: 11, color: AppTheme.primary)),
+                                ),
+                              ),
+                            ],
+                          ),
                         ))
                     .toList(),
               ),

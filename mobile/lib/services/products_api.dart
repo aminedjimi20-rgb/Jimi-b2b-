@@ -68,6 +68,11 @@ class ProductsApi {
     return (res.data as List<dynamic>).map((e) => EmployeeProduct.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<EmployeeProduct> getStaff(String id) async {
+    final res = await _dio.get('/products/staff/$id');
+    return EmployeeProduct.fromJson(res.data as Map<String, dynamic>);
+  }
+
   /// Same as Client's searchByImage, restricted to the Employee shape (no prixAchat/marge).
   Future<List<EmployeeImageSearchResult>> searchByImageStaff(String filePath) async {
     final formData = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});

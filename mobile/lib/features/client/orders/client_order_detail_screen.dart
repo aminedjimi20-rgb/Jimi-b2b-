@@ -9,6 +9,7 @@ import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
+import '../catalog/client_product_detail_screen.dart';
 import 'client_orders_screen.dart';
 
 final _clientOrderProvider = FutureProvider.autoDispose.family<OrderView, String>((ref, id) {
@@ -85,7 +86,21 @@ class ClientOrderDetailScreen extends ConsumerWidget {
                           ),
                           title: Text(item.nom),
                           subtitle: Text('Qté: ${item.quantite} × ${formatMoney(item.prixUnitaire)}'),
-                          trailing: Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          trailing: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),
+                              InkWell(
+                                onTap: () => Navigator.of(context)
+                                    .push(MaterialPageRoute(builder: (_) => ClientProductDetailScreen(productId: item.productId))),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('Détails', style: TextStyle(fontSize: 11, color: AppTheme.primary)),
+                                ),
+                              ),
+                            ],
+                          ),
                         ))
                     .toList(),
               ),

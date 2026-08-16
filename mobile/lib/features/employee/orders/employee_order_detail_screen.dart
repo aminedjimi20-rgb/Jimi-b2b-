@@ -9,6 +9,7 @@ import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
+import '../employee_product_detail_screen.dart';
 
 // An employee only ever prepares — EN_ATTENTE/CONFIRMEE -> PREPARATION -> PRETE.
 // Confirming (Admin validates the on-site order), cancelling and shipping stay
@@ -110,6 +111,11 @@ class _EmployeeOrderDetailScreenState extends ConsumerState<EmployeeOrderDetailS
                             ),
                             title: Text(item.nom),
                             subtitle: Text('${item.code} · Qté: ${item.quantite}'),
+                            trailing: InkWell(
+                              onTap: () => Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (_) => EmployeeProductDetailScreen(productId: item.productId))),
+                              child: Text('Détails', style: TextStyle(fontSize: 11, color: AppTheme.primary)),
+                            ),
                           ))
                       .toList(),
                 ),
