@@ -6,7 +6,10 @@ import { CreateProductRequestDto } from './dto/create-product-request.dto';
 import { toAdminProductRequestDTO, toClientProductRequestDTO } from './dto/product-request-response.dto';
 import { UpdateProductRequestStatusDto } from './dto/update-product-request-status.dto';
 
-const REQUEST_INCLUDE = { client: { select: { raisonSociale: true, telephone: true } } } as const;
+const REQUEST_INCLUDE = {
+  client: { select: { raisonSociale: true, telephone: true } },
+  employee: { select: { nom: true } },
+} as const;
 
 @Injectable()
 export class ProductRequestsService {
@@ -40,6 +43,31 @@ export class ProductRequestsService {
     return requests.map(toClientProductRequestDTO);
   }
 
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  async createForEmployee(employeeId: string, dto: CreateProductRequestDto) {
+    const request = await this.prisma.productRequest.create({
+      data: { employeeId, imageUrl: dto.imageUrl, description: dto.description },
+    });
+
+    await this.notifications.notifyAllAdmins(
+      'DEMANDE_PRODUIT',
+      'Nouvelle demande de produit',
+      'Un employé a demandé un produit par photo.',
+      { productRequestId: request.id },
+    );
+
+    return toClientProductRequestDTO(request);
+  }
+
+  async findAllForEmployee(employeeId: string) {
+    const requests = await this.prisma.productRequest.findMany({
+      where: { employeeId, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+    return requests.map(toClientProductRequestDTO);
+  }
+
   // ── ADMIN ────────────────────────────────────────────────────────────
 
   async findAllForAdmin(status?: 'EN_ATTENTE' | 'TRAITEE' | 'REJETEE') {
@@ -61,10 +89,17 @@ export class ProductRequestsService {
       include: REQUEST_INCLUDE,
     });
 
-    const client = await this.prisma.client.findUnique({ where: { id: updated.clientId } });
-    if (client) {
-      const titre = dto.status === 'TRAITEE' ? 'Votre demande de produit a été traitée' : 'Votre demande de produit a été refusée';
-      await this.notifications.notifyUser(client.userId, 'DEMANDE_PRODUIT', titre, dto.adminNote ?? titre, { productRequestId: id });
+    const titre = dto.status === 'TRAITEE' ? 'Votre demande de produit a été traitée' : 'Votre demande de produit a été refusée';
+    if (updated.clientId) {
+      const client = await this.prisma.client.findUnique({ where: { id: updated.clientId } });
+      if (client) {
+        await this.notifications.notifyUser(client.userId, 'DEMANDE_PRODUIT', titre, dto.adminNote ?? titre, { productRequestId: id });
+      }
+    } else if (updated.employeeId) {
+      const employee = await this.prisma.employee.findUnique({ where: { id: updated.employeeId } });
+      if (employee) {
+        await this.notifications.notifyUser(employee.userId, 'DEMANDE_PRODUIT', titre, dto.adminNote ?? titre, { productRequestId: id });
+      }
     }
 
     return toAdminProductRequestDTO(updated);

@@ -65,6 +65,14 @@ export class ProductsController {
     return this.productsService.findOneForEmployee(id);
   }
 
+  @Roles('EMPLOYEE')
+  @Post('staff/search-image')
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } }))
+  searchByImageEmployee(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Aucune image reçue.');
+    return this.productsService.searchByImageForEmployee(file.buffer);
+  }
+
   @Roles('ADMIN')
   @Get(':id')
   findOneAdmin(@Param('id') id: string) {

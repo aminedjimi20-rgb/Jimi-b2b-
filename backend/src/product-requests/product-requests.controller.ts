@@ -24,6 +24,20 @@ export class ProductRequestsController {
     return this.productRequestsService.findAllForClient(user.clientId!);
   }
 
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  @Roles('EMPLOYEE')
+  @Post('staff')
+  createForEmployee(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProductRequestDto) {
+    return this.productRequestsService.createForEmployee(user.employeeId!, dto);
+  }
+
+  @Roles('EMPLOYEE')
+  @Get('staff/mine')
+  findMineEmployee(@CurrentUser() user: AuthenticatedUser) {
+    return this.productRequestsService.findAllForEmployee(user.employeeId!);
+  }
+
   // ── ADMIN ────────────────────────────────────────────────────────────
 
   @Roles('ADMIN')

@@ -419,6 +419,33 @@ export class ProductsService {
     return results.sort((a, b) => b.matchScore - a.matchScore);
   }
 
+  /** Same idea as searchByImageForAdmin, restricted to the Employee shape (no prixAchat/marge). */
+  async searchByImageForEmployee(buffer: Buffer) {
+    const matches = await this.matchProductsByImage(buffer);
+    if (matches.length === 0) return [];
+
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: matches.map(([productId]) => productId) } },
+      include: PRODUCT_INCLUDE,
+    });
+
+    const distanceByProductId = new Map(matches);
+    const promoInfo = await computeActivePromoInfo(this.prisma);
+    const results = products.map((product) => {
+      const distance = distanceByProductId.get(product.id)!;
+      return {
+        ...toEmployeeProductDTO(product, {
+          dernierChangementPrix: null,
+          dernierArrivage: null,
+          estPromo: productHasActivePromo(promoInfo, product.id),
+        }),
+        matchScore: Math.round((1 - distance / 64) * 100),
+      };
+    });
+
+    return results.sort((a, b) => b.matchScore - a.matchScore);
+  }
+
   /** Shared core of searchByImage/searchByImageForAdmin — hashes the query photo and returns the best-matching productIds, closest first. */
   private async matchProductsByImage(buffer: Buffer) {
     const queryHash = await computeImageHash(buffer);

@@ -37,8 +37,8 @@ export class UploadsController {
     return { url: `/uploads/products/${file.filename}` };
   }
 
-  /** CLIENT-only — photo attached to a "demander un produit" request (see ProductRequestsModule). */
-  @Roles('CLIENT')
+  /** Client/Employee — photo attached to a "demander un produit" request (see ProductRequestsModule). */
+  @Roles('CLIENT', 'EMPLOYEE')
   @Post('request-photo')
   @UseInterceptors(
     FileInterceptor('file', {

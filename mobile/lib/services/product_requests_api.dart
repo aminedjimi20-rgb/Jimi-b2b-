@@ -21,6 +21,21 @@ class ProductRequestsApi {
     return (res.data as List<dynamic>).map((e) => ProductRequestView.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  // ── EMPLOYEE ─────────────────────────────────────────────────────────
+
+  Future<ProductRequestView> createForEmployee({required String imageUrl, String? description}) async {
+    final res = await _dio.post('/product-requests/staff', data: {
+      'imageUrl': imageUrl,
+      if (description != null && description.isNotEmpty) 'description': description,
+    });
+    return ProductRequestView.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<List<ProductRequestView>> mineEmployee() async {
+    final res = await _dio.get('/product-requests/staff/mine');
+    return (res.data as List<dynamic>).map((e) => ProductRequestView.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
   // ── ADMIN ────────────────────────────────────────────────────────────
 
   Future<List<ProductRequestView>> listAdmin({String? status}) async {

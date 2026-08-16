@@ -85,8 +85,9 @@ model Employee {
   canSeeClientPhone   Boolean @default(false)
   canSeeClientAddress Boolean @default(false)
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orders Order[]
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders          Order[]
+  productRequests ProductRequest[]
 
   @@index([deletedAt])
 }
@@ -622,9 +623,12 @@ enum ProductRequestStatus {
 // an optional description) asking the Admin to source/add it — see spec
 // point "Demander un produit par photo". Admin reviews and closes it out
 // with a status + an optional note back to the client.
+// Exactly one of clientId/employeeId is set — enforced in ProductRequestsService,
+// not at the DB level (Postgres CHECK constraints aren't modeled by Prisma).
 model ProductRequest {
   id          String               @id @default(cuid())
-  clientId    String
+  clientId    String?
+  employeeId  String?
   imageUrl    String
   description String?
   status      ProductRequestStatus @default(EN_ATTENTE)
@@ -633,9 +637,11 @@ model ProductRequest {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client   Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([clientId])
+  @@index([employeeId])
   @@index([status])
   @@index([deletedAt])
 }

@@ -68,6 +68,18 @@ class ProductsApi {
     return (res.data as List<dynamic>).map((e) => EmployeeProduct.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  /// Same as Client's searchByImage, restricted to the Employee shape (no prixAchat/marge).
+  Future<List<EmployeeImageSearchResult>> searchByImageStaff(String filePath) async {
+    final formData = FormData.fromMap({'file': await MultipartFile.fromFile(filePath)});
+    final res = await _dio.post('/products/staff/search-image', data: formData);
+    return (res.data as List<dynamic>)
+        .map((e) => EmployeeImageSearchResult(
+              product: EmployeeProduct.fromJson(e as Map<String, dynamic>),
+              matchScore: e['matchScore'] as int,
+            ))
+        .toList();
+  }
+
   // ── CLIENT ───────────────────────────────────────────────────────────
 
   Future<({List<ClientProduct> items, int total})> searchCatalog({
@@ -109,6 +121,12 @@ class ProductsApi {
 class ImageSearchResult {
   ImageSearchResult({required this.product, required this.matchScore});
   final ClientProduct product;
+  final int matchScore;
+}
+
+class EmployeeImageSearchResult {
+  EmployeeImageSearchResult({required this.product, required this.matchScore});
+  final EmployeeProduct product;
   final int matchScore;
 }
 
