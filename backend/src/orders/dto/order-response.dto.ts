@@ -85,13 +85,22 @@ export function toClientOrderDTO(order: OrderWithRelations) {
   };
 }
 
+const REDACTED = 'Non autorisé';
+
 /**
  * Employee view — enough to prepare/deliver an assigned or self-created
  * order (client identity, items, totals). Deliberately omits
  * remisePourcentage: applying a discount stays an Admin-only decision, an
  * employee never sees or controls it, mirroring the client's own DTO.
+ *
+ * `permissions` is per-employee (Employee.canSeeClientPhone/Address, set by
+ * the Admin) — off by default, so contact details are redacted server-side
+ * (never sent at all, not merely hidden in the UI) unless explicitly granted.
  */
-export function toEmployeeOrderDTO(order: OrderWithRelations) {
+export function toEmployeeOrderDTO(
+  order: OrderWithRelations,
+  permissions: { canSeeClientPhone: boolean; canSeeClientAddress: boolean },
+) {
   return {
     id: order.id,
     reference: order.reference,
@@ -107,9 +116,9 @@ export function toEmployeeOrderDTO(order: OrderWithRelations) {
     montantRestant: clampedRemainder(order.total, order.montantPaye),
     statutPaiement: computePaymentStatus(order.montantPaye, order.total),
     clientNom: order.client?.raisonSociale,
-    clientTelephone: order.client?.telephone,
-    adresseLivraison: order.adresseLivraison,
-    telephoneContact: order.telephoneContact,
+    clientTelephone: permissions.canSeeClientPhone ? order.client?.telephone : REDACTED,
+    adresseLivraison: permissions.canSeeClientAddress ? order.adresseLivraison : REDACTED,
+    telephoneContact: permissions.canSeeClientPhone ? order.telephoneContact : REDACTED,
     notes: order.notes,
     items: mapItems(order.items),
     createdAt: order.createdAt,

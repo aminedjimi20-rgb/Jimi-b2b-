@@ -60,13 +60,13 @@ export class ClientsService {
   }
 
   /** Employee picking a client for an on-site order — identity/contact only, no credit exposure. */
-  async findAllForEmployee() {
-    const clients = await this.prisma.client.findMany({
-      where: { deletedAt: null },
-      include: CLIENT_INCLUDE_USER,
-      orderBy: { raisonSociale: 'asc' },
-    });
-    return clients.map(toEmployeeClientDTO);
+  async findAllForEmployee(employeeId: string) {
+    const [clients, employee] = await Promise.all([
+      this.prisma.client.findMany({ where: { deletedAt: null }, include: CLIENT_INCLUDE_USER, orderBy: { raisonSociale: 'asc' } }),
+      this.prisma.employee.findUnique({ where: { id: employeeId }, select: { canSeeClientPhone: true, canSeeClientAddress: true } }),
+    ]);
+    const permissions = { canSeeClientPhone: employee?.canSeeClientPhone ?? false, canSeeClientAddress: employee?.canSeeClientAddress ?? false };
+    return clients.map((client) => toEmployeeClientDTO(client, permissions));
   }
 
   async findOneForAdmin(clientId: string) {

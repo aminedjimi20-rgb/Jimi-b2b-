@@ -78,6 +78,13 @@ model Employee {
   deletedAt DateTime? // corbeille — null = actif
   createdAt DateTime  @default(now())
 
+  // Granular visibility, set by the Admin per employee — off by default (an
+  // employee sees neither unless explicitly granted). Enforced server-side
+  // in the employee-facing DTOs (see orders/dto, clients/dto), never just
+  // hidden in the UI.
+  canSeeClientPhone   Boolean @default(false)
+  canSeeClientAddress Boolean @default(false)
+
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
 

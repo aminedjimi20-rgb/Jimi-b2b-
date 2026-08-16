@@ -48,15 +48,18 @@ export function toSelfClientDTO(client: ClientWithUser) {
 /**
  * Allow-list mapper — an Employee picking a client for an on-site order.
  * Just enough to identify/contact the client; no credit exposure or
- * internal notes (Admin-only, same rule as everywhere else).
+ * internal notes (Admin-only, same rule as everywhere else). Phone/address
+ * are further redacted unless the Admin explicitly granted this employee
+ * that visibility (Employee.canSeeClientPhone/Address) — enforced here,
+ * server-side, not just hidden in the UI.
  */
-export function toEmployeeClientDTO(client: ClientWithUser) {
+export function toEmployeeClientDTO(client: ClientWithUser, permissions: { canSeeClientPhone: boolean; canSeeClientAddress: boolean }) {
   return {
     id: client.id,
     raisonSociale: client.raisonSociale,
-    telephone: client.telephone,
-    adresse: client.adresse,
-    ville: client.ville,
+    telephone: permissions.canSeeClientPhone ? client.telephone : 'Non autorisé',
+    adresse: permissions.canSeeClientAddress ? client.adresse : null,
+    ville: permissions.canSeeClientAddress ? client.ville : null,
   };
 }
 

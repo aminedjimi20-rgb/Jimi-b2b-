@@ -91,6 +91,55 @@ class AdminEmployeesScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _showPermissionsDialog(BuildContext context, WidgetRef ref, EmployeeView e) async {
+    bool canSeeClientPhone = e.canSeeClientPhone;
+    bool canSeeClientAddress = e.canSeeClientAddress;
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text('Permissions — ${e.nom}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Par défaut, un employé ne voit jamais le téléphone ni l\'adresse du client sur un bon.',
+                style: TextStyle(fontSize: 13),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Voir le téléphone du client'),
+                value: canSeeClientPhone,
+                onChanged: (v) => setDialogState(() => canSeeClientPhone = v),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Voir l\'adresse du client'),
+                value: canSeeClientAddress,
+                onChanged: (v) => setDialogState(() => canSeeClientAddress = v),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+            ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enregistrer')),
+          ],
+        ),
+      ),
+    );
+
+    if (saved == true) {
+      await ref.read(employeesApiProvider).updatePermissions(
+            e.id,
+            canSeeClientPhone: canSeeClientPhone,
+            canSeeClientAddress: canSeeClientAddress,
+          );
+      ref.invalidate(adminEmployeesProvider);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final employees = ref.watch(adminEmployeesProvider);
@@ -131,6 +180,11 @@ class AdminEmployeesScreen extends ConsumerWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.privacy_tip_outlined),
+                        tooltip: 'Permissions',
+                        onPressed: () => _showPermissionsDialog(context, ref, e),
+                      ),
                       Switch(
                         value: e.status == 'ACTIVE',
                         onChanged: (v) async {

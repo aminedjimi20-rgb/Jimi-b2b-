@@ -21,6 +21,15 @@ class EmployeesApi {
     return EmployeeView.fromJson(res.data as Map<String, dynamic>);
   }
 
+  /// Admin-only visibility toggles — enforced server-side (see backend order/client DTOs), not just hidden in the UI.
+  Future<EmployeeView> updatePermissions(String id, {required bool canSeeClientPhone, required bool canSeeClientAddress}) async {
+    final res = await _dio.patch('/employees/$id', data: {
+      'canSeeClientPhone': canSeeClientPhone,
+      'canSeeClientAddress': canSeeClientAddress,
+    });
+    return EmployeeView.fromJson(res.data as Map<String, dynamic>);
+  }
+
   /// Moves to the corbeille (reversible, also suspends login) — see [permanentDelete] to erase for good.
   Future<void> remove(String id) => _dio.delete('/employees/$id');
 

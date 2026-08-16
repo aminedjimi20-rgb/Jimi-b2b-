@@ -11,6 +11,8 @@ export function toAdminEmployeeDTO(employee: EmployeeWithUser) {
     email: employee.user.email,
     phone: employee.user.phone,
     status: employee.user.status,
+    canSeeClientPhone: employee.canSeeClientPhone,
+    canSeeClientAddress: employee.canSeeClientAddress,
     createdAt: employee.createdAt,
   };
 }

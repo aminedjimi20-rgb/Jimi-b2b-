@@ -154,18 +154,29 @@ export class OrdersService {
   }
 
   async findAllForEmployee(employeeId: string) {
-    const orders = await this.prisma.order.findMany({
-      where: { employeeId, deletedAt: null },
-      include: ORDER_INCLUDE,
-      orderBy: { createdAt: 'desc' },
-    });
-    return orders.map(toEmployeeOrderDTO);
+    const [orders, permissions] = await Promise.all([
+      this.prisma.order.findMany({ where: { employeeId, deletedAt: null }, include: ORDER_INCLUDE, orderBy: { createdAt: 'desc' } }),
+      this.getEmployeePermissions(employeeId),
+    ]);
+    return orders.map((order) => toEmployeeOrderDTO(order, permissions));
   }
 
   async findOneForEmployee(employeeId: string, id: string) {
-    const order = await this.prisma.order.findFirst({ where: { id, employeeId, deletedAt: null }, include: ORDER_INCLUDE });
+    const [order, permissions] = await Promise.all([
+      this.prisma.order.findFirst({ where: { id, employeeId, deletedAt: null }, include: ORDER_INCLUDE }),
+      this.getEmployeePermissions(employeeId),
+    ]);
     if (!order) throw new NotFoundException('Commande introuvable.');
-    return toEmployeeOrderDTO(order);
+    return toEmployeeOrderDTO(order, permissions);
+  }
+
+  /** Defaults closed (false/false) if the employee record is somehow missing — fail safe, never fail open. */
+  private async getEmployeePermissions(employeeId: string): Promise<{ canSeeClientPhone: boolean; canSeeClientAddress: boolean }> {
+    const employee = await this.prisma.employee.findUnique({
+      where: { id: employeeId },
+      select: { canSeeClientPhone: true, canSeeClientAddress: true },
+    });
+    return { canSeeClientPhone: employee?.canSeeClientPhone ?? false, canSeeClientAddress: employee?.canSeeClientAddress ?? false };
   }
 
   /** An employee only prepares — moving to PREPARATION/PRETE. Everything else (confirm, cancel, ship) stays Admin-only. */
