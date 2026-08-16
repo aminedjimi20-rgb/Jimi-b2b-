@@ -368,7 +368,7 @@ export class OrdersService {
 
     await runOrExplainForeignKeyError(
       () => this.prisma.order.delete({ where: { id } }),
-      'Impossible de supprimer définitivement : des données liées existent encore.',
+      'Impossible de supprimer définitivement : des paiements sont encore enregistrés sur cette commande.',
     );
   }
 

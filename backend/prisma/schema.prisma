@@ -554,10 +554,15 @@ model Payment {
   provider       String? // extension future : "baridimob", "stripe", "cib", ...
   createdAt      DateTime      @default(now())
 
-  client       Client?       @relation(fields: [clientId], references: [id])
-  order        Order?        @relation(fields: [orderId], references: [id])
-  fabricant    Fabricant?    @relation(fields: [fabricantId], references: [id])
-  stockReceipt StockReceipt? @relation(fields: [stockReceiptId], references: [id])
+  // Restrict (not the Prisma default of SetNull for optional relations): a
+  // Payment is real financial history — permanently deleting the client/
+  // order/fournisseur/bon it belongs to must never silently sever that link.
+  // The corbeille's "supprimer définitivement" is correctly blocked instead
+  // (see runOrExplainForeignKeyError) until there's nothing left to protect.
+  client       Client?       @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  order        Order?        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  fabricant    Fabricant?    @relation(fields: [fabricantId], references: [id], onDelete: Restrict)
+  stockReceipt StockReceipt? @relation(fields: [stockReceiptId], references: [id], onDelete: Restrict)
 
   @@index([clientId])
   @@index([fabricantId])

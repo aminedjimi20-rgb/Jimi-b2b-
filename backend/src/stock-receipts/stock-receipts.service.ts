@@ -138,7 +138,7 @@ export class StockReceiptsService {
 
     await runOrExplainForeignKeyError(
       () => this.prisma.stockReceipt.delete({ where: { id } }),
-      'Impossible de supprimer définitivement : des données liées existent encore.',
+      'Impossible de supprimer définitivement : des paiements sont encore enregistrés sur ce bon.',
     );
   }
 

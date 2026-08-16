@@ -123,7 +123,7 @@ export class FabricantsService {
 
     await runOrExplainForeignKeyError(
       () => this.prisma.fabricant.delete({ where: { id } }),
-      'Impossible de supprimer définitivement : des bons de réception ou des produits sont encore liés à ce fournisseur.',
+      'Impossible de supprimer définitivement : des bons de réception, des produits ou des paiements sont encore liés à ce fournisseur.',
     );
   }
 
