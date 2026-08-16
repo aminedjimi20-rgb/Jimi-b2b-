@@ -134,6 +134,9 @@ export function toEmployeeProductDTO(product: ProductWithRelations, derived: Pro
     estNouveau: product.estNouveau,
     estSaisonnier: product.estSaisonnier,
     estPromo: derived.estPromo,
+    // Never prixAchat/marge — but the arrival date is purely operational
+    // (helps an employee spot what just came in), safe to expose.
+    dernierArrivage: derived.dernierArrivage,
     images: product.images.map((img) => ({ id: img.id, url: img.url, isPrimary: img.isPrimary })),
     priceTiers: product.priceTiers.map((t) => ({ id: t.id, qteMin: t.qteMin, qteMax: t.qteMax, prix: t.prix })),
   };

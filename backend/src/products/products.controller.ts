@@ -55,8 +55,8 @@ export class ProductsController {
 
   @Roles('EMPLOYEE')
   @Get('staff')
-  findAllEmployee() {
-    return this.productsService.findAllForEmployee();
+  findAllEmployee(@Query('sortBy') sortBy?: ProductSortBy) {
+    return this.productsService.findAllForEmployee(sortBy);
   }
 
   @Roles('EMPLOYEE')

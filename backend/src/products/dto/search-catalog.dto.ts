@@ -1,5 +1,9 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+
+// Client is never offered a sort depending on prixAchat/marge/stock exact —
+// see ProductsService.CLIENT_SORT_OPTIONS.
+const CLIENT_SORT_VALUES = ['nom', 'nomDesc', 'prix', 'prixAsc', 'nouveautes', 'dernierChangement'] as const;
 
 export class SearchCatalogDto {
   @IsOptional()
@@ -9,6 +13,10 @@ export class SearchCatalogDto {
   @IsOptional()
   @IsString()
   categoryId?: string;
+
+  @IsOptional()
+  @IsIn(CLIENT_SORT_VALUES)
+  sortBy?: (typeof CLIENT_SORT_VALUES)[number];
 
   @IsOptional()
   @Type(() => Number)

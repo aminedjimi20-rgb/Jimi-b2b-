@@ -63,8 +63,8 @@ class ProductsApi {
 
   // ── EMPLOYEE ─────────────────────────────────────────────────────────
 
-  Future<List<EmployeeProduct>> listStaff() async {
-    final res = await _dio.get('/products/staff');
+  Future<List<EmployeeProduct>> listStaff({String? sortBy}) async {
+    final res = await _dio.get('/products/staff', queryParameters: {if (sortBy != null) 'sortBy': sortBy});
     return (res.data as List<dynamic>).map((e) => EmployeeProduct.fromJson(e as Map<String, dynamic>)).toList();
   }
 
@@ -90,12 +90,14 @@ class ProductsApi {
   Future<({List<ClientProduct> items, int total})> searchCatalog({
     String? q,
     String? categoryId,
+    String? sortBy,
     int page = 1,
     int pageSize = 20,
   }) async {
     final res = await _dio.get('/products/catalog/search', queryParameters: {
       if (q != null && q.isNotEmpty) 'q': q,
       if (categoryId != null) 'categoryId': categoryId,
+      if (sortBy != null) 'sortBy': sortBy,
       'page': page,
       'pageSize': pageSize,
     });

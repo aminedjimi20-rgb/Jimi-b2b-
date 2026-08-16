@@ -8,6 +8,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/product_sort_menu.dart';
 import '../../../models/category.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
@@ -21,6 +22,7 @@ final _categoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) => 
 
 final _searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 final _selectedCategoryProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _sortByProvider = StateProvider.autoDispose<String?>((ref) => null);
 
 /// True whenever the current catalog listing came from the local cache
 /// instead of a live network response — drives the "Mode hors-ligne" banner.
@@ -29,10 +31,11 @@ final _catalogIsOfflineProvider = StateProvider.autoDispose<bool>((ref) => false
 final _catalogProvider = FutureProvider.autoDispose<List<ClientProduct>>((ref) async {
   final q = ref.watch(_searchQueryProvider);
   final categoryId = ref.watch(_selectedCategoryProvider);
+  final sortBy = ref.watch(_sortByProvider);
   final db = ref.watch(appDatabaseProvider);
 
   try {
-    final result = await ref.watch(productsApiProvider).searchCatalog(q: q, categoryId: categoryId, pageSize: 100);
+    final result = await ref.watch(productsApiProvider).searchCatalog(q: q, categoryId: categoryId, sortBy: sortBy, pageSize: 100);
     ref.read(_catalogIsOfflineProvider.notifier).state = false;
     unawaited(db.cacheCatalog(result.items.map((p) => p.toJson()).toList()));
     return result.items;
@@ -70,6 +73,7 @@ class _ClientCatalogScreenState extends ConsumerState<ClientCatalogScreen> {
     final catalog = ref.watch(_catalogProvider);
     final categories = ref.watch(_categoriesProvider);
     final selectedCategory = ref.watch(_selectedCategoryProvider);
+    final sortBy = ref.watch(_sortByProvider);
 
     final isOffline = ref.watch(_catalogIsOfflineProvider);
 
@@ -77,6 +81,11 @@ class _ClientCatalogScreenState extends ConsumerState<ClientCatalogScreen> {
       appBar: AppBar(
         title: const Text('Catalogue'),
         actions: [
+          ProductSortMenu(
+            options: kClientSortOptions,
+            value: sortBy,
+            onChanged: (v) => ref.read(_sortByProvider.notifier).state = v,
+          ),
           IconButton(
             icon: const Icon(Icons.camera_alt_outlined),
             tooltip: 'Rechercher par photo',

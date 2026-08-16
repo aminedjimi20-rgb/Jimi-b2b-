@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 const Map<String, String> kProductSortOptions = {
   'nom': 'Nom (A-Z)',
+  'nomDesc': 'Nom (Z-A)',
   'stock': 'Stock (décroissant)',
   'prix': 'Prix (décroissant)',
+  'prixAsc': 'Prix (croissant)',
   'dernierChangement': 'Dernier changement de prix',
   'dernierArrivage': 'Dernier arrivage',
   'nouveautes': 'Nouveautés',

@@ -6,11 +6,15 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../../core/widgets/photo_gallery_viewer.dart';
+import '../../core/widgets/product_sort_menu.dart';
 import '../../models/employee_product.dart';
 import '../../services/service_providers.dart';
 
+final _employeeSortByProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 final employeeProductsProvider = FutureProvider.autoDispose<List<EmployeeProduct>>((ref) {
-  return ref.watch(productsApiProvider).listStaff();
+  final sortBy = ref.watch(_employeeSortByProvider);
+  return ref.watch(productsApiProvider).listStaff(sortBy: sortBy);
 });
 
 /// Read-only catalog — helps an employee check stock/price while preparing
@@ -28,10 +32,18 @@ class _EmployeeProductsScreenState extends ConsumerState<EmployeeProductsScreen>
   @override
   Widget build(BuildContext context) {
     final products = ref.watch(employeeProductsProvider);
+    final sortBy = ref.watch(_employeeSortByProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Produits'),
+        actions: [
+          ProductSortMenu(
+            options: kEmployeeSortOptions,
+            value: sortBy,
+            onChanged: (v) => ref.read(_employeeSortByProvider.notifier).state = v,
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(

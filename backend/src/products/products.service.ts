@@ -23,7 +23,21 @@ const PRODUCT_INCLUDE = {
 // "visually similar enough to be the same or a related product photo".
 const IMAGE_SEARCH_MAX_DISTANCE = 16;
 
-export type ProductSortBy = 'nom' | 'stock' | 'prix' | 'dernierChangement' | 'dernierArrivage' | 'nouveautes' | 'saisonnier';
+export type ProductSortBy =
+  | 'nom'
+  | 'nomDesc'
+  | 'stock'
+  | 'prix'
+  | 'prixAsc'
+  | 'dernierChangement'
+  | 'dernierArrivage'
+  | 'nouveautes'
+  | 'saisonnier';
+
+/** Client never sees prixAchat/marge — restricted to sorts that don't depend on them. */
+export const CLIENT_SORT_OPTIONS: ProductSortBy[] = ['nom', 'nomDesc', 'prix', 'prixAsc', 'nouveautes', 'dernierChangement'];
+/** Employee never sees prixAchat/marge either, but does prepare/sell so stock + dernier arrivage stay useful. */
+export const EMPLOYEE_SORT_OPTIONS: ProductSortBy[] = ['nom', 'nomDesc', 'prix', 'prixAsc', 'nouveautes', 'dernierArrivage', 'stock'];
 
 @Injectable()
 export class ProductsService {
@@ -184,13 +198,30 @@ export class ProductsService {
 
   // ── EMPLOYEE ─────────────────────────────────────────────────────────
 
-  async findAllForEmployee() {
+  async findAllForEmployee(sortBy?: ProductSortBy) {
+    const safeSortBy = sortBy && EMPLOYEE_SORT_OPTIONS.includes(sortBy) ? sortBy : undefined;
+
     const products = await this.prisma.product.findMany({
       where: { deletedAt: null, actif: true, category: { visibleToEmployee: true } },
       include: PRODUCT_INCLUDE,
       orderBy: { nom: 'asc' },
     });
-    return Promise.all(products.map(async (p) => toEmployeeProductDTO(p, await this.computeDerivedInfo(p.id))));
+
+    const [lastEntryByProduct, promoInfo] = await Promise.all([
+      this.lastEntryDateByProduct(),
+      computeActivePromoInfo(this.prisma),
+    ]);
+
+    const withDerived = products.map((product) => ({
+      product,
+      dto: toEmployeeProductDTO(product, {
+        dernierArrivage: lastEntryByProduct.get(product.id) ?? null,
+        dernierChangementPrix: null,
+        estPromo: productHasActivePromo(promoInfo, product.id),
+      }),
+    }));
+
+    return this.sortProducts(withDerived, safeSortBy).map((x) => x.dto);
   }
 
   async findOneForEmployee(id: string) {
@@ -199,11 +230,16 @@ export class ProductsService {
     return toEmployeeProductDTO(product, await this.computeDerivedInfo(id));
   }
 
-  private sortProducts<T extends { product: { nom: string; stockReel: number; prixVente: Prisma.Decimal; estNouveau: boolean; estSaisonnier: boolean }; dto: { dernierChangementPrix: Date | null; dernierArrivage: Date | null } }>(
+  private sortProducts<
+    T extends {
+      product: { nom: string; stockReel: number; prixVente: Prisma.Decimal; estNouveau: boolean; estSaisonnier: boolean };
+      dto: { dernierChangementPrix?: Date | null; dernierArrivage?: Date | null };
+    },
+  >(
     items: T[],
     sortBy?: ProductSortBy,
   ): T[] {
-    const byDateDesc = (a: Date | null, b: Date | null) => {
+    const byDateDesc = (a: Date | null | undefined, b: Date | null | undefined) => {
       if (a == null && b == null) return 0;
       if (a == null) return 1;
       if (b == null) return -1;
@@ -213,10 +249,14 @@ export class ProductsService {
     switch (sortBy) {
       case 'nom':
         return [...items].sort((a, b) => a.product.nom.localeCompare(b.product.nom));
+      case 'nomDesc':
+        return [...items].sort((a, b) => b.product.nom.localeCompare(a.product.nom));
       case 'stock':
         return [...items].sort((a, b) => b.product.stockReel - a.product.stockReel);
       case 'prix':
         return [...items].sort((a, b) => b.product.prixVente.comparedTo(a.product.prixVente));
+      case 'prixAsc':
+        return [...items].sort((a, b) => a.product.prixVente.comparedTo(b.product.prixVente));
       case 'dernierChangement':
         return [...items].sort((a, b) => byDateDesc(a.dto.dernierChangementPrix, b.dto.dernierChangementPrix));
       case 'dernierArrivage':
@@ -225,6 +265,42 @@ export class ProductsService {
         return [...items].sort((a, b) => Number(b.product.estNouveau) - Number(a.product.estNouveau));
       case 'saisonnier':
         return [...items].sort((a, b) => Number(b.product.estSaisonnier) - Number(a.product.estSaisonnier));
+      default:
+        return items;
+    }
+  }
+
+  /**
+   * Client-facing sort — operates on the already-mapped ClientProductDTO
+   * (never the raw Product): `prix` is the price already resolved for THIS
+   * client, never the admin's base prixVente. No stock/prixAchat sort is
+   * offered here — see CLIENT_SORT_OPTIONS.
+   */
+  private async sortClientProducts<T extends { id: string; nom: string; prix: Prisma.Decimal; estNouveau: boolean }>(
+    items: T[],
+    sortBy: ProductSortBy,
+  ): Promise<T[]> {
+    switch (sortBy) {
+      case 'nom':
+        return [...items].sort((a, b) => a.nom.localeCompare(b.nom));
+      case 'nomDesc':
+        return [...items].sort((a, b) => b.nom.localeCompare(a.nom));
+      case 'prix':
+        return [...items].sort((a, b) => b.prix.comparedTo(a.prix));
+      case 'prixAsc':
+        return [...items].sort((a, b) => a.prix.comparedTo(b.prix));
+      case 'nouveautes':
+        return [...items].sort((a, b) => Number(b.estNouveau) - Number(a.estNouveau));
+      case 'dernierChangement': {
+        const lastPriceChangeByProduct = await this.lastPriceChangeByProduct();
+        const byDateDesc = (a: Date | undefined, b: Date | undefined) => {
+          if (a == null && b == null) return 0;
+          if (a == null) return 1;
+          if (b == null) return -1;
+          return b.getTime() - a.getTime();
+        };
+        return [...items].sort((a, b) => byDateDesc(lastPriceChangeByProduct.get(a.id), lastPriceChangeByProduct.get(b.id)));
+      }
       default:
         return items;
     }
@@ -326,11 +402,15 @@ export class ProductsService {
       }),
     );
 
-    const filtered = resolved.filter((p) => {
+    let filtered = resolved.filter((p) => {
       if (query.prixMin != null && p.prix.lessThan(query.prixMin)) return false;
       if (query.prixMax != null && p.prix.greaterThan(query.prixMax)) return false;
       return true;
     });
+
+    if (query.sortBy) {
+      filtered = await this.sortClientProducts(filtered, query.sortBy);
+    }
 
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
