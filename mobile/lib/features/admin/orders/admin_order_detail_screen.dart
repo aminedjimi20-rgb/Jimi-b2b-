@@ -193,6 +193,8 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                     pw.Text('Remise: ${o.remisePourcentage}%', style: const pw.TextStyle(fontSize: 11)),
                   if (o.fraisLivraison > 0)
                     pw.Text('Frais de livraison: ${formatMoney(o.fraisLivraison)}', style: const pw.TextStyle(fontSize: 11)),
+                  if (o.transporteurNom != null)
+                    pw.Text('Transporteur: ${o.transporteurNom}${o.destination != null ? ' → ${o.destination}' : ''}', style: const pw.TextStyle(fontSize: 11)),
                   pw.Text('Total: ${formatMoney(o.total)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
                   pw.Text('Payé: ${formatMoney(o.montantPaye)}', style: const pw.TextStyle(fontSize: 11)),
                   pw.Text('Reste à payer: ${formatMoney(o.montantRestant)}', style: const pw.TextStyle(fontSize: 11)),
@@ -296,6 +298,8 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
                     if (o.remisePourcentage != null && o.remisePourcentage! > 0)
                       _InfoRow(label: 'Remise', value: '${o.remisePourcentage}%'),
                     if (o.fraisLivraison > 0) _InfoRow(label: 'Frais de livraison', value: formatMoney(o.fraisLivraison)),
+                    if (o.transporteurNom != null) _InfoRow(label: 'Transporteur', value: o.transporteurNom!),
+                    if (o.destination != null && o.destination!.isNotEmpty) _InfoRow(label: 'Destination', value: o.destination!),
                     if (o.notes != null && o.notes!.isNotEmpty) _InfoRow(label: 'Notes', value: o.notes!),
                   ],
                 ),

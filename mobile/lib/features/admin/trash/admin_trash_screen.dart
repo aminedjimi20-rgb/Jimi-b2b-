@@ -11,6 +11,7 @@ import '../../../models/fabricant.dart';
 import '../../../models/order.dart';
 import '../../../models/product.dart';
 import '../../../models/stock_receipt.dart';
+import '../../../models/transporteur.dart';
 import '../../../services/service_providers.dart';
 
 final _productsTrashProvider = FutureProvider.autoDispose<List<AdminProduct>>((ref) => ref.watch(productsApiProvider).trash());
@@ -19,6 +20,7 @@ final _fabricantsTrashProvider = FutureProvider.autoDispose<List<Fabricant>>((re
 final _categoriesTrashProvider = FutureProvider.autoDispose<List<Category>>((ref) => ref.watch(categoriesApiProvider).trash());
 final _ordersTrashProvider = FutureProvider.autoDispose<List<OrderView>>((ref) => ref.watch(ordersApiProvider).trash());
 final _receiptsTrashProvider = FutureProvider.autoDispose<List<StockReceiptView>>((ref) => ref.watch(stockReceiptsApiProvider).trash());
+final _transporteursTrashProvider = FutureProvider.autoDispose<List<Transporteur>>((ref) => ref.watch(transporteursApiProvider).trash());
 
 /// Corbeille — items moved here by "Supprimer" across the app can be
 /// restored or erased for good, one tab per entity type.
@@ -28,7 +30,7 @@ class AdminTrashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 7,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Corbeille'),
@@ -41,6 +43,7 @@ class AdminTrashScreen extends StatelessWidget {
               Tab(text: 'Catégories'),
               Tab(text: 'Commandes'),
               Tab(text: 'Bons réception'),
+              Tab(text: 'Transporteurs'),
             ],
           ),
         ),
@@ -105,6 +108,16 @@ class AdminTrashScreen extends StatelessWidget {
               onPermanentDelete: (ref, id) => ref.read(stockReceiptsApiProvider).permanentDelete(id),
               entityLabel: 'ce bon de réception',
               emptyText: 'Corbeille des bons de réception vide.',
+            ),
+            _TrashList<Transporteur>(
+              provider: _transporteursTrashProvider,
+              idOf: (t) => t.id,
+              titleOf: (t) => t.nom,
+              subtitleOf: (t) => '${t.rates.length} tarif${t.rates.length == 1 ? '' : 's'}',
+              onRestore: (ref, id) => ref.read(transporteursApiProvider).restore(id),
+              onPermanentDelete: (ref, id) => ref.read(transporteursApiProvider).permanentDelete(id),
+              entityLabel: 'ce transporteur',
+              emptyText: 'Corbeille des transporteurs vide.',
             ),
           ],
         ),

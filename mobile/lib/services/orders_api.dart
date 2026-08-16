@@ -63,6 +63,8 @@ class OrdersApi {
     String? nom,
     double? remisePourcentage,
     double? fraisLivraison,
+    String? transporteurId,
+    String? destination,
     String? notes,
   }) async {
     final res = await _dio.post('/orders/admin', data: {
@@ -74,13 +76,29 @@ class OrdersApi {
       if (nom != null && nom.isNotEmpty) 'nom': nom,
       if (remisePourcentage != null && remisePourcentage > 0) 'remisePourcentage': remisePourcentage,
       if (fraisLivraison != null && fraisLivraison > 0) 'fraisLivraison': fraisLivraison,
+      if (transporteurId != null) 'transporteurId': transporteurId,
+      if (destination != null && destination.isNotEmpty) 'destination': destination,
       if (notes != null && notes.isNotEmpty) 'notes': notes,
     });
     return OrderView.fromJson(res.data as Map<String, dynamic>);
   }
 
-  Future<List<OrderView>> listAdmin({String? status}) async {
-    final res = await _dio.get('/orders', queryParameters: {if (status != null) 'status': status});
+  Future<List<OrderView>> listAdmin({String? status, String? transporteurId, DateTime? from, DateTime? to}) async {
+    final res = await _dio.get('/orders', queryParameters: {
+      if (status != null) 'status': status,
+      if (transporteurId != null) 'transporteurId': transporteurId,
+      if (from != null) 'from': from.toIso8601String(),
+      if (to != null) 'to': to.toIso8601String(),
+    });
+    return (res.data as List<dynamic>).map((e) => OrderView.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<OrderView>> deliveryHistory({String? transporteurId, DateTime? from, DateTime? to}) async {
+    final res = await _dio.get('/orders/delivery-history', queryParameters: {
+      if (transporteurId != null) 'transporteurId': transporteurId,
+      if (from != null) 'from': from.toIso8601String(),
+      if (to != null) 'to': to.toIso8601String(),
+    });
     return (res.data as List<dynamic>).map((e) => OrderView.fromJson(e as Map<String, dynamic>)).toList();
   }
 

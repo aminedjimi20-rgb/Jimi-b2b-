@@ -94,6 +94,9 @@ class OrderView {
     required this.sousTotal,
     this.remisePourcentage,
     required this.fraisLivraison,
+    this.transporteurId,
+    this.transporteurNom,
+    this.destination,
     required this.montantPaye,
     required this.montantRestant,
     required this.statutPaiement,
@@ -116,6 +119,9 @@ class OrderView {
   final double sousTotal;
   final double? remisePourcentage;
   final double fraisLivraison;
+  final String? transporteurId;
+  final String? transporteurNom;
+  final String? destination;
   final double montantPaye;
   final double montantRestant;
   final String statutPaiement;
@@ -138,6 +144,9 @@ class OrderView {
         sousTotal: parseDecimal(json['sousTotal']),
         remisePourcentage: json['remisePourcentage'] == null ? null : parseDecimal(json['remisePourcentage']),
         fraisLivraison: parseDecimal(json['fraisLivraison']),
+        transporteurId: json['transporteurId'] as String?,
+        transporteurNom: json['transporteurNom'] as String?,
+        destination: json['destination'] as String?,
         montantPaye: parseDecimal(json['montantPaye']),
         montantRestant: parseDecimal(json['montantRestant']),
         statutPaiement: json['statutPaiement'] as String? ?? 'NON_PAYE',

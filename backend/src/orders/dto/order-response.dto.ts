@@ -1,10 +1,14 @@
-import { Client, Order, OrderItem, Prisma, Product, ProductImage } from '@prisma/client';
+import { Client, Order, OrderItem, Prisma, Product, ProductImage, Transporteur } from '@prisma/client';
 import { clampedRemainder, computePaymentStatus } from '../../common/payment-status.util';
 
 type OrderItemWithProduct = OrderItem & {
   product: Pick<Product, 'id' | 'nom' | 'code'> & { images: Pick<ProductImage, 'url' | 'isPrimary'>[] };
 };
-type OrderWithRelations = Order & { items: OrderItemWithProduct[]; client?: Pick<Client, 'raisonSociale' | 'telephone'> };
+type OrderWithRelations = Order & {
+  items: OrderItemWithProduct[];
+  client?: Pick<Client, 'raisonSociale' | 'telephone'>;
+  transporteur?: Pick<Transporteur, 'nom'> | null;
+};
 
 function mapItems(items: OrderItemWithProduct[]) {
   return items.map((item) => ({
@@ -34,6 +38,9 @@ export function toAdminOrderDTO(order: OrderWithRelations) {
     sousTotal: computeSousTotal(order.items),
     remisePourcentage: order.remisePourcentage,
     fraisLivraison: order.fraisLivraison,
+    transporteurId: order.transporteurId,
+    transporteurNom: order.transporteur?.nom ?? null,
+    destination: order.destination,
     total: order.total,
     montantPaye: order.montantPaye,
     montantRestant: clampedRemainder(order.total, order.montantPaye),
@@ -60,6 +67,8 @@ export function toClientOrderDTO(order: OrderWithRelations) {
     paymentMethod: order.paymentMethod,
     sousTotal: computeSousTotal(order.items),
     fraisLivraison: order.fraisLivraison,
+    transporteurNom: order.transporteur?.nom ?? null,
+    destination: order.destination,
     total: order.total,
     montantPaye: order.montantPaye,
     montantRestant: clampedRemainder(order.total, order.montantPaye),

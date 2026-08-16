@@ -14,6 +14,7 @@ import 'promotions_api.dart';
 import 'stats_api.dart';
 import 'stock_api.dart';
 import 'stock_receipts_api.dart';
+import 'transporteurs_api.dart';
 import 'uploads_api.dart';
 
 final categoriesApiProvider = Provider((ref) => CategoriesApi(ref.watch(dioProvider)));
@@ -29,4 +30,5 @@ final statsApiProvider = Provider((ref) => StatsApi(ref.watch(dioProvider)));
 final notificationsApiProvider = Provider((ref) => NotificationsApi(ref.watch(dioProvider)));
 final promotionsApiProvider = Provider((ref) => PromotionsApi(ref.watch(dioProvider)));
 final priceCategoriesApiProvider = Provider((ref) => PriceCategoriesApi(ref.watch(dioProvider)));
+final transporteursApiProvider = Provider((ref) => TransporteursApi(ref.watch(dioProvider)));
 final uploadsApiProvider = Provider((ref) => UploadsApi(ref.watch(dioProvider)));

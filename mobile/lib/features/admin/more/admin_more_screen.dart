@@ -11,6 +11,8 @@ import '../promotions/admin_promotions_screen.dart';
 import '../stock/admin_stock_receipts_screen.dart';
 import '../stock/admin_stock_screen.dart';
 import '../trash/admin_trash_screen.dart';
+import '../transporteurs/admin_delivery_history_screen.dart';
+import '../transporteurs/admin_transporteurs_screen.dart';
 import 'admin_export_screen.dart';
 
 class AdminMoreScreen extends ConsumerWidget {
@@ -57,6 +59,18 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Catégories de prix'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminPriceCategoriesScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.local_shipping_outlined),
+            title: const Text('Transporteurs'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminTransporteursScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.map_outlined),
+            title: const Text('Historique des livraisons'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminDeliveryHistoryScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),

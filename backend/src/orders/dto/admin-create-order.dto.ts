@@ -20,4 +20,12 @@ export class AdminCreateOrderDto extends CreateOrderDto {
   @IsNumber()
   @Min(0)
   fraisLivraison?: number;
+
+  @IsOptional()
+  @IsString()
+  transporteurId?: string;
+
+  @IsOptional()
+  @IsString()
+  destination?: string;
 }

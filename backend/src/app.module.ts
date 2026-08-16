@@ -17,6 +17,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { OrdersModule } from './orders/orders.module';
 import { StockModule } from './stock/stock.module';
 import { StockReceiptsModule } from './stock-receipts/stock-receipts.module';
+import { TransporteursModule } from './transporteurs/transporteurs.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { StatsModule } from './stats/stats.module';
@@ -45,6 +46,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     OrdersModule,
     StockModule,
     StockReceiptsModule,
+    TransporteursModule,
     PaymentsModule,
     StatsModule,
     ExportModule,

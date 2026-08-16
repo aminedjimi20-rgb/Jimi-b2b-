@@ -14,6 +14,7 @@ const ORDER_INCLUDE = {
     include: { product: { select: { id: true, nom: true, code: true, images: { select: { url: true, isPrimary: true } } } } },
   },
   client: { select: { raisonSociale: true, telephone: true } },
+  transporteur: { select: { nom: true } },
 } as const;
 
 // Allowed forward transitions. ANNULEE is reachable from any state before EXPEDIEE.
@@ -44,7 +45,7 @@ export class OrdersService {
   async createForClient(
     clientId: string,
     dto: CreateOrderDto,
-    options?: { remisePourcentage?: number; fraisLivraison?: number },
+    options?: { remisePourcentage?: number; fraisLivraison?: number; transporteurId?: string; destination?: string },
   ) {
     const order = await this.prisma.$transaction(async (tx) => {
       const client = await tx.client.findUnique({ where: { id: clientId } });
@@ -98,6 +99,8 @@ export class OrdersService {
           total,
           remisePourcentage: remise,
           fraisLivraison,
+          transporteurId: options?.transporteurId,
+          destination: options?.destination,
           items: { create: itemsData },
         },
         include: ORDER_INCLUDE,
@@ -162,9 +165,33 @@ export class OrdersService {
 
   // ── ADMIN ────────────────────────────────────────────────────────────
 
-  async findAllForAdmin(status?: OrderStatus) {
+  async findAllForAdmin(status?: OrderStatus, filters?: { transporteurId?: string; from?: string; to?: string }) {
     const orders = await this.prisma.order.findMany({
-      where: { deletedAt: null, ...(status ? { status } : {}) },
+      where: {
+        deletedAt: null,
+        ...(status ? { status } : {}),
+        ...(filters?.transporteurId ? { transporteurId: filters.transporteurId } : {}),
+        ...(filters?.from || filters?.to
+          ? { createdAt: { ...(filters.from ? { gte: new Date(filters.from) } : {}), ...(filters.to ? { lte: new Date(filters.to) } : {}) } }
+          : {}),
+      },
+      include: ORDER_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+    return orders.map(toAdminOrderDTO);
+  }
+
+  /** Historique de livraisons — commandes avec un transporteur assigné, filtrable par date/transporteur. */
+  async findDeliveryHistory(filters?: { transporteurId?: string; from?: string; to?: string }) {
+    const orders = await this.prisma.order.findMany({
+      where: {
+        deletedAt: null,
+        transporteurId: { not: null },
+        ...(filters?.transporteurId ? { transporteurId: filters.transporteurId } : {}),
+        ...(filters?.from || filters?.to
+          ? { createdAt: { ...(filters.from ? { gte: new Date(filters.from) } : {}), ...(filters.to ? { lte: new Date(filters.to) } : {}) } }
+          : {}),
+      },
       include: ORDER_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });

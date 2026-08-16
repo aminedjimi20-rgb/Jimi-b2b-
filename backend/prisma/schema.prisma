@@ -315,6 +315,39 @@ model PromotionClient {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Transport / livraison
+// ─────────────────────────────────────────────────────────────────────────
+
+// Transporteur (société ou personne qui livre) — géré par l'Admin, sert de
+// base au tarif par destination (DeliveryRate) sélectionnable sur une commande.
+model Transporteur {
+  id        String    @id @default(cuid())
+  nom       String
+  deletedAt DateTime? // corbeille — null = actif
+  createdAt DateTime  @default(now())
+
+  rates  DeliveryRate[]
+  orders Order[]
+
+  @@index([nom])
+  @@index([deletedAt])
+}
+
+// Tarif de livraison d'UN transporteur vers UNE destination — préremplit
+// automatiquement fraisLivraison quand l'Admin choisit transporteur+destination.
+model DeliveryRate {
+  id             String  @id @default(cuid())
+  transporteurId String
+  destination    String
+  prix           Decimal @db.Decimal(12, 2)
+
+  transporteur Transporteur @relation(fields: [transporteurId], references: [id], onDelete: Cascade)
+
+  @@unique([transporteurId, destination])
+  @@index([transporteurId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Commandes
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -348,17 +381,20 @@ model Order {
   total             Decimal       @db.Decimal(12, 2) // sous-total après remise + fraisLivraison — calculé serveur
   remisePourcentage Decimal?      @db.Decimal(5, 2) // remise ADMIN uniquement — jamais pilotable par le client
   fraisLivraison    Decimal       @default(0) @db.Decimal(12, 2) // ADMIN uniquement, affiché séparément dans le bon
+  transporteurId    String? // optionnel — voir Transporteur/DeliveryRate
+  destination       String? // ville/zone de livraison, pour l'historique et le tarif
   montantPaye       Decimal       @default(0) @db.Decimal(12, 2) // somme des Payment liés — statut dérivé (voir order-response.dto)
   deletedAt         DateTime? // corbeille — null = actif
   notes             String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
-  client     Client          @relation(fields: [clientId], references: [id])
-  items      OrderItem[]
-  stockMoves StockMovement[]
-  payments   Payment[]
-  delivery   Delivery?
+  client       Client          @relation(fields: [clientId], references: [id])
+  transporteur Transporteur?   @relation(fields: [transporteurId], references: [id])
+  items        OrderItem[]
+  stockMoves   StockMovement[]
+  payments     Payment[]
+  delivery     Delivery?
 
   @@index([clientId])
   @@index([status])

@@ -7,6 +7,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../models/client.dart';
 import '../../../models/order.dart';
 import '../../../models/product.dart';
+import '../../../models/transporteur.dart';
 import '../../../services/orders_api.dart';
 import '../../../services/service_providers.dart';
 import '../products/admin_product_tile.dart';
@@ -14,6 +15,7 @@ import 'admin_order_detail_screen.dart';
 
 final _clientsForOrderProvider = FutureProvider.autoDispose<List<ClientView>>((ref) => ref.watch(clientsApiProvider).listAdmin());
 final _productsForOrderProvider = FutureProvider.autoDispose<List<AdminProduct>>((ref) => ref.watch(productsApiProvider).listAdmin());
+final _transporteursForOrderProvider = FutureProvider.autoDispose<List<Transporteur>>((ref) => ref.watch(transporteursApiProvider).list());
 
 class _OrderLine {
   _OrderLine(this.product, int initialQuantite) : quantite = initialQuantite {
@@ -63,6 +65,8 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
   bool _remiseCustomSelected = false;
   bool _saving = false;
   String? _error;
+  Transporteur? _transporteur;
+  String? _destination;
 
   double get _subtotal => _lines.fold(0.0, (sum, l) => sum + l.product.prixVente * l.quantite);
   double get _fraisLivraisonValue => double.tryParse(_fraisLivraison.text.replaceAll(',', '.')) ?? 0;
@@ -114,6 +118,32 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
     });
   }
 
+  Future<void> _pickTransporteur() async {
+    final transporteurs = await ref.read(_transporteursForOrderProvider.future);
+    if (!mounted) return;
+    final selected = await showModalBottomSheet<Transporteur>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _TransporteurPickerSheet(transporteurs: transporteurs),
+    );
+    if (selected != null) setState(() => _transporteur = selected);
+  }
+
+  Future<void> _pickDestination() async {
+    if (_transporteur == null) return;
+    final selected = await showModalBottomSheet<DeliveryRate>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _DestinationPickerSheet(rates: _transporteur!.rates),
+    );
+    if (selected != null) {
+      setState(() {
+        _destination = selected.destination;
+        _fraisLivraison.text = selected.prix.toStringAsFixed(0);
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (_client == null) {
       setState(() => _error = 'Choisissez un client.');
@@ -143,6 +173,8 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
             nom: _nom.text.trim().isEmpty ? null : _nom.text.trim(),
             remisePourcentage: _remisePourcentage,
             fraisLivraison: _fraisLivraisonValue > 0 ? _fraisLivraisonValue : null,
+            transporteurId: _transporteur?.id,
+            destination: _destination,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
           );
       if (mounted) {
@@ -280,6 +312,26 @@ class _AdminCreateOrderScreenState extends ConsumerState<AdminCreateOrderScreen>
                 onChanged: (v) => setState(() => _remisePourcentage = double.tryParse(v)),
               ),
             ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _pickTransporteur,
+                    icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                    label: Text(_transporteur?.nom ?? 'Transporteur', overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _transporteur == null ? null : _pickDestination,
+                    icon: const Icon(Icons.place_outlined, size: 18),
+                    label: Text(_destination ?? 'Destination', overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: _fraisLivraison,
@@ -455,6 +507,104 @@ class _ProductPickerSheetState extends State<_ProductPickerSheet> {
                         product: filtered[i],
                         onTap: () => Navigator.pop(context, filtered[i]),
                       ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransporteurPickerSheet extends StatelessWidget {
+  const _TransporteurPickerSheet({required this.transporteurs});
+  final List<Transporteur> transporteurs;
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.3,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Choisir un transporteur', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Expanded(
+              child: transporteurs.isEmpty
+                  ? const Center(child: Text('Aucun transporteur créé (voir Plus > Transporteurs).'))
+                  : ListView.builder(
+                      controller: scrollController,
+                      itemCount: transporteurs.length,
+                      itemBuilder: (context, i) {
+                        final t = transporteurs[i];
+                        return ListTile(
+                          leading: const Icon(Icons.local_shipping_outlined),
+                          title: Text(t.nom),
+                          subtitle: Text('${t.rates.length} tarif${t.rates.length == 1 ? '' : 's'}'),
+                          onTap: () => Navigator.pop(context, t),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DestinationPickerSheet extends StatefulWidget {
+  const _DestinationPickerSheet({required this.rates});
+  final List<DeliveryRate> rates;
+
+  @override
+  State<_DestinationPickerSheet> createState() => _DestinationPickerSheetState();
+}
+
+class _DestinationPickerSheetState extends State<_DestinationPickerSheet> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _query.isEmpty ? widget.rates : widget.rates.where((r) => r.destination.toLowerCase().contains(_query)).toList();
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.3,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Choisir une destination', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            TextField(
+              decoration: const InputDecoration(hintText: 'Rechercher...', prefixIcon: Icon(Icons.search)),
+              onChanged: (v) => setState(() => _query = v.toLowerCase()),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: filtered.isEmpty
+                  ? const Center(child: Text('Aucun tarif pour ce transporteur.'))
+                  : ListView.builder(
+                      controller: scrollController,
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) {
+                        final r = filtered[i];
+                        return ListTile(
+                          leading: const Icon(Icons.place_outlined),
+                          title: Text(r.destination),
+                          trailing: Text(formatMoney(r.prix)),
+                          onTap: () => Navigator.pop(context, r),
+                        );
+                      },
                     ),
             ),
           ],

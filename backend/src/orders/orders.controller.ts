@@ -44,21 +44,37 @@ export class OrdersController {
   @Roles('ADMIN')
   @Post('admin')
   createForAdmin(@Body() dto: AdminCreateOrderDto) {
-    const { clientId, remisePourcentage, fraisLivraison, ...orderDto } = dto;
-    return this.ordersService.createForClient(clientId, orderDto, { remisePourcentage, fraisLivraison });
+    const { clientId, remisePourcentage, fraisLivraison, transporteurId, destination, ...orderDto } = dto;
+    return this.ordersService.createForClient(clientId, orderDto, {
+      remisePourcentage,
+      fraisLivraison,
+      transporteurId,
+      destination,
+    });
   }
 
   @Roles('ADMIN')
   @Get()
-  findAll(@Query('status') status?: OrderStatus) {
-    return this.ordersService.findAllForAdmin(status);
+  findAll(
+    @Query('status') status?: OrderStatus,
+    @Query('transporteurId') transporteurId?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.ordersService.findAllForAdmin(status, { transporteurId, from, to });
   }
 
-  // Must come before ':id' so "trash" isn't swallowed as an id param.
+  // Must come before ':id' so "trash"/"delivery-history" aren't swallowed as an id param.
   @Roles('ADMIN')
   @Get('trash')
   findTrash() {
     return this.ordersService.findTrash();
+  }
+
+  @Roles('ADMIN')
+  @Get('delivery-history')
+  findDeliveryHistory(@Query('transporteurId') transporteurId?: string, @Query('from') from?: string, @Query('to') to?: string) {
+    return this.ordersService.findDeliveryHistory({ transporteurId, from, to });
   }
 
   @Roles('ADMIN')

@@ -24,16 +24,21 @@ export class StatsService {
       },
     });
 
+    // chiffreAffaires ne compte que les produits — les frais de livraison sont
+    // un flux séparé, jamais mélangé au CA/marge (voir point 18/34 du cahier des charges).
     let chiffreAffaires = new Prisma.Decimal(0);
+    let fraisLivraisonTotal = new Prisma.Decimal(0);
     let benefice = new Prisma.Decimal(0);
     const parProduit = new Map<string, { nom: string; quantite: number; ca: Prisma.Decimal }>();
     const parClient = new Map<string, { nom: string; ca: Prisma.Decimal }>();
 
     for (const order of orders) {
-      chiffreAffaires = chiffreAffaires.plus(order.total);
+      const produitsCA = order.items.reduce((sum, item) => sum.plus(item.prixUnitaire.mul(item.quantite)), new Prisma.Decimal(0));
+      chiffreAffaires = chiffreAffaires.plus(produitsCA);
+      fraisLivraisonTotal = fraisLivraisonTotal.plus(order.fraisLivraison);
 
       const clientEntry = parClient.get(order.clientId) ?? { nom: order.client.raisonSociale, ca: new Prisma.Decimal(0) };
-      clientEntry.ca = clientEntry.ca.plus(order.total);
+      clientEntry.ca = clientEntry.ca.plus(produitsCA);
       parClient.set(order.clientId, clientEntry);
 
       for (const item of order.items) {
@@ -62,6 +67,7 @@ export class StatsService {
     return {
       periode: { from, to },
       chiffreAffaires,
+      fraisLivraisonTotal,
       benefice,
       margePourcentage,
       nombreCommandes: orders.length,
