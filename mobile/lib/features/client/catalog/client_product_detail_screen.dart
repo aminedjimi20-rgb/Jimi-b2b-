@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../cart/cart_controller.dart';
@@ -74,11 +75,14 @@ class _ClientProductDetailScreenState extends ConsumerState<ClientProductDetailS
               Expanded(
                 child: ListView(
                   children: [
-                    AspectRatio(
-                      aspectRatio: 1.2,
-                      child: p.primaryImageUrl != null
-                          ? CachedNetworkImage(imageUrl: p.primaryImageUrl!, fit: BoxFit.cover)
-                          : Container(color: Colors.grey.shade100, child: const Icon(Icons.image_outlined, size: 64, color: Colors.grey)),
+                    GestureDetector(
+                      onTap: p.images.isNotEmpty ? () => PhotoGalleryViewer.open(context, p.images.map((i) => i.url).toList()) : null,
+                      child: AspectRatio(
+                        aspectRatio: 1.2,
+                        child: p.primaryImageUrl != null
+                            ? CachedNetworkImage(imageUrl: p.primaryImageUrl!, fit: BoxFit.cover)
+                            : Container(color: Colors.grey.shade100, child: const Icon(Icons.image_outlined, size: 64, color: Colors.grey)),
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +6,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/order.dart';
 import '../../../services/service_providers.dart';
 import 'client_orders_screen.dart';
@@ -68,6 +70,19 @@ class ClientOrderDetailScreen extends ConsumerWidget {
               child: Column(
                 children: o.items
                     .map((item) => ListTile(
+                          leading: GestureDetector(
+                            onTap: item.imageUrl != null ? () => PhotoGalleryViewer.open(context, [item.imageUrl!]) : null,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: item.imageUrl != null
+                                    ? CachedNetworkImage(imageUrl: item.imageUrl!, fit: BoxFit.cover, errorWidget: (_, __, ___) => const Icon(Icons.inventory_2_outlined))
+                                    : const Icon(Icons.inventory_2_outlined),
+                              ),
+                            ),
+                          ),
                           title: Text(item.nom),
                           subtitle: Text('Qté: ${item.quantite} × ${formatMoney(item.prixUnitaire)}'),
                           trailing: Text(formatMoney(item.sousTotal), style: const TextStyle(fontWeight: FontWeight.bold)),

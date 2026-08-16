@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import 'admin_product_form_screen.dart';
@@ -54,9 +55,12 @@ class AdminProductDetailScreen extends ConsumerWidget {
                   scrollDirection: Axis.horizontal,
                   itemCount: p.images.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, i) => ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: CachedNetworkImage(imageUrl: p.images[i].url, width: 140, height: 140, fit: BoxFit.cover),
+                  itemBuilder: (context, i) => GestureDetector(
+                    onTap: () => PhotoGalleryViewer.open(context, p.images.map((img) => img.url).toList(), initialIndex: i),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: CachedNetworkImage(imageUrl: p.images[i].url, width: 140, height: 140, fit: BoxFit.cover),
+                    ),
                   ),
                 ),
               ),

@@ -15,6 +15,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../core/widgets/photo_gallery_viewer.dart';
 import '../../../models/order.dart';
 import '../../../models/stock_receipt.dart';
 import '../../../services/service_providers.dart';
@@ -270,18 +271,21 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
               child: Column(
                 children: r.items
                     .map((item) => ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: item.imageUrl != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: item.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      errorWidget: (_, __, ___) => const Icon(Icons.inventory_2_outlined),
-                                    )
-                                  : const Icon(Icons.inventory_2_outlined),
+                          leading: GestureDetector(
+                            onTap: item.imageUrl != null ? () => PhotoGalleryViewer.open(context, [item.imageUrl!]) : null,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: item.imageUrl != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: item.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (_, __, ___) => const Icon(Icons.inventory_2_outlined),
+                                      )
+                                    : const Icon(Icons.inventory_2_outlined),
+                              ),
                             ),
                           ),
                           title: Text(item.nom),

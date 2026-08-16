@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_value_widget.dart';
+import '../../core/widgets/photo_gallery_viewer.dart';
 import '../../models/employee_product.dart';
 import '../../services/service_providers.dart';
 
@@ -63,19 +64,22 @@ class _EmployeeProductsScreenState extends ConsumerState<EmployeeProductsScreen>
                 return Card(
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: p.primaryImageUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: p.primaryImageUrl!,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => Icon(Icons.inventory_2_outlined, color: lowStock ? AppTheme.warning : Colors.grey[600]),
-                                placeholder: (_, __) => Icon(Icons.inventory_2_outlined, color: lowStock ? AppTheme.warning : Colors.grey[600]),
-                              )
-                            : Icon(Icons.inventory_2_outlined, color: lowStock ? AppTheme.warning : Colors.grey[600]),
+                    leading: GestureDetector(
+                      onTap: p.primaryImageUrl != null ? () => PhotoGalleryViewer.open(context, p.images.map((i) => i.url).toList()) : null,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: p.primaryImageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: p.primaryImageUrl!,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (_, __, ___) => Icon(Icons.inventory_2_outlined, color: lowStock ? AppTheme.warning : Colors.grey[600]),
+                                  placeholder: (_, __) => Icon(Icons.inventory_2_outlined, color: lowStock ? AppTheme.warning : Colors.grey[600]),
+                                )
+                              : Icon(Icons.inventory_2_outlined, color: lowStock ? AppTheme.warning : Colors.grey[600]),
+                        ),
                       ),
                     ),
                     title: Text(p.nom, maxLines: 1, overflow: TextOverflow.ellipsis),
