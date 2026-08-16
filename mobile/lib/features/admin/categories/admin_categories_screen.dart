@@ -65,6 +65,70 @@ Future<bool> showCreateCategoryDialog(BuildContext context, WidgetRef ref) async
   return created;
 }
 
+Future<void> _showEditCategoryDialog(BuildContext context, WidgetRef ref, Category category) async {
+  final controller = TextEditingController(text: category.nom);
+  bool visibleToClient = category.visibleToClient;
+  bool visibleToEmployee = category.visibleToEmployee;
+  String? error;
+
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: const Text('Modifier le dossier'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: controller, autofocus: true, decoration: const InputDecoration(labelText: 'Nom du dossier')),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Visible pour les clients'),
+              value: visibleToClient,
+              onChanged: (v) => setState(() => visibleToClient = v),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Visible pour les employés'),
+              value: visibleToEmployee,
+              onChanged: (v) => setState(() => visibleToEmployee = v),
+            ),
+            if (error != null) ...[
+              const SizedBox(height: 8),
+              Text(error!, style: const TextStyle(color: AppTheme.danger)),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          ElevatedButton(
+            onPressed: () async {
+              final nom = controller.text.trim();
+              if (nom.isEmpty) {
+                setState(() => error = 'Le nom est requis.');
+                return;
+              }
+              try {
+                await ref.read(categoriesApiProvider).update(
+                      category.id,
+                      nom: nom,
+                      visibleToClient: visibleToClient,
+                      visibleToEmployee: visibleToEmployee,
+                    );
+                if (ctx.mounted) Navigator.pop(ctx);
+                ref.invalidate(adminCategoriesProvider);
+              } catch (e) {
+                setState(() => error = e is ApiException ? e.message : 'Erreur.');
+              }
+            },
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 Future<void> _confirmDeleteCategory(BuildContext context, WidgetRef ref, Category category) async {
   final confirmed = await showDialog<bool>(
     context: context,
@@ -132,10 +196,25 @@ class AdminCategoriesScreen extends ConsumerWidget {
                 child: ListTile(
                   leading: const Icon(Icons.sell_outlined),
                   title: Text(items[i].nom),
+                  subtitle: !items[i].visibleToClient || !items[i].visibleToEmployee
+                      ? Text(
+                          [
+                            if (!items[i].visibleToClient) 'Masqué aux clients',
+                            if (!items[i].visibleToEmployee) 'Masqué aux employés',
+                          ].join(' · '),
+                          style: const TextStyle(color: AppTheme.warning, fontSize: 12),
+                        )
+                      : null,
+                  onTap: () => _showEditCategoryDialog(context, ref, items[i]),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text('${items[i].productCount} produit${items[i].productCount == 1 ? '' : 's'}'),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        tooltip: 'Modifier',
+                        onPressed: () => _showEditCategoryDialog(context, ref, items[i]),
+                      ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline, size: 20),
                         tooltip: 'Supprimer',

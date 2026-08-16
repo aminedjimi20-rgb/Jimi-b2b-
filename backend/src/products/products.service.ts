@@ -186,7 +186,7 @@ export class ProductsService {
 
   async findAllForEmployee() {
     const products = await this.prisma.product.findMany({
-      where: { deletedAt: null, actif: true },
+      where: { deletedAt: null, actif: true, category: { visibleToEmployee: true } },
       include: PRODUCT_INCLUDE,
       orderBy: { nom: 'asc' },
     });
@@ -302,6 +302,7 @@ export class ProductsService {
     const where: Prisma.ProductWhereInput = {
       actif: true,
       deletedAt: null,
+      category: { visibleToClient: true },
       ...(query.categoryId ? { categoryId: query.categoryId } : {}),
       ...(query.q
         ? {

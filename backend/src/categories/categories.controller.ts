@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
@@ -7,11 +9,11 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
-  // Readable by any authenticated role (Admin + Client both need the category tree to browse/filter).
-  @Roles('ADMIN', 'CLIENT')
+  // Readable by any authenticated role — Client/Employee are scoped to visible-to-them categories (see service).
+  @Roles('ADMIN', 'CLIENT', 'EMPLOYEE')
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.categoriesService.findAll(user.role === 'CLIENT' || user.role === 'EMPLOYEE' ? user.role : undefined);
   }
 
   // Must come before ':id'-style routes so "trash" isn't swallowed as an id param.

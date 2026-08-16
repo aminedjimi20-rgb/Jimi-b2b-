@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -7,4 +7,12 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsString()
   parentId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  visibleToClient?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  visibleToEmployee?: boolean;
 }

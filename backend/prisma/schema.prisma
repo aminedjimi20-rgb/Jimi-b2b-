@@ -156,6 +156,12 @@ model Category {
   nom       String
   parentId  String?
   deletedAt DateTime? // corbeille — null = actif
+
+  // Visibility per role, set by the Admin — default true (visible) so every
+  // existing category keeps behaving exactly as before this field existed.
+  visibleToClient   Boolean @default(true)
+  visibleToEmployee Boolean @default(true)
+
   parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children  Category[] @relation("CategoryTree")
   products  Product[]

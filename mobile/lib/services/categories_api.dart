@@ -14,6 +14,12 @@ class CategoriesApi {
   Future<void> create(String nom, {String? parentId}) =>
       _dio.post('/categories', data: {'nom': nom, if (parentId != null) 'parentId': parentId});
 
+  Future<void> update(String id, {String? nom, bool? visibleToClient, bool? visibleToEmployee}) => _dio.patch('/categories/$id', data: {
+        if (nom != null) 'nom': nom,
+        if (visibleToClient != null) 'visibleToClient': visibleToClient,
+        if (visibleToEmployee != null) 'visibleToEmployee': visibleToEmployee,
+      });
+
   /// Moves to the corbeille (reversible) — see [permanentDelete] to erase for good.
   Future<void> remove(String id) => _dio.delete('/categories/$id');
 
