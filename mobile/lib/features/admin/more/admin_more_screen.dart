@@ -6,13 +6,13 @@ import '../../../core/theme/app_theme.dart';
 import '../../auth/change_password_screen.dart';
 import '../../shared/notifications_screen.dart';
 import '../categories/admin_categories_screen.dart';
+import '../dashboard/admin_dashboard_screen.dart';
 import '../employees/admin_employees_screen.dart';
 import '../fabricants/admin_fabricants_screen.dart';
 import '../price_categories/admin_price_categories_screen.dart';
 import '../product_requests/admin_product_requests_screen.dart';
 import '../products/admin_image_search_screen.dart';
 import '../promotions/admin_promotions_screen.dart';
-import '../stock/admin_stock_receipts_screen.dart';
 import '../stock/admin_stock_screen.dart';
 import '../trash/admin_trash_screen.dart';
 import '../transporteurs/admin_delivery_history_screen.dart';
@@ -28,6 +28,13 @@ class AdminMoreScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Plus')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.bar_chart_outlined),
+            title: const Text('Statistiques'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminDashboardScreen())),
+          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.category_outlined),
             title: const Text('Catégories'),
@@ -51,12 +58,6 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Fournisseurs'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminFabricantsScreen())),
-          ),
-          ListTile(
-            leading: const Icon(Icons.local_shipping_outlined),
-            title: const Text('Réceptions fournisseurs (bons)'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminStockReceiptsScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.local_offer_outlined),
