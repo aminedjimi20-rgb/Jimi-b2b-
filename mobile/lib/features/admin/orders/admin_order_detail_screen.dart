@@ -50,6 +50,7 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
   bool _generating = false;
   bool _recordingPayment = false;
   bool _deleting = false;
+  bool _reactivating = false;
 
   Future<void> _updateStatus(String status) async {
     try {
@@ -59,6 +60,20 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
       }
+    }
+  }
+
+  Future<void> _reactivate(OrderView o) async {
+    setState(() => _reactivating = true);
+    try {
+      await ref.read(ordersApiProvider).reactivate(o.id);
+      ref.invalidate(_adminOrderProvider(widget.orderId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+      }
+    } finally {
+      if (mounted) setState(() => _reactivating = false);
     }
   }
 
@@ -414,6 +429,19 @@ class _AdminOrderDetailScreenState extends ConsumerState<AdminOrderDetailScreen>
               ),
             ],
             const SizedBox(height: 24),
+            if (o.status == 'ANNULEE') ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _reactivating ? null : () => _reactivate(o),
+                  icon: _reactivating
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.replay_outlined),
+                  label: const Text('Réactiver la commande'),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             if ((_nextStatuses[o.status] ?? []).isNotEmpty) ...[
               Text('Changer le statut', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),

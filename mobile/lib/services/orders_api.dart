@@ -130,6 +130,12 @@ class OrdersApi {
     return OrderView.fromJson(res.data as Map<String, dynamic>);
   }
 
+  /// Un-cancels an order (ANNULEE -> EN_ATTENTE) — a mis-click on "Annuler" shouldn't be a dead end.
+  Future<OrderView> reactivate(String id) async {
+    final res = await _dio.post('/orders/$id/reactivate');
+    return OrderView.fromJson(res.data as Map<String, dynamic>);
+  }
+
   // ── EMPLOYEE ─────────────────────────────────────────────────────────
 
   /// Counter sale placed by an Employee — auto-assigned to them. No remisePourcentage (Admin-only).

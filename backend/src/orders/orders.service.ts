@@ -307,6 +307,40 @@ export class OrdersService {
     return this.findOneForAdmin(id);
   }
 
+  /**
+   * Un-cancels an order (ANNULEE -> EN_ATTENTE) — a mis-click on "Annuler"
+   * shouldn't be a dead end. Symmetrically re-applies what cancelling
+   * reversed (stock, credit), exactly like the corbeille's restore() does
+   * for a trashed order, since cancelling already ran that same reversal.
+   */
+  async reactivate(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
+    if (order.status !== 'ANNULEE') throw new BadRequestException('Seule une commande annulée peut être réactivée.');
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of order.items) {
+        await tx.product.update({ where: { id: item.productId }, data: { stockReel: { decrement: item.quantite } } });
+        await tx.stockMovement.create({
+          data: { productId: item.productId, type: 'VENTE', quantite: item.quantite, orderId: id, motif: `Réactivation ${order.reference}` },
+        });
+      }
+      if (order.paymentMethod === 'CREDIT') {
+        const client = await tx.client.findUnique({ where: { id: order.clientId } });
+        if (client) {
+          const nouveauSolde = client.soldeCredit.plus(order.total);
+          if (nouveauSolde.greaterThan(client.limiteCredit)) {
+            throw new BadRequestException('Réactivation impossible : limite de crédit du client dépassée.');
+          }
+          await tx.client.update({ where: { id: order.clientId }, data: { soldeCredit: nouveauSolde } });
+        }
+      }
+      await tx.order.update({ where: { id }, data: { status: 'EN_ATTENTE' } });
+    });
+
+    return this.findOneForAdmin(id);
+  }
+
   // ── Corbeille ────────────────────────────────────────────────────────
 
   async findTrash() {

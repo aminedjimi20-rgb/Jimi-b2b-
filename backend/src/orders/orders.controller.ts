@@ -125,6 +125,13 @@ export class OrdersController {
     return this.ordersService.assignEmployee(id, dto.employeeId ?? null);
   }
 
+  // Un-cancels an order (ANNULEE -> EN_ATTENTE) — a mis-click on "Annuler" shouldn't be a dead end.
+  @Roles('ADMIN')
+  @Post(':id/reactivate')
+  reactivate(@Param('id') id: string) {
+    return this.ordersService.reactivate(id);
+  }
+
   // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.
   @Roles('ADMIN')
   @Delete(':id')
