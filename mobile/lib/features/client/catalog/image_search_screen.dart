@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../services/products_api.dart';
 import '../../../services/service_providers.dart';
+import '../product_requests/client_request_product_screen.dart';
 import 'client_product_detail_screen.dart';
 
 /// Client takes/picks a photo of a product they're holding — the app
@@ -91,7 +92,25 @@ class _ImageSearchScreenState extends ConsumerState<ImageSearchScreen> {
           if (!_loading && _results != null)
             Expanded(
               child: _results!.isEmpty
-                  ? const Center(child: Text('Aucun produit similaire trouvé.'))
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Aucun produit similaire trouvé.', textAlign: TextAlign.center),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => ClientRequestProductScreen(initialImagePath: _pickedPath)),
+                              ),
+                              icon: const Icon(Icons.add_a_photo_outlined),
+                              label: const Text('Demander ce produit'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: _results!.length,

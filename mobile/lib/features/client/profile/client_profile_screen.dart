@@ -10,6 +10,7 @@ import '../../../services/service_providers.dart';
 import '../../shared/notifications_screen.dart';
 import '../favorites/client_favorites_screen.dart';
 import '../orders/client_orders_screen.dart';
+import '../product_requests/client_my_requests_screen.dart';
 
 final _myProfileProvider = FutureProvider.autoDispose<ClientView>((ref) => ref.watch(clientsApiProvider).myProfile());
 
@@ -74,6 +75,12 @@ class ClientProfileScreen extends ConsumerWidget {
                     title: const Text('Mes favoris'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClientFavoritesScreen())),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.add_a_photo_outlined),
+                    title: const Text('Mes demandes de produits'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClientMyRequestsScreen())),
                   ),
                   ListTile(
                     leading: const Icon(Icons.notifications_outlined),

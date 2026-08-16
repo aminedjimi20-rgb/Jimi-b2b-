@@ -36,4 +36,27 @@ export class UploadsController {
     if (!file) throw new BadRequestException('Aucun fichier reçu.');
     return { url: `/uploads/products/${file.filename}` };
   }
+
+  /** CLIENT-only — photo attached to a "demander un produit" request (see ProductRequestsModule). */
+  @Roles('CLIENT')
+  @Post('request-photo')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/requests',
+        filename: (_req, file, cb) => cb(null, `${randomUUID()}${extname(file.originalname)}`),
+      }),
+      fileFilter: (_req, file, cb) => {
+        if (!ALLOWED_MIME.includes(file.mimetype)) {
+          return cb(new BadRequestException('Format image non supporté.'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 8 * 1024 * 1024 },
+    }),
+  )
+  uploadRequestPhoto(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Aucun fichier reçu.');
+    return { url: `/uploads/requests/${file.filename}` };
+  }
 }

@@ -12,6 +12,7 @@ import '../../../models/category.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../cart/cart_controller.dart';
+import '../product_requests/client_request_product_screen.dart';
 import 'client_product_detail_screen.dart';
 import 'image_search_screen.dart';
 import 'voice_search_button.dart';
@@ -80,6 +81,11 @@ class _ClientCatalogScreenState extends ConsumerState<ClientCatalogScreen> {
             icon: const Icon(Icons.camera_alt_outlined),
             tooltip: 'Rechercher par photo',
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImageSearchScreen())),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_a_photo_outlined),
+            tooltip: 'Demander un produit',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClientRequestProductScreen())),
           ),
         ],
         bottom: PreferredSize(

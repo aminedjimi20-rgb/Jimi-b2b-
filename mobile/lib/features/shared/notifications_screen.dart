@@ -25,6 +25,8 @@ IconData _iconFor(String type) {
       return Icons.warning_amber_rounded;
     case 'PROMOTION':
       return Icons.local_offer_outlined;
+    case 'DEMANDE_PRODUIT':
+      return Icons.add_a_photo_outlined;
     default:
       return Icons.notifications_outlined;
   }

@@ -14,6 +14,7 @@ import { ProductsModule } from './products/products.module';
 import { PriceCategoriesModule } from './price-categories/price-categories.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { ProductRequestsModule } from './product-requests/product-requests.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { OrdersModule } from './orders/orders.module';
 import { StockModule } from './stock/stock.module';
@@ -44,6 +45,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     PriceCategoriesModule,
     PromotionsModule,
     FavoritesModule,
+    ProductRequestsModule,
     UploadsModule,
     OrdersModule,
     StockModule,

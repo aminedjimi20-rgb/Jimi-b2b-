@@ -10,6 +10,7 @@ import 'notifications_api.dart';
 import 'orders_api.dart';
 import 'payments_api.dart';
 import 'price_categories_api.dart';
+import 'product_requests_api.dart';
 import 'products_api.dart';
 import 'promotions_api.dart';
 import 'stats_api.dart';
@@ -34,3 +35,4 @@ final promotionsApiProvider = Provider((ref) => PromotionsApi(ref.watch(dioProvi
 final priceCategoriesApiProvider = Provider((ref) => PriceCategoriesApi(ref.watch(dioProvider)));
 final transporteursApiProvider = Provider((ref) => TransporteursApi(ref.watch(dioProvider)));
 final uploadsApiProvider = Provider((ref) => UploadsApi(ref.watch(dioProvider)));
+final productRequestsApiProvider = Provider((ref) => ProductRequestsApi(ref.watch(dioProvider)));

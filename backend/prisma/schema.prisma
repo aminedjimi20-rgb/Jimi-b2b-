@@ -117,13 +117,14 @@ model Client {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  priceCategory PriceCategory?       @relation(fields: [priceCategoryId], references: [id])
-  customPrices  ClientProductPrice[]
-  orders        Order[]
-  favorites     Favorite[]
-  promotions    PromotionClient[]
-  payments      Payment[]
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  priceCategory   PriceCategory?       @relation(fields: [priceCategoryId], references: [id])
+  customPrices    ClientProductPrice[]
+  orders          Order[]
+  favorites       Favorite[]
+  promotions      PromotionClient[]
+  payments        Payment[]
+  productRequests ProductRequest[]
 
   @@index([raisonSociale])
   @@index([deletedAt])
@@ -549,6 +550,7 @@ enum NotificationType {
   STOCK_FAIBLE
   PROMOTION
   SYSTEME
+  DEMANDE_PRODUIT
 }
 
 model Notification {
@@ -578,6 +580,34 @@ model Favorite {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, productId])
+}
+
+enum ProductRequestStatus {
+  EN_ATTENTE
+  TRAITEE
+  REJETEE
+}
+
+// A client, unable to find a product in the catalog, submits a photo (and
+// an optional description) asking the Admin to source/add it — see spec
+// point "Demander un produit par photo". Admin reviews and closes it out
+// with a status + an optional note back to the client.
+model ProductRequest {
+  id          String               @id @default(cuid())
+  clientId    String
+  imageUrl    String
+  description String?
+  status      ProductRequestStatus @default(EN_ATTENTE)
+  adminNote   String?
+  deletedAt   DateTime? // corbeille — null = actif
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([status])
+  @@index([deletedAt])
 }
 
 enum DevicePlatform {

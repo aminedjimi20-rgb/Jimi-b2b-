@@ -11,6 +11,7 @@ import '../../../models/employee.dart';
 import '../../../models/fabricant.dart';
 import '../../../models/order.dart';
 import '../../../models/product.dart';
+import '../../../models/product_request.dart';
 import '../../../models/stock_receipt.dart';
 import '../../../models/transporteur.dart';
 import '../../../services/service_providers.dart';
@@ -23,6 +24,8 @@ final _ordersTrashProvider = FutureProvider.autoDispose<List<OrderView>>((ref) =
 final _receiptsTrashProvider = FutureProvider.autoDispose<List<StockReceiptView>>((ref) => ref.watch(stockReceiptsApiProvider).trash());
 final _transporteursTrashProvider = FutureProvider.autoDispose<List<Transporteur>>((ref) => ref.watch(transporteursApiProvider).trash());
 final _employeesTrashProvider = FutureProvider.autoDispose<List<EmployeeView>>((ref) => ref.watch(employeesApiProvider).trash());
+final _productRequestsTrashProvider =
+    FutureProvider.autoDispose<List<ProductRequestView>>((ref) => ref.watch(productRequestsApiProvider).trash());
 
 /// Corbeille — items moved here by "Supprimer" across the app can be
 /// restored or erased for good, one tab per entity type.
@@ -32,7 +35,7 @@ class AdminTrashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 8,
+      length: 9,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Corbeille'),
@@ -47,6 +50,7 @@ class AdminTrashScreen extends StatelessWidget {
               Tab(text: 'Bons réception'),
               Tab(text: 'Transporteurs'),
               Tab(text: 'Employés'),
+              Tab(text: 'Demandes produits'),
             ],
           ),
         ),
@@ -131,6 +135,16 @@ class AdminTrashScreen extends StatelessWidget {
               onPermanentDelete: (ref, id) => ref.read(employeesApiProvider).permanentDelete(id),
               entityLabel: 'cet employé',
               emptyText: 'Corbeille des employés vide.',
+            ),
+            _TrashList<ProductRequestView>(
+              provider: _productRequestsTrashProvider,
+              idOf: (r) => r.id,
+              titleOf: (r) => r.clientNom ?? r.description ?? 'Demande de produit',
+              subtitleOf: (r) => r.description ?? '-',
+              onRestore: (ref, id) => ref.read(productRequestsApiProvider).restore(id),
+              onPermanentDelete: (ref, id) => ref.read(productRequestsApiProvider).permanentDelete(id),
+              entityLabel: 'cette demande de produit',
+              emptyText: 'Corbeille des demandes de produits vide.',
             ),
           ],
         ),
