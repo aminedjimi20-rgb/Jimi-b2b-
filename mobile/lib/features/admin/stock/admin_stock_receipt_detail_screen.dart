@@ -172,7 +172,11 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
-                  pw.Text('Total achat: ${formatMoney(receipt.totalAchat)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Sous-total achat: ${formatMoney(receipt.totalAchat)}', style: const pw.TextStyle(fontSize: 11)),
+                  if (receipt.remisePourcentage != null && receipt.remisePourcentage! > 0) ...[
+                    pw.Text('Remise (${receipt.remisePourcentage}%): -${formatMoney(receipt.montantRemise)}', style: const pw.TextStyle(fontSize: 11)),
+                  ],
+                  pw.Text('Total dû: ${formatMoney(receipt.totalApresRemise)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
                   pw.SizedBox(height: 4),
                   pw.Text('Payé: ${formatMoney(receipt.montantPaye)}', style: const pw.TextStyle(fontSize: 11)),
                   pw.Text('Reste à payer: ${formatMoney(receipt.montantRestant)}', style: const pw.TextStyle(fontSize: 11)),
@@ -320,8 +324,26 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total achat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(formatMoney(r.totalAchat), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                      const Text('Sous-total achat'),
+                      Text(formatMoney(r.totalAchat)),
+                    ],
+                  ),
+                  if (r.remisePourcentage != null && r.remisePourcentage! > 0) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Remise (${r.remisePourcentage!.toStringAsFixed(0)}%)'),
+                        Text('- ${formatMoney(r.montantRemise)}', style: const TextStyle(color: AppTheme.warning)),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total dû', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(formatMoney(r.totalApresRemise), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
                     ],
                   ),
                   const Divider(height: 20),

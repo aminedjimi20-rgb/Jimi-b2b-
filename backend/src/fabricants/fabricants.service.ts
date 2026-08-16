@@ -30,7 +30,13 @@ export class FabricantsService {
     });
     if (!fabricant || fabricant.deletedAt) throw new NotFoundException('Fournisseur introuvable.');
 
-    const totalAchat = fabricant.receipts.reduce((sum, r) => sum.plus(r.totalAchat), new Prisma.Decimal(0));
+    // totalAchat sur chaque bon est le sous-total AVANT remise — ce qui est
+    // réellement dû (et donc la base du "reste") est après remise, exactement
+    // comme dans stock-receipt-response.dto.
+    const totalApresRemise = (r: { totalAchat: Prisma.Decimal; remisePourcentage: Prisma.Decimal | null }) =>
+      r.remisePourcentage ? r.totalAchat.minus(r.totalAchat.mul(r.remisePourcentage).div(100)) : r.totalAchat;
+
+    const totalDu = fabricant.receipts.reduce((sum, r) => sum.plus(totalApresRemise(r)), new Prisma.Decimal(0));
     const totalPaye = fabricant.receipts.reduce((sum, r) => sum.plus(r.montantPaye), new Prisma.Decimal(0));
 
     return {
@@ -41,9 +47,9 @@ export class FabricantsService {
       email: fabricant.email,
       notesInternes: fabricant.notesInternes,
       createdAt: fabricant.createdAt,
-      totalAchat,
+      totalAchat: totalDu,
       totalPaye,
-      totalRestant: clampedRemainder(totalAchat, totalPaye),
+      totalRestant: clampedRemainder(totalDu, totalPaye),
       products: fabricant.products.map((p) => ({
         id: p.id,
         nom: p.nom,
@@ -57,10 +63,10 @@ export class FabricantsService {
         id: r.id,
         reference: r.reference,
         createdAt: r.createdAt,
-        totalAchat: r.totalAchat,
+        totalAchat: totalApresRemise(r),
         montantPaye: r.montantPaye,
-        montantRestant: clampedRemainder(r.totalAchat, r.montantPaye),
-        statutPaiement: computePaymentStatus(r.montantPaye, r.totalAchat),
+        montantRestant: clampedRemainder(totalApresRemise(r), r.montantPaye),
+        statutPaiement: computePaymentStatus(r.montantPaye, totalApresRemise(r)),
       })),
       payments: fabricant.payments.map((p) => ({
         id: p.id,

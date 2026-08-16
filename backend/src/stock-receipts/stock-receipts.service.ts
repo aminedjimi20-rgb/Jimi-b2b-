@@ -28,7 +28,9 @@ export class StockReceiptsService {
     if (products.length !== dto.items.length) {
       throw new BadRequestException('Un ou plusieurs produits sont introuvables.');
     }
+    const productById = new Map(products.map((p) => [p.id, p]));
 
+    const remise = dto.remisePourcentage;
     const reference = await this.generateReference();
     let total = new Prisma.Decimal(0);
     let totalAchat = new Prisma.Decimal(0);
@@ -36,6 +38,12 @@ export class StockReceiptsService {
       const quantite = item.cartons * item.unitesParCarton;
       total = total.plus(new Prisma.Decimal(item.prixVente).mul(quantite));
       totalAchat = totalAchat.plus(new Prisma.Decimal(item.prixAchat).mul(quantite));
+      // Coût réel après remise fournisseur — c'est CE prix qui doit servir de
+      // base à la marge du produit (ex: 100 DA avant remise, 10% de remise
+      // => 90 DA de coût réel), jamais le prix brut avant remise.
+      const prixAchatReel = remise
+        ? new Prisma.Decimal(item.prixAchat).mul(new Prisma.Decimal(100).minus(remise)).div(100)
+        : new Prisma.Decimal(item.prixAchat);
       return {
         productId: item.productId,
         cartons: item.cartons,
@@ -43,6 +51,7 @@ export class StockReceiptsService {
         quantite,
         prixAchat: item.prixAchat,
         prixVente: item.prixVente,
+        prixAchatReel,
       };
     });
 
@@ -52,9 +61,10 @@ export class StockReceiptsService {
           reference,
           fabricantId: dto.fabricantId,
           notes: dto.notes,
+          remisePourcentage: remise,
           total,
           totalAchat,
-          items: { create: itemsData },
+          items: { create: itemsData.map(({ prixAchatReel: _prixAchatReel, ...rest }) => rest) },
         },
       });
 
@@ -69,6 +79,18 @@ export class StockReceiptsService {
             motif: `Réception ${reference} — ${fabricant.nom}`,
           },
         });
+
+        // Remise appliquée : le coût de revient catalogue doit refléter ce
+        // qui a réellement été payé, sinon la marge affichée reste fausse.
+        if (remise) {
+          const product = productById.get(item.productId)!;
+          if (!product.prixAchat.equals(item.prixAchatReel)) {
+            await tx.product.update({ where: { id: item.productId }, data: { prixAchat: item.prixAchatReel } });
+            await tx.productPriceHistory.create({
+              data: { productId: item.productId, prixAchat: item.prixAchatReel, prixVente: product.prixVente },
+            });
+          }
+        }
       }
 
       return created;

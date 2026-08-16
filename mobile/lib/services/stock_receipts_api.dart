@@ -34,11 +34,13 @@ class StockReceiptsApi {
     required String fabricantId,
     required List<StockReceiptItemInput> items,
     String? notes,
+    double? remisePourcentage,
   }) async {
     final res = await _dio.post('/stock-receipts', data: {
       'fabricantId': fabricantId,
       'items': items.map((e) => e.toJson()).toList(),
       if (notes != null && notes.isNotEmpty) 'notes': notes,
+      if (remisePourcentage != null && remisePourcentage > 0) 'remisePourcentage': remisePourcentage,
     });
     return StockReceiptView.fromJson(res.data as Map<String, dynamic>);
   }

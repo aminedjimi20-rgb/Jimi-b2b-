@@ -51,6 +51,9 @@ class StockReceiptView {
     this.notes,
     required this.total,
     required this.totalAchat,
+    this.remisePourcentage,
+    required this.montantRemise,
+    required this.totalApresRemise,
     required this.montantPaye,
     required this.montantRestant,
     required this.statutPaiement,
@@ -64,7 +67,10 @@ class StockReceiptView {
   final String fabricantNom;
   final String? notes;
   final double total;
-  final double totalAchat;
+  final double totalAchat; // sous-total achat AVANT remise
+  final double? remisePourcentage;
+  final double montantRemise;
+  final double totalApresRemise; // montant réellement dû — base du "reste à payer"
   final double montantPaye;
   final double montantRestant;
   final String statutPaiement;
@@ -79,6 +85,9 @@ class StockReceiptView {
         notes: json['notes'] as String?,
         total: parseDecimal(json['total']),
         totalAchat: parseDecimal(json['totalAchat']),
+        remisePourcentage: json['remisePourcentage'] == null ? null : parseDecimal(json['remisePourcentage']),
+        montantRemise: parseDecimal(json['montantRemise']),
+        totalApresRemise: json['totalApresRemise'] == null ? parseDecimal(json['totalAchat']) : parseDecimal(json['totalApresRemise']),
         montantPaye: parseDecimal(json['montantPaye']),
         montantRestant: parseDecimal(json['montantRestant']),
         statutPaiement: json['statutPaiement'] as String? ?? 'NON_PAYE',

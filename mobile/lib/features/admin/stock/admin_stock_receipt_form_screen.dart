@@ -57,10 +57,14 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
   Fabricant? _fabricant;
   final List<_ReceiptLine> _lines = [];
   final _notes = TextEditingController();
+  final _remise = TextEditingController();
   bool _saving = false;
   String? _error;
 
   double get _totalAchat => _lines.fold(0.0, (sum, l) => sum + l.sousTotalAchat);
+  double get _remiseValue => double.tryParse(_remise.text.replaceAll(',', '.')) ?? 0;
+  double get _montantRemise => _totalAchat * _remiseValue / 100;
+  double get _totalApresRemise => _totalAchat - _montantRemise;
 
   Future<void> _pickFabricant() async {
     final fabricants = await ref.read(_fabricantsForReceiptProvider.future);
@@ -149,6 +153,7 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
             fabricantId: _fabricant!.id,
             items: items,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+            remisePourcentage: _remiseValue > 0 ? _remiseValue : null,
           );
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: receipt.id)));
@@ -166,6 +171,7 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
       line.dispose();
     }
     _notes.dispose();
+    _remise.dispose();
     super.dispose();
   }
 
@@ -210,6 +216,13 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
           else
             ..._lines.map((line) => _ReceiptLineCard(line: line, onChanged: () => setState(() {}), onRemove: () => setState(() => _lines.remove(line)))),
           if (_lines.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _remise,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Remise fournisseur (%, optionnel)', isDense: true),
+              onChanged: (_) => setState(() {}),
+            ),
             const Divider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -219,8 +232,24 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total achat', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(formatMoney(_totalAchat), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                      const Text('Sous-total achat'),
+                      Text(formatMoney(_totalAchat)),
+                    ],
+                  ),
+                  if (_remiseValue > 0) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Remise (${_remiseValue.toStringAsFixed(0)}%)'),
+                        Text('- ${formatMoney(_montantRemise)}'),
+                      ],
+                    ),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total dû', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(formatMoney(_totalApresRemise), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
                     ],
                   ),
                 ],
