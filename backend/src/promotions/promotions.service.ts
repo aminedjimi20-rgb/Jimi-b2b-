@@ -2,7 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 
-const PROMOTION_INCLUDE = { products: true, clients: true } as const;
+const PROMOTION_INCLUDE = {
+  products: { include: { product: { select: { id: true, nom: true } } } },
+  clients: { include: { client: { select: { id: true, raisonSociale: true } } } },
+} as const;
 
 @Injectable()
 export class PromotionsService {
