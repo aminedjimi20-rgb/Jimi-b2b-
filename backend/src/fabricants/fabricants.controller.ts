@@ -24,9 +24,24 @@ export class FabricantsController {
     return this.fabricantsService.create(dto);
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.fabricantsService.findOneForAdmin(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Partial<CreateFabricantDto>) {
     return this.fabricantsService.update(id, dto);
+  }
+
+  @Post(':id/products/:productId')
+  associateProduct(@Param('id') id: string, @Param('productId') productId: string) {
+    return this.fabricantsService.associateProduct(id, productId);
+  }
+
+  @Delete(':id/products/:productId')
+  dissociateProduct(@Param('id') id: string, @Param('productId') productId: string) {
+    return this.fabricantsService.dissociateProduct(id, productId);
   }
 
   // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.

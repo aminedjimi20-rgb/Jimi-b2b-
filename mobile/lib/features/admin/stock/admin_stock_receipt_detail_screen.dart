@@ -15,6 +15,7 @@ import '../../../core/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
+import '../../../models/order.dart';
 import '../../../models/stock_receipt.dart';
 import '../../../services/service_providers.dart';
 
@@ -35,6 +36,32 @@ class AdminStockReceiptDetailScreen extends ConsumerStatefulWidget {
 class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceiptDetailScreen> {
   bool _generating = false;
   bool _deleting = false;
+  bool _recordingPayment = false;
+
+  Future<void> _recordPayment(StockReceiptView r) async {
+    final result = await showDialog<_ReceiptPaymentInput>(
+      context: context,
+      builder: (ctx) => _RecordReceiptPaymentDialog(maxMontant: r.montantRestant),
+    );
+    if (result == null) return;
+
+    setState(() => _recordingPayment = true);
+    try {
+      await ref.read(paymentsApiProvider).create(
+            fabricantId: r.fabricantId,
+            stockReceiptId: r.id,
+            montant: result.montant,
+            method: result.method,
+          );
+      ref.invalidate(_receiptProvider(widget.receiptId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+      }
+    } finally {
+      if (mounted) setState(() => _recordingPayment = false);
+    }
+  }
 
   Future<void> _confirmDelete(StockReceiptView receipt) async {
     final confirmed = await showDialog<bool>(
@@ -219,7 +246,16 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(r.reference, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
+                    _StatusChip(
+                      label: paymentStatusLabel(r.statutPaiement),
+                      color: r.statutPaiement == 'PAYE'
+                          ? AppTheme.success
+                          : r.statutPaiement == 'PARTIEL'
+                              ? AppTheme.warning
+                              : AppTheme.danger,
+                    ),
+                    const SizedBox(height: 8),
                     Text('Fabricant: ${r.fabricantNom}'),
                     Text('Date: ${formatDate(r.createdAt)}'),
                     if (r.notes != null && r.notes!.isNotEmpty) Text('Notes: ${r.notes}'),
@@ -275,12 +311,124 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                       Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
                     ],
                   ),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Payé au fournisseur'),
+                      Text(formatMoney(r.montantPaye), style: const TextStyle(color: AppTheme.success)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Reste à payer'),
+                      Text(
+                        formatMoney(r.montantRestant),
+                        style: TextStyle(color: r.montantRestant > 0 ? AppTheme.danger : AppTheme.success, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
+            if (r.montantRestant > 0) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _recordingPayment ? null : () => _recordPayment(r),
+                  icon: _recordingPayment
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.payments_outlined),
+                  label: const Text('Enregistrer un paiement au fournisseur'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.label, required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _ReceiptPaymentInput {
+  _ReceiptPaymentInput(this.montant, this.method);
+  final double montant;
+  final String method;
+}
+
+class _RecordReceiptPaymentDialog extends StatefulWidget {
+  const _RecordReceiptPaymentDialog({required this.maxMontant});
+  final double maxMontant;
+
+  @override
+  State<_RecordReceiptPaymentDialog> createState() => _RecordReceiptPaymentDialogState();
+}
+
+class _RecordReceiptPaymentDialogState extends State<_RecordReceiptPaymentDialog> {
+  late final TextEditingController _montant = TextEditingController(text: widget.maxMontant.toStringAsFixed(0));
+  String _method = 'ESPECES';
+  String? _error;
+
+  @override
+  void dispose() {
+    _montant.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final value = double.tryParse(_montant.text.replaceAll(',', '.'));
+    if (value == null || value <= 0) {
+      setState(() => _error = 'Montant invalide.');
+      return;
+    }
+    Navigator.pop(context, _ReceiptPaymentInput(value, _method));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Enregistrer un paiement'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Reste à payer: ${formatMoney(widget.maxMontant)}', style: TextStyle(color: Colors.grey[600])),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _montant,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: 'Montant versé', errorText: _error),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _method,
+            decoration: const InputDecoration(labelText: 'Méthode'),
+            items: kPaymentMethods.map((m) => DropdownMenuItem(value: m, child: Text(paymentMethodLabel(m)))).toList(),
+            onChanged: (v) => setState(() => _method = v!),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+        ElevatedButton(onPressed: _submit, child: const Text('Enregistrer')),
+      ],
     );
   }
 }

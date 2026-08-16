@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/fabricant.dart';
 import '../../../services/service_providers.dart';
+import 'admin_fabricant_detail_screen.dart';
 import 'fabricant_dialog.dart';
 
 final adminFabricantsProvider = FutureProvider.autoDispose<List<Fabricant>>((ref) {
@@ -89,6 +90,10 @@ class AdminFabricantsScreen extends ConsumerWidget {
                       tooltip: 'Supprimer',
                       onPressed: () => _confirmDeleteFabricant(context, ref, f),
                     ),
+                    onTap: () async {
+                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminFabricantDetailScreen(fabricantId: f.id)));
+                      ref.invalidate(adminFabricantsProvider);
+                    },
                   ),
                 );
               },

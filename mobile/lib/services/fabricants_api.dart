@@ -20,6 +20,17 @@ class FabricantsApi {
     return Fabricant.fromJson(res.data as Map<String, dynamic>);
   }
 
+  Future<FabricantDetail> getOne(String id) async {
+    final res = await _dio.get('/fabricants/$id');
+    return FabricantDetail.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<void> associateProduct(String fabricantId, String productId) =>
+      _dio.post('/fabricants/$fabricantId/products/$productId');
+
+  Future<void> dissociateProduct(String fabricantId, String productId) =>
+      _dio.delete('/fabricants/$fabricantId/products/$productId');
+
   /// Moves to the corbeille (reversible) — see [permanentDelete] to erase for good.
   Future<void> remove(String id) => _dio.delete('/fabricants/$id');
 
