@@ -5,6 +5,7 @@ import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/change_password_screen.dart';
 import '../../shared/notifications_screen.dart';
+import '../../shared/drafts_screen.dart';
 import '../categories/admin_categories_screen.dart';
 import '../dashboard/admin_dashboard_screen.dart';
 import '../employees/admin_employees_screen.dart';
@@ -113,6 +114,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Export Excel'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminExportScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_note_outlined),
+            title: const Text('Brouillons'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DraftsScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.delete_outline),

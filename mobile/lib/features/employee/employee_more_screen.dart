@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../auth/change_password_screen.dart';
+import '../shared/drafts_screen.dart';
 import '../shared/notifications_screen.dart';
 import 'employee_image_search_screen.dart';
 import 'employee_request_product_screen.dart';
@@ -34,6 +35,12 @@ class EmployeeMoreScreen extends ConsumerWidget {
             title: const Text('Demander un produit'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmployeeRequestProductScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_note_outlined),
+            title: const Text('Brouillons'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DraftsScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.password_outlined),

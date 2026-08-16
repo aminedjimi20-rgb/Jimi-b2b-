@@ -162,4 +162,13 @@ class AppDatabase {
     final db = await database;
     await db.delete('form_drafts', where: 'formKey = ?', whereArgs: [formKey]);
   }
+
+  /// Every pending draft across all form kinds — powers the global
+  /// "Brouillons" list so a half-filled bon is visible without reopening
+  /// its creation screen.
+  Future<List<({String formKey, DateTime updatedAt})>> readAllDrafts() async {
+    final db = await database;
+    final rows = await db.query('form_drafts', orderBy: 'updatedAt DESC');
+    return rows.map((r) => (formKey: r['formKey'] as String, updatedAt: DateTime.fromMillisecondsSinceEpoch(r['updatedAt'] as int))).toList();
+  }
 }
