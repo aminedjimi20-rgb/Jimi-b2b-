@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/auth/auth_controller.dart';
+import 'forgot_password_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -90,22 +92,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     validator: (v) => (v == null || v.isEmpty) ? 'Champ requis' : null,
                     onFieldSubmitted: (_) => _submit(),
                   ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                      child: const Text('Mot de passe oublié ?'),
+                    ),
+                  ),
                   if (error != null) ...[
                     const SizedBox(height: 14),
                     Text(error, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
                   ],
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: isLoading ? null : _submit,
                     child: isLoading
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : const Text('Se connecter'),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Vous n'avez pas de compte ? Contactez votre fournisseur.",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                    child: const Text('Pas de compte ? Créer un compte'),
                   ),
                 ],
               ),

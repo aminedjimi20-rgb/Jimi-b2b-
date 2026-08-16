@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { SequencesModule } from './common/sequences/sequences.module';
+import { MailerModule } from './mailer/mailer.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 import { EmployeesModule } from './employees/employees.module';
@@ -35,6 +36,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     PrismaModule,
     SequencesModule,
+    MailerModule,
     NotificationsModule,
     AuthModule,
     ClientsModule,

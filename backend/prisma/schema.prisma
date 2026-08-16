@@ -46,6 +46,16 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  // Email verification / password reset — @default(true) so every account
+  // created by an Admin (client/employee onboarding) or that existed before
+  // this feature stays fully usable with zero migration side-effects; only
+  // the new self-registration flow (register()) explicitly sets this false.
+  emailVerified               Boolean   @default(true)
+  emailVerificationTokenHash  String?   @unique
+  emailVerificationExpiresAt  DateTime?
+  passwordResetTokenHash      String?   @unique
+  passwordResetExpiresAt      DateTime?
+
   client        Client?
   employee      Employee?
   refreshTokens RefreshToken[]

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../auth/change_password_screen.dart';
 import '../../shared/notifications_screen.dart';
 import '../categories/admin_categories_screen.dart';
 import '../employees/admin_employees_screen.dart';
@@ -110,6 +111,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Corbeille'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminTrashScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.password_outlined),
+            title: const Text('Modifier le mot de passe'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ChangePasswordScreen())),
           ),
           const Divider(),
           ListTile(

@@ -106,6 +106,56 @@ class AuthController extends StateNotifier<AuthStatus> {
     _tokenStorage.clear();
     state = const AuthUnauthenticated();
   }
+
+  /// Public self-registration (always CLIENT) — doesn't touch [state]/session:
+  /// the account starts unverified, so there's nothing to log into yet.
+  /// Returns null on success, an error message otherwise.
+  Future<String?> register({
+    required String email,
+    required String password,
+    required String raisonSociale,
+    required String telephone,
+    String? adresse,
+    String? ville,
+  }) async {
+    try {
+      await _dio.post('/auth/register', data: {
+        'email': email,
+        'password': password,
+        'raisonSociale': raisonSociale,
+        'telephone': telephone,
+        if (adresse != null && adresse.isNotEmpty) 'adresse': adresse,
+        if (ville != null && ville.isNotEmpty) 'ville': ville,
+      });
+      return null;
+    } on DioException catch (e) {
+      return ApiException.fromDioError(e).message;
+    } catch (_) {
+      return 'Une erreur est survenue. Réessayez.';
+    }
+  }
+
+  Future<String?> forgotPassword(String email) async {
+    try {
+      await _dio.post('/auth/forgot-password', data: {'email': email});
+      return null;
+    } on DioException catch (e) {
+      return ApiException.fromDioError(e).message;
+    } catch (_) {
+      return 'Une erreur est survenue. Réessayez.';
+    }
+  }
+
+  Future<String?> resendVerification(String email) async {
+    try {
+      await _dio.post('/auth/resend-verification', data: {'email': email});
+      return null;
+    } on DioException catch (e) {
+      return ApiException.fromDioError(e).message;
+    } catch (_) {
+      return 'Une erreur est survenue. Réessayez.';
+    }
+  }
 }
 
 final authControllerProvider = StateNotifierProvider<AuthController, AuthStatus>((ref) {

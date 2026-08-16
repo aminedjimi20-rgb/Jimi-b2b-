@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers.dart';
+import 'auth_api.dart';
 import 'categories_api.dart';
 import 'clients_api.dart';
 import 'employees_api.dart';
@@ -19,6 +20,7 @@ import 'stock_receipts_api.dart';
 import 'transporteurs_api.dart';
 import 'uploads_api.dart';
 
+final authApiProvider = Provider((ref) => AuthApi(ref.watch(dioProvider)));
 final categoriesApiProvider = Provider((ref) => CategoriesApi(ref.watch(dioProvider)));
 final fabricantsApiProvider = Provider((ref) => FabricantsApi(ref.watch(dioProvider)));
 final productsApiProvider = Provider((ref) => ProductsApi(ref.watch(dioProvider)));
