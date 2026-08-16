@@ -65,6 +65,34 @@ Future<bool> showCreateCategoryDialog(BuildContext context, WidgetRef ref) async
   return created;
 }
 
+Future<void> _confirmDeleteCategory(BuildContext context, WidgetRef ref, Category category) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Supprimer cette catégorie ?'),
+      content: Text('"${category.nom}" sera déplacée vers la corbeille. Vous pourrez la restaurer plus tard.'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+          child: const Text('Supprimer'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) return;
+
+  try {
+    await ref.read(categoriesApiProvider).remove(category.id);
+    ref.invalidate(adminCategoriesProvider);
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+    }
+  }
+}
+
 class AdminCategoriesScreen extends ConsumerWidget {
   const AdminCategoriesScreen({super.key});
 
@@ -104,7 +132,17 @@ class AdminCategoriesScreen extends ConsumerWidget {
                 child: ListTile(
                   leading: const Icon(Icons.sell_outlined),
                   title: Text(items[i].nom),
-                  trailing: Text('${items[i].productCount} produit${items[i].productCount == 1 ? '' : 's'}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('${items[i].productCount} produit${items[i].productCount == 1 ? '' : 's'}'),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 20),
+                        tooltip: 'Supprimer',
+                        onPressed: () => _confirmDeleteCategory(context, ref, items[i]),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

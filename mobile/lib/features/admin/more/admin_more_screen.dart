@@ -5,9 +5,11 @@ import '../../../core/auth/auth_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../shared/notifications_screen.dart';
 import '../categories/admin_categories_screen.dart';
+import '../fabricants/admin_fabricants_screen.dart';
 import '../promotions/admin_promotions_screen.dart';
 import '../stock/admin_stock_receipts_screen.dart';
 import '../stock/admin_stock_screen.dart';
+import '../trash/admin_trash_screen.dart';
 import 'admin_export_screen.dart';
 
 class AdminMoreScreen extends ConsumerWidget {
@@ -32,6 +34,12 @@ class AdminMoreScreen extends ConsumerWidget {
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminStockScreen())),
           ),
           ListTile(
+            leading: const Icon(Icons.factory_outlined),
+            title: const Text('Fournisseurs'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminFabricantsScreen())),
+          ),
+          ListTile(
             leading: const Icon(Icons.local_shipping_outlined),
             title: const Text('Réceptions fournisseurs (bons)'),
             trailing: const Icon(Icons.chevron_right),
@@ -54,6 +62,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Export Excel'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminExportScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete_outline),
+            title: const Text('Corbeille'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminTrashScreen())),
           ),
           const Divider(),
           ListTile(

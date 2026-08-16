@@ -18,13 +18,30 @@ export class StockReceiptsController {
     return this.stockReceiptsService.findAll();
   }
 
+  // Must come before ':id' so "trash" isn't swallowed as an id param.
+  @Get('trash')
+  findTrash() {
+    return this.stockReceiptsService.findTrash();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.stockReceiptsService.findOne(id);
   }
 
+  // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.stockReceiptsService.remove(id);
+  }
+
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.stockReceiptsService.restore(id);
+  }
+
+  @Delete(':id/permanent')
+  permanentDelete(@Param('id') id: string) {
+    return this.stockReceiptsService.permanentDelete(id);
   }
 }

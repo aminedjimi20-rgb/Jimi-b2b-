@@ -28,6 +28,18 @@ class ClientsApi {
     return ClientView.fromJson(res.data as Map<String, dynamic>);
   }
 
+  /// Moves to the corbeille (reversible, also suspends login) — see [permanentDelete] to erase for good.
+  Future<void> remove(String id) => _dio.delete('/clients/$id');
+
+  Future<List<ClientView>> trash() async {
+    final res = await _dio.get('/clients/trash');
+    return (res.data as List<dynamic>).map((e) => ClientView.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> restore(String id) => _dio.post('/clients/$id/restore');
+
+  Future<void> permanentDelete(String id) => _dio.delete('/clients/$id/permanent');
+
   // ── CLIENT (self) ────────────────────────────────────────────────────
 
   Future<ClientView> myProfile() async {

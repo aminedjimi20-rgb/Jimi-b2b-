@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
+import { SequencesModule } from './common/sequences/sequences.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -29,6 +30,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     PrismaModule,
+    SequencesModule,
     NotificationsModule,
     AuthModule,
     ClientsModule,

@@ -13,6 +13,12 @@ export class FabricantsController {
     return this.fabricantsService.findAll();
   }
 
+  // Must come before ':id'-style routes so "trash" isn't swallowed as an id param.
+  @Get('trash')
+  findTrash() {
+    return this.fabricantsService.findTrash();
+  }
+
   @Post()
   create(@Body() dto: CreateFabricantDto) {
     return this.fabricantsService.create(dto);
@@ -23,8 +29,19 @@ export class FabricantsController {
     return this.fabricantsService.update(id, dto);
   }
 
+  // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.fabricantsService.remove(id);
+  }
+
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.fabricantsService.restore(id);
+  }
+
+  @Delete(':id/permanent')
+  permanentDelete(@Param('id') id: string) {
+    return this.fabricantsService.permanentDelete(id);
   }
 }

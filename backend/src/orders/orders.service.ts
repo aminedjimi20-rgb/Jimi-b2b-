@@ -3,6 +3,8 @@ import { OrderStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService } from '../pricing/pricing.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SequencesService } from '../common/sequences/sequences.service';
+import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatusValue } from './dto/update-order-status.dto';
 import { toAdminOrderDTO, toClientOrderDTO } from './dto/order-response.dto';
@@ -31,6 +33,7 @@ export class OrdersService {
     private prisma: PrismaService,
     private pricing: PricingService,
     private notifications: NotificationsService,
+    private sequences: SequencesService,
   ) {}
 
   // ── CLIENT ───────────────────────────────────────────────────────────
@@ -48,7 +51,7 @@ export class OrdersService {
 
       for (const line of dto.items) {
         const product = await tx.product.findUnique({ where: { id: line.productId } });
-        if (!product || !product.actif) {
+        if (!product || !product.actif || product.deletedAt) {
           throw new BadRequestException(`Produit introuvable ou indisponible: ${line.productId}`);
         }
         if (line.quantite < product.minCommande) {
@@ -76,7 +79,7 @@ export class OrdersService {
         await tx.client.update({ where: { id: clientId }, data: { soldeCredit: nouveauSolde } });
       }
 
-      const reference = this.generateReference();
+      const reference = await this.generateReference();
       const created = await tx.order.create({
         data: {
           reference,
@@ -125,7 +128,7 @@ export class OrdersService {
 
   async findAllForClient(clientId: string) {
     const orders = await this.prisma.order.findMany({
-      where: { clientId },
+      where: { clientId, deletedAt: null },
       include: ORDER_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
@@ -133,13 +136,13 @@ export class OrdersService {
   }
 
   async findOneForClient(clientId: string, id: string) {
-    const order = await this.prisma.order.findFirst({ where: { id, clientId }, include: ORDER_INCLUDE });
+    const order = await this.prisma.order.findFirst({ where: { id, clientId, deletedAt: null }, include: ORDER_INCLUDE });
     if (!order) throw new NotFoundException('Commande introuvable.');
     return toClientOrderDTO(order);
   }
 
   async reorder(clientId: string, orderId: string) {
-    const previous = await this.prisma.order.findFirst({ where: { id: orderId, clientId }, include: ORDER_INCLUDE });
+    const previous = await this.prisma.order.findFirst({ where: { id: orderId, clientId, deletedAt: null }, include: ORDER_INCLUDE });
     if (!previous) throw new NotFoundException('Commande introuvable.');
 
     return this.createForClient(clientId, {
@@ -154,7 +157,7 @@ export class OrdersService {
 
   async findAllForAdmin(status?: OrderStatus) {
     const orders = await this.prisma.order.findMany({
-      where: status ? { status } : undefined,
+      where: { deletedAt: null, ...(status ? { status } : {}) },
       include: ORDER_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
@@ -163,13 +166,13 @@ export class OrdersService {
 
   async findOneForAdmin(id: string) {
     const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
-    if (!order) throw new NotFoundException('Commande introuvable.');
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
     return toAdminOrderDTO(order);
   }
 
   async updateStatus(id: string, nextStatus: OrderStatusValue) {
     const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
-    if (!order) throw new NotFoundException('Commande introuvable.');
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
 
     const allowed = NEXT_STATUS[order.status];
     if (!allowed.includes(nextStatus as OrderStatus)) {
@@ -208,22 +211,31 @@ export class OrdersService {
 
   async updatePayment(id: string, estPayee: boolean) {
     const order = await this.prisma.order.findUnique({ where: { id } });
-    if (!order) throw new NotFoundException('Commande introuvable.');
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
     await this.prisma.order.update({ where: { id }, data: { estPayee } });
     return this.findOneForAdmin(id);
   }
 
-  // Stock/credit were committed at creation time (not at shipment), so any
-  // order still "in flight" (not yet ANNULEE — already reversed — nor
-  // EXPEDIEE/LIVREE — goods physically gone) must have its effects undone
-  // before the row disappears, exactly like cancelling it would.
-  async remove(id: string) {
-    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
-    if (!order) throw new NotFoundException('Commande introuvable.');
+  // ── Corbeille ────────────────────────────────────────────────────────
 
-    const reversible: OrderStatus[] = ['EN_ATTENTE', 'CONFIRMEE', 'PREPARATION', 'PRETE'];
+  async findTrash() {
+    const orders = await this.prisma.order.findMany({
+      where: { deletedAt: { not: null } },
+      include: ORDER_INCLUDE,
+      orderBy: { deletedAt: 'desc' },
+    });
+    return orders.map(toAdminOrderDTO);
+  }
+
+  // Moves to the corbeille. Stock/credit were committed at creation time (not
+  // at shipment), so any order still "in flight" (not yet ANNULEE — already
+  // reversed — nor EXPEDIEE/LIVREE — goods physically gone) must have its
+  // effects undone, exactly like cancelling it would — `restore` re-applies
+  // them symmetrically, since nothing else can touch a trashed order.
+  async remove(id: string) {
+    const order = await this.getActiveWithItems(id);
     await this.prisma.$transaction(async (tx) => {
-      if (reversible.includes(order.status)) {
+      if (this.isReversible(order.status)) {
         for (const item of order.items) {
           await tx.product.update({ where: { id: item.productId }, data: { stockReel: { increment: item.quantite } } });
         }
@@ -231,14 +243,59 @@ export class OrdersService {
           await tx.client.update({ where: { id: order.clientId }, data: { soldeCredit: { decrement: order.total } } });
         }
       }
-      await tx.order.delete({ where: { id } });
+      await tx.order.update({ where: { id }, data: { deletedAt: new Date() } });
     });
   }
 
-  private generateReference(): string {
+  async restore(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!order || !order.deletedAt) throw new NotFoundException('Commande introuvable dans la corbeille.');
+
+    await this.prisma.$transaction(async (tx) => {
+      if (this.isReversible(order.status)) {
+        for (const item of order.items) {
+          await tx.product.update({ where: { id: item.productId }, data: { stockReel: { decrement: item.quantite } } });
+        }
+        if (order.paymentMethod === 'CREDIT') {
+          const client = await tx.client.findUnique({ where: { id: order.clientId } });
+          if (client) {
+            const nouveauSolde = client.soldeCredit.plus(order.total);
+            if (nouveauSolde.greaterThan(client.limiteCredit)) {
+              throw new BadRequestException('Restauration impossible : limite de crédit du client dépassée.');
+            }
+            await tx.client.update({ where: { id: order.clientId }, data: { soldeCredit: nouveauSolde } });
+          }
+        }
+      }
+      await tx.order.update({ where: { id }, data: { deletedAt: null } });
+    });
+  }
+
+  async permanentDelete(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order || !order.deletedAt) throw new NotFoundException('Commande introuvable dans la corbeille.');
+
+    await runOrExplainForeignKeyError(
+      () => this.prisma.order.delete({ where: { id } }),
+      'Impossible de supprimer définitivement : des données liées existent encore.',
+    );
+  }
+
+  private isReversible(status: OrderStatus): boolean {
+    return (['EN_ATTENTE', 'CONFIRMEE', 'PREPARATION', 'PRETE'] as OrderStatus[]).includes(status);
+  }
+
+  private async getActiveWithItems(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id }, include: ORDER_INCLUDE });
+    if (!order || order.deletedAt) throw new NotFoundException('Commande introuvable.');
+    return order;
+  }
+
+  /** Human-readable, sequential, unique per year: BC-2026-0001, BC-2026-0002, ... */
+  private async generateReference(): Promise<string> {
     const year = new Date().getFullYear();
-    const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-    return `CMD-${year}-${suffix}`;
+    const n = await this.sequences.next(`BC-${year}`);
+    return `BC-${year}-${String(n).padStart(4, '0')}`;
   }
 
   private async checkLowStock(productIds: string[]) {

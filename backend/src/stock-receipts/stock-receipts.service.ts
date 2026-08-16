@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { SequencesService } from '../common/sequences/sequences.service';
+import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateStockReceiptDto } from './dto/create-stock-receipt.dto';
 import { toStockReceiptDTO } from './dto/stock-receipt-response.dto';
 
@@ -11,7 +13,10 @@ const RECEIPT_INCLUDE = {
 
 @Injectable()
 export class StockReceiptsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private sequences: SequencesService,
+  ) {}
 
   async create(dto: CreateStockReceiptDto) {
     const fabricant = await this.prisma.fabricant.findUnique({ where: { id: dto.fabricantId } });
@@ -24,7 +29,7 @@ export class StockReceiptsService {
       throw new BadRequestException('Un ou plusieurs produits sont introuvables.');
     }
 
-    const reference = this.generateReference();
+    const reference = await this.generateReference();
     let total = new Prisma.Decimal(0);
     let totalAchat = new Prisma.Decimal(0);
     const itemsData = dto.items.map((item) => {
@@ -74,6 +79,7 @@ export class StockReceiptsService {
 
   async findAll() {
     const receipts = await this.prisma.stockReceipt.findMany({
+      where: { deletedAt: null },
       include: RECEIPT_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
@@ -82,29 +88,70 @@ export class StockReceiptsService {
 
   async findOne(id: string) {
     const receipt = await this.prisma.stockReceipt.findUnique({ where: { id }, include: RECEIPT_INCLUDE });
-    if (!receipt) throw new NotFoundException('Bon de réception introuvable.');
+    if (!receipt || receipt.deletedAt) throw new NotFoundException('Bon de réception introuvable.');
     return toStockReceiptDTO(receipt);
   }
 
-  // Undoes the stock this receipt had added, then deletes it. If some of
-  // that stock has since been sold, stockReel can end up below the amount
-  // this receipt contributed — that's an accurate signal to recount, not
-  // an error, so it's allowed to go negative rather than blocked.
-  async remove(id: string) {
-    const receipt = await this.prisma.stockReceipt.findUnique({ where: { id }, include: { items: true } });
-    if (!receipt) throw new NotFoundException('Bon de réception introuvable.');
+  // ── Corbeille ────────────────────────────────────────────────────────
 
+  async findTrash() {
+    const receipts = await this.prisma.stockReceipt.findMany({
+      where: { deletedAt: { not: null } },
+      include: RECEIPT_INCLUDE,
+      orderBy: { deletedAt: 'desc' },
+    });
+    return receipts.map(toStockReceiptDTO);
+  }
+
+  // Moves to the corbeille and undoes the stock this receipt had added — if
+  // some of that stock has since been sold, stockReel can end up below the
+  // amount this receipt contributed, which is an accurate signal to
+  // recount, not an error, so it's allowed to go negative rather than blocked.
+  async remove(id: string) {
+    const receipt = await this.getActiveWithItems(id);
     await this.prisma.$transaction(async (tx) => {
       for (const item of receipt.items) {
         await tx.product.update({ where: { id: item.productId }, data: { stockReel: { decrement: item.quantite } } });
       }
-      await tx.stockReceipt.delete({ where: { id } });
+      await tx.stockReceipt.update({ where: { id }, data: { deletedAt: new Date() } });
     });
   }
 
-  private generateReference(): string {
+  // Restores from the corbeille and re-applies the stock it had added —
+  // symmetric with `remove`, safe because nothing else can touch a
+  // trashed receipt's items while it sits in the corbeille.
+  async restore(id: string) {
+    const receipt = await this.prisma.stockReceipt.findUnique({ where: { id }, include: { items: true } });
+    if (!receipt || !receipt.deletedAt) throw new NotFoundException('Bon de réception introuvable dans la corbeille.');
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of receipt.items) {
+        await tx.product.update({ where: { id: item.productId }, data: { stockReel: { increment: item.quantite } } });
+      }
+      await tx.stockReceipt.update({ where: { id }, data: { deletedAt: null } });
+    });
+  }
+
+  async permanentDelete(id: string) {
+    const receipt = await this.prisma.stockReceipt.findUnique({ where: { id } });
+    if (!receipt || !receipt.deletedAt) throw new NotFoundException('Bon de réception introuvable dans la corbeille.');
+
+    await runOrExplainForeignKeyError(
+      () => this.prisma.stockReceipt.delete({ where: { id } }),
+      'Impossible de supprimer définitivement : des données liées existent encore.',
+    );
+  }
+
+  private async getActiveWithItems(id: string) {
+    const receipt = await this.prisma.stockReceipt.findUnique({ where: { id }, include: { items: true } });
+    if (!receipt || receipt.deletedAt) throw new NotFoundException('Bon de réception introuvable.');
+    return receipt;
+  }
+
+  /** Human-readable, sequential, unique per year: BR-2026-0001, BR-2026-0002, ... */
+  private async generateReference(): Promise<string> {
     const year = new Date().getFullYear();
-    const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-    return `BR-${year}-${suffix}`;
+    const n = await this.sequences.next(`BR-${year}`);
+    return `BR-${year}-${String(n).padStart(4, '0')}`;
   }
 }

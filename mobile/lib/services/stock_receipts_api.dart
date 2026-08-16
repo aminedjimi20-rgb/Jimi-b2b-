@@ -53,5 +53,15 @@ class StockReceiptsApi {
     return StockReceiptView.fromJson(res.data as Map<String, dynamic>);
   }
 
+  /// Moves to the corbeille (reversible) — see [permanentDelete] to erase for good.
   Future<void> remove(String id) => _dio.delete('/stock-receipts/$id');
+
+  Future<List<StockReceiptView>> trash() async {
+    final res = await _dio.get('/stock-receipts/trash');
+    return (res.data as List<dynamic>).map((e) => StockReceiptView.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> restore(String id) => _dio.post('/stock-receipts/$id/restore');
+
+  Future<void> permanentDelete(String id) => _dio.delete('/stock-receipts/$id/permanent');
 }

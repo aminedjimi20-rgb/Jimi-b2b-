@@ -129,6 +129,34 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
     }
   }
 
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer ce produit ?'),
+        content: const Text('Il sera déplacé vers la corbeille. Vous pourrez le restaurer plus tard.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(productsApiProvider).remove(widget.productId!);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+      }
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_categoryId == null) {
@@ -220,7 +248,12 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
     final fabricants = ref.watch(_fabricantsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? 'Modifier le produit' : 'Nouveau produit')),
+      appBar: AppBar(
+        title: Text(_isEdit ? 'Modifier le produit' : 'Nouveau produit'),
+        actions: [
+          if (_isEdit) IconButton(icon: const Icon(Icons.delete_outline), tooltip: 'Supprimer', onPressed: _confirmDelete),
+        ],
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Form(

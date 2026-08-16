@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateClientDto } from './dto/create-client.dto';
 import { toAdminClientDTO, toSelfClientDTO } from './dto/client-response.dto';
 
@@ -48,6 +49,7 @@ export class ClientsService {
 
   async findAllForAdmin() {
     const clients = await this.prisma.client.findMany({
+      where: { deletedAt: null },
       include: CLIENT_INCLUDE_USER,
       orderBy: { raisonSociale: 'asc' },
     });
@@ -59,7 +61,7 @@ export class ClientsService {
       where: { id: clientId },
       include: CLIENT_INCLUDE_USER,
     });
-    if (!client) throw new NotFoundException('Client introuvable.');
+    if (!client || client.deletedAt) throw new NotFoundException('Client introuvable.');
     return toAdminClientDTO(client);
   }
 
@@ -75,8 +77,49 @@ export class ClientsService {
 
   async setStatus(clientId: string, status: 'ACTIVE' | 'SUSPENDED') {
     const client = await this.prisma.client.findUnique({ where: { id: clientId } });
-    if (!client) throw new NotFoundException('Client introuvable.');
+    if (!client || client.deletedAt) throw new NotFoundException('Client introuvable.');
     await this.prisma.user.update({ where: { id: client.userId }, data: { status } });
     return this.findOneForAdmin(clientId);
+  }
+
+  // ── Corbeille ────────────────────────────────────────────────────────
+
+  async findTrash() {
+    const clients = await this.prisma.client.findMany({
+      where: { deletedAt: { not: null } },
+      include: CLIENT_INCLUDE_USER,
+      orderBy: { deletedAt: 'desc' },
+    });
+    return clients.map(toAdminClientDTO);
+  }
+
+  // Trashing a client also suspends their login — restoring reactivates it.
+  async remove(clientId: string) {
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client || client.deletedAt) throw new NotFoundException('Client introuvable.');
+    await this.prisma.$transaction([
+      this.prisma.client.update({ where: { id: clientId }, data: { deletedAt: new Date() } }),
+      this.prisma.user.update({ where: { id: client.userId }, data: { status: 'SUSPENDED' } }),
+    ]);
+  }
+
+  async restore(clientId: string) {
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client || !client.deletedAt) throw new NotFoundException('Client introuvable dans la corbeille.');
+    await this.prisma.$transaction([
+      this.prisma.client.update({ where: { id: clientId }, data: { deletedAt: null } }),
+      this.prisma.user.update({ where: { id: client.userId }, data: { status: 'ACTIVE' } }),
+    ]);
+  }
+
+  async permanentDelete(clientId: string) {
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client || !client.deletedAt) throw new NotFoundException('Client introuvable dans la corbeille.');
+
+    await runOrExplainForeignKeyError(
+      // Deleting the User cascades to Client (Client.userId is onDelete: Cascade).
+      () => this.prisma.user.delete({ where: { id: client.userId } }),
+      'Impossible de supprimer définitivement : des commandes ou paiements sont encore liés à ce client.',
+    );
   }
 }

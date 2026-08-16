@@ -29,6 +29,36 @@ class AdminClientDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, ClientView client) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer ce client ?'),
+        content: Text(
+          '${client.raisonSociale} sera déplacé vers la corbeille et son compte suspendu. Vous pourrez le restaurer plus tard.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(clientsApiProvider).remove(clientId);
+      if (context.mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+      }
+    }
+  }
+
   Future<void> _openCustomPriceDialog(BuildContext context, WidgetRef ref) async {
     final products = await ref.read(productsApiProvider).listAdmin();
     if (!context.mounted) return;
@@ -128,6 +158,13 @@ class AdminClientDetailScreen extends ConsumerWidget {
               style: OutlinedButton.styleFrom(foregroundColor: c.status == 'ACTIVE' ? AppTheme.danger : AppTheme.success),
               icon: Icon(c.status == 'ACTIVE' ? Icons.block : Icons.check_circle_outline),
               label: Text(c.status == 'ACTIVE' ? 'Suspendre ce compte' : 'Réactiver ce compte'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => _confirmDelete(context, ref, c),
+              style: OutlinedButton.styleFrom(foregroundColor: AppTheme.danger),
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Supprimer ce client'),
             ),
           ],
         ),

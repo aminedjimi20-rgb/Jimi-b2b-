@@ -11,6 +11,15 @@ datasource db {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Compteurs — references séquentielles lisibles (BC-2026-0001, BR-2026-0001, ...)
+// ─────────────────────────────────────────────────────────────────────────
+
+model Sequence {
+  key   String @id // ex: "BC-2026", "BR-2026" — un compteur par préfixe+année
+  value Int    @default(0)
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Auth / Users
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -76,17 +85,18 @@ model UserPermission {
 // ─────────────────────────────────────────────────────────────────────────
 
 model Client {
-  id            String   @id @default(cuid())
-  userId        String   @unique
+  id            String    @id @default(cuid())
+  userId        String    @unique
   raisonSociale String
   telephone     String
   adresse       String?
   ville         String?
-  limiteCredit  Decimal  @default(0) @db.Decimal(12, 2)
-  soldeCredit   Decimal  @default(0) @db.Decimal(12, 2)
+  limiteCredit  Decimal   @default(0) @db.Decimal(12, 2)
+  soldeCredit   Decimal   @default(0) @db.Decimal(12, 2)
   notesInternes String? // visible Admin uniquement
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime? // corbeille — null = actif
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   customPrices ClientProductPrice[]
@@ -96,6 +106,7 @@ model Client {
   payments     Payment[]
 
   @@index([raisonSociale])
+  @@index([deletedAt])
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -103,50 +114,55 @@ model Client {
 // ─────────────────────────────────────────────────────────────────────────
 
 model Category {
-  id       String     @id @default(cuid())
-  nom      String
-  parentId String?
-  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryTree")
-  products Product[]
+  id        String     @id @default(cuid())
+  nom       String
+  parentId  String?
+  deletedAt DateTime? // corbeille — null = actif
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
 
   @@unique([nom, parentId])
+  @@index([deletedAt])
 }
 
 // Fournisseur/fabricant — d'où vient la marchandise reçue via un StockReceipt.
 model Fabricant {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   nom       String
   telephone String?
   adresse   String?
-  createdAt DateTime @default(now())
+  deletedAt DateTime? // corbeille — null = actif
+  createdAt DateTime  @default(now())
 
   products Product[]
   receipts StockReceipt[]
 
   @@index([nom])
+  @@index([deletedAt])
 }
 
 model Product {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   nom            String
-  code           String   @unique
+  code           String    @unique
   categoryId     String
   fabricantId    String?
   description    String?
   taille         String?
   couleur        String?
   marque         String?
-  prixAchat      Decimal  @db.Decimal(12, 2) // ADMIN ONLY — jamais exposé au client
-  prixVente      Decimal  @db.Decimal(12, 2)
-  stockReel      Int      @default(0) // ADMIN ONLY — client voit un statut dérivé
-  stockMinimum   Int      @default(0) // ADMIN ONLY
-  minCommande    Int      @default(1)
+  prixAchat      Decimal   @db.Decimal(12, 2) // ADMIN ONLY — jamais exposé au client
+  prixVente      Decimal   @db.Decimal(12, 2)
+  stockReel      Int       @default(0) // ADMIN ONLY — client voit un statut dérivé
+  stockMinimum   Int       @default(0) // ADMIN ONLY
+  minCommande    Int       @default(1)
   uniteParCarton Int? // pratique pour préremplir le prochain bon de réception de ce produit
-  actif          Boolean  @default(true)
+  actif          Boolean   @default(true) // visibilité catalogue — distinct de deletedAt
+  deletedAt      DateTime? // corbeille — null = actif (peut être true ou false pour `actif`)
   imageHash      String? // pHash de l'image principale, pour recherche par image (Phase 1)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   category          Category             @relation(fields: [categoryId], references: [id])
   fabricant         Fabricant?           @relation(fields: [fabricantId], references: [id])
@@ -162,6 +178,7 @@ model Product {
   @@index([categoryId])
   @@index([fabricantId])
   @@index([nom])
+  @@index([deletedAt])
 }
 
 model ProductImage {
@@ -274,7 +291,7 @@ enum PaymentMethod {
 
 model Order {
   id                String        @id @default(cuid())
-  reference         String        @unique // ex: CMD-2026-00001
+  reference         String        @unique // ex: BC-2026-0001 (bon client)
   nom               String? // libellé libre pour retrouver la commande facilement
   clientId          String
   status            OrderStatus   @default(EN_ATTENTE)
@@ -284,6 +301,7 @@ model Order {
   total             Decimal       @db.Decimal(12, 2) // calculé serveur, jamais fourni par le client
   remisePourcentage Decimal?      @db.Decimal(5, 2) // remise ADMIN uniquement — jamais pilotable par le client
   estPayee          Boolean       @default(false)
+  deletedAt         DateTime? // corbeille — null = actif
   notes             String?
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -296,6 +314,7 @@ model Order {
 
   @@index([clientId])
   @@index([status])
+  @@index([deletedAt])
 }
 
 model OrderItem {
@@ -346,19 +365,21 @@ model StockMovement {
 // StockMovement ENTREE (traçabilité), et garde un instantané des cartons /
 // unités par carton / prix vente au moment de la réception pour le PDF.
 model StockReceipt {
-  id          String   @id @default(cuid())
-  reference   String   @unique // ex: BR-2026-00001
+  id          String    @id @default(cuid())
+  reference   String    @unique // ex: BR-2026-0001
   fabricantId String
-  total       Decimal  @db.Decimal(12, 2) // total au prix de vente — calculé serveur
-  totalAchat  Decimal  @default(0) @db.Decimal(12, 2) // total au prix d'achat — ce que ça a réellement coûté
+  total       Decimal   @db.Decimal(12, 2) // total au prix de vente — calculé serveur
+  totalAchat  Decimal   @default(0) @db.Decimal(12, 2) // total au prix d'achat — ce que ça a réellement coûté
   notes       String?
-  createdAt   DateTime @default(now())
+  deletedAt   DateTime? // corbeille — null = actif
+  createdAt   DateTime  @default(now())
 
   fabricant  Fabricant          @relation(fields: [fabricantId], references: [id])
   items      StockReceiptItem[]
   stockMoves StockMovement[]
 
   @@index([fabricantId])
+  @@index([deletedAt])
 }
 
 model StockReceiptItem {

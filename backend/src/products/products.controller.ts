@@ -28,6 +28,13 @@ export class ProductsController {
     return this.productsService.findAllForAdmin(categoryId);
   }
 
+  // Must come before ':id' so "trash" isn't swallowed as an id param.
+  @Roles('ADMIN')
+  @Get('trash')
+  findTrash() {
+    return this.productsService.findTrash();
+  }
+
   @Roles('ADMIN')
   @Get(':id')
   findOneAdmin(@Param('id') id: string) {
@@ -40,10 +47,23 @@ export class ProductsController {
     return this.productsService.update(id, dto);
   }
 
+  // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.
   @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  @Roles('ADMIN')
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.productsService.restore(id);
+  }
+
+  @Roles('ADMIN')
+  @Delete(':id/permanent')
+  permanentDelete(@Param('id') id: string) {
+    return this.productsService.permanentDelete(id);
   }
 
   @Roles('ADMIN')

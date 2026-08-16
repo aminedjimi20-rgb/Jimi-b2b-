@@ -28,7 +28,17 @@ class ProductsApi {
     return AdminProduct.fromJson(res.data as Map<String, dynamic>);
   }
 
+  /// Moves to the corbeille (reversible) — see [permanentDelete] to erase for good.
   Future<void> remove(String id) => _dio.delete('/products/$id');
+
+  Future<List<AdminProduct>> trash() async {
+    final res = await _dio.get('/products/trash');
+    return (res.data as List<dynamic>).map((e) => AdminProduct.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> restore(String id) => _dio.post('/products/$id/restore');
+
+  Future<void> permanentDelete(String id) => _dio.delete('/products/$id/permanent');
 
   Future<void> setCustomPrice(String productId, String clientId, double prix) =>
       _dio.post('/products/$productId/custom-price', data: {'clientId': clientId, 'prix': prix});

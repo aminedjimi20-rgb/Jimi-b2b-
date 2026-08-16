@@ -4,6 +4,7 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService } from '../pricing/pricing.service';
+import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchCatalogDto } from './dto/search-catalog.dto';
@@ -107,15 +108,18 @@ export class ProductsService {
     return toAdminProductDTO(product);
   }
 
+  // Moves to the corbeille — independent of `actif` (catalog visibility),
+  // which stays untouched so restoring brings the product back exactly as
+  // it was, visible or not.
   async remove(id: string) {
     const existing = await this.prisma.product.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Produit introuvable.');
-    await this.prisma.product.update({ where: { id }, data: { actif: false } });
+    if (!existing || existing.deletedAt) throw new NotFoundException('Produit introuvable.');
+    await this.prisma.product.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 
   async findAllForAdmin(categoryId?: string) {
     const products = await this.prisma.product.findMany({
-      where: categoryId ? { categoryId } : undefined,
+      where: { deletedAt: null, ...(categoryId ? { categoryId } : {}) },
       include: PRODUCT_INCLUDE,
       orderBy: { updatedAt: 'desc' },
     });
@@ -124,8 +128,35 @@ export class ProductsService {
 
   async findOneForAdmin(id: string) {
     const product = await this.prisma.product.findUnique({ where: { id }, include: PRODUCT_INCLUDE });
-    if (!product) throw new NotFoundException('Produit introuvable.');
+    if (!product || product.deletedAt) throw new NotFoundException('Produit introuvable.');
     return toAdminProductDTO(product);
+  }
+
+  // ── Corbeille ────────────────────────────────────────────────────────
+
+  async findTrash() {
+    const products = await this.prisma.product.findMany({
+      where: { deletedAt: { not: null } },
+      include: PRODUCT_INCLUDE,
+      orderBy: { deletedAt: 'desc' },
+    });
+    return products.map(toAdminProductDTO);
+  }
+
+  async restore(id: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product || !product.deletedAt) throw new NotFoundException('Produit introuvable dans la corbeille.');
+    await this.prisma.product.update({ where: { id }, data: { deletedAt: null } });
+  }
+
+  async permanentDelete(id: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product || !product.deletedAt) throw new NotFoundException('Produit introuvable dans la corbeille.');
+
+    await runOrExplainForeignKeyError(
+      () => this.prisma.product.delete({ where: { id } }),
+      'Impossible de supprimer définitivement : des commandes ou bons de réception référencent encore ce produit.',
+    );
   }
 
   async setCustomPrice(productId: string, clientId: string, prix: number) {
@@ -142,6 +173,7 @@ export class ProductsService {
   async searchCatalogForClient(clientId: string, query: SearchCatalogDto) {
     const where: Prisma.ProductWhereInput = {
       actif: true,
+      deletedAt: null,
       ...(query.categoryId ? { categoryId: query.categoryId } : {}),
       ...(query.q
         ? {
@@ -183,7 +215,7 @@ export class ProductsService {
 
   async getProductForClient(clientId: string, productId: string) {
     const product = await this.prisma.product.findFirst({
-      where: { id: productId, actif: true },
+      where: { id: productId, actif: true, deletedAt: null },
       include: PRODUCT_INCLUDE,
     });
     if (!product) throw new NotFoundException('Produit introuvable.');
@@ -198,7 +230,7 @@ export class ProductsService {
     const queryHash = await computeImageHash(buffer);
 
     const images = await this.prisma.productImage.findMany({
-      where: { hash: { not: null }, product: { actif: true } },
+      where: { hash: { not: null }, product: { actif: true, deletedAt: null } },
       select: { hash: true, productId: true },
     });
 

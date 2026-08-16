@@ -55,6 +55,13 @@ export class OrdersController {
     return this.ordersService.findAllForAdmin(status);
   }
 
+  // Must come before ':id' so "trash" isn't swallowed as an id param.
+  @Roles('ADMIN')
+  @Get('trash')
+  findTrash() {
+    return this.ordersService.findTrash();
+  }
+
   @Roles('ADMIN')
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -73,9 +80,22 @@ export class OrdersController {
     return this.ordersService.updatePayment(id, dto.estPayee);
   }
 
+  // Moves to the corbeille (reversible) — see DELETE :id/permanent to erase for good.
   @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
+  }
+
+  @Roles('ADMIN')
+  @Post(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.ordersService.restore(id);
+  }
+
+  @Roles('ADMIN')
+  @Delete(':id/permanent')
+  permanentDelete(@Param('id') id: string) {
+    return this.ordersService.permanentDelete(id);
   }
 }
