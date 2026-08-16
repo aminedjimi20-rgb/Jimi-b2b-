@@ -11,6 +11,12 @@ class AppTheme {
   static const Color danger = Color(0xFFD64545);
   static const Color warning = Color(0xFFDB8A1F);
 
+  // Secondary text / placeholders — deliberately darker than Material's
+  // default derived greys (which can render as low-contrast light grey on
+  // white). ~9:1 contrast on white, comfortably above WCAG AA.
+  static const Color textSecondary = Color(0xFF475467);
+  static const Color textPlaceholder = Color(0xFF667085);
+
   static ThemeData light() {
     final base = ThemeData(
       useMaterial3: true,
@@ -39,6 +45,10 @@ class AppTheme {
         fillColor: Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: const TextStyle(color: textSecondary),
+        floatingLabelStyle: const TextStyle(color: primary),
+        hintStyle: const TextStyle(color: textPlaceholder),
+        helperStyle: const TextStyle(color: textSecondary),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -47,8 +57,21 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: primary,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: textSecondary,
         showUnselectedLabels: true,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 12,
+            fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
+            color: states.contains(WidgetState.selected) ? primary : textSecondary,
+          ),
+        ),
+      ),
+      textTheme: base.textTheme.copyWith(
+        bodySmall: base.textTheme.bodySmall?.copyWith(color: textSecondary),
+        bodyMedium: base.textTheme.bodyMedium?.copyWith(color: const Color(0xFF1D2939)),
       ),
     );
   }
