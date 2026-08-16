@@ -7,33 +7,63 @@ import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/stats.dart';
 import '../../../services/service_providers.dart';
 
-enum _Period { today, week, month, year }
+enum _Period { today, yesterday, week, lastWeek, month, lastMonth, months3, months6, year, lastYear, custom }
 
 extension on _Period {
   String get label => switch (this) {
         _Period.today => "Aujourd'hui",
-        _Period.week => '7 jours',
-        _Period.month => '30 jours',
+        _Period.yesterday => 'Hier',
+        _Period.week => 'Cette semaine',
+        _Period.lastWeek => 'Semaine précédente',
+        _Period.month => 'Ce mois',
+        _Period.lastMonth => 'Mois précédent',
+        _Period.months3 => '3 mois',
+        _Period.months6 => '6 mois',
         _Period.year => 'Cette année',
+        _Period.lastYear => 'Année précédente',
+        _Period.custom => 'Période personnalisée',
       };
 
+  /// [custom] is handled separately (see _customRangeProvider) — this range is unused for it.
   ({DateTime from, DateTime to}) range(DateTime now) {
     final todayStart = DateTime(now.year, now.month, now.day);
+    final weekday = now.weekday; // 1 = lundi
+    final thisWeekStart = todayStart.subtract(Duration(days: weekday - 1));
+    final thisMonthStart = DateTime(now.year, now.month, 1);
     return switch (this) {
       _Period.today => (from: todayStart, to: now),
-      _Period.week => (from: todayStart.subtract(const Duration(days: 6)), to: now),
-      _Period.month => (from: todayStart.subtract(const Duration(days: 29)), to: now),
+      _Period.yesterday => (from: todayStart.subtract(const Duration(days: 1)), to: todayStart.subtract(const Duration(seconds: 1))),
+      _Period.week => (from: thisWeekStart, to: now),
+      _Period.lastWeek => (from: thisWeekStart.subtract(const Duration(days: 7)), to: thisWeekStart.subtract(const Duration(seconds: 1))),
+      _Period.month => (from: thisMonthStart, to: now),
+      _Period.lastMonth => (
+          from: DateTime(now.year, now.month - 1, 1),
+          to: thisMonthStart.subtract(const Duration(seconds: 1)),
+        ),
+      _Period.months3 => (from: DateTime(now.year, now.month - 3, now.day), to: now),
+      _Period.months6 => (from: DateTime(now.year, now.month - 6, now.day), to: now),
       _Period.year => (from: DateTime(now.year, 1, 1), to: now),
+      _Period.lastYear => (from: DateTime(now.year - 1, 1, 1), to: DateTime(now.year - 1, 12, 31, 23, 59, 59)),
+      _Period.custom => (from: todayStart, to: now),
     };
   }
 }
 
 final _periodProvider = StateProvider.autoDispose<_Period>((ref) => _Period.week);
 final _chartVisibleProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _customRangeProvider = StateProvider.autoDispose<DateTimeRange?>((ref) => null);
+
+({DateTime from, DateTime to}) _resolveRange(_Period period, DateTimeRange? custom) {
+  if (period == _Period.custom && custom != null) {
+    return (from: custom.start, to: DateTime(custom.end.year, custom.end.month, custom.end.day, 23, 59, 59));
+  }
+  return period.range(DateTime.now());
+}
 
 final _dashboardProvider = FutureProvider.autoDispose<DashboardStats>((ref) {
   final period = ref.watch(_periodProvider);
-  final range = period.range(DateTime.now());
+  final custom = ref.watch(_customRangeProvider);
+  final range = _resolveRange(period, custom);
   return ref.watch(statsApiProvider).dashboard(from: range.from, to: range.to);
 });
 
@@ -42,7 +72,8 @@ final _dashboardProvider = FutureProvider.autoDispose<DashboardStats>((ref) {
 /// comparison instead of an arbitrary baseline.
 final _previousDashboardProvider = FutureProvider.autoDispose<DashboardStats>((ref) {
   final period = ref.watch(_periodProvider);
-  final range = period.range(DateTime.now());
+  final custom = ref.watch(_customRangeProvider);
+  final range = _resolveRange(period, custom);
   final duration = range.to.difference(range.from);
   return ref.watch(statsApiProvider).dashboard(from: range.from.subtract(duration), to: range.from);
 });
@@ -50,11 +81,26 @@ final _previousDashboardProvider = FutureProvider.autoDispose<DashboardStats>((r
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
+  Future<void> _pickCustomRange(BuildContext context, WidgetRef ref) async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 5),
+      lastDate: now,
+      initialDateRange: ref.read(_customRangeProvider) ?? DateTimeRange(start: now.subtract(const Duration(days: 6)), end: now),
+    );
+    if (picked != null) {
+      ref.read(_customRangeProvider.notifier).state = picked;
+      ref.read(_periodProvider.notifier).state = _Period.custom;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(_dashboardProvider);
     final previous = ref.watch(_previousDashboardProvider);
     final period = ref.watch(_periodProvider);
+    final customRange = ref.watch(_customRangeProvider);
     final chartVisible = ref.watch(_chartVisibleProvider);
 
     return Scaffold(
@@ -80,9 +126,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                         .map((p) => Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: ChoiceChip(
-                                label: Text(p.label),
+                                label: Text(p == _Period.custom && customRange != null
+                                    ? '${formatDate(customRange.start)} → ${formatDate(customRange.end)}'
+                                    : p.label),
                                 selected: period == p,
-                                onSelected: (_) => ref.read(_periodProvider.notifier).state = p,
+                                onSelected: (_) {
+                                  if (p == _Period.custom) {
+                                    _pickCustomRange(context, ref);
+                                  } else {
+                                    ref.read(_periodProvider.notifier).state = p;
+                                  }
+                                },
                               ),
                             ))
                         .toList(),
