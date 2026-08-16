@@ -559,11 +559,13 @@ model Notification {
   message   String
   lu        Boolean          @default(false)
   data      Json? // ex: { orderId, productId }
+  deletedAt DateTime? // corbeille — null = active
   createdAt DateTime         @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, lu])
+  @@index([userId, deletedAt])
 }
 
 model Favorite {
