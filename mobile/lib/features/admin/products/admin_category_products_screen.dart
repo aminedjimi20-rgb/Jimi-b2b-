@@ -4,11 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
+import 'admin_product_detail_screen.dart';
 import 'admin_product_form_screen.dart';
+import 'admin_product_sort.dart';
 import 'admin_product_tile.dart';
 
+final _categorySortProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 final _categoryProductsProvider = FutureProvider.autoDispose.family<List<AdminProduct>, String>((ref, categoryId) {
-  return ref.watch(productsApiProvider).listAdmin(categoryId: categoryId);
+  final sortBy = ref.watch(_categorySortProvider);
+  return ref.watch(productsApiProvider).listAdmin(categoryId: categoryId, sortBy: sortBy);
 });
 
 /// Products belonging to a single category — the "folder" view opened from
@@ -22,9 +27,15 @@ class AdminCategoryProductsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(_categoryProductsProvider(categoryId));
+    final sortBy = ref.watch(_categorySortProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(categoryName)),
+      appBar: AppBar(
+        title: Text(categoryName),
+        actions: [
+          ProductSortMenuButton(value: sortBy, onChanged: (v) => ref.read(_categorySortProvider.notifier).state = v),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final created = await Navigator.of(context).push<bool>(
@@ -53,10 +64,10 @@ class AdminCategoryProductsScreen extends ConsumerWidget {
                 return AdminProductTile(
                   product: p,
                   onTap: () async {
-                    final updated = await Navigator.of(context).push<bool>(
-                      MaterialPageRoute(builder: (_) => AdminProductFormScreen(productId: p.id)),
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => AdminProductDetailScreen(productId: p.id)),
                     );
-                    if (updated == true) ref.invalidate(_categoryProductsProvider(categoryId));
+                    ref.invalidate(_categoryProductsProvider(categoryId));
                   },
                 );
               },

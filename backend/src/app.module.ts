@@ -10,6 +10,7 @@ import { ClientsModule } from './clients/clients.module';
 import { CategoriesModule } from './categories/categories.module';
 import { FabricantsModule } from './fabricants/fabricants.module';
 import { ProductsModule } from './products/products.module';
+import { PriceCategoriesModule } from './price-categories/price-categories.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { UploadsModule } from './uploads/uploads.module';
@@ -37,6 +38,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     CategoriesModule,
     FabricantsModule,
     ProductsModule,
+    PriceCategoriesModule,
     PromotionsModule,
     FavoritesModule,
     UploadsModule,

@@ -8,14 +8,22 @@ import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchCatalogDto } from './dto/search-catalog.dto';
-import { toAdminProductDTO, toClientProductDTO } from './dto/product-response.dto';
+import { ProductDerivedInfo, toAdminProductDTO, toClientProductDTO } from './dto/product-response.dto';
 import { computeImageHash, hammingDistance } from './image-hash.util';
+import { computeActivePromoInfo, productHasActivePromo } from '../promotions/active-promotions.util';
 
-const PRODUCT_INCLUDE = { images: true, priceTiers: true, fabricant: true } as const;
+const PRODUCT_INCLUDE = {
+  images: true,
+  priceTiers: true,
+  fabricant: true,
+  salePrices: { include: { priceCategory: true } },
+} as const;
 
 // A dHash is 64 bits; empirically a Hamming distance under ~12 means
 // "visually similar enough to be the same or a related product photo".
 const IMAGE_SEARCH_MAX_DISTANCE = 16;
+
+export type ProductSortBy = 'nom' | 'stock' | 'prix' | 'dernierChangement' | 'dernierArrivage' | 'nouveautes' | 'saisonnier';
 
 @Injectable()
 export class ProductsService {
@@ -51,9 +59,12 @@ export class ProductsService {
         minCommande: dto.minCommande,
         uniteParCarton: dto.uniteParCarton,
         actif: dto.actif ?? true,
+        estNouveau: dto.estNouveau ?? false,
+        estSaisonnier: dto.estSaisonnier ?? false,
         imageHash: imageInputs[0]?.hash,
         images: imageInputs.length ? { create: imageInputs } : undefined,
         priceTiers: dto.priceTiers ? { create: dto.priceTiers } : undefined,
+        salePrices: dto.salePrices ? { create: dto.salePrices } : undefined,
       },
       include: PRODUCT_INCLUDE,
     });
@@ -64,7 +75,12 @@ export class ProductsService {
       });
     }
 
-    return toAdminProductDTO(product);
+    // Baseline snapshot — every later price edit compares against this.
+    await this.prisma.productPriceHistory.create({
+      data: { productId: product.id, prixAchat: product.prixAchat, prixVente: product.prixVente },
+    });
+
+    return toAdminProductDTO(product, await this.computeDerivedInfo(product.id));
   }
 
   async update(id: string, dto: UpdateProductDto) {
@@ -77,6 +93,12 @@ export class ProductsService {
     }
 
     const imageInputs = await this.buildImageCreateInputs(dto.imageUrls ?? [], false);
+
+    const prixAchat = dto.prixAchat ?? existing.prixAchat.toNumber();
+    const prixVente = dto.prixVente ?? existing.prixVente.toNumber();
+    const priceChanged = dto.prixAchat !== undefined || dto.prixVente !== undefined
+      ? !existing.prixAchat.equals(prixAchat) || !existing.prixVente.equals(prixVente)
+      : false;
 
     const product = await this.prisma.product.update({
       where: { id },
@@ -95,17 +117,29 @@ export class ProductsService {
         minCommande: dto.minCommande,
         uniteParCarton: dto.uniteParCarton,
         actif: dto.actif,
+        estNouveau: dto.estNouveau,
+        estSaisonnier: dto.estSaisonnier,
         // stockReel is intentionally NOT editable here — it only changes via
         // recorded StockMovement entries (see StockService), so the audit
         // trail always explains every change in real quantity.
         // New photos are appended (not a replace) — removing a photo is a
         // separate explicit action, never implied by an unrelated edit.
         images: imageInputs.length ? { create: imageInputs } : undefined,
+        // Present (even empty) replaces the whole list — "Prix de vente 1/2/3...".
+        salePrices: dto.salePrices
+          ? { deleteMany: {}, create: dto.salePrices }
+          : undefined,
       },
       include: PRODUCT_INCLUDE,
     });
 
-    return toAdminProductDTO(product);
+    if (priceChanged) {
+      await this.prisma.productPriceHistory.create({
+        data: { productId: id, prixAchat: product.prixAchat, prixVente: product.prixVente },
+      });
+    }
+
+    return toAdminProductDTO(product, await this.computeDerivedInfo(id));
   }
 
   // Moves to the corbeille — independent of `actif` (catalog visibility),
@@ -117,19 +151,96 @@ export class ProductsService {
     await this.prisma.product.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 
-  async findAllForAdmin(categoryId?: string) {
+  async findAllForAdmin(categoryId?: string, sortBy?: ProductSortBy) {
     const products = await this.prisma.product.findMany({
       where: { deletedAt: null, ...(categoryId ? { categoryId } : {}) },
       include: PRODUCT_INCLUDE,
       orderBy: { updatedAt: 'desc' },
     });
-    return products.map(toAdminProductDTO);
+
+    const [lastEntryByProduct, lastPriceChangeByProduct, promoInfo] = await Promise.all([
+      this.lastEntryDateByProduct(),
+      this.lastPriceChangeByProduct(),
+      computeActivePromoInfo(this.prisma),
+    ]);
+
+    const withDerived = products.map((product) => ({
+      product,
+      dto: toAdminProductDTO(product, {
+        dernierChangementPrix: lastPriceChangeByProduct.get(product.id) ?? null,
+        dernierArrivage: lastEntryByProduct.get(product.id) ?? null,
+        estPromo: productHasActivePromo(promoInfo, product.id),
+      }),
+    }));
+
+    return this.sortProducts(withDerived, sortBy).map((x) => x.dto);
   }
 
   async findOneForAdmin(id: string) {
     const product = await this.prisma.product.findUnique({ where: { id }, include: PRODUCT_INCLUDE });
     if (!product || product.deletedAt) throw new NotFoundException('Produit introuvable.');
-    return toAdminProductDTO(product);
+    return toAdminProductDTO(product, await this.computeDerivedInfo(id));
+  }
+
+  private sortProducts<T extends { product: { nom: string; stockReel: number; prixVente: Prisma.Decimal; estNouveau: boolean; estSaisonnier: boolean }; dto: { dernierChangementPrix: Date | null; dernierArrivage: Date | null } }>(
+    items: T[],
+    sortBy?: ProductSortBy,
+  ): T[] {
+    const byDateDesc = (a: Date | null, b: Date | null) => {
+      if (a == null && b == null) return 0;
+      if (a == null) return 1;
+      if (b == null) return -1;
+      return b.getTime() - a.getTime();
+    };
+
+    switch (sortBy) {
+      case 'nom':
+        return [...items].sort((a, b) => a.product.nom.localeCompare(b.product.nom));
+      case 'stock':
+        return [...items].sort((a, b) => b.product.stockReel - a.product.stockReel);
+      case 'prix':
+        return [...items].sort((a, b) => b.product.prixVente.comparedTo(a.product.prixVente));
+      case 'dernierChangement':
+        return [...items].sort((a, b) => byDateDesc(a.dto.dernierChangementPrix, b.dto.dernierChangementPrix));
+      case 'dernierArrivage':
+        return [...items].sort((a, b) => byDateDesc(a.dto.dernierArrivage, b.dto.dernierArrivage));
+      case 'nouveautes':
+        return [...items].sort((a, b) => Number(b.product.estNouveau) - Number(a.product.estNouveau));
+      case 'saisonnier':
+        return [...items].sort((a, b) => Number(b.product.estSaisonnier) - Number(a.product.estSaisonnier));
+      default:
+        return items;
+    }
+  }
+
+  private async computeDerivedInfo(productId: string): Promise<ProductDerivedInfo> {
+    const [lastEntry, lastPriceChange, promoInfo] = await Promise.all([
+      this.prisma.stockMovement.findFirst({ where: { productId, type: 'ENTREE' }, orderBy: { createdAt: 'desc' } }),
+      this.prisma.productPriceHistory.findFirst({ where: { productId }, orderBy: { changedAt: 'desc' } }),
+      computeActivePromoInfo(this.prisma),
+    ]);
+    return {
+      dernierArrivage: lastEntry?.createdAt ?? null,
+      dernierChangementPrix: lastPriceChange?.changedAt ?? null,
+      estPromo: productHasActivePromo(promoInfo, productId),
+    };
+  }
+
+  private async lastEntryDateByProduct(): Promise<Map<string, Date>> {
+    const groups = await this.prisma.stockMovement.groupBy({
+      by: ['productId'],
+      where: { type: 'ENTREE' },
+      _max: { createdAt: true },
+    });
+    return new Map(groups.filter((g) => g._max.createdAt).map((g) => [g.productId, g._max.createdAt!]));
+  }
+
+  private async lastPriceChangeByProduct(): Promise<Map<string, Date>> {
+    const groups = await this.prisma.productPriceHistory.groupBy({
+      by: ['productId'],
+      _max: { changedAt: true },
+    });
+    return new Map(groups.filter((g) => g._max.changedAt).map((g) => [g.productId, g._max.changedAt!]));
   }
 
   // ── Corbeille ────────────────────────────────────────────────────────
@@ -140,7 +251,7 @@ export class ProductsService {
       include: PRODUCT_INCLUDE,
       orderBy: { deletedAt: 'desc' },
     });
-    return products.map(toAdminProductDTO);
+    return Promise.all(products.map(async (p) => toAdminProductDTO(p, await this.computeDerivedInfo(p.id))));
   }
 
   async restore(id: string) {
@@ -186,12 +297,14 @@ export class ProductsService {
     };
 
     const products = await this.prisma.product.findMany({ where, include: PRODUCT_INCLUDE });
+    const promoInfo = await computeActivePromoInfo(this.prisma);
 
     const resolved = await Promise.all(
       products.map(async (product) => {
         const price = await this.pricing.resolvePrice(clientId, product.id, product.minCommande);
         const status = this.pricing.stockStatus(product.stockReel, product.stockMinimum);
-        return toClientProductDTO(product, price, status);
+        const estPromo = productHasActivePromo(promoInfo, product.id);
+        return toClientProductDTO(product, price, status, estPromo);
       }),
     );
 
@@ -222,7 +335,9 @@ export class ProductsService {
 
     const price = await this.pricing.resolvePrice(clientId, productId, product.minCommande);
     const status = this.pricing.stockStatus(product.stockReel, product.stockMinimum);
-    return toClientProductDTO(product, price, status);
+    const promoInfo = await computeActivePromoInfo(this.prisma);
+    const estPromo = productHasActivePromo(promoInfo, productId);
+    return toClientProductDTO(product, price, status, estPromo);
   }
 
   /** Client uploads a photo of a product they're holding — matched against stored product photo hashes. */
@@ -254,12 +369,17 @@ export class ProductsService {
     });
 
     const distanceByProductId = new Map(matches);
+    const promoInfo = await computeActivePromoInfo(this.prisma);
     const results = await Promise.all(
       products.map(async (product) => {
         const price = await this.pricing.resolvePrice(clientId, product.id, product.minCommande);
         const status = this.pricing.stockStatus(product.stockReel, product.stockMinimum);
         const distance = distanceByProductId.get(product.id)!;
-        return { ...toClientProductDTO(product, price, status), matchScore: Math.round((1 - distance / 64) * 100) };
+        const estPromo = productHasActivePromo(promoInfo, product.id);
+        return {
+          ...toClientProductDTO(product, price, status, estPromo),
+          matchScore: Math.round((1 - distance / 64) * 100),
+        };
       }),
     );
 

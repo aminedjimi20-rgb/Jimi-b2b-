@@ -8,8 +8,11 @@ class ProductsApi {
 
   // ── ADMIN ────────────────────────────────────────────────────────────
 
-  Future<List<AdminProduct>> listAdmin({String? categoryId}) async {
-    final res = await _dio.get('/products', queryParameters: {if (categoryId != null) 'categoryId': categoryId});
+  Future<List<AdminProduct>> listAdmin({String? categoryId, String? sortBy}) async {
+    final res = await _dio.get('/products', queryParameters: {
+      if (categoryId != null) 'categoryId': categoryId,
+      if (sortBy != null) 'sortBy': sortBy,
+    });
     return (res.data as List<dynamic>).map((e) => AdminProduct.fromJson(e as Map<String, dynamic>)).toList();
   }
 

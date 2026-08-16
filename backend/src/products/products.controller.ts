@@ -4,7 +4,7 @@ import { memoryStorage } from 'multer';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
-import { ProductsService } from './products.service';
+import { ProductsService, ProductSortBy } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SearchCatalogDto } from './dto/search-catalog.dto';
@@ -24,8 +24,8 @@ export class ProductsController {
 
   @Roles('ADMIN')
   @Get()
-  findAllAdmin(@Query('categoryId') categoryId?: string) {
-    return this.productsService.findAllForAdmin(categoryId);
+  findAllAdmin(@Query('categoryId') categoryId?: string, @Query('sortBy') sortBy?: ProductSortBy) {
+    return this.productsService.findAllForAdmin(categoryId, sortBy);
   }
 
   // Must come before ':id' so "trash" isn't swallowed as an id param.

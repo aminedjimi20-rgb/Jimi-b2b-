@@ -4,6 +4,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/types/authenticated-user';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
+import { UpdateClientDto } from './dto/update-client.dto';
 import { UpdateClientStatusDto } from './dto/update-client-status.dto';
 
 @Controller('clients')
@@ -33,6 +34,12 @@ export class ClientsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.clientsService.findOneForAdmin(id);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateClientDto) {
+    return this.clientsService.update(id, dto);
   }
 
   @Roles('ADMIN')

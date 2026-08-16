@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
-export type PriceSource = 'PROMOTION' | 'PERSONNALISE' | 'PALIER' | 'NORMAL';
+export type PriceSource = 'PROMOTION' | 'PERSONNALISE' | 'PALIER' | 'CATEGORIE' | 'NORMAL';
 
 export interface ResolvedPrice {
   prix: Prisma.Decimal;
@@ -19,7 +19,8 @@ export interface ResolvedPrice {
  *   1. Active promotion targeting this client + product (or untargeted / global)
  *   2. Client-specific custom price
  *   3. Quantity price tier
- *   4. Normal sale price
+ *   4. Client's price category (Prix de vente 1/2/3... — see PriceCategory)
+ *   5. Normal sale price
  */
 @Injectable()
 export class PricingService {
@@ -75,6 +76,14 @@ export class PricingService {
       orderBy: { qteMin: 'desc' },
     });
     if (tier) return { prix: tier.prix, source: 'PALIER' };
+
+    const client = await this.prisma.client.findUnique({ where: { id: clientId }, select: { priceCategoryId: true } });
+    if (client?.priceCategoryId) {
+      const categoryPrice = await this.prisma.productSalePrice.findUnique({
+        where: { productId_priceCategoryId: { productId, priceCategoryId: client.priceCategoryId } },
+      });
+      if (categoryPrice) return { prix: categoryPrice.prix, source: 'CATEGORIE' };
+    }
 
     return { prix: product.prixVente, source: 'NORMAL' };
   }

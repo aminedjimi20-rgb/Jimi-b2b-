@@ -25,6 +25,15 @@ class PriceTierInputDto {
   prix!: number;
 }
 
+class SalePriceInputDto {
+  @IsString()
+  priceCategoryId!: string;
+
+  @IsNumber()
+  @Min(0)
+  prix!: number;
+}
+
 export class CreateProductDto {
   @IsString()
   nom!: string;
@@ -85,6 +94,14 @@ export class CreateProductDto {
   actif?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  estNouveau?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  estSaisonnier?: boolean;
+
+  @IsOptional()
   @IsArray()
   imageUrls?: string[];
 
@@ -94,4 +111,13 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => PriceTierInputDto)
   priceTiers?: PriceTierInputDto[];
+
+  // Prix de vente 1/2/3... — un prix par catégorie de prix (voir PriceCategory).
+  // Présent (même vide) = remplace entièrement la liste existante.
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(0)
+  @ValidateNested({ each: true })
+  @Type(() => SalePriceInputDto)
+  salePrices?: SalePriceInputDto[];
 }

@@ -96,6 +96,18 @@ class _ClientProductDetailScreenState extends ConsumerState<ClientProductDetailS
                             ],
                           ),
                           Text('Code: ${p.code}', style: TextStyle(color: Colors.grey[600])),
+                          if (p.estPromo || p.estNouveau || p.estSaisonnier)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Wrap(
+                                spacing: 6,
+                                children: [
+                                  if (p.estPromo) const _Badge(label: 'Promo', color: AppTheme.danger),
+                                  if (p.estNouveau) const _Badge(label: 'Nouveau', color: AppTheme.primary),
+                                  if (p.estSaisonnier) const _Badge(label: 'Saisonnier', color: AppTheme.warning),
+                                ],
+                              ),
+                            ),
                           if (p.taille != null || p.couleur != null || p.marque != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
@@ -161,6 +173,21 @@ class _ClientProductDetailScreenState extends ConsumerState<ClientProductDetailS
           );
         },
       ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({required this.label, required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }
 }

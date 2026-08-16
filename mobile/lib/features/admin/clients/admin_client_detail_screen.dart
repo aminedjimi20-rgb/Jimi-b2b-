@@ -105,6 +105,53 @@ class AdminClientDetailScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _changePriceCategory(BuildContext context, WidgetRef ref, ClientView client) async {
+    final categories = await ref.read(priceCategoriesApiProvider).list();
+    if (!context.mounted) return;
+
+    String? selectedId = client.priceCategoryId;
+    final result = await showDialog<String?>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Catégorie de prix'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String?>(
+                title: const Text('Aucune (prix normal)'),
+                value: null,
+                groupValue: selectedId,
+                onChanged: (v) => setState(() => selectedId = v),
+              ),
+              for (final cat in categories)
+                RadioListTile<String?>(
+                  title: Text(cat.nom),
+                  value: cat.id,
+                  groupValue: selectedId,
+                  onChanged: (v) => setState(() => selectedId = v),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+            ElevatedButton(onPressed: () => Navigator.pop(ctx, selectedId ?? ''), child: const Text('Enregistrer')),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+
+    try {
+      await ref.read(clientsApiProvider).update(clientId, {'priceCategoryId': result});
+      ref.invalidate(_adminClientProvider(clientId));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur.')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final client = ref.watch(_adminClientProvider(clientId));
@@ -141,16 +188,23 @@ class AdminClientDetailScreen extends ConsumerWidget {
                     if (c.adresse != null) _Row(label: 'Adresse', value: c.adresse!),
                     _Row(label: 'Limite crédit', value: formatMoney(c.limiteCredit)),
                     _Row(label: 'Solde crédit', value: formatMoney(c.soldeCredit)),
+                    _Row(label: 'Catégorie de prix', value: c.priceCategoryNom ?? 'Aucune (prix normal)'),
                     if (c.notesInternes != null && c.notesInternes!.isNotEmpty) _Row(label: 'Notes internes', value: c.notesInternes!),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () => _changePriceCategory(context, ref, c),
+              icon: const Icon(Icons.sell_outlined),
+              label: const Text('Changer la catégorie de prix'),
+            ),
+            const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: () => _openCustomPriceDialog(context, ref),
-              icon: const Icon(Icons.sell_outlined),
-              label: const Text('Définir un prix personnalisé'),
+              icon: const Icon(Icons.price_change_outlined),
+              label: const Text('Définir un prix personnalisé (par produit)'),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(

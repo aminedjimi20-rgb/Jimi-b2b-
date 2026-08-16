@@ -39,4 +39,9 @@ export class CreateClientDto {
   @IsOptional()
   @IsString()
   notesInternes?: string;
+
+  // Catégorie de prix assignée (Prix de vente 1/2/3...) — voir PriceCategory.
+  @IsOptional()
+  @IsString()
+  priceCategoryId?: string;
 }

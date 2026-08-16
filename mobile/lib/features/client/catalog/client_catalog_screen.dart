@@ -211,6 +211,19 @@ class _ProductCard extends ConsumerWidget {
                       child: Text(stockStatusLabel(product.disponibilite), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600)),
                     ),
                   ),
+                  if (product.estPromo || product.estNouveau || product.estSaisonnier)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (product.estPromo) const _ProductBadge(label: 'Promo', color: AppTheme.danger),
+                          if (product.estNouveau) const _ProductBadge(label: 'Nouveau', color: AppTheme.primary),
+                          if (product.estSaisonnier) const _ProductBadge(label: 'Saisonnier', color: AppTheme.warning),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -256,4 +269,22 @@ class _ImagePlaceholder extends StatelessWidget {
   const _ImagePlaceholder();
   @override
   Widget build(BuildContext context) => Container(color: Colors.grey.shade100, child: const Icon(Icons.image_outlined, color: Colors.grey, size: 32));
+}
+
+class _ProductBadge extends StatelessWidget {
+  const _ProductBadge({required this.label, required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(6)),
+        child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
 }

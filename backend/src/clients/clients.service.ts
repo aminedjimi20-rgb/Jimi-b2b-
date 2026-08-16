@@ -3,10 +3,12 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { runOrExplainForeignKeyError } from '../common/prisma-errors.util';
 import { CreateClientDto } from './dto/create-client.dto';
+import { UpdateClientDto } from './dto/update-client.dto';
 import { toAdminClientDTO, toSelfClientDTO } from './dto/client-response.dto';
 
 const CLIENT_INCLUDE_USER = {
   user: { select: { email: true, phone: true, status: true } },
+  priceCategory: true,
 } as const;
 
 @Injectable()
@@ -31,6 +33,7 @@ export class ClientsService {
         ville: dto.ville,
         limiteCredit: dto.limiteCredit ?? 0,
         notesInternes: dto.notesInternes,
+        priceCategory: dto.priceCategoryId ? { connect: { id: dto.priceCategoryId } } : undefined,
         user: {
           create: {
             email: dto.email,
@@ -73,6 +76,25 @@ export class ClientsService {
     });
     if (!client) throw new NotFoundException('Profil introuvable.');
     return toSelfClientDTO(client);
+  }
+
+  async update(clientId: string, dto: UpdateClientDto) {
+    const client = await this.prisma.client.findUnique({ where: { id: clientId } });
+    if (!client || client.deletedAt) throw new NotFoundException('Client introuvable.');
+
+    await this.prisma.client.update({
+      where: { id: clientId },
+      data: {
+        raisonSociale: dto.raisonSociale,
+        telephone: dto.telephone,
+        adresse: dto.adresse,
+        ville: dto.ville,
+        limiteCredit: dto.limiteCredit,
+        notesInternes: dto.notesInternes,
+        priceCategoryId: dto.priceCategoryId === undefined ? undefined : (dto.priceCategoryId || null),
+      },
+    });
+    return this.findOneForAdmin(clientId);
   }
 
   async setStatus(clientId: string, status: 'ACTIVE' | 'SUSPENDED') {

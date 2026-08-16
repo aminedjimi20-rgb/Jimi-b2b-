@@ -34,6 +34,21 @@ class PriceTier {
   Map<String, dynamic> toJson() => {'qteMin': qteMin, 'qteMax': qteMax, 'prix': prix};
 }
 
+/// One "Prix de vente N" — this product's price for a given [PriceCategory].
+class ProductSalePrice {
+  ProductSalePrice({required this.priceCategoryId, required this.priceCategoryNom, required this.prix});
+
+  final String priceCategoryId;
+  final String priceCategoryNom;
+  final double prix;
+
+  factory ProductSalePrice.fromJson(Map<String, dynamic> json) => ProductSalePrice(
+        priceCategoryId: json['priceCategoryId'] as String,
+        priceCategoryNom: json['priceCategoryNom'] as String,
+        prix: parseDecimal(json['prix']),
+      );
+}
+
 /// Full product as seen by ADMIN — includes cost/margin/exact stock.
 class AdminProduct {
   AdminProduct({
@@ -56,8 +71,15 @@ class AdminProduct {
     required this.minCommande,
     this.uniteParCarton,
     required this.actif,
+    required this.estNouveau,
+    required this.estSaisonnier,
+    required this.estPromo,
+    required this.estNouveauPrix,
+    this.dernierChangementPrix,
+    this.dernierArrivage,
     required this.images,
     required this.priceTiers,
+    required this.salePrices,
   });
 
   final String id;
@@ -79,8 +101,15 @@ class AdminProduct {
   final int minCommande;
   final int? uniteParCarton;
   final bool actif;
+  final bool estNouveau;
+  final bool estSaisonnier;
+  final bool estPromo;
+  final bool estNouveauPrix;
+  final DateTime? dernierChangementPrix;
+  final DateTime? dernierArrivage;
   final List<ProductImage> images;
   final List<PriceTier> priceTiers;
+  final List<ProductSalePrice> salePrices;
 
   String? get primaryImageUrl {
     if (images.isEmpty) return null;
@@ -107,8 +136,15 @@ class AdminProduct {
         minCommande: json['minCommande'] as int,
         uniteParCarton: json['uniteParCarton'] as int?,
         actif: json['actif'] as bool,
+        estNouveau: json['estNouveau'] as bool? ?? false,
+        estSaisonnier: json['estSaisonnier'] as bool? ?? false,
+        estPromo: json['estPromo'] as bool? ?? false,
+        estNouveauPrix: json['estNouveauPrix'] as bool? ?? false,
+        dernierChangementPrix: parseDateOrNull(json['dernierChangementPrix']),
+        dernierArrivage: parseDateOrNull(json['dernierArrivage']),
         images: (json['images'] as List<dynamic>? ?? []).map((e) => ProductImage.fromJson(e as Map<String, dynamic>)).toList(),
         priceTiers: (json['priceTiers'] as List<dynamic>? ?? []).map((e) => PriceTier.fromJson(e as Map<String, dynamic>)).toList(),
+        salePrices: (json['salePrices'] as List<dynamic>? ?? []).map((e) => ProductSalePrice.fromJson(e as Map<String, dynamic>)).toList(),
       );
 }
 
@@ -128,6 +164,9 @@ class ClientProduct {
     required this.prixSource,
     required this.minCommande,
     required this.disponibilite,
+    required this.estNouveau,
+    required this.estSaisonnier,
+    required this.estPromo,
     required this.images,
     required this.grilleQuantite,
   });
@@ -144,6 +183,9 @@ class ClientProduct {
   final String prixSource;
   final int minCommande;
   final String disponibilite;
+  final bool estNouveau;
+  final bool estSaisonnier;
+  final bool estPromo;
   final List<ProductImage> images;
   final List<PriceTier> grilleQuantite;
 
@@ -165,6 +207,9 @@ class ClientProduct {
         prixSource: json['prixSource'] as String,
         minCommande: json['minCommande'] as int,
         disponibilite: json['disponibilite'] as String,
+        estNouveau: json['estNouveau'] as bool? ?? false,
+        estSaisonnier: json['estSaisonnier'] as bool? ?? false,
+        estPromo: json['estPromo'] as bool? ?? false,
         images: (json['images'] as List<dynamic>? ?? []).map((e) => ProductImage.fromJson(e as Map<String, dynamic>)).toList(),
         grilleQuantite: (json['grilleQuantite'] as List<dynamic>? ?? []).map((e) => PriceTier.fromJson(e as Map<String, dynamic>)).toList(),
       );
@@ -184,6 +229,9 @@ class ClientProduct {
         'prixSource': prixSource,
         'minCommande': minCommande,
         'disponibilite': disponibilite,
+        'estNouveau': estNouveau,
+        'estSaisonnier': estSaisonnier,
+        'estPromo': estPromo,
         'images': images.map((i) => i.toJson()).toList(),
         'grilleQuantite': grilleQuantite.map((t) => t.toJson()).toList(),
       };

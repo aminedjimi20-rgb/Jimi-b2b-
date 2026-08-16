@@ -1,6 +1,6 @@
-import { Client, User } from '@prisma/client';
+import { Client, PriceCategory, User } from '@prisma/client';
 
-type ClientWithUser = Client & { user: Pick<User, 'email' | 'phone' | 'status'> };
+type ClientWithUser = Client & { user: Pick<User, 'email' | 'phone' | 'status'>; priceCategory?: PriceCategory | null };
 
 /**
  * Allow-list mapper — Admin sees everything about a client, including
@@ -18,6 +18,8 @@ export function toAdminClientDTO(client: ClientWithUser) {
     status: client.user.status,
     limiteCredit: client.limiteCredit,
     soldeCredit: client.soldeCredit,
+    priceCategoryId: client.priceCategoryId,
+    priceCategoryNom: client.priceCategory?.nom ?? null,
     notesInternes: client.notesInternes,
     createdAt: client.createdAt,
   };

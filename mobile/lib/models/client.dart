@@ -12,6 +12,8 @@ class ClientView {
     this.status,
     required this.limiteCredit,
     required this.soldeCredit,
+    this.priceCategoryId,
+    this.priceCategoryNom,
     this.notesInternes,
   });
 
@@ -25,6 +27,8 @@ class ClientView {
   final String? status;
   final double limiteCredit;
   final double soldeCredit;
+  final String? priceCategoryId;
+  final String? priceCategoryNom;
   final String? notesInternes;
 
   factory ClientView.fromJson(Map<String, dynamic> json) => ClientView(
@@ -38,6 +42,8 @@ class ClientView {
         status: json['status'] as String?,
         limiteCredit: parseDecimal(json['limiteCredit']),
         soldeCredit: parseDecimal(json['soldeCredit']),
+        priceCategoryId: json['priceCategoryId'] as String?,
+        priceCategoryNom: json['priceCategoryNom'] as String?,
         notesInternes: json['notesInternes'] as String?,
       );
 }

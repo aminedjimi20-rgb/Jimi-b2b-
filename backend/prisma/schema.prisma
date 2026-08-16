@@ -85,25 +85,27 @@ model UserPermission {
 // ─────────────────────────────────────────────────────────────────────────
 
 model Client {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  raisonSociale String
-  telephone     String
-  adresse       String?
-  ville         String?
-  limiteCredit  Decimal   @default(0) @db.Decimal(12, 2)
-  soldeCredit   Decimal   @default(0) @db.Decimal(12, 2)
-  notesInternes String? // visible Admin uniquement
-  deletedAt     DateTime? // corbeille — null = actif
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  raisonSociale   String
+  telephone       String
+  adresse         String?
+  ville           String?
+  limiteCredit    Decimal   @default(0) @db.Decimal(12, 2)
+  soldeCredit     Decimal   @default(0) @db.Decimal(12, 2)
+  priceCategoryId String? // catégorie de prix assignée — voir PriceCategory/ProductSalePrice
+  notesInternes   String? // visible Admin uniquement
+  deletedAt       DateTime? // corbeille — null = actif
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customPrices ClientProductPrice[]
-  orders       Order[]
-  favorites    Favorite[]
-  promotions   PromotionClient[]
-  payments     Payment[]
+  user          User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  priceCategory PriceCategory?       @relation(fields: [priceCategoryId], references: [id])
+  customPrices  ClientProductPrice[]
+  orders        Order[]
+  favorites     Favorite[]
+  promotions    PromotionClient[]
+  payments      Payment[]
 
   @@index([raisonSociale])
   @@index([deletedAt])
@@ -160,16 +162,20 @@ model Product {
   minCommande    Int       @default(1)
   uniteParCarton Int? // pratique pour préremplir le prochain bon de réception de ce produit
   actif          Boolean   @default(true) // visibilité catalogue — distinct de deletedAt
+  estNouveau     Boolean   @default(false) // badge "Nouveau" — activé/désactivé par l'Admin, visible du client
+  estSaisonnier  Boolean   @default(false) // badge "Saisonnier" — activé/désactivé par l'Admin, visible du client
   deletedAt      DateTime? // corbeille — null = actif (peut être true ou false pour `actif`)
   imageHash      String? // pHash de l'image principale, pour recherche par image (Phase 1)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  category          Category             @relation(fields: [categoryId], references: [id])
-  fabricant         Fabricant?           @relation(fields: [fabricantId], references: [id])
+  category          Category              @relation(fields: [categoryId], references: [id])
+  fabricant         Fabricant?            @relation(fields: [fabricantId], references: [id])
   images            ProductImage[]
   priceTiers        PriceTier[]
   customPrices      ClientProductPrice[]
+  salePrices        ProductSalePrice[]
+  priceHistory      ProductPriceHistory[]
   orderItems        OrderItem[]
   stockMoves        StockMovement[]
   stockReceiptItems StockReceiptItem[]
@@ -220,6 +226,46 @@ model ClientProductPrice {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, productId])
+}
+
+// Catégorie de prix (ex: "Gros", "Détail", "VIP") — un client est assigné à
+// une catégorie et paie automatiquement le prix défini pour cette catégorie
+// sur chaque produit (voir ProductSalePrice), sans configuration par client.
+model PriceCategory {
+  id        String   @id @default(cuid())
+  nom       String   @unique
+  createdAt DateTime @default(now())
+
+  salePrices ProductSalePrice[]
+  clients    Client[]
+}
+
+// Prix de vente d'UN produit pour UNE catégorie de prix — "Prix de vente 1/2/3...".
+model ProductSalePrice {
+  id              String  @id @default(cuid())
+  productId       String
+  priceCategoryId String
+  prix            Decimal @db.Decimal(12, 2)
+
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceCategory PriceCategory @relation(fields: [priceCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, priceCategoryId])
+  @@index([productId])
+}
+
+// Instantané prixAchat/prixVente à chaque changement — permet d'afficher
+// "dernier changement de prix" et un badge "Nouveau prix" sur la fiche produit.
+model ProductPriceHistory {
+  id        String   @id @default(cuid())
+  productId String
+  prixAchat Decimal  @db.Decimal(12, 2)
+  prixVente Decimal  @db.Decimal(12, 2)
+  changedAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────

@@ -23,6 +23,11 @@ class ClientsApi {
     return ClientView.fromJson(res.data as Map<String, dynamic>);
   }
 
+  Future<ClientView> update(String id, Map<String, dynamic> payload) async {
+    final res = await _dio.patch('/clients/$id', data: payload);
+    return ClientView.fromJson(res.data as Map<String, dynamic>);
+  }
+
   Future<ClientView> setStatus(String id, String status) async {
     final res = await _dio.patch('/clients/$id/status', data: {'status': status});
     return ClientView.fromJson(res.data as Map<String, dynamic>);

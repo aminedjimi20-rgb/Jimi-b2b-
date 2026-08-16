@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../shared/notifications_screen.dart';
 import '../categories/admin_categories_screen.dart';
 import '../fabricants/admin_fabricants_screen.dart';
+import '../price_categories/admin_price_categories_screen.dart';
 import '../promotions/admin_promotions_screen.dart';
 import '../stock/admin_stock_receipts_screen.dart';
 import '../stock/admin_stock_screen.dart';
@@ -50,6 +51,12 @@ class AdminMoreScreen extends ConsumerWidget {
             title: const Text('Promotions'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminPromotionsScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.sell_outlined),
+            title: const Text('Catégories de prix'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminPriceCategoriesScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),

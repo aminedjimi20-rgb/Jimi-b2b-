@@ -8,6 +8,7 @@ import 'favorites_api.dart';
 import 'notifications_api.dart';
 import 'orders_api.dart';
 import 'payments_api.dart';
+import 'price_categories_api.dart';
 import 'products_api.dart';
 import 'promotions_api.dart';
 import 'stats_api.dart';
@@ -27,4 +28,5 @@ final favoritesApiProvider = Provider((ref) => FavoritesApi(ref.watch(dioProvide
 final statsApiProvider = Provider((ref) => StatsApi(ref.watch(dioProvider)));
 final notificationsApiProvider = Provider((ref) => NotificationsApi(ref.watch(dioProvider)));
 final promotionsApiProvider = Provider((ref) => PromotionsApi(ref.watch(dioProvider)));
+final priceCategoriesApiProvider = Provider((ref) => PriceCategoriesApi(ref.watch(dioProvider)));
 final uploadsApiProvider = Provider((ref) => UploadsApi(ref.watch(dioProvider)));

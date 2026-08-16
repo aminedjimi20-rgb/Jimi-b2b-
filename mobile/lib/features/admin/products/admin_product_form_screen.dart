@@ -8,6 +8,7 @@ import '../../../core/api/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/category.dart';
 import '../../../models/fabricant.dart';
+import '../../../models/price_category.dart';
 import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../fabricants/fabricant_dialog.dart';
@@ -15,6 +16,7 @@ import '../stock/admin_stock_screen.dart';
 
 final _categoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) => ref.watch(categoriesApiProvider).list());
 final _fabricantsProvider = FutureProvider.autoDispose<List<Fabricant>>((ref) => ref.watch(fabricantsApiProvider).list());
+final _priceCategoriesProvider = FutureProvider.autoDispose<List<PriceCategory>>((ref) => ref.watch(priceCategoriesApiProvider).list());
 
 /// Create/edit product form — Admin only. `productId` null means "create".
 /// `initialCategoryId` pre-selects a category when creating from a category
@@ -39,6 +41,12 @@ class _TierInput {
   String prix;
 }
 
+class _SalePriceInput {
+  _SalePriceInput({required this.priceCategoryId, this.prix = ''});
+  String priceCategoryId;
+  String prix;
+}
+
 class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nom = TextEditingController();
@@ -57,12 +65,15 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
   String? _categoryId;
   String? _fabricantId;
   bool _actif = true;
+  bool _estNouveau = false;
+  bool _estSaisonnier = false;
   bool _loading = false;
   bool _saving = false;
   String? _error;
   final List<String> _newLocalImagePaths = [];
   final List<ProductImage> _existingImages = [];
   final List<_TierInput> _tiers = [];
+  final List<_SalePriceInput> _salePrices = [];
 
   AdminProduct? _product;
 
@@ -99,8 +110,11 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
       _categoryId = p.categoryId;
       _fabricantId = p.fabricantId;
       _actif = p.actif;
+      _estNouveau = p.estNouveau;
+      _estSaisonnier = p.estSaisonnier;
       _existingImages.addAll(p.images);
       _tiers.addAll(p.priceTiers.map((t) => _TierInput(qteMin: '${t.qteMin}', qteMax: t.qteMax?.toString() ?? '', prix: '${t.prix}')));
+      _salePrices.addAll(p.salePrices.map((sp) => _SalePriceInput(priceCategoryId: sp.priceCategoryId, prix: '${sp.prix}')));
     } catch (e) {
       _error = e is ApiException ? e.message : 'Erreur de chargement.';
     } finally {
@@ -185,6 +199,11 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
               })
           .toList();
 
+      final salePrices = _salePrices
+          .where((s) => s.prix.isNotEmpty)
+          .map((s) => {'priceCategoryId': s.priceCategoryId, 'prix': double.parse(s.prix)})
+          .toList();
+
       final payload = {
         'nom': _nom.text.trim(),
         'code': _code.text.trim(),
@@ -200,6 +219,10 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
         'minCommande': int.parse(_minCommande.text),
         'uniteParCarton': _uniteParCarton.text.trim().isEmpty ? null : int.tryParse(_uniteParCarton.text.trim()),
         'actif': _actif,
+        'estNouveau': _estNouveau,
+        'estSaisonnier': _estSaisonnier,
+        // Present (even empty) replaces the whole list on the backend.
+        'salePrices': salePrices,
         if (uploadedUrls.isNotEmpty) 'imageUrls': uploadedUrls,
         if (!_isEdit) ...{
           'stockReel': int.parse(_stockReel.text),
@@ -246,6 +269,7 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
   Widget build(BuildContext context) {
     final categories = ref.watch(_categoriesProvider);
     final fabricants = ref.watch(_fabricantsProvider);
+    final priceCategories = ref.watch(_priceCategoriesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -416,6 +440,61 @@ class _AdminProductFormScreenState extends ConsumerState<AdminProductFormScreen>
                     title: const Text('Produit actif (visible dans le catalogue client)'),
                     value: _actif,
                     onChanged: (v) => setState(() => _actif = v),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Nouveau'),
+                    subtitle: const Text('Badge "Nouveau" affiché au client'),
+                    value: _estNouveau,
+                    onChanged: (v) => setState(() => _estNouveau = v),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Saisonnier'),
+                    subtitle: const Text('Badge "Saisonnier" affiché au client'),
+                    value: _estSaisonnier,
+                    onChanged: (v) => setState(() => _estSaisonnier = v),
+                  ),
+                  const SizedBox(height: 20),
+                  priceCategories.when(
+                    data: (cats) {
+                      final available = cats.where((c) => !_salePrices.any((s) => s.priceCategoryId == c.id)).toList();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Prix de vente par catégorie', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                              TextButton.icon(
+                                onPressed: available.isEmpty
+                                    ? null
+                                    : () => setState(() => _salePrices.add(_SalePriceInput(priceCategoryId: available.first.id))),
+                                icon: const Icon(Icons.add),
+                                label: const Text('Ajouter'),
+                              ),
+                            ],
+                          ),
+                          if (cats.isEmpty)
+                            const Text('Aucune catégorie de prix créée (voir Plus > Catégories de prix).')
+                          else if (_salePrices.isEmpty)
+                            const Text('Prix normal appliqué à tous les clients.')
+                          else
+                            ..._salePrices.asMap().entries.map((entry) => _SalePriceRow(
+                                  input: entry.value,
+                                  categories: cats,
+                                  otherSelectedIds: _salePrices
+                                      .where((s) => s != entry.value)
+                                      .map((s) => s.priceCategoryId)
+                                      .toSet(),
+                                  onChanged: () => setState(() {}),
+                                  onRemove: () => setState(() => _salePrices.removeAt(entry.key)),
+                                )),
+                        ],
+                      );
+                    },
+                    loading: () => const LinearProgressIndicator(),
+                    error: (_, __) => const Text('Impossible de charger les catégories de prix.'),
                   ),
                   if (!_isEdit) ...[
                     const SizedBox(height: 20),
@@ -597,6 +676,60 @@ class _TierRow extends StatelessWidget {
               decoration: const InputDecoration(labelText: 'Prix', isDense: true),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               onChanged: (v) { tier.prix = v; onChanged(); },
+            ),
+          ),
+          IconButton(icon: const Icon(Icons.delete_outline), onPressed: onRemove),
+        ],
+      ),
+    );
+  }
+}
+
+class _SalePriceRow extends StatelessWidget {
+  const _SalePriceRow({
+    required this.input,
+    required this.categories,
+    required this.otherSelectedIds,
+    required this.onChanged,
+    required this.onRemove,
+  });
+  final _SalePriceInput input;
+  final List<PriceCategory> categories;
+  final Set<String> otherSelectedIds;
+  final VoidCallback onChanged;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final available = categories.where((c) => c.id == input.priceCategoryId || !otherSelectedIds.contains(c.id)).toList();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: DropdownButtonFormField<String>(
+              initialValue: input.priceCategoryId,
+              decoration: const InputDecoration(isDense: true),
+              items: available.map((c) => DropdownMenuItem(value: c.id, child: Text(c.nom))).toList(),
+              onChanged: (v) {
+                if (v != null) {
+                  input.priceCategoryId = v;
+                  onChanged();
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextFormField(
+              initialValue: input.prix,
+              decoration: const InputDecoration(labelText: 'Prix', isDense: true),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (v) {
+                input.prix = v;
+                onChanged();
+              },
             ),
           ),
           IconButton(icon: const Icon(Icons.delete_outline), onPressed: onRemove),

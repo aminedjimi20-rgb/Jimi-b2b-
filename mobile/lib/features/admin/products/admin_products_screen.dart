@@ -6,11 +6,16 @@ import '../../../models/product.dart';
 import '../../../services/service_providers.dart';
 import '../categories/admin_categories_screen.dart';
 import 'admin_category_products_screen.dart';
+import 'admin_product_detail_screen.dart';
 import 'admin_product_form_screen.dart';
+import 'admin_product_sort.dart';
 import 'admin_product_tile.dart';
 
+final _productSortProvider = StateProvider.autoDispose<String?>((ref) => null);
+
 final _adminProductsProvider = FutureProvider.autoDispose<List<AdminProduct>>((ref) {
-  return ref.watch(productsApiProvider).listAdmin();
+  final sortBy = ref.watch(_productSortProvider);
+  return ref.watch(productsApiProvider).listAdmin(sortBy: sortBy);
 });
 
 class AdminProductsScreen extends ConsumerStatefulWidget {
@@ -59,10 +64,14 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
   Widget build(BuildContext context) {
     final products = ref.watch(_adminProductsProvider);
     final categories = ref.watch(adminCategoriesProvider);
+    final sortBy = ref.watch(_productSortProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Produits'),
+        actions: [
+          ProductSortMenuButton(value: sortBy, onChanged: (v) => ref.read(_productSortProvider.notifier).state = v),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(
@@ -111,10 +120,10 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                 itemBuilder: (context, i) => AdminProductTile(
                   product: filtered[i],
                   onTap: () async {
-                    final updated = await Navigator.of(context).push<bool>(
-                      MaterialPageRoute(builder: (_) => AdminProductFormScreen(productId: filtered[i].id)),
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => AdminProductDetailScreen(productId: filtered[i].id)),
                     );
-                    if (updated == true) ref.invalidate(_adminProductsProvider);
+                    ref.invalidate(_adminProductsProvider);
                   },
                 ),
               );
