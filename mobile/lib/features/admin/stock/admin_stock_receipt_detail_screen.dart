@@ -143,7 +143,7 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                     _cell('Article', bold: true),
                     _cell('Cartons', bold: true),
                     _cell('Qté', bold: true),
-                    _cell('Prix vente', bold: true),
+                    _cell('Prix achat', bold: true),
                     _cell('Total', bold: true),
                   ],
                 ),
@@ -159,8 +159,8 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                       _cell('${item.nom}\n${item.code}'),
                       _cell('${item.cartons} x ${item.unitesParCarton}'),
                       _cell('${item.quantite}'),
-                      _cell(formatMoney(item.prixVente)),
-                      _cell(formatMoney(item.sousTotal)),
+                      _cell(formatMoney(item.prixAchat)),
+                      _cell(formatMoney(item.sousTotalAchat)),
                     ],
                   ),
               ],
@@ -171,9 +171,10 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
-                  pw.Text('Total achat: ${formatMoney(receipt.totalAchat)}', style: const pw.TextStyle(fontSize: 11)),
-                  pw.SizedBox(height: 2),
-                  pw.Text('Total vente: ${formatMoney(receipt.total)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Total achat: ${formatMoney(receipt.totalAchat)}', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.SizedBox(height: 4),
+                  pw.Text('Payé: ${formatMoney(receipt.montantPaye)}', style: const pw.TextStyle(fontSize: 11)),
+                  pw.Text('Reste à payer: ${formatMoney(receipt.montantRestant)}', style: const pw.TextStyle(fontSize: 11)),
                 ],
               ),
             ),
@@ -300,19 +301,12 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 children: [
+                  // Un bon fournisseur concerne uniquement l'achat/réception — jamais de "Total vente" ici.
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total achat (ce que ça a coûté)'),
-                      Text(formatMoney(r.totalAchat), style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Total vente', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
+                      const Text('Total achat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(formatMoney(r.totalAchat), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
                     ],
                   ),
                   const Divider(height: 20),

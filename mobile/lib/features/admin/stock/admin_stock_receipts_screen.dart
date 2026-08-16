@@ -74,7 +74,7 @@ class AdminStockReceiptsScreen extends ConsumerWidget {
                             leading: const Icon(Icons.inventory_2_outlined),
                             title: Text(r.reference),
                             subtitle: Text('${r.fabricantNom} · ${formatDate(r.createdAt)} · ${r.items.length} article${r.items.length == 1 ? '' : 's'}'),
-                            trailing: Text(formatMoney(r.total), style: const TextStyle(fontWeight: FontWeight.bold)),
+                            trailing: Text(formatMoney(r.totalAchat), style: const TextStyle(fontWeight: FontWeight.bold)),
                             onTap: () async {
                               await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: r.id)));
                               ref.invalidate(_stockReceiptsProvider);

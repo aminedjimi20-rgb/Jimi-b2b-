@@ -60,7 +60,6 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
   bool _saving = false;
   String? _error;
 
-  double get _total => _lines.fold(0.0, (sum, l) => sum + l.sousTotal);
   double get _totalAchat => _lines.fold(0.0, (sum, l) => sum + l.sousTotalAchat);
 
   Future<void> _pickFabricant() async {
@@ -216,19 +215,12 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 children: [
+                  // Un bon fournisseur concerne uniquement l'achat/réception — jamais de "Total vente" ici.
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total achat (ce que ça coûte)'),
-                      Text(formatMoney(_totalAchat), style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Total vente', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(formatMoney(_total), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                      const Text('Total achat', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(formatMoney(_totalAchat), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
                     ],
                   ),
                 ],
