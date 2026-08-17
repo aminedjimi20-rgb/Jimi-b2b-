@@ -95,12 +95,22 @@ export function SellerForm() {
         <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-[var(--color-accent)]">
           {t("sellPage.sections.contact")}
         </h2>
+        <p className="mb-4 text-xs text-[var(--color-text-muted)]">{t("sellPage.privacyNote")}</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FieldWrapper label={t("forms.fields.name")} required>
             <TextInput name="name" required placeholder={t("forms.placeholders.name")} />
           </FieldWrapper>
+          <FieldWrapper label={t("forms.fields.company")}>
+            <TextInput name="company" placeholder={t("forms.placeholders.company")} />
+          </FieldWrapper>
           <FieldWrapper label={t("forms.fields.phone")} required>
             <TextInput name="phone" type="tel" required placeholder={t("forms.placeholders.phone")} />
+          </FieldWrapper>
+          <FieldWrapper label={t("forms.fields.whatsapp")}>
+            <TextInput name="whatsapp" type="tel" placeholder={t("forms.placeholders.phone")} />
+          </FieldWrapper>
+          <FieldWrapper label={t("forms.fields.email")}>
+            <TextInput name="email" type="email" placeholder={t("forms.placeholders.email")} />
           </FieldWrapper>
         </div>
       </div>

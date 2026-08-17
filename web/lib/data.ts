@@ -16,9 +16,50 @@ function isPublished(m: Machine): boolean {
   return !m.moderationStatus || m.moderationStatus === "published";
 }
 
-export async function getPublicMachines(): Promise<Machine[]> {
+/** Machine shape allowed to reach a public page or a client component.
+ *  Jimi acts as the intermediary between buyer and seller — the seller's
+ *  identity and every internal moderation field are dropped here, at the
+ *  data layer, so no client bundle, RSC payload, or public API response can
+ *  ever carry them (frontend-only hiding would not be enough). */
+export type PublicMachine = Omit<
+  Machine,
+  "sellerId" | "adminNote" | "submittedAt" | "reviewedAt" | "moderationStatus"
+>;
+
+// Deliberately an allow-list, not a deny-list: a new private field added to
+// Machine later stays excluded by default instead of silently leaking here.
+function toPublicMachine(m: Machine): PublicMachine {
+  return {
+    id: m.id,
+    slug: m.slug,
+    brand: m.brand,
+    model: m.model,
+    year: m.year,
+    tonnage: m.tonnage,
+    drive: m.drive,
+    category: m.category,
+    status: m.status,
+    featured: m.featured,
+    wilaya: m.wilaya,
+    price: m.price,
+    priceOnRequest: m.priceOnRequest,
+    images: m.images,
+    videoUrl: m.videoUrl,
+    videoThumbnail: m.videoThumbnail,
+    videoTitle: m.videoTitle,
+    photos: m.photos,
+    specs: m.specs,
+    description: m.description,
+    worksPerformed: m.worksPerformed,
+    defects: m.defects,
+    accessories: m.accessories,
+    isDemo: m.isDemo,
+  };
+}
+
+export async function getPublicMachines(): Promise<PublicMachine[]> {
   const machines = await getMachines();
-  return machines.filter(isPublished);
+  return machines.filter(isPublished).map(toPublicMachine);
 }
 
 export async function getMachineBySlug(slug: string): Promise<Machine | undefined> {
@@ -26,12 +67,12 @@ export async function getMachineBySlug(slug: string): Promise<Machine | undefine
   return machines.find((m) => m.slug === slug);
 }
 
-export async function getPublicMachineBySlug(slug: string): Promise<Machine | undefined> {
+export async function getPublicMachineBySlug(slug: string): Promise<PublicMachine | undefined> {
   const machines = await getPublicMachines();
   return machines.find((m) => m.slug === slug);
 }
 
-export async function getFeaturedMachines(limit = 6): Promise<Machine[]> {
+export async function getFeaturedMachines(limit = 6): Promise<PublicMachine[]> {
   const machines = await getPublicMachines();
   const featured = machines.filter((m) => m.featured);
   const pool = featured.length > 0 ? featured : machines;

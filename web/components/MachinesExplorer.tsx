@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { MachineCard } from "@/components/MachineCard";
 import { Select, TextInput, FieldWrapper } from "@/components/forms/fields";
 import { Button } from "@/components/ui/Button";
-import type { Machine, MachineDrive, MachineStatus } from "@/lib/types";
+import type { MachineDrive, MachineStatus } from "@/lib/types";
+import type { PublicMachine } from "@/lib/data";
 import { RotateCcw, SearchX } from "lucide-react";
 
 interface Filters {
@@ -24,7 +25,7 @@ const DRIVE_KEY: Record<MachineDrive, "hydraulic" | "servo" | "hybrid"> = {
   hybride: "hybrid",
 };
 
-export function MachinesExplorer({ machines, brands }: { machines: Machine[]; brands: string[] }) {
+export function MachinesExplorer({ machines, brands }: { machines: PublicMachine[]; brands: string[] }) {
   const t = useTranslations();
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
 

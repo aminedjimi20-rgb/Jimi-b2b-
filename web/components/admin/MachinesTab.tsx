@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, Fragment } from "react";
 import type { Machine, MachineDrive, MachineStatus } from "@/lib/types";
-import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check } from "lucide-react";
+import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
 
 const STATUS_LABELS: Record<MachineStatus, string> = {
   disponible: "Disponible",
@@ -108,6 +108,16 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
     } finally {
       setSavingVideo(false);
     }
+  }
+
+  async function toggleVisibility(id: string, currentlyPublished: boolean) {
+    const moderationStatus = currentlyPublished ? "draft" : "published";
+    setMachines((prev) => prev.map((m) => (m.id === id ? { ...m, moderationStatus } : m)));
+    await fetch(`/api/admin/machines/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ moderationStatus }),
+    });
   }
 
   async function remove(id: string) {
@@ -278,6 +288,26 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                   <td className="px-4 py-3 text-end">
                     {!m.isDemo && (
                       <div className="flex items-center justify-end gap-1">
+                        {(m.moderationStatus === "published" || !m.moderationStatus) && (
+                          <button
+                            onClick={() => toggleVisibility(m.id, true)}
+                            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+                            aria-label="Masquer du site public"
+                            title="Masquer du site public"
+                          >
+                            <EyeOff size={15} />
+                          </button>
+                        )}
+                        {m.moderationStatus === "draft" && (
+                          <button
+                            onClick={() => toggleVisibility(m.id, false)}
+                            className="rounded-md p-1.5 text-emerald-600 hover:bg-emerald-50"
+                            aria-label="Republier"
+                            title="Republier sur le site public"
+                          >
+                            <Eye size={15} />
+                          </button>
+                        )}
                         <button
                           onClick={() => setEditingVideoId(editingVideoId === m.id ? null : m.id)}
                           className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"

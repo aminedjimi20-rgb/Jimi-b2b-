@@ -4,20 +4,32 @@ import { useState } from "react";
 import { LeadsTab } from "./LeadsTab";
 import { MachinesTab } from "./MachinesTab";
 import { PendingListingsTab } from "./PendingListingsTab";
+import { SellersTab } from "./SellersTab";
+import { BuyersTab } from "./BuyersTab";
+import { MachineLeadsTab } from "./MachineLeadsTab";
 import { SettingsTab } from "./SettingsTab";
 import type { Lead } from "@/lib/leads";
 import type { Machine } from "@/lib/types";
-import { Inbox, Factory, Settings2, ClipboardCheck } from "lucide-react";
+import type { SellerProfile } from "@/lib/sellers";
+import type { BuyerProfile } from "@/lib/buyers";
+import type { MachineLead } from "@/lib/machineLeads";
+import { Inbox, Factory, Settings2, ClipboardCheck, Users, UserSquare2, Handshake } from "lucide-react";
 
-type Tab = "leads" | "pending" | "machines" | "settings";
+type Tab = "leads" | "pending" | "machines" | "sellers" | "buyers" | "machineLeads" | "settings";
 
 export function AdminDashboard({
   initialLeads,
   initialMachines,
+  initialSellers,
+  initialBuyers,
+  initialMachineLeads,
   usingDefaultPassword,
 }: {
   initialLeads: Lead[];
   initialMachines: Machine[];
+  initialSellers: SellerProfile[];
+  initialBuyers: BuyerProfile[];
+  initialMachineLeads: MachineLead[];
   usingDefaultPassword: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("leads");
@@ -29,7 +41,10 @@ export function AdminDashboard({
   const tabs: { key: Tab; label: string; icon: typeof Inbox; count?: number }[] = [
     { key: "leads", label: "Demandes reçues", icon: Inbox, count: initialLeads.length },
     { key: "pending", label: "Annonces à valider", icon: ClipboardCheck, count: pendingMachines.length },
+    { key: "machineLeads", label: "Leads", icon: Handshake, count: initialMachineLeads.length },
     { key: "machines", label: "Machines", icon: Factory, count: initialMachines.length },
+    { key: "sellers", label: "Vendeurs", icon: UserSquare2, count: initialSellers.length },
+    { key: "buyers", label: "Acheteurs", icon: Users, count: initialBuyers.length },
     { key: "settings", label: "Paramètres", icon: Settings2 },
   ];
 
@@ -62,8 +77,19 @@ export function AdminDashboard({
       </div>
 
       {tab === "leads" && <LeadsTab initialLeads={initialLeads} />}
-      {tab === "pending" && <PendingListingsTab initialMachines={pendingMachines} />}
+      {tab === "pending" && (
+        <PendingListingsTab initialMachines={pendingMachines} sellers={initialSellers} />
+      )}
+      {tab === "machineLeads" && (
+        <MachineLeadsTab
+          initialLeads={initialMachineLeads}
+          sellers={initialSellers}
+          buyers={initialBuyers}
+        />
+      )}
       {tab === "machines" && <MachinesTab initialMachines={initialMachines} />}
+      {tab === "sellers" && <SellersTab initialSellers={initialSellers} machines={initialMachines} />}
+      {tab === "buyers" && <BuyersTab initialBuyers={initialBuyers} leads={initialMachineLeads} />}
       {tab === "settings" && <SettingsTab usingDefaultPassword={usingDefaultPassword} />}
     </div>
   );

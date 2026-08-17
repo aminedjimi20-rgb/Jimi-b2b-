@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { submitMachineForReview, type SellerListingInput } from "@/lib/machinesStore";
+import { findOrCreateSeller } from "@/lib/sellers";
 import { notifyAdminNewListing } from "@/lib/notifications";
 import { isRateLimited } from "@/lib/rateLimit";
 import { sanitizeUrl } from "@/lib/sanitize";
@@ -52,9 +53,12 @@ export async function POST(request: NextRequest) {
   }
 
   const yearNum = Number(b.year);
-  const priceNum = Number(b.price);
+  const priceNum = Number(b.priceWanted);
   const drive = VALID_DRIVES.includes(b.drive as MachineDrive) ? (b.drive as MachineDrive) : "hydraulique";
   const email = typeof b.email === "string" && b.email.trim() ? b.email.trim().slice(0, 200) : null;
+  const whatsapp = typeof b.whatsapp === "string" && b.whatsapp.trim() ? b.whatsapp.trim().slice(0, 50) : null;
+  const company = typeof b.company === "string" && b.company.trim() ? b.company.trim().slice(0, 200) : null;
+  const sellerWilaya = typeof b.wilaya === "string" ? b.wilaya.trim().slice(0, 100) : null;
 
   const STATE_LABELS: Record<string, string> = {
     excellent: "État : excellent",
@@ -70,19 +74,28 @@ export async function POST(request: NextRequest) {
     description = `${description}\nDisponibilité : ${b.availability.trim()}`;
   }
 
+  const seller = await findOrCreateSeller({
+    name,
+    phone,
+    whatsapp,
+    email,
+    wilaya: sellerWilaya,
+    company,
+  });
+
   const input: SellerListingInput = {
     brand,
     model,
     tonnage,
     year: Number.isFinite(yearNum) && yearNum > 0 ? yearNum : null,
     drive,
-    wilaya: typeof b.wilaya === "string" ? b.wilaya.trim().slice(0, 100) : "",
+    wilaya: sellerWilaya ?? "",
     price: Number.isFinite(priceNum) && priceNum > 0 ? priceNum : null,
     priceOnRequest: Boolean(b.priceOnRequest) || !Number.isFinite(priceNum) || priceNum <= 0,
     description: description.trim().slice(0, MAX_TEXT),
     videoUrl: sanitizeUrl(b.video),
     photos: cleanPhotos(b.photos),
-    seller: { name, phone, email },
+    sellerId: seller.id,
   };
 
   const machine = await submitMachineForReview(input);

@@ -29,7 +29,7 @@
     "whatsapp": "Chat on WhatsApp",
     "getQuote": "Request a quote",
     "viewDetails": "View machine",
-    "contactWhatsapp": "Contact via WhatsApp",
+    "imInterested": "I'm interested",
     "requestInfo": "Request more information",
     "scheduleInspection": "Schedule an inspection",
     "proposeMachine": "Submit my machine",
@@ -86,12 +86,36 @@
       "title": "Why choose Jimi?",
       "subtitle": "A single technical point of contact who genuinely understands the machine — not just the market.",
       "items": [
-        { "icon": "wrench", "title": "Technical expertise", "desc": "Direct intervention on PLC, HMI, drives, servo and control circuits." },
-        { "icon": "factory", "title": "Injection machine specialist", "desc": "In-depth knowledge of hydraulic, servo and hybrid machines." },
-        { "icon": "cpu", "title": "Industrial automation", "desc": "Programming, retrofit and integration of modern control systems." },
-        { "icon": "search", "title": "Technical diagnostics", "desc": "Rigorous analysis before any intervention or purchase recommendation." },
-        { "icon": "handshake", "title": "Buy/sell support", "desc": "A technical eye on every transaction, not just a commercial one." },
-        { "icon": "map", "title": "Nationwide in Algeria", "desc": "On-site service available across Algeria depending on the project." }
+        {
+          "icon": "wrench",
+          "title": "Technical expertise",
+          "desc": "Direct intervention on PLC, HMI, drives, servo and control circuits."
+        },
+        {
+          "icon": "factory",
+          "title": "Injection machine specialist",
+          "desc": "In-depth knowledge of hydraulic, servo and hybrid machines."
+        },
+        {
+          "icon": "cpu",
+          "title": "Industrial automation",
+          "desc": "Programming, retrofit and integration of modern control systems."
+        },
+        {
+          "icon": "search",
+          "title": "Technical diagnostics",
+          "desc": "Rigorous analysis before any intervention or purchase recommendation."
+        },
+        {
+          "icon": "handshake",
+          "title": "Buy/sell support",
+          "desc": "A technical eye on every transaction, not just a commercial one."
+        },
+        {
+          "icon": "map",
+          "title": "Nationwide in Algeria",
+          "desc": "On-site service available across Algeria depending on the project."
+        }
       ]
     },
     "intermediation": {
@@ -130,9 +154,18 @@
       "title": "Before / After",
       "subtitle": "Concrete interventions that bring a machine back into production.",
       "items": [
-        { "before": "Old electrical cabinet", "after": "New automated cabinet" },
-        { "before": "Old control system", "after": "Modern PLC + HMI" },
-        { "before": "Machine down", "after": "Machine back in service" }
+        {
+          "before": "Old electrical cabinet",
+          "after": "New automated cabinet"
+        },
+        {
+          "before": "Old control system",
+          "after": "Modern PLC + HMI"
+        },
+        {
+          "before": "Machine down",
+          "after": "Machine back in service"
+        }
       ]
     },
     "realisations": {
@@ -146,12 +179,36 @@
       "title": "Our process",
       "subtitle": "A clear method, from first contact to back in production.",
       "steps": [
-        { "number": "01", "title": "Analysis", "desc": "We identify the machine, the need or the issue at hand." },
-        { "number": "02", "title": "Diagnostics", "desc": "A rigorous technical examination determines the exact cause." },
-        { "number": "03", "title": "Proposal", "desc": "We present a clear solution and a cost estimate." },
-        { "number": "04", "title": "Intervention", "desc": "Renovation, repair or commissioning, according to the identified need." },
-        { "number": "05", "title": "Testing", "desc": "Full verification of the cycle and all machine functions." },
-        { "number": "06", "title": "Delivery", "desc": "The machine is back in working order, ready for production." }
+        {
+          "number": "01",
+          "title": "Analysis",
+          "desc": "We identify the machine, the need or the issue at hand."
+        },
+        {
+          "number": "02",
+          "title": "Diagnostics",
+          "desc": "A rigorous technical examination determines the exact cause."
+        },
+        {
+          "number": "03",
+          "title": "Proposal",
+          "desc": "We present a clear solution and a cost estimate."
+        },
+        {
+          "number": "04",
+          "title": "Intervention",
+          "desc": "Renovation, repair or commissioning, according to the identified need."
+        },
+        {
+          "number": "05",
+          "title": "Testing",
+          "desc": "Full verification of the cycle and all machine functions."
+        },
+        {
+          "number": "06",
+          "title": "Delivery",
+          "desc": "The machine is back in working order, ready for production."
+        }
       ]
     },
     "testimonials": {
@@ -216,7 +273,10 @@
     "defectsTitle": "Points of attention / possible defects",
     "accessoriesTitle": "Included accessories",
     "interestedTitle": "Interested in this machine?",
-    "interestedSubtitle": "Contact us for more information or to arrange a technical inspection.",
+    "interestedSubtitle": "Leave us your details: Jimi puts you in touch with the seller, in full confidentiality.",
+    "interestDefaultMessage": "Hello, I'm interested in the machine {machine}. I'd like more information.",
+    "interestSuccessTitle": "Your request has been received",
+    "interestSuccessMessage": "Thank you. Your request has been received. Our team will contact you shortly.",
     "specs": {
       "brand": "Brand",
       "model": "Model",
@@ -250,7 +310,8 @@
   },
   "sellPage": {
     "title": "Want to sell your machine?",
-    "intro": "If you own an injection machine and want to sell it, send us its details: we'll help you find a serious buyer.",
+    "intro": "Jimi reviews your machine and handles putting it in front of interested buyers. Your contact details are never shown publicly — Jimi acts as the go-between with interested buyers.",
+    "privacyNote": "Your contact details stay private and are only visible to our team — they never appear on the public listing.",
     "successTitle": "Your machine has been submitted",
     "successMessage": "Thank you, your listing has been sent to our team for review. Once approved, it will be published on the site — we'll reach out if we need more details.",
     "photosPlaceholder": "One link per line (Drive, Photos, WhatsApp...)",
@@ -268,17 +329,43 @@
       "renovation": {
         "title": "Injection machine renovation",
         "desc": "Full upgrade of older machines, from electrical retrofit to commissioning.",
-        "items": ["Electrical retrofit", "Cabinet replacement", "PLC", "HMI", "Drives", "Servo systems", "Sensors", "Wiring", "Machine safety", "Commissioning"]
+        "items": [
+          "Electrical retrofit",
+          "Cabinet replacement",
+          "PLC",
+          "HMI",
+          "Drives",
+          "Servo systems",
+          "Sensors",
+          "Wiring",
+          "Machine safety",
+          "Commissioning"
+        ]
       },
       "automation": {
         "title": "Industrial automation",
         "desc": "Integration of modern control systems to improve precision, safety and productivity.",
-        "items": ["PLC programming", "HMI interfaces", "Variable frequency drives (VFD)", "Servo systems", "Industrial sensors", "Industrial communication"]
+        "items": [
+          "PLC programming",
+          "HMI interfaces",
+          "Variable frequency drives (VFD)",
+          "Servo systems",
+          "Industrial sensors",
+          "Industrial communication"
+        ]
       },
       "maintenance": {
         "title": "Maintenance & troubleshooting",
         "desc": "Fast diagnostics and targeted intervention to limit production downtime.",
-        "items": ["Fault diagnostics", "Electrical faults", "Hydraulic control", "Temperature regulation", "Injection cycle", "Automatic mode", "Safety systems"]
+        "items": [
+          "Fault diagnostics",
+          "Electrical faults",
+          "Hydraulic control",
+          "Temperature regulation",
+          "Injection cycle",
+          "Automatic mode",
+          "Safety systems"
+        ]
       },
       "modernisation": {
         "title": "Modernization",
@@ -366,14 +453,38 @@
     "successMessage": "Thank you for your message. We will get back to you as soon as possible."
   },
   "faqItems": [
-    { "q": "Do you buy machines?", "a": "We do not buy machines directly. We support the connection between sellers and buyers, with a first-level technical verification." },
-    { "q": "Do you help sell a machine?", "a": "Yes. You can send us your machine's information via the dedicated form, and we give it visibility to interested buyers." },
-    { "q": "Do you work throughout Algeria?", "a": "Yes, on-site service is possible in all wilayas depending on the nature and location of the project." },
-    { "q": "Do you renovate old machines?", "a": "Yes, renovation and electrical retrofit of older machines make up a significant part of our activity." },
-    { "q": "Can you inspect a machine before purchase?", "a": "Yes, a technical inspection can be arranged before purchase, on request, to verify the machine's actual condition." },
-    { "q": "How do I request a specific machine?", "a": "Use the \"I'm looking for a machine\" form, specifying tonnage, brand, budget and desired condition. We then search our network." },
-    { "q": "How do I get a quote?", "a": "Contact us via WhatsApp, phone or the contact form describing your need. We'll get back to you with a clear proposal." },
-    { "q": "What types of machines do you handle?", "a": "Mainly hydraulic, servo or hybrid plastic injection machines, as well as related automation equipment." }
+    {
+      "q": "Do you buy machines?",
+      "a": "We do not buy machines directly. We support the connection between sellers and buyers, with a first-level technical verification."
+    },
+    {
+      "q": "Do you help sell a machine?",
+      "a": "Yes. You can send us your machine's information via the dedicated form, and we give it visibility to interested buyers."
+    },
+    {
+      "q": "Do you work throughout Algeria?",
+      "a": "Yes, on-site service is possible in all wilayas depending on the nature and location of the project."
+    },
+    {
+      "q": "Do you renovate old machines?",
+      "a": "Yes, renovation and electrical retrofit of older machines make up a significant part of our activity."
+    },
+    {
+      "q": "Can you inspect a machine before purchase?",
+      "a": "Yes, a technical inspection can be arranged before purchase, on request, to verify the machine's actual condition."
+    },
+    {
+      "q": "How do I request a specific machine?",
+      "a": "Use the \"I'm looking for a machine\" form, specifying tonnage, brand, budget and desired condition. We then search our network."
+    },
+    {
+      "q": "How do I get a quote?",
+      "a": "Contact us via WhatsApp, phone or the contact form describing your need. We'll get back to you with a clear proposal."
+    },
+    {
+      "q": "What types of machines do you handle?",
+      "a": "Mainly hydraulic, servo or hybrid plastic injection machines, as well as related automation equipment."
+    }
   ],
   "footer": {
     "description": "Specialist in the renovation, automation and maintenance of plastic injection machines. Buying, selling and brokering industrial machines in Algeria.",
@@ -425,9 +536,23 @@
       "video": "https://..."
     },
     "options": {
-      "state": { "excellent": "Excellent", "good": "Good condition", "average": "Average condition", "toRenovate": "Needs renovation" },
-      "driveType": { "hydraulic": "Hydraulic", "servo": "Servo", "hybrid": "Hybrid", "indifferent": "No preference" },
-      "machineType": { "injection": "Plastic injection", "blowMolding": "Blow molding / extrusion", "other": "Other" }
+      "state": {
+        "excellent": "Excellent",
+        "good": "Good condition",
+        "average": "Average condition",
+        "toRenovate": "Needs renovation"
+      },
+      "driveType": {
+        "hydraulic": "Hydraulic",
+        "servo": "Servo",
+        "hybrid": "Hybrid",
+        "indifferent": "No preference"
+      },
+      "machineType": {
+        "injection": "Plastic injection",
+        "blowMolding": "Blow molding / extrusion",
+        "other": "Other"
+      }
     },
     "buttons": {
       "send": "Send",
@@ -443,8 +568,6 @@
     "whatsappAlternative": "You can also write to us directly on"
   },
   "whatsappMessages": {
-    "machineInterest": "Hello Jimi, I'm interested in the {brand} {model} {tonnage} machine. I'd like more information.",
-    "machineVideoInterest": "Hello Jimi, I'm interested in the {brand} {model} {tonnage} machine and saw its video. I'd like more information.",
     "serviceQuote": "Hello Jimi, I'd like a quote for renovating my injection machine.",
     "generalContact": "Hello Jimi, I'd like more information about your services.",
     "buyRequest": "Hello Jimi, I'm looking for an injection machine. I'd like to send you my criteria.",

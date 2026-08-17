@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import type { Machine, MachineDrive } from "@/lib/types";
+import type { SellerProfile } from "@/lib/sellers";
 import {
   RefreshCw,
   Check,
@@ -31,8 +32,15 @@ const MODERATION_TONE: Record<string, string> = {
   draft: "bg-orange-50 text-orange-700",
 };
 
-export function PendingListingsTab({ initialMachines }: { initialMachines: Machine[] }) {
+export function PendingListingsTab({
+  initialMachines,
+  sellers,
+}: {
+  initialMachines: Machine[];
+  sellers: SellerProfile[];
+}) {
   const [machines, setMachines] = useState(initialMachines);
+  const sellerById = new Map(sellers.map((s) => [s.id, s]));
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -292,33 +300,41 @@ export function PendingListingsTab({ initialMachines }: { initialMachines: Machi
                 </>
               )}
 
-              {m.seller && (
-                <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[var(--color-border)] pt-3 text-xs">
-                  <span className="font-semibold text-[var(--color-ink)]">{m.seller.name}</span>
-                  <a
-                    href={`https://wa.me/${m.seller.phone.replace(/[^\d]/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-semibold text-[#1fa855] hover:underline"
-                  >
-                    <MessageCircle size={13} /> WhatsApp
-                  </a>
-                  <a
-                    href={`tel:${m.seller.phone}`}
-                    className="inline-flex items-center gap-1 font-semibold text-[var(--color-accent)] hover:underline"
-                  >
-                    <Phone size={13} /> {m.seller.phone}
-                  </a>
-                  {m.seller.email && (
-                    <a
-                      href={`mailto:${m.seller.email}`}
-                      className="inline-flex items-center gap-1 font-semibold text-[var(--color-accent)] hover:underline"
-                    >
-                      <Mail size={13} /> {m.seller.email}
-                    </a>
-                  )}
-                </div>
-              )}
+              {m.sellerId &&
+                (() => {
+                  const seller = sellerById.get(m.sellerId!);
+                  if (!seller) return null;
+                  return (
+                    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[var(--color-border)] pt-3 text-xs">
+                      <span className="font-semibold text-[var(--color-ink)]">
+                        {seller.name}
+                        {seller.company ? ` — ${seller.company}` : ""}
+                      </span>
+                      <a
+                        href={`https://wa.me/${(seller.whatsapp || seller.phone).replace(/[^\d]/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-semibold text-[#1fa855] hover:underline"
+                      >
+                        <MessageCircle size={13} /> WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${seller.phone}`}
+                        className="inline-flex items-center gap-1 font-semibold text-[var(--color-accent)] hover:underline"
+                      >
+                        <Phone size={13} /> {seller.phone}
+                      </a>
+                      {seller.email && (
+                        <a
+                          href={`mailto:${seller.email}`}
+                          className="inline-flex items-center gap-1 font-semibold text-[var(--color-accent)] hover:underline"
+                        >
+                          <Mail size={13} /> {seller.email}
+                        </a>
+                      )}
+                    </div>
+                  );
+                })()}
             </div>
           ))}
         </div>

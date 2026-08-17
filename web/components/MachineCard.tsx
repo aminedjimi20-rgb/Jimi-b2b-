@@ -2,17 +2,18 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { MachineArt } from "@/components/MachineArt";
-import type { Machine } from "@/lib/types";
+import type { MachineStatus } from "@/lib/types";
+import type { PublicMachine } from "@/lib/data";
 import { MapPin, Gauge, Calendar, Video } from "lucide-react";
 
-const statusTone: Record<Machine["status"], "success" | "danger" | "warning" | "accent"> = {
+const statusTone: Record<MachineStatus, "success" | "danger" | "warning" | "accent"> = {
   disponible: "success",
   vendue: "danger",
   reservee: "warning",
   nouveau: "accent",
 };
 
-export function MachineCard({ machine, index = 0 }: { machine: Machine; index?: number }) {
+export function MachineCard({ machine, index = 0 }: { machine: PublicMachine; index?: number }) {
   const t = useTranslations();
 
   return (

@@ -6,20 +6,12 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { MachineArt } from "@/components/MachineArt";
 import { MachineVideoPlayer } from "@/components/MachineVideoPlayer";
+import { MachineInterestForm } from "@/components/MachineInterestForm";
 import { JsonLd } from "@/components/JsonLd";
 import { getPublicMachineBySlug } from "@/lib/data";
-import { buildWhatsAppLink } from "@/config/site.config";
 import { getVideoProvider, getAutoVideoThumbnail, getVideoEmbedUrl } from "@/lib/video";
 import { Link } from "@/i18n/navigation";
-import {
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  Gauge,
-  MessageCircle,
-  Mail,
-  CalendarClock,
-} from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Gauge, Mail, CalendarClock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -69,20 +61,7 @@ export default async function MachineDetailPage({
   if (!machine) notFound();
 
   const t = await getTranslations();
-  const waInterest = buildWhatsAppLink(
-    t("whatsappMessages.machineInterest", {
-      brand: machine.brand,
-      model: machine.model,
-      tonnage: `${machine.tonnage}T`,
-    })
-  );
-  const waVideoInterest = buildWhatsAppLink(
-    t("whatsappMessages.machineVideoInterest", {
-      brand: machine.brand,
-      model: machine.model,
-      tonnage: `${machine.tonnage}T`,
-    })
-  );
+  const machineLabel = `${machine.brand} ${machine.model} ${machine.tonnage}T`;
   const videoThumbnail = machine.videoUrl
     ? machine.videoThumbnail || getAutoVideoThumbnail(machine.videoUrl)
     : null;
@@ -213,15 +192,12 @@ export default async function MachineDetailPage({
                     <p className="text-sm font-semibold text-[var(--color-ink)]">
                       {t("machineDetail.interestedTitle")}
                     </p>
-                    <Button
-                      href={waVideoInterest}
-                      external
-                      variant="whatsapp"
-                      size="sm"
-                      icon={<MessageCircle size={16} />}
+                    <a
+                      href="#interest-form"
+                      className="text-sm font-semibold text-[var(--color-accent)] hover:underline"
                     >
-                      {t("cta.contactWhatsapp")}
-                    </Button>
+                      {t("cta.imInterested")} →
+                    </a>
                   </div>
                 </>
               )}
@@ -300,26 +276,24 @@ export default async function MachineDetailPage({
                   </dl>
                 </div>
 
-                <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-6">
+                <div
+                  id="interest-form"
+                  className="scroll-mt-24 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-6"
+                >
                   <h2 className="text-base font-bold text-[var(--color-ink)]">
                     {t("machineDetail.interestedTitle")}
                   </h2>
                   <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
                     {t("machineDetail.interestedSubtitle")}
                   </p>
-                  <div className="mt-5 flex flex-col gap-3">
-                    <Button
-                      href={waInterest}
-                      external
-                      variant="whatsapp"
-                      icon={<MessageCircle size={17} />}
-                    >
-                      {t("cta.contactWhatsapp")}
-                    </Button>
-                    <Button href="/contact" variant="outline" icon={<Mail size={17} />}>
+                  <div className="mt-5">
+                    <MachineInterestForm machineId={machine.id} machineLabel={machineLabel} />
+                  </div>
+                  <div className="mt-3 flex flex-col gap-2 border-t border-[var(--color-border)] pt-3">
+                    <Button href="/contact" variant="outline" size="sm" icon={<Mail size={16} />}>
                       {t("cta.requestInfo")}
                     </Button>
-                    <Button href="/contact" variant="ghost" icon={<CalendarClock size={17} />}>
+                    <Button href="/contact" variant="ghost" size="sm" icon={<CalendarClock size={16} />}>
                       {t("cta.scheduleInspection")}
                     </Button>
                   </div>

@@ -3,12 +3,6 @@ export type MachineDrive = "hydraulique" | "servo" | "hybride";
 export type MachineCategory = "injection";
 export type ModerationStatus = "pending" | "published" | "rejected" | "draft";
 
-export interface MachineSeller {
-  name: string;
-  phone: string;
-  email?: string | null;
-}
-
 export interface MachineSpecs {
   clampingForce?: string;
   screwDiameter?: string;
@@ -51,7 +45,10 @@ export interface Machine {
   /** Publication workflow state — distinct from the commercial `status` above.
    *  Missing on legacy/demo records, which are treated as "published". */
   moderationStatus?: ModerationStatus;
-  seller?: MachineSeller | null;
+  /** Reference to the private SellerProfile record (lib/sellers.ts) — never
+   *  the seller's contact details themselves. Admin-only, stripped from every
+   *  public data path (see lib/data.ts `toPublicMachine`). */
+  sellerId?: string | null;
   adminNote?: string | null;
   submittedAt?: string | null;
   reviewedAt?: string | null;

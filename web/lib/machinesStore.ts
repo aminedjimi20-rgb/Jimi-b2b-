@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import type { Machine, MachineSeller, ModerationStatus } from "@/lib/types";
+import type { Machine, ModerationStatus } from "@/lib/types";
 
 // Serverless platforms (Vercel, etc.) only allow writes under the OS temp
 // directory — the deployed app bundle itself is read-only. This store is
@@ -36,7 +36,7 @@ export type AdminMachineInput = {
   videoTitle?: string | null;
   photos?: string[];
   moderationStatus?: ModerationStatus;
-  seller?: MachineSeller | null;
+  sellerId?: string | null;
   adminNote?: string | null;
   reviewedAt?: string | null;
 };
@@ -53,7 +53,7 @@ export type SellerListingInput = {
   description: string;
   videoUrl?: string | null;
   photos?: string[];
-  seller: MachineSeller;
+  sellerId: string;
 };
 
 function slugify(input: string): string {
@@ -116,7 +116,7 @@ export async function addRuntimeMachine(input: AdminMachineInput): Promise<Machi
     isDemo: false,
     // Added directly by an authenticated admin — no review queue needed.
     moderationStatus: "published",
-    seller: null,
+    sellerId: null,
     adminNote: null,
     submittedAt: new Date().toISOString(),
     reviewedAt: new Date().toISOString(),
@@ -164,7 +164,7 @@ export async function submitMachineForReview(input: SellerListingInput): Promise
     accessories: [],
     isDemo: false,
     moderationStatus: "pending",
-    seller: input.seller,
+    sellerId: input.sellerId,
     adminNote: null,
     submittedAt: new Date().toISOString(),
     reviewedAt: null,
