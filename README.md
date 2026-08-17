@@ -5,11 +5,17 @@ et **Client**. Voir la conception complète dans [`docs/ARCHITECTURE.md`](docs/A
 [`docs/DATABASE.md`](docs/DATABASE.md) et le déploiement dans
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
+Ce dépôt héberge également le site web vitrine **Jimi Renovation &
+Installation** (`web/`), un projet indépendant dédié à la rénovation de
+machines d'injection plastique, l'automatisation industrielle et
+l'intermédiation achat/vente de machines — voir [`web/README.md`](web/README.md).
+
 ## Structure du monorepo
 
 ```
 backend/   API NestJS + Prisma + PostgreSQL (voir backend/README.md)
 mobile/    Application Flutter (Admin + Client, voir mobile/README.md)
+web/       Site Jimi Renovation & Installation — Next.js (voir web/README.md)
 docs/      Architecture, schéma de base de données, déploiement
 ```
 

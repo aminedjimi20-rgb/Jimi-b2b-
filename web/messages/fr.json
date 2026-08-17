@@ -1,0 +1,448 @@
+{
+  "meta": {
+    "defaultTitle": "Jimi Renovation & Installation | Machines d'injection plastique & Automatisation industrielle",
+    "defaultDescription": "Spécialiste de la rénovation, du retrofit et de la maintenance des machines d'injection plastique en Algérie. Automatisation industrielle, PLC/HMI, vente et achat de machines d'occasion."
+  },
+  "nav": {
+    "home": "Accueil",
+    "machines": "Machines",
+    "buy": "Acheter une machine",
+    "buyShort": "Acheter",
+    "sell": "Vendre une machine",
+    "sellShort": "Vendre",
+    "services": "Services",
+    "realisations": "Réalisations",
+    "blog": "Conseils & Actualités",
+    "blogShort": "Conseils",
+    "contact": "Contact",
+    "servicesMenu": {
+      "renovation": "Rénovation de machines d'injection",
+      "automation": "Automatisation industrielle",
+      "maintenance": "Maintenance & dépannage"
+    },
+    "getQuote": "Demander un devis"
+  },
+  "cta": {
+    "viewMachines": "Voir les machines",
+    "requestMachine": "Demander une machine",
+    "ourServices": "Nos services",
+    "whatsapp": "Discuter sur WhatsApp",
+    "getQuote": "Demander un devis",
+    "viewDetails": "Voir la machine",
+    "contactWhatsapp": "Contacter par WhatsApp",
+    "requestInfo": "Demander plus d'informations",
+    "scheduleInspection": "Prendre rendez-vous pour inspection",
+    "proposeMachine": "Proposer ma machine",
+    "sendMyRequest": "Envoyer ma demande",
+    "viewAll": "Voir tout",
+    "readMore": "Lire l'article",
+    "learnMore": "En savoir plus",
+    "backToMachines": "Retour aux machines",
+    "backToBlog": "Retour aux articles",
+    "callNow": "Appeler maintenant"
+  },
+  "hero": {
+    "badge": "Automaticien industriel — Injection plastique",
+    "title": "Machines d'injection plastique & Solutions d'automatisation industrielle",
+    "subtitle": "Rénovation, modernisation, dépannage et mise en relation pour l'achat et la vente de machines d'injection en Algérie.",
+    "stat1Value": "PLC / HMI",
+    "stat1Label": "Retrofit & mise en service",
+    "stat2Value": "100%",
+    "stat2Label": "Expertise technique terrain",
+    "stat3Value": "58 wilayas",
+    "stat3Label": "Intervention possible"
+  },
+  "quickCta": {
+    "title": "Que souhaitez-vous faire ?",
+    "buy": {
+      "title": "Je cherche une machine",
+      "desc": "Dites-nous votre besoin, nous cherchons la machine adaptée.",
+      "action": "Faire une demande"
+    },
+    "sell": {
+      "title": "Je veux vendre ma machine",
+      "desc": "Proposez votre machine à des acheteurs sérieux.",
+      "action": "Proposer ma machine"
+    },
+    "service": {
+      "title": "J'ai besoin d'une intervention",
+      "desc": "Rénovation, dépannage, automatisation, mise en service.",
+      "action": "Demander un devis"
+    }
+  },
+  "home": {
+    "featuredMachines": {
+      "title": "Machines à la une",
+      "subtitle": "Une sélection de machines d'injection actuellement suivies par Jimi Renovation & Installation.",
+      "demoNotice": "Données de démonstration — les machines réellement disponibles seront publiées ici.",
+      "viewAll": "Voir toutes les machines"
+    },
+    "services": {
+      "title": "Nos domaines d'expertise",
+      "subtitle": "Une expertise technique complète autour de la machine d'injection plastique, de sa rénovation à sa remise en production."
+    },
+    "whyUs": {
+      "title": "Pourquoi choisir Jimi ?",
+      "subtitle": "Un interlocuteur technique unique, qui connaît réellement la machine — pas seulement le marché.",
+      "items": [
+        { "icon": "wrench", "title": "Expertise technique", "desc": "Intervention directe sur PLC, HMI, variateurs, servo et circuits de commande." },
+        { "icon": "factory", "title": "Spécialiste machines d'injection", "desc": "Connaissance approfondie des machines hydrauliques, servo et hybrides." },
+        { "icon": "cpu", "title": "Automatisation industrielle", "desc": "Programmation, retrofit et intégration de systèmes de contrôle modernes." },
+        { "icon": "search", "title": "Diagnostic technique", "desc": "Analyse rigoureuse avant toute intervention ou recommandation d'achat." },
+        { "icon": "handshake", "title": "Accompagnement achat/vente", "desc": "Un regard technique sur chaque transaction, pas seulement commercial." },
+        { "icon": "map", "title": "Intervention en Algérie", "desc": "Déplacement possible partout en Algérie selon les projets." }
+      ]
+    },
+    "intermediation": {
+      "title": "Intermédiation & mise en relation",
+      "subtitle": "Un accompagnement technique pour connecter vendeurs et acheteurs de machines d'injection en Algérie.",
+      "buyers": {
+        "title": "Pour les acheteurs",
+        "items": [
+          "Recherche ciblée selon tonnage, marque, état et budget",
+          "Première évaluation technique de la machine identifiée",
+          "Aide à la négociation et aux questions techniques",
+          "Organisation d'une inspection si nécessaire"
+        ]
+      },
+      "sellers": {
+        "title": "Pour les vendeurs",
+        "items": [
+          "Mise en visibilité auprès d'acheteurs sérieux",
+          "Valorisation technique de la machine (état, historique, travaux effectués)",
+          "Accompagnement dans les échanges avec les acheteurs intéressés"
+        ]
+      },
+      "ourRole": {
+        "title": "Notre rôle",
+        "items": [
+          "Recherche et sélection de machines correspondant au besoin",
+          "Première vérification technique",
+          "Mise en relation entre les parties",
+          "Accompagnement de la négociation",
+          "Inspection technique si nécessaire"
+        ]
+      },
+      "disclaimer": "Jimi Renovation & Installation agit en tant qu'intermédiaire technique. Chaque transaction reste sous la responsabilité directe de l'acheteur et du vendeur."
+    },
+    "beforeAfter": {
+      "title": "Avant / Après",
+      "subtitle": "Des interventions concrètes qui remettent une machine en état de production.",
+      "items": [
+        { "before": "Ancienne armoire électrique", "after": "Nouvelle armoire automatisée" },
+        { "before": "Ancien système de commande", "after": "PLC + HMI moderne" },
+        { "before": "Machine à l'arrêt", "after": "Machine remise en service" }
+      ]
+    },
+    "realisations": {
+      "title": "Nos réalisations",
+      "subtitle": "Un aperçu de projets de rénovation et de mise en service accompagnés par Jimi.",
+      "viewAll": "Voir toutes les réalisations"
+    },
+    "process": {
+      "title": "Notre processus",
+      "subtitle": "Une méthode claire, du premier contact à la remise en production.",
+      "steps": [
+        { "number": "01", "title": "Analyse", "desc": "Nous identifions la machine, le besoin ou le problème rencontré." },
+        { "number": "02", "title": "Diagnostic", "desc": "Un examen technique rigoureux détermine l'origine exacte du problème." },
+        { "number": "03", "title": "Proposition", "desc": "Nous présentons une solution claire et une estimation du coût." },
+        { "number": "04", "title": "Intervention", "desc": "Rénovation, dépannage ou mise en service, selon le besoin identifié." },
+        { "number": "05", "title": "Tests", "desc": "Vérification complète du cycle et de toutes les fonctions de la machine." },
+        { "number": "06", "title": "Livraison", "desc": "La machine est remise en état de marche, prête pour la production." }
+      ]
+    },
+    "testimonials": {
+      "title": "Témoignages clients",
+      "subtitle": "Cet espace accueillera prochainement les retours de nos clients.",
+      "emptyState": "Les témoignages clients seront publiés ici au fur et à mesure des projets réalisés."
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "subtitle": "Les réponses aux questions les plus posées par nos clients."
+    },
+    "finalCta": {
+      "title": "Un projet, une panne, une machine à trouver ?",
+      "subtitle": "Parlons-en directement — la réponse la plus rapide est sur WhatsApp.",
+      "whatsapp": "Discuter sur WhatsApp",
+      "contact": "Contacter par formulaire"
+    }
+  },
+  "machines": {
+    "pageTitle": "Machines d'injection disponibles",
+    "pageSubtitle": "Machines suivies par Jimi Renovation & Installation, avec vérification technique de premier niveau.",
+    "demoBanner": "Les fiches ci-dessous sont des exemples de démonstration destinés à illustrer le fonctionnement du site. Elles ne correspondent pas à des machines réellement en vente.",
+    "filters": {
+      "title": "Filtrer les machines",
+      "brand": "Marque",
+      "allBrands": "Toutes les marques",
+      "type": "Type",
+      "allTypes": "Tous les types",
+      "status": "Disponibilité",
+      "allStatus": "Toutes",
+      "tonnageMin": "Tonnage min.",
+      "tonnageMax": "Tonnage max.",
+      "reset": "Réinitialiser",
+      "apply": "Appliquer"
+    },
+    "resultsCount": "{count} machine(s) trouvée(s)",
+    "noResults": "Aucune machine ne correspond à vos critères. Essayez d'élargir votre recherche ou envoyez-nous votre demande directement.",
+    "noResultsCta": "Envoyer ma demande",
+    "priceOnRequest": "Prix sur demande",
+    "notFoundBanner": {
+      "title": "Vous ne trouvez pas la machine qu'il vous faut ?",
+      "subtitle": "Décrivez-nous votre besoin exact : tonnage, marque, budget. Nous cherchons pour vous.",
+      "cta": "Je cherche une machine"
+    }
+  },
+  "badges": {
+    "disponible": "Disponible",
+    "vendue": "Vendue",
+    "reservee": "Réservée",
+    "nouveau": "Nouveau"
+  },
+  "machineDetail": {
+    "galleryTitle": "Galerie photos",
+    "specsTitle": "Fiche technique",
+    "descriptionTitle": "Description technique",
+    "worksTitle": "Travaux effectués",
+    "defectsTitle": "Points d'attention / défauts éventuels",
+    "accessoriesTitle": "Accessoires inclus",
+    "interestedTitle": "Intéressé par cette machine ?",
+    "interestedSubtitle": "Contactez-nous pour obtenir plus d'informations ou organiser une inspection technique.",
+    "specs": {
+      "brand": "Marque",
+      "model": "Modèle",
+      "year": "Année",
+      "tonnage": "Tonnage",
+      "clampingForce": "Force de fermeture",
+      "screwDiameter": "Diamètre vis",
+      "injectionVolume": "Volume d'injection",
+      "injectionPressure": "Pression d'injection",
+      "motor": "Moteur / Servo",
+      "control": "Contrôle",
+      "plc": "PLC",
+      "hmi": "HMI",
+      "pumpType": "Type de pompe",
+      "condition": "État général",
+      "hours": "Heures de fonctionnement",
+      "location": "Localisation",
+      "price": "Prix",
+      "notAvailable": "Non communiqué"
+    }
+  },
+  "buyPage": {
+    "title": "Je cherche une machine",
+    "subtitle": "Décrivez précisément votre besoin : nous recherchons activement la machine correspondante dans notre réseau.",
+    "successTitle": "Votre demande a bien été envoyée",
+    "successMessage": "Merci, votre recherche a été enregistrée. Nous revenons vers vous rapidement avec des propositions correspondant à votre besoin.",
+    "sections": {
+      "criteria": "Critères de recherche",
+      "contact": "Vos coordonnées"
+    }
+  },
+  "sellPage": {
+    "title": "Vous souhaitez vendre votre machine ?",
+    "intro": "Si vous possédez une machine d'injection et souhaitez la vendre, transmettez-nous ses informations : nous vous aidons à trouver un acheteur sérieux.",
+    "successTitle": "Votre machine a bien été soumise",
+    "successMessage": "Merci, votre annonce a été transmise à notre équipe. Nous vous recontactons pour valider les détails et la mettre en visibilité.",
+    "sections": {
+      "machine": "Informations sur la machine",
+      "contact": "Vos coordonnées",
+      "media": "Photos et vidéo"
+    }
+  },
+  "services": {
+    "pageTitle": "Nos services",
+    "pageSubtitle": "Une expertise technique complète pour la rénovation, l'automatisation et la maintenance de vos machines d'injection.",
+    "categories": {
+      "renovation": {
+        "title": "Rénovation de machines d'injection",
+        "desc": "Remise à niveau complète des machines anciennes, du retrofit électrique à la mise en service.",
+        "items": ["Retrofit électrique", "Remplacement d'armoire", "PLC", "HMI", "Variateurs", "Systèmes servo", "Capteurs", "Câblage", "Sécurité machine", "Mise en service"]
+      },
+      "automation": {
+        "title": "Automatisation industrielle",
+        "desc": "Intégration de systèmes de contrôle modernes pour améliorer précision, sécurité et productivité.",
+        "items": ["Programmation PLC", "Interfaces HMI", "Variateurs de fréquence (VFD)", "Systèmes servo", "Capteurs industriels", "Communication industrielle"]
+      },
+      "maintenance": {
+        "title": "Maintenance & dépannage",
+        "desc": "Diagnostic rapide et intervention ciblée pour limiter les arrêts de production.",
+        "items": ["Diagnostic de panne", "Pannes électriques", "Régulation hydraulique", "Régulation de température", "Cycle d'injection", "Mode automatique", "Systèmes de sécurité"]
+      },
+      "modernisation": {
+        "title": "Modernisation",
+        "desc": "Une machine ancienne n'a pas toujours besoin d'être remplacée. Selon son état mécanique, une modernisation ciblée du système de commande permet souvent de prolonger sa durée de vie à moindre coût, tout en améliorant sa précision et sa sécurité."
+      }
+    },
+    "cta": {
+      "title": "Une machine à l'arrêt ou à moderniser ?",
+      "subtitle": "Décrivez votre besoin, nous revenons vers vous avec un diagnostic clair.",
+      "button": "Demander un devis"
+    }
+  },
+  "servicePages": {
+    "renovation": {
+      "title": "Rénovation de machines d'injection plastique",
+      "subtitle": "Retrofit électrique, PLC, HMI et remise en service complète de vos machines d'injection.",
+      "intro": "Une machine d'injection ancienne, même en bon état mécanique, devient rapidement un frein à la production lorsque son système de commande est obsolète. La rénovation permet de moderniser l'armoire électrique, le contrôle et la sécurité de la machine, sans remplacer l'ensemble hydraulique et mécanique encore fonctionnel.",
+      "whatWeDo": "Ce que comprend une rénovation",
+      "items": [
+        "Diagnostic complet de l'installation électrique existante",
+        "Remplacement de l'armoire électrique et du câblage vétuste",
+        "Intégration d'un PLC et d'une interface HMI modernes",
+        "Remplacement ou réglage des variateurs et systèmes servo",
+        "Mise à niveau des capteurs et de la sécurité machine",
+        "Tests complets et mise en service"
+      ]
+    },
+    "automation": {
+      "title": "Automatisation industrielle",
+      "subtitle": "Programmation PLC, HMI, variateurs et intégration de systèmes de contrôle modernes.",
+      "intro": "L'automatisation industrielle améliore la précision, la répétabilité et la sécurité de vos équipements de production. Elle s'applique aussi bien aux machines d'injection qu'à d'autres équipements industriels nécessitant un contrôle automatisé.",
+      "whatWeDo": "Domaines d'intervention",
+      "items": [
+        "Programmation et paramétrage PLC",
+        "Conception d'interfaces HMI claires et fonctionnelles",
+        "Intégration de variateurs de fréquence (VFD)",
+        "Mise en œuvre de systèmes servo",
+        "Installation et calibration de capteurs industriels",
+        "Mise en réseau et communication industrielle"
+      ]
+    },
+    "maintenance": {
+      "title": "Maintenance & dépannage de machines d'injection",
+      "subtitle": "Diagnostic rapide et intervention ciblée pour limiter les arrêts de production.",
+      "intro": "Un arrêt de production non planifié a un coût direct sur votre activité. Notre approche du dépannage privilégie un diagnostic précis avant toute intervention, afin d'identifier la cause réelle de la panne plutôt que de remplacer des pièces au hasard.",
+      "whatWeDo": "Domaines d'intervention",
+      "items": [
+        "Diagnostic de panne électrique et hydraulique",
+        "Régulation de température et résistances chauffantes",
+        "Anomalies du cycle d'injection",
+        "Dysfonctionnement du mode automatique",
+        "Vérification des systèmes de sécurité",
+        "Maintenance préventive programmée"
+      ]
+    }
+  },
+  "realisations": {
+    "pageTitle": "Nos réalisations",
+    "pageSubtitle": "Aperçu de projets de rénovation, de dépannage et de mise en service.",
+    "demoBanner": "Les projets ci-dessous illustrent le type d'intervention réalisé. De nouveaux projets réels seront ajoutés au fur et à mesure.",
+    "labels": {
+      "machine": "Machine",
+      "brand": "Marque",
+      "tonnage": "Tonnage",
+      "problem": "Problème initial",
+      "solution": "Solution apportée",
+      "result": "Résultat"
+    }
+  },
+  "blog": {
+    "pageTitle": "Conseils & Actualités",
+    "pageSubtitle": "Nos conseils techniques pour bien choisir, entretenir et faire évoluer vos machines d'injection.",
+    "readTime": "min de lecture",
+    "relatedTitle": "À lire aussi"
+  },
+  "contactPage": {
+    "title": "Contactez-nous",
+    "subtitle": "Une question, un projet, une machine à trouver ou à vendre ? Écrivez-nous ou contactez-nous directement.",
+    "infoTitle": "Nos coordonnées",
+    "formTitle": "Envoyer un message",
+    "successTitle": "Message envoyé",
+    "successMessage": "Merci pour votre message. Nous vous répondrons dans les plus brefs délais."
+  },
+  "faqItems": [
+    { "q": "Est-ce que vous achetez des machines ?", "a": "Nous n'achetons pas directement les machines. Nous accompagnons la mise en relation entre vendeurs et acheteurs, avec une vérification technique de premier niveau." },
+    { "q": "Est-ce que vous aidez à vendre une machine ?", "a": "Oui. Vous pouvez nous transmettre les informations de votre machine via le formulaire dédié, et nous la mettons en visibilité auprès d'acheteurs intéressés." },
+    { "q": "Est-ce que vous intervenez partout en Algérie ?", "a": "Oui, un déplacement est possible dans toutes les wilayas selon la nature du projet et sa localisation." },
+    { "q": "Est-ce que vous rénovez les anciennes machines ?", "a": "Oui, la rénovation et le retrofit électrique de machines anciennes constituent une part importante de notre activité." },
+    { "q": "Pouvez-vous inspecter une machine avant achat ?", "a": "Oui, une inspection technique peut être organisée avant l'achat, sur demande, afin de vérifier l'état réel de la machine." },
+    { "q": "Comment demander une machine spécifique ?", "a": "Utilisez le formulaire « Je cherche une machine » en précisant tonnage, marque, budget et état souhaité. Nous recherchons ensuite dans notre réseau." },
+    { "q": "Comment obtenir un devis ?", "a": "Contactez-nous via WhatsApp, téléphone ou le formulaire de contact en décrivant votre besoin. Nous revenons vers vous avec une proposition claire." },
+    { "q": "Quels types de machines prenez-vous en charge ?", "a": "Principalement les machines d'injection plastique, hydrauliques, servo ou hybrides, ainsi que les équipements d'automatisation associés." }
+  ],
+  "footer": {
+    "description": "Spécialiste de la rénovation, de l'automatisation et de la maintenance des machines d'injection plastique. Achat, vente et mise en relation de machines industrielles en Algérie.",
+    "navTitle": "Navigation",
+    "servicesTitle": "Services",
+    "contactTitle": "Contact",
+    "legalTitle": "Informations",
+    "rights": "Tous droits réservés.",
+    "madeWith": "Site professionnel — Jimi Renovation & Installation"
+  },
+  "forms": {
+    "fields": {
+      "name": "Nom complet",
+      "company": "Entreprise",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "wilaya": "Wilaya",
+      "message": "Message",
+      "brand": "Marque",
+      "model": "Modèle",
+      "tonnage": "Tonnage",
+      "tonnageMin": "Tonnage minimum",
+      "tonnageMax": "Tonnage maximum",
+      "year": "Année",
+      "yearMin": "Année minimum",
+      "budgetMin": "Budget minimum (DA)",
+      "budgetMax": "Budget maximum (DA)",
+      "location": "Localisation",
+      "state": "État de la machine",
+      "machineType": "Type de machine",
+      "driveType": "Servo / Hydraulique",
+      "specificNeed": "Besoin particulier",
+      "priceWanted": "Prix souhaité (DA)",
+      "description": "Description",
+      "availability": "Disponibilité",
+      "photos": "Photos",
+      "video": "Lien vidéo (YouTube, Drive, etc.)",
+      "serviceType": "Service recherché"
+    },
+    "placeholders": {
+      "name": "Votre nom et prénom",
+      "company": "Nom de votre entreprise (optionnel)",
+      "phone": "0555 00 00 00",
+      "email": "vous@exemple.com",
+      "message": "Décrivez votre besoin en quelques lignes...",
+      "specificNeed": "Précisez toute exigence particulière (cadence, moules, énergie, etc.)",
+      "description": "État général, historique d'utilisation, travaux déjà réalisés...",
+      "video": "https://..."
+    },
+    "options": {
+      "state": { "excellent": "Excellent", "good": "Bon état", "average": "État moyen", "toRenovate": "À rénover" },
+      "driveType": { "hydraulic": "Hydraulique", "servo": "Servo", "hybrid": "Hybride", "indifferent": "Indifférent" },
+      "machineType": { "injection": "Injection plastique", "blowMolding": "Extrusion-soufflage", "other": "Autre" }
+    },
+    "buttons": {
+      "send": "Envoyer",
+      "sending": "Envoi en cours...",
+      "sendRequest": "Envoyer ma demande"
+    },
+    "errors": {
+      "required": "Ce champ est requis",
+      "invalidPhone": "Numéro de téléphone invalide",
+      "invalidEmail": "Adresse email invalide",
+      "generic": "Une erreur est survenue. Merci de réessayer ou de nous contacter directement sur WhatsApp."
+    },
+    "whatsappAlternative": "Vous pouvez aussi nous écrire directement sur"
+  },
+  "whatsappMessages": {
+    "machineInterest": "Bonjour Jimi, je suis intéressé(e) par la machine {brand} {model} {tonnage}. Je souhaite avoir plus d'informations.",
+    "serviceQuote": "Bonjour Jimi, je souhaite avoir un devis pour la rénovation de ma machine d'injection.",
+    "generalContact": "Bonjour Jimi, j'aimerais avoir plus d'informations sur vos services.",
+    "buyRequest": "Bonjour Jimi, je recherche une machine d'injection. Je souhaite vous transmettre mes critères.",
+    "sellRequest": "Bonjour Jimi, je souhaite vous proposer une machine d'injection à la vente."
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "subtitle": "La page que vous recherchez n'existe pas ou a été déplacée.",
+    "cta": "Retour à l'accueil"
+  },
+  "langSwitcher": {
+    "label": "Langue"
+  },
+  "demoDataBadge": "Démo"
+}
