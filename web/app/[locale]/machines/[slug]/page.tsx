@@ -17,7 +17,6 @@ import {
   MessageCircle,
   Mail,
   CalendarClock,
-  Info,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -263,13 +262,6 @@ export default async function MachineDetailPage({
                     </Button>
                   </div>
                 </div>
-
-                {machine.isDemo && (
-                  <div className="flex items-start gap-2.5 rounded-lg bg-amber-50 px-4 py-3 text-xs text-amber-800">
-                    <Info size={14} className="mt-0.5 shrink-0" />
-                    <p>{t("machines.demoBanner")}</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

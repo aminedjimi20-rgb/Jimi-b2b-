@@ -55,14 +55,24 @@ lib/                  Accès aux données, i18n helpers, stockage fichier (leads
 messages/             Traductions fr.json / ar.json / en.json
 ```
 
-## Machines : démo vs réel
+## Machines et réalisations : aucune donnée fictive
 
-- `data/machines.json` contient des **fiches de démonstration** (clairement
-  indiquées comme telles sur le site) pour illustrer le fonctionnement de la
-  plateforme.
+- `data/machines.json` et `data/projects.json` sont **vides par défaut** —
+  aucune machine ni réalisation inventée n'est publiée sur le site. Tant
+  qu'ils sont vides, les pages `/machines`, `/realisations` et la page
+  d'accueil affichent un état vide honnête (« Aucune machine disponible
+  actuellement », etc.) avec un appel à l'action vers WhatsApp/contact.
 - Les machines ajoutées depuis `/admin` (onglet **Machines**) sont stockées
-  dans `.data/machines.json` (créé automatiquement, non versionné) et
-  apparaissent immédiatement sur le site public, sans le badge « Démo ».
+  dans un dossier temporaire du serveur (`os.tmpdir()` — voir
+  `lib/machinesStore.ts`) et apparaissent immédiatement sur le site public.
+  ⚠️ Ce stockage est **éphémère** sur les plateformes serverless (Vercel) :
+  il peut être réinitialisé à chaque nouveau déploiement ou redémarrage.
+  Pour une utilisation réelle en production, remplacez-le par une vraie
+  base de données (voir ci-dessous) avant d'ajouter des machines qui
+  doivent persister durablement.
+- Pour ajouter de vraies réalisations, éditez directement
+  `data/projects.json` (structure prête, voir `lib/types.ts`) — il n'y a
+  pas encore d'interface admin dédiée pour celles-ci.
 - Pour une mise en production sérieuse avec plusieurs administrateurs ou un
   fort volume de machines/leads, remplacez le stockage fichier
   (`lib/leads.ts`, `lib/machinesStore.ts`) par une vraie base de données

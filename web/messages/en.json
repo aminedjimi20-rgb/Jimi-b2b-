@@ -74,8 +74,9 @@
     "featuredMachines": {
       "title": "Featured machines",
       "subtitle": "A selection of injection machines currently tracked by Jimi Renovation & Installation.",
-      "demoNotice": "Demo data — machines actually available will be published here.",
-      "viewAll": "View all machines"
+      "viewAll": "View all machines",
+      "emptyTitle": "No machines listed yet",
+      "emptySubtitle": "Our selection is being put together. Tell us what you need — we actively search our network for it."
     },
     "services": {
       "title": "Our areas of expertise",
@@ -137,7 +138,9 @@
     "realisations": {
       "title": "Our projects",
       "subtitle": "A look at renovation and commissioning projects supported by Jimi.",
-      "viewAll": "View all projects"
+      "viewAll": "View all projects",
+      "emptyTitle": "Our projects are coming soon",
+      "emptySubtitle": "This space will showcase our renovation, troubleshooting and commissioning projects as they're completed. For a concrete example of our work, contact us directly."
     },
     "process": {
       "title": "Our process",
@@ -170,7 +173,10 @@
   "machines": {
     "pageTitle": "Available injection machines",
     "pageSubtitle": "Machines tracked by Jimi Renovation & Installation, with first-level technical verification.",
-    "demoBanner": "The listings below are demo examples used to illustrate how the site works. They do not correspond to machines actually for sale.",
+    "emptyCatalog": {
+      "title": "No machines available right now",
+      "subtitle": "Our catalog is being put together. Tell us what you need and we'll get back to you with matching proposals."
+    },
     "filters": {
       "title": "Filter machines",
       "brand": "Brand",
@@ -328,7 +334,10 @@
   "realisations": {
     "pageTitle": "Our projects",
     "pageSubtitle": "An overview of renovation, troubleshooting and commissioning projects.",
-    "demoBanner": "The projects below illustrate the type of intervention performed. New real projects will be added over time.",
+    "emptyState": {
+      "title": "Our projects are coming soon",
+      "subtitle": "This page will showcase our renovation, troubleshooting and commissioning projects as they're completed. For a concrete example of our work, contact us directly."
+    },
     "labels": {
       "machine": "Machine",
       "brand": "Brand",

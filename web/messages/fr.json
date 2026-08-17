@@ -74,8 +74,9 @@
     "featuredMachines": {
       "title": "Machines à la une",
       "subtitle": "Une sélection de machines d'injection actuellement suivies par Jimi Renovation & Installation.",
-      "demoNotice": "Données de démonstration — les machines réellement disponibles seront publiées ici.",
-      "viewAll": "Voir toutes les machines"
+      "viewAll": "Voir toutes les machines",
+      "emptyTitle": "Aucune machine en ligne pour le moment",
+      "emptySubtitle": "Notre sélection est en cours de constitution. Décrivez-nous votre besoin : nous recherchons activement dans notre réseau."
     },
     "services": {
       "title": "Nos domaines d'expertise",
@@ -137,7 +138,9 @@
     "realisations": {
       "title": "Nos réalisations",
       "subtitle": "Un aperçu de projets de rénovation et de mise en service accompagnés par Jimi.",
-      "viewAll": "Voir toutes les réalisations"
+      "viewAll": "Voir toutes les réalisations",
+      "emptyTitle": "Nos réalisations arrivent bientôt",
+      "emptySubtitle": "Cet espace présentera nos projets de rénovation, dépannage et mise en service au fur et à mesure. Pour un aperçu concret de notre travail, contactez-nous directement."
     },
     "process": {
       "title": "Notre processus",
@@ -170,7 +173,10 @@
   "machines": {
     "pageTitle": "Machines d'injection disponibles",
     "pageSubtitle": "Machines suivies par Jimi Renovation & Installation, avec vérification technique de premier niveau.",
-    "demoBanner": "Les fiches ci-dessous sont des exemples de démonstration destinés à illustrer le fonctionnement du site. Elles ne correspondent pas à des machines réellement en vente.",
+    "emptyCatalog": {
+      "title": "Aucune machine disponible actuellement",
+      "subtitle": "Notre catalogue est en cours de constitution. Décrivez-nous votre besoin et nous vous recontactons avec des propositions correspondantes."
+    },
     "filters": {
       "title": "Filtrer les machines",
       "brand": "Marque",
@@ -328,7 +334,10 @@
   "realisations": {
     "pageTitle": "Nos réalisations",
     "pageSubtitle": "Aperçu de projets de rénovation, de dépannage et de mise en service.",
-    "demoBanner": "Les projets ci-dessous illustrent le type d'intervention réalisé. De nouveaux projets réels seront ajoutés au fur et à mesure.",
+    "emptyState": {
+      "title": "Nos réalisations arrivent bientôt",
+      "subtitle": "Cette page présentera nos projets de rénovation, dépannage et mise en service au fur et à mesure. Pour un aperçu concret de notre travail, contactez-nous directement."
+    },
     "labels": {
       "machine": "Machine",
       "brand": "Marque",

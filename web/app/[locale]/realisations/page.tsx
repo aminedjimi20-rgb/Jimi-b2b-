@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { ProjectCard } from "@/components/ProjectCard";
+import { EmptyState } from "@/components/EmptyState";
 import { getProjects } from "@/lib/data";
-import { Info } from "lucide-react";
+import { buildWhatsAppLink } from "@/config/site.config";
+import { ClipboardList } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -28,6 +30,8 @@ export default async function RealisationsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("realisations");
+  const tw = await getTranslations("whatsappMessages");
+  const tc = await getTranslations("cta");
   const projects = getProjects();
 
   return (
@@ -35,15 +39,21 @@ export default async function RealisationsPage({
       <PageHeader eyebrow="Portfolio" title={t("pageTitle")} subtitle={t("pageSubtitle")} />
       <section className="py-12 md:py-16">
         <Container>
-          <div className="mb-8 flex items-start gap-2.5 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <Info size={16} className="mt-0.5 shrink-0" />
-            <p>{t("demoBanner")}</p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i} />
-            ))}
-          </div>
+          {projects.length === 0 ? (
+            <EmptyState
+              icon={ClipboardList}
+              title={t("emptyState.title")}
+              subtitle={t("emptyState.subtitle")}
+              whatsappHref={buildWhatsAppLink(tw("serviceQuote"))}
+              whatsappLabel={tc("whatsapp")}
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {projects.map((project, i) => (
+                <ProjectCard key={project.id} project={project} index={i} />
+              ))}
+            </div>
+          )}
         </Container>
       </section>
     </>
