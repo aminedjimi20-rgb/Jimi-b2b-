@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { updateRuntimeMachine, deleteRuntimeMachine, type AdminMachineInput } from "@/lib/machinesStore";
 import { sanitizeUrl } from "@/lib/sanitize";
-import type { ModerationStatus } from "@/lib/types";
+import type { MachineStatus } from "@/lib/types";
 
-const VALID_MODERATION_STATUSES: ModerationStatus[] = ["pending", "published", "rejected", "draft"];
+const VALID_STATUSES: MachineStatus[] = ["draft", "pending", "published", "rejected", "reserved", "sold"];
 
 export async function PATCH(
   request: NextRequest,
@@ -31,9 +31,9 @@ export async function PATCH(
   if ("adminNote" in body) {
     body.adminNote = body.adminNote ? String(body.adminNote).slice(0, 1000) : null;
   }
-  if ("moderationStatus" in body) {
-    if (!VALID_MODERATION_STATUSES.includes(body.moderationStatus as ModerationStatus)) {
-      return NextResponse.json({ error: "invalid_moderation_status" }, { status: 400 });
+  if ("status" in body) {
+    if (!VALID_STATUSES.includes(body.status as MachineStatus)) {
+      return NextResponse.json({ error: "invalid_status" }, { status: 400 });
     }
     body.reviewedAt = new Date().toISOString();
   }

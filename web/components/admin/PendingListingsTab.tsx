@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import type { Machine, MachineDrive } from "@/lib/types";
 import type { SellerProfile } from "@/lib/sellers";
+import { PhotoUploader } from "@/components/forms/MediaUploader";
 import {
   RefreshCw,
   Check,
@@ -22,12 +23,12 @@ const DRIVE_LABELS: Record<MachineDrive, string> = {
   hybride: "Hybride",
 };
 
-const MODERATION_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<string, string> = {
   pending: "En attente",
   draft: "Modifications demandées",
 };
 
-const MODERATION_TONE: Record<string, string> = {
+const STATUS_TONE: Record<string, string> = {
   pending: "bg-amber-50 text-amber-700",
   draft: "bg-orange-50 text-orange-700",
 };
@@ -43,7 +44,17 @@ export function PendingListingsTab({
   const sellerById = new Map(sellers.map((s) => [s.id, s]));
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editPhotos, setEditPhotos] = useState<string[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  function startEdit(m: Machine) {
+    if (editingId === m.id) {
+      setEditingId(null);
+      return;
+    }
+    setEditingId(m.id);
+    setEditPhotos(m.photos ?? []);
+  }
 
   async function refresh() {
     setLoading(true);
@@ -51,7 +62,7 @@ export function PendingListingsTab({
       const res = await fetch("/api/admin/machines");
       const json = await res.json();
       const all = (json.machines ?? []) as Machine[];
-      setMachines(all.filter((m) => m.moderationStatus === "pending" || m.moderationStatus === "draft"));
+      setMachines(all.filter((m) => m.status === "pending" || m.status === "draft"));
     } finally {
       setLoading(false);
     }
@@ -68,7 +79,7 @@ export function PendingListingsTab({
       if (res.ok) {
         const json = await res.json();
         const updated = json.machine as Machine;
-        if (updated.moderationStatus === "pending" || updated.moderationStatus === "draft") {
+        if (updated.status === "pending" || updated.status === "draft") {
           setMachines((prev) => prev.map((m) => (m.id === id ? updated : m)));
         } else {
           setMachines((prev) => prev.filter((m) => m.id !== id));
@@ -81,19 +92,19 @@ export function PendingListingsTab({
   }
 
   function approve(id: string) {
-    patch(id, { moderationStatus: "published" });
+    patch(id, { status: "published" });
   }
 
   function reject(id: string) {
     const reason = window.prompt("Motif du rejet (optionnel, usage interne uniquement) :");
     if (reason === null) return;
-    patch(id, { moderationStatus: "rejected", adminNote: reason || null });
+    patch(id, { status: "rejected", adminNote: reason || null });
   }
 
   function requestChanges(id: string) {
     const note = window.prompt("Quelles modifications ou informations demander au vendeur ?");
     if (!note) return;
-    patch(id, { moderationStatus: "draft", adminNote: note });
+    patch(id, { status: "draft", adminNote: note });
   }
 
   async function saveEdit(id: string, e: FormEvent<HTMLFormElement>) {
@@ -110,6 +121,7 @@ export function PendingListingsTab({
       priceOnRequest: formData.get("priceOnRequest") === "on",
       description: String(formData.get("description") || ""),
       videoUrl: String(formData.get("videoUrl") || "") || null,
+      photos: editPhotos,
     });
   }
 
@@ -138,12 +150,8 @@ export function PendingListingsTab({
             <div key={m.id} className="rounded-xl border border-[var(--color-border)] bg-white p-4 md:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                      MODERATION_TONE[m.moderationStatus ?? "pending"]
-                    }`}
-                  >
-                    {MODERATION_LABELS[m.moderationStatus ?? "pending"]}
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_TONE[m.status]}`}>
+                    {STATUS_LABELS[m.status]}
                   </span>
                   <span className="text-sm font-semibold text-[var(--color-ink)]">
                     {m.brand} {m.model}
@@ -156,7 +164,7 @@ export function PendingListingsTab({
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
-                    onClick={() => setEditingId(editingId === m.id ? null : m.id)}
+                    onClick={() => startEdit(m)}
                     className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
                     aria-label="Modifier"
                   >
@@ -186,7 +194,7 @@ export function PendingListingsTab({
                 </div>
               </div>
 
-              {m.adminNote && m.moderationStatus === "draft" && (
+              {m.adminNote && m.status === "draft" && (
                 <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
                   <strong>Modifications demandées :</strong> {m.adminNote}
                 </p>
@@ -233,6 +241,9 @@ export function PendingListingsTab({
                     placeholder="Lien vidéo"
                     className="admin-input sm:col-span-2"
                   />
+                  <div className="sm:col-span-3">
+                    <PhotoUploader value={editPhotos} onChange={setEditPhotos} />
+                  </div>
                   <textarea
                     name="description"
                     defaultValue={m.description}

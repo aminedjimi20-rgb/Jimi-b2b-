@@ -2,33 +2,31 @@
 
 import { useState, FormEvent, Fragment } from "react";
 import type { Machine, MachineDrive, MachineStatus } from "@/lib/types";
+import { PhotoUploader } from "@/components/forms/MediaUploader";
 import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
 
 const STATUS_LABELS: Record<MachineStatus, string> = {
-  disponible: "Disponible",
-  vendue: "Vendue",
-  reservee: "Réservée",
-  nouveau: "Nouveau",
+  draft: "Brouillon (masquée)",
+  pending: "En attente de validation",
+  published: "Publiée",
+  rejected: "Rejetée",
+  reserved: "Réservée",
+  sold: "Vendue",
+};
+
+const STATUS_TONE: Record<MachineStatus, string> = {
+  draft: "bg-slate-100 text-slate-600",
+  pending: "bg-amber-50 text-amber-700",
+  published: "bg-emerald-50 text-emerald-700",
+  rejected: "bg-red-50 text-red-700",
+  reserved: "bg-purple-50 text-purple-700",
+  sold: "bg-blue-50 text-blue-700",
 };
 
 const DRIVE_LABELS: Record<MachineDrive, string> = {
   hydraulique: "Hydraulique",
   servo: "Servo",
   hybride: "Hybride",
-};
-
-const MODERATION_LABELS: Record<string, string> = {
-  pending: "En attente",
-  published: "Publiée",
-  rejected: "Rejetée",
-  draft: "Modifs demandées",
-};
-
-const MODERATION_TONE: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700",
-  published: "bg-emerald-50 text-emerald-700",
-  rejected: "bg-red-50 text-red-700",
-  draft: "bg-orange-50 text-orange-700",
 };
 
 export function MachinesTab({ initialMachines }: { initialMachines: Machine[] }) {
@@ -38,6 +36,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
   const [submitting, setSubmitting] = useState(false);
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [savingVideo, setSavingVideo] = useState(false);
+  const [newPhotos, setNewPhotos] = useState<string[]>([]);
 
   async function refresh() {
     setLoading(true);
@@ -63,10 +62,12 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
         body: JSON.stringify({
           ...payload,
           priceOnRequest: formData.get("priceOnRequest") === "on",
+          photos: newPhotos,
         }),
       });
       if (res.ok) {
         e.currentTarget.reset();
+        setNewPhotos([]);
         setShowForm(false);
         await refresh();
       }
@@ -110,18 +111,8 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
     }
   }
 
-  async function toggleVisibility(id: string, currentlyPublished: boolean) {
-    const moderationStatus = currentlyPublished ? "draft" : "published";
-    setMachines((prev) => prev.map((m) => (m.id === id ? { ...m, moderationStatus } : m)));
-    await fetch(`/api/admin/machines/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ moderationStatus }),
-    });
-  }
-
   async function remove(id: string) {
-    if (!confirm("Supprimer cette machine ?")) return;
+    if (!confirm("Supprimer définitivement cette machine ?")) return;
     setMachines((prev) => prev.filter((m) => m.id !== id));
     await fetch(`/api/admin/machines/${id}`, { method: "DELETE" });
   }
@@ -131,8 +122,10 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-[var(--color-text-muted)]">
           Les machines <strong>« Démo »</strong> proviennent des données d&apos;exemple du site
-          (non modifiables ici). Les machines que vous ajoutez ci-dessous apparaissent
-          immédiatement sur le site public.
+          (non modifiables ici). Les machines ajoutées par les vendeurs sont soumises à
+          validation : elles apparaissent sur le site public uniquement après approbation de
+          Jimi (onglet « Annonces à valider »). Une machine ajoutée directement ici par un admin
+          est publiée immédiatement.
         </p>
         <div className="flex gap-2">
           <button
@@ -166,10 +159,10 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
               </option>
             ))}
           </select>
-          <select name="status" defaultValue="disponible" className="admin-input">
-            {Object.entries(STATUS_LABELS).map(([v, l]) => (
+          <select name="status" defaultValue="published" className="admin-input">
+            {(["published", "draft", "reserved", "sold"] as MachineStatus[]).map((v) => (
               <option key={v} value={v}>
-                {l}
+                {STATUS_LABELS[v]}
               </option>
             ))}
           </select>
@@ -184,6 +177,13 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
             rows={3}
             className="admin-input sm:col-span-3"
           />
+
+          <div className="sm:col-span-3">
+            <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+              Photos (optionnel)
+            </p>
+            <PhotoUploader value={newPhotos} onChange={setNewPhotos} />
+          </div>
 
           <div className="sm:col-span-3">
             <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
@@ -215,14 +215,13 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
       )}
 
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-white">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="w-full min-w-[780px] text-sm">
           <thead>
             <tr className="border-b border-[var(--color-border)] text-start text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
               <th className="px-4 py-3 text-start">Machine</th>
               <th className="px-4 py-3 text-start">Tonnage</th>
               <th className="px-4 py-3 text-start">Wilaya</th>
               <th className="px-4 py-3 text-start">Statut</th>
-              <th className="px-4 py-3 text-start">Publication</th>
               <th className="px-4 py-3 text-start">Vidéo</th>
               <th className="px-4 py-3 text-start">Source</th>
               <th className="px-4 py-3 text-start"></th>
@@ -239,12 +238,14 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                   <td className="px-4 py-3">{m.wilaya}</td>
                   <td className="px-4 py-3">
                     {m.isDemo ? (
-                      STATUS_LABELS[m.status]
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_TONE[m.status]}`}>
+                        {STATUS_LABELS[m.status]}
+                      </span>
                     ) : (
                       <select
                         value={m.status}
                         onChange={(e) => setStatus(m.id, e.target.value as MachineStatus)}
-                        className="rounded-md border border-[var(--color-border)] px-2 py-1 text-xs"
+                        className={`rounded-md border border-[var(--color-border)] px-2 py-1 text-xs font-medium ${STATUS_TONE[m.status]}`}
                       >
                         {Object.entries(STATUS_LABELS).map(([v, l]) => (
                           <option key={v} value={v}>
@@ -252,19 +253,6 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                           </option>
                         ))}
                       </select>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {m.isDemo ? (
-                      <span className="text-xs text-slate-400">—</span>
-                    ) : (
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          MODERATION_TONE[m.moderationStatus ?? "published"]
-                        }`}
-                      >
-                        {MODERATION_LABELS[m.moderationStatus ?? "published"]}
-                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -288,9 +276,9 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                   <td className="px-4 py-3 text-end">
                     {!m.isDemo && (
                       <div className="flex items-center justify-end gap-1">
-                        {(m.moderationStatus === "published" || !m.moderationStatus) && (
+                        {m.status === "published" && (
                           <button
-                            onClick={() => toggleVisibility(m.id, true)}
+                            onClick={() => setStatus(m.id, "draft")}
                             className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
                             aria-label="Masquer du site public"
                             title="Masquer du site public"
@@ -298,9 +286,9 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                             <EyeOff size={15} />
                           </button>
                         )}
-                        {m.moderationStatus === "draft" && (
+                        {m.status === "draft" && (
                           <button
-                            onClick={() => toggleVisibility(m.id, false)}
+                            onClick={() => setStatus(m.id, "published")}
                             className="rounded-md p-1.5 text-emerald-600 hover:bg-emerald-50"
                             aria-label="Republier"
                             title="Republier sur le site public"
@@ -311,7 +299,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                         <button
                           onClick={() => setEditingVideoId(editingVideoId === m.id ? null : m.id)}
                           className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
-                          aria-label="Modifier la vidéo"
+                          aria-label="Modifier"
                         >
                           {editingVideoId === m.id ? <X size={15} /> : <Pencil size={15} />}
                         </button>
@@ -328,7 +316,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                 </tr>
                 {editingVideoId === m.id && (
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
-                    <td colSpan={8} className="px-4 py-4">
+                    <td colSpan={7} className="px-4 py-4">
                       <form
                         onSubmit={(e) => saveVideo(m.id, e)}
                         className="grid grid-cols-1 gap-3 sm:grid-cols-3"

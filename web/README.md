@@ -45,6 +45,45 @@ restent surchargeables via des variables d'environnement (`.env.local`, voir
 | `ADMIN_PASSWORD`                   | —                         | Mot de passe du tableau de bord `/admin` — **à définir avant mise en production** |
 | `ADMIN_SESSION_SECRET`             | —                         | Clé secrète de session admin (chaîne aléatoire)  |
 
+## Base de données et stockage — configuration obligatoire en production
+
+⚠️ **Sans cette étape, les machines/leads/vendeurs/acheteurs peuvent
+disparaître après une action admin (Approve, etc.).** C'est exactement le
+bug qui se produisait auparavant : Vercel exécute chaque requête sur une
+instance serverless parmi plusieurs, et un fichier écrit dans le dossier
+temporaire d'une instance (`os.tmpdir()`) n'est pas visible par les autres
+instances ni garanti de survivre — la requête suivante peut retomber sur
+une instance « vide ». Le stockage fichier reste utilisé automatiquement en
+développement local (pratique, zéro configuration), mais **n'est pas une
+persistance réelle** : c'est pour ça qu'une machine approuvée pouvait
+sembler avoir disparu.
+
+La vraie base de données est **Supabase** (Postgres + Storage), déjà câblée
+dans le code (`lib/supabase.ts`, `lib/sellers.ts`, `lib/buyers.ts`,
+`lib/machinesStore.ts`, `lib/machineLeads.ts`, `lib/leads.ts` basculent
+automatiquement sur Supabase dès que les variables d'environnement sont
+présentes). Mise en place (une seule fois) :
+
+1. Créer un projet gratuit sur [supabase.com](https://supabase.com).
+2. Dans **SQL Editor**, coller le contenu de `web/supabase/schema.sql` et
+   l'exécuter (crée les tables `machines`, `sellers`, `buyers`,
+   `machine_leads`, `leads`, avec Row Level Security activée et **aucune
+   policy** — seule la clé `service_role`, utilisée uniquement côté serveur,
+   peut donc lire/écrire ces données).
+3. Dans **Project Settings → API**, copier 3 valeurs vers les variables
+   d'environnement de Vercel (Project Settings → Environment Variables) :
+   - `SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_URL` = Project URL
+   - `SUPABASE_SERVICE_ROLE_KEY` = clé `service_role` (secrète, jamais
+     exposée au navigateur)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = clé `anon`/`public` (nécessaire pour
+     que le navigateur envoie directement les photos/vidéos vers Supabase
+     Storage sans passer par le serveur)
+4. Redéployer. Le bucket de stockage `machine-media` (public en lecture) est
+   créé automatiquement au premier envoi de photo/vidéo — aucune étape
+   manuelle supplémentaire côté Storage.
+
+Voir `.env.example` pour le nom exact de chaque variable.
+
 ## Structure
 
 ```
@@ -54,7 +93,8 @@ app/api/              Route handlers (leads, admin)
 components/           Composants UI, sections de page, formulaires
 config/site.config.ts Configuration centrale (coordonnées, SEO)
 data/                 Données de démonstration (machines, réalisations, articles)
-lib/                  Accès aux données, i18n helpers, stockage fichier (leads/machines admin)
+lib/                  Accès aux données, i18n helpers, Supabase (DB + Storage)
+supabase/schema.sql   Script SQL à exécuter une fois dans Supabase
 messages/             Traductions fr.json / ar.json / en.json
 ```
 
@@ -65,21 +105,23 @@ messages/             Traductions fr.json / ar.json / en.json
   qu'ils sont vides, les pages `/machines`, `/realisations` et la page
   d'accueil affichent un état vide honnête (« Aucune machine disponible
   actuellement », etc.) avec un appel à l'action vers WhatsApp/contact.
-- Les machines ajoutées depuis `/admin` (onglet **Machines**) sont stockées
-  dans un dossier temporaire du serveur (`os.tmpdir()` — voir
-  `lib/machinesStore.ts`) et apparaissent immédiatement sur le site public
-  (ajout fait par un admin authentifié = publication directe).
-  ⚠️ Ce stockage est **éphémère** sur les plateformes serverless (Vercel) :
-  il peut être réinitialisé à chaque nouveau déploiement ou redémarrage.
-  Pour une utilisation réelle en production, remplacez-le par une vraie
-  base de données (voir ci-dessous) avant d'ajouter des machines qui
-  doivent persister durablement.
+- Les machines ajoutées depuis `/admin` (onglet **Machines**) sont
+  persistées dans Supabase (voir section précédente) et apparaissent
+  immédiatement sur le site public (ajout fait par un admin authentifié =
+  publication directe).
+- **Statut unique.** Une machine a un seul champ `status`, partout le même
+  nom côté base de données, API et interface admin :
+  `draft` (brouillon/masquée) → `pending` (en attente de validation) →
+  `published` (publiée) / `rejected` (rejetée), puis `reserved`
+  (réservée) / `sold` (vendue) une fois publiée. Le site public
+  (`lib/data.ts` → `getPublicMachines()`) n'affiche que
+  `published`/`reserved`/`sold` ; `draft`/`pending`/`rejected` ne sont
+  jamais visibles hors de `/admin`.
 - **Modération obligatoire pour les annonces de vendeurs.** Le formulaire
   public `/vendre-machine` ne publie jamais rien directement : chaque
-  soumission crée une machine avec `moderationStatus: "pending"`, invisible
-  sur `/machines`, la page d'accueil, la page détail et le sitemap tant
-  qu'un admin ne l'a pas approuvée (`lib/data.ts` → `getPublicMachines()`
-  filtre sur `moderationStatus === "published"`). L'admin consulte les
+  soumission crée une machine avec `status: "pending"`, invisible sur
+  `/machines`, la page d'accueil, la page détail et le sitemap tant qu'un
+  admin ne l'a pas approuvée. L'admin consulte les
   annonces en attente dans l'onglet **« Annonces à valider »** (badge de
   compteur en temps réel — c'est la notification actuelle ; voir
   `lib/notifications.ts` pour le point d'extension email/WhatsApp une fois
@@ -124,17 +166,17 @@ reste l'intermédiaire entre acheteur et vendeur à chaque étape.
   `data/projects.json` (structure prête, voir `lib/types.ts`) — il n'y a
   pas encore d'interface admin dédiée pour celles-ci.
 - Chaque machine peut avoir sa propre vidéo (section « Voir la machine en
-  fonctionnement » sur sa page, badge « Vidéo disponible » sur sa carte).
-  Depuis `/admin` (ajout ou icône crayon sur une machine existante),
-  renseignez un lien MP4, YouTube ou Vimeo — la lecture s'adapte
-  automatiquement (`lib/video.ts`). Aucun upload de fichier n'est câblé
-  pour l'instant (seul un lien vidéo est demandé) ; le champ `videoUrl` de
-  `Machine` est prêt pour brancher un vrai stockage de fichiers plus tard.
-- Pour une mise en production sérieuse avec plusieurs administrateurs ou un
-  fort volume de machines/leads, remplacez le stockage fichier
-  (`lib/leads.ts`, `lib/machinesStore.ts`) par une vraie base de données
-  (Postgres, Supabase, etc.) — l'architecture (types, API routes) est déjà
-  prête pour cette migration.
+  fonctionnement » sur sa page, badge « Vidéo disponible » sur sa carte) et
+  plusieurs photos. Sur `/vendre-machine`, le vendeur choisit ses photos et
+  sa vidéo directement depuis la galerie/l'appareil de son téléphone
+  (`components/forms/MediaUploader.tsx`) : les fichiers sont envoyés
+  directement du navigateur vers Supabase Storage (URL d'upload signée,
+  générée par `/api/upload/sign`), jamais en base64 ni via
+  `localStorage`. La première photo de la liste est la **photo
+  principale** (réordonnable, un bouton dédié permet d'en choisir une
+  autre) et c'est elle qui apparaît sur la carte, la page d'accueil, la
+  fiche détail et l'aperçu Open Graph. Un lien YouTube/Vimeo/MP4 direct
+  reste aussi accepté pour la vidéo (`lib/video.ts`).
 
 ## Tableau de bord admin
 
@@ -143,7 +185,14 @@ défaut `jimi-admin-2026` si non configuré — **à changer avant mise en
 production**). Permet de :
 
 - consulter et traiter les demandes reçues (achat, vente, service, contact) ;
-- ajouter / modifier le statut / supprimer des machines réelles ;
+- valider/rejeter/masquer les annonces de vendeurs (onglet **Annonces à
+  valider**) ;
+- ajouter / modifier le statut / masquer / supprimer des machines
+  (onglet **Machines**) ;
+- consulter les fiches vendeurs et acheteurs avec leurs coordonnées
+  privées (onglets **Vendeurs**, **Acheteurs**) ;
+- gérer le pipeline de deals et la commission de chaque mise en relation
+  (onglet **Leads**) ;
 - consulter les informations de configuration de l'entreprise.
 
 ## SEO

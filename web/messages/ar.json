@@ -259,10 +259,9 @@
     }
   },
   "badges": {
-    "disponible": "متوفرة",
-    "vendue": "مباعة",
-    "reservee": "محجوزة",
-    "nouveau": "جديد"
+    "published": "متوفرة",
+    "sold": "مباعة",
+    "reserved": "محجوزة"
   },
   "machineDetail": {
     "galleryTitle": "معرض الصور",
@@ -314,13 +313,22 @@
     "privacyNote": "معلوماتك الشخصية تبقى خاصة ولا يراها إلا فريقنا — لا تظهر أبدًا في الإعلان العام.",
     "successTitle": "تم إرسال معلومات آلتك بنجاح",
     "successMessage": "شكرًا لك، تم إرسال إعلانك إلى فريقنا للمراجعة. بعد الموافقة عليه سيتم نشره في الموقع — سنتواصل معك إذا احتجنا لمعلومات إضافية.",
-    "photosPlaceholder": "رابط واحد في كل سطر (Drive، Photos، WhatsApp...)",
-    "photosHint": "الصقوا رابطًا أو أكثر لصور الآلة، أو أرسلوها عبر WhatsApp بعد إرسال هذا النموذج.",
     "sections": {
       "machine": "معلومات الآلة",
       "contact": "معلومات التواصل",
       "media": "الصور والفيديو"
     }
+  },
+  "mediaUploader": {
+    "addPhotos": "إضافة صور",
+    "addVideo": "إضافة فيديو",
+    "uploading": "جارٍ الإرسال…",
+    "mainPhotoBadge": "رئيسية",
+    "setAsMain": "تعيين كصورة رئيسية",
+    "remove": "حذف",
+    "replace": "استبدال",
+    "maxReached": "تم بلوغ الحد الأقصى للصور",
+    "notConfigured": "تخزين الملفات غير مُهيأ بعد."
   },
   "services": {
     "pageTitle": "خدماتنا",

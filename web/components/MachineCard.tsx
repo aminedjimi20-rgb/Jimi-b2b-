@@ -7,10 +7,12 @@ import type { PublicMachine } from "@/lib/data";
 import { MapPin, Gauge, Calendar, Video } from "lucide-react";
 
 const statusTone: Record<MachineStatus, "success" | "danger" | "warning" | "accent"> = {
-  disponible: "success",
-  vendue: "danger",
-  reservee: "warning",
-  nouveau: "accent",
+  published: "success",
+  sold: "danger",
+  reserved: "warning",
+  draft: "accent",
+  pending: "accent",
+  rejected: "danger",
 };
 
 export function MachineCard({ machine, index = 0 }: { machine: PublicMachine; index?: number }) {
@@ -22,7 +24,16 @@ export function MachineCard({ machine, index = 0 }: { machine: PublicMachine; in
       className="group flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-ink)]">
-        <MachineArt seed={index} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        {machine.photos && machine.photos.length > 0 ? (
+          // eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Supabase Storage domain, unknown at build time
+          <img
+            src={machine.photos[0]}
+            alt={`${machine.brand} ${machine.model}`}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <MachineArt seed={index} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        )}
         <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-2">
           <Badge tone={statusTone[machine.status]}>{t(`badges.${machine.status}`)}</Badge>
           {machine.isDemo && (

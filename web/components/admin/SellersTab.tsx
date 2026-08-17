@@ -5,18 +5,22 @@ import type { Machine } from "@/lib/types";
 import type { SellerProfile } from "@/lib/sellers";
 import { RefreshCw, MessageCircle, Phone, Mail } from "lucide-react";
 
-const MODERATION_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<string, string> = {
+  draft: "Brouillon",
   pending: "En attente",
   published: "Publiée",
   rejected: "Rejetée",
-  draft: "Modifs demandées",
+  reserved: "Réservée",
+  sold: "Vendue",
 };
 
-const MODERATION_TONE: Record<string, string> = {
+const STATUS_TONE: Record<string, string> = {
+  draft: "bg-slate-100 text-slate-600",
   pending: "bg-amber-50 text-amber-700",
   published: "bg-emerald-50 text-emerald-700",
   rejected: "bg-red-50 text-red-700",
-  draft: "bg-orange-50 text-orange-700",
+  reserved: "bg-purple-50 text-purple-700",
+  sold: "bg-blue-50 text-blue-700",
 };
 
 export function SellersTab({
@@ -107,12 +111,8 @@ export function SellersTab({
                         className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface-2)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)]"
                       >
                         {m.brand} {m.model} ({m.tonnage}T)
-                        <span
-                          className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                            MODERATION_TONE[m.moderationStatus ?? "published"]
-                          }`}
-                        >
-                          {MODERATION_LABELS[m.moderationStatus ?? "published"]}
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${STATUS_TONE[m.status]}`}>
+                          {STATUS_LABELS[m.status]}
                         </span>
                       </span>
                     ))}

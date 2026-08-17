@@ -41,7 +41,7 @@ export function MachinesExplorer({ machines, brands }: { machines: PublicMachine
   }, [machines, filters]);
 
   const driveOptions: MachineDrive[] = ["hydraulique", "servo", "hybride"];
-  const statusOptions: MachineStatus[] = ["disponible", "reservee", "vendue", "nouveau"];
+  const statusOptions: MachineStatus[] = ["published", "reserved", "sold"];
 
   return (
     <div>

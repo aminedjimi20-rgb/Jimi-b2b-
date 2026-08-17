@@ -7,8 +7,8 @@ import { isRateLimited } from "@/lib/rateLimit";
 
 const MAX_TEXT = 2000;
 
-function isPublished(moderationStatus: string | undefined): boolean {
-  return !moderationStatus || moderationStatus === "published";
+function isPublic(status: string): boolean {
+  return status === "published" || status === "reserved" || status === "sold";
 }
 
 export async function POST(request: NextRequest) {
@@ -43,11 +43,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  // Only machines actually published can receive interest — this also
-  // prevents probing for hidden/pending/rejected machine IDs.
+  // Only machines actually public can receive interest — this also
+  // prevents probing for hidden/draft/pending/rejected machine IDs.
   const machines = await getMachines();
   const machine = machines.find((m) => m.id === machineId);
-  if (!machine || !isPublished(machine.moderationStatus)) {
+  if (!machine || !isPublic(machine.status)) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 

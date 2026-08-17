@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     year: Number(body.year),
     tonnage: Number(body.tonnage),
     drive: body.drive ?? "hydraulique",
-    status: body.status ?? "disponible",
+    status: body.status ?? "published",
     wilaya: body.wilaya ?? "Alger",
     price: body.price ? Number(body.price) : null,
     priceOnRequest: Boolean(body.priceOnRequest),
@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
     videoUrl: sanitizeUrl(body.videoUrl),
     videoThumbnail: sanitizeUrl(body.videoThumbnail),
     videoTitle: body.videoTitle ? String(body.videoTitle).slice(0, 200) : null,
+    photos: Array.isArray(body.photos)
+      ? body.photos.map((p) => sanitizeUrl(p)).filter((p): p is string => Boolean(p)).slice(0, 10)
+      : [],
   });
 
   return NextResponse.json({ ok: true, machine });

@@ -16,11 +16,14 @@ export function useListingSubmission() {
     const website = String(formData.get("website") ?? "");
     formData.delete("website");
 
-    const photosRaw = String(formData.get("photos") ?? "");
-    const photos = photosRaw
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const photosRaw = String(formData.get("photos") ?? "[]");
+    let photos: string[] = [];
+    try {
+      const parsed = JSON.parse(photosRaw);
+      if (Array.isArray(parsed)) photos = parsed.filter((p): p is string => typeof p === "string");
+    } catch {
+      photos = [];
+    }
     formData.delete("photos");
 
     const payload: Record<string, unknown> = { website, photos };

@@ -35,6 +35,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
+      ...(machine.photos && machine.photos.length > 0 ? { images: [{ url: machine.photos[0] }] } : {}),
       ...(hasFileVideo && machine.videoUrl
         ? { videos: [{ url: machine.videoUrl, type: "video/mp4" }] }
         : {}),
@@ -44,10 +45,9 @@ export async function generateMetadata({
 }
 
 const statusTone: Record<string, "success" | "danger" | "warning" | "accent"> = {
-  disponible: "success",
-  vendue: "danger",
-  reservee: "warning",
-  nouveau: "accent",
+  published: "success",
+  sold: "danger",
+  reserved: "warning",
 };
 
 export default async function MachineDetailPage({
@@ -106,7 +106,7 @@ export default async function MachineDetailPage({
             priceCurrency: "DZD",
             price: machine.price ?? undefined,
             availability:
-              machine.status === "disponible" || machine.status === "nouveau"
+              machine.status === "published"
                 ? "https://schema.org/InStock"
                 : "https://schema.org/OutOfStock",
           },
@@ -167,16 +167,24 @@ export default async function MachineDetailPage({
               <h2 className="mt-8 mb-3 text-sm font-bold uppercase tracking-wide text-[var(--color-ink)]">
                 {t("machineDetail.galleryTitle")}
               </h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {Array.from({ length: machine.images }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square overflow-hidden rounded-lg bg-[var(--color-ink)]"
-                  >
-                    <MachineArt seed={i} className="h-full w-full object-cover" />
-                  </div>
-                ))}
-              </div>
+              {machine.photos && machine.photos.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {machine.photos.map((url, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Supabase Storage domain, unknown at build time
+                    <img
+                      key={url}
+                      src={url}
+                      alt={`${machine.brand} ${machine.model} — photo ${i + 1}`}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      className="aspect-square rounded-lg border border-[var(--color-border)] object-cover"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="aspect-video overflow-hidden rounded-lg bg-[var(--color-ink)]">
+                  <MachineArt seed={0} className="h-full w-full object-cover" />
+                </div>
+              )}
 
               {machine.videoUrl && (
                 <>

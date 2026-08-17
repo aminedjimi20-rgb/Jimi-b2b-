@@ -34,9 +34,7 @@ export function AdminDashboard({
 }) {
   const [tab, setTab] = useState<Tab>("leads");
 
-  const pendingMachines = initialMachines.filter(
-    (m) => m.moderationStatus === "pending" || m.moderationStatus === "draft"
-  );
+  const pendingMachines = initialMachines.filter((m) => m.status === "pending" || m.status === "draft");
 
   const tabs: { key: Tab; label: string; icon: typeof Inbox; count?: number }[] = [
     { key: "leads", label: "Demandes reçues", icon: Inbox, count: initialLeads.length },

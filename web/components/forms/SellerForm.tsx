@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useListingSubmission } from "./useListingSubmission";
 import { FieldWrapper, TextInput, TextArea, Select } from "./fields";
 import { SuccessMessage, ErrorMessage, HoneypotField } from "./FormStatusMessages";
 import { WhatsAppAlternative } from "./WhatsAppAlternative";
+import { PhotoUploader, VideoUploader } from "./MediaUploader";
 import { Button } from "@/components/ui/Button";
 import { wilayas } from "@/lib/wilayas";
 import { Send } from "lucide-react";
@@ -12,6 +14,20 @@ import { Send } from "lucide-react";
 export function SellerForm() {
   const t = useTranslations();
   const { status, submit } = useListingSubmission();
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [video, setVideo] = useState<string | null>(null);
+
+  const uploaderLabels = {
+    addPhotos: t("mediaUploader.addPhotos"),
+    addVideo: t("mediaUploader.addVideo"),
+    uploading: t("mediaUploader.uploading"),
+    mainPhotoBadge: t("mediaUploader.mainPhotoBadge"),
+    setAsMain: t("mediaUploader.setAsMain"),
+    remove: t("mediaUploader.remove"),
+    replace: t("mediaUploader.replace"),
+    maxReached: t("mediaUploader.maxReached"),
+    notConfigured: t("mediaUploader.notConfigured"),
+  };
 
   if (status === "success") {
     return (
@@ -75,19 +91,13 @@ export function SellerForm() {
         <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-[var(--color-accent)]">
           {t("sellPage.sections.media")}
         </h2>
-        <FieldWrapper
-          label={t("forms.fields.photos")}
-          className="mb-4"
-        >
-          <TextArea
-            name="photos"
-            rows={3}
-            placeholder={t("sellPage.photosPlaceholder")}
-          />
+        <FieldWrapper label={t("forms.fields.photos")} className="mb-4">
+          <PhotoUploader value={photos} onChange={setPhotos} labels={uploaderLabels} />
+          <input type="hidden" name="photos" value={JSON.stringify(photos)} />
         </FieldWrapper>
-        <p className="mb-3 text-xs text-[var(--color-text-muted)]">{t("sellPage.photosHint")}</p>
         <FieldWrapper label={t("forms.fields.video")}>
-          <TextInput name="video" type="url" placeholder={t("forms.placeholders.video")} />
+          <VideoUploader value={video} onChange={setVideo} labels={uploaderLabels} />
+          <input type="hidden" name="video" value={video ?? ""} />
         </FieldWrapper>
       </div>
 

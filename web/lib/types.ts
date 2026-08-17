@@ -1,7 +1,10 @@
-export type MachineStatus = "disponible" | "vendue" | "reservee" | "nouveau";
+// Single lifecycle status for a listing — one name used everywhere
+// (database, API, admin UI, public site). No separate "moderation status"
+// vs "commercial status": reservation/sale only ever apply to an already
+// published listing, so one linear-ish enum models reality correctly.
+export type MachineStatus = "draft" | "pending" | "published" | "rejected" | "reserved" | "sold";
 export type MachineDrive = "hydraulique" | "servo" | "hybride";
 export type MachineCategory = "injection";
-export type ModerationStatus = "pending" | "published" | "rejected" | "draft";
 
 export interface MachineSpecs {
   clampingForce?: string;
@@ -31,10 +34,11 @@ export interface Machine {
   wilaya: string;
   price: number | null;
   priceOnRequest: boolean;
-  images: number;
   videoUrl?: string | null;
   videoThumbnail?: string | null;
   videoTitle?: string | null;
+  /** Uploaded photo URLs, in display order. photos[0] is the main photo
+   *  (used on cards, homepage, detail page hero, OG image). */
   photos?: string[];
   specs: MachineSpecs;
   description: string;
@@ -42,9 +46,6 @@ export interface Machine {
   defects: string[];
   accessories: string[];
   isDemo: boolean;
-  /** Publication workflow state — distinct from the commercial `status` above.
-   *  Missing on legacy/demo records, which are treated as "published". */
-  moderationStatus?: ModerationStatus;
   /** Reference to the private SellerProfile record (lib/sellers.ts) — never
    *  the seller's contact details themselves. Admin-only, stripped from every
    *  public data path (see lib/data.ts `toPublicMachine`). */

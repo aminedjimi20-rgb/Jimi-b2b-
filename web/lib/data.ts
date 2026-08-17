@@ -9,22 +9,19 @@ export async function getMachines(): Promise<Machine[]> {
   return [...runtime, ...(machinesData as Machine[])];
 }
 
-/** Machines visible on the public website. A machine with no `moderationStatus`
- *  (legacy/demo record) is treated as published; anything pending admin review,
- *  rejected, or sent back as a draft must never reach public pages. */
-function isPublished(m: Machine): boolean {
-  return !m.moderationStatus || m.moderationStatus === "published";
+/** Machines visible on the public website: exactly status === "published",
+ *  plus "reserved"/"sold" (still real, still shown, just no longer
+ *  purchasable) — everything else (draft, pending, rejected) stays hidden. */
+function isPublic(m: Machine): boolean {
+  return m.status === "published" || m.status === "reserved" || m.status === "sold";
 }
 
 /** Machine shape allowed to reach a public page or a client component.
  *  Jimi acts as the intermediary between buyer and seller — the seller's
- *  identity and every internal moderation field are dropped here, at the
+ *  identity and every internal admin-only field are dropped here, at the
  *  data layer, so no client bundle, RSC payload, or public API response can
  *  ever carry them (frontend-only hiding would not be enough). */
-export type PublicMachine = Omit<
-  Machine,
-  "sellerId" | "adminNote" | "submittedAt" | "reviewedAt" | "moderationStatus"
->;
+export type PublicMachine = Omit<Machine, "sellerId" | "adminNote" | "submittedAt" | "reviewedAt">;
 
 // Deliberately an allow-list, not a deny-list: a new private field added to
 // Machine later stays excluded by default instead of silently leaking here.
@@ -43,7 +40,6 @@ function toPublicMachine(m: Machine): PublicMachine {
     wilaya: m.wilaya,
     price: m.price,
     priceOnRequest: m.priceOnRequest,
-    images: m.images,
     videoUrl: m.videoUrl,
     videoThumbnail: m.videoThumbnail,
     videoTitle: m.videoTitle,
@@ -59,7 +55,7 @@ function toPublicMachine(m: Machine): PublicMachine {
 
 export async function getPublicMachines(): Promise<PublicMachine[]> {
   const machines = await getMachines();
-  return machines.filter(isPublished).map(toPublicMachine);
+  return machines.filter(isPublic).map(toPublicMachine);
 }
 
 export async function getMachineBySlug(slug: string): Promise<Machine | undefined> {

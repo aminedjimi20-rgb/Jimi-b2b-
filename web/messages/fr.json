@@ -259,10 +259,9 @@
     }
   },
   "badges": {
-    "disponible": "Disponible",
-    "vendue": "Vendue",
-    "reservee": "Réservée",
-    "nouveau": "Nouveau"
+    "published": "Disponible",
+    "sold": "Vendue",
+    "reserved": "Réservée"
   },
   "machineDetail": {
     "galleryTitle": "Galerie photos",
@@ -314,13 +313,22 @@
     "privacyNote": "Vos coordonnées restent privées et ne sont visibles que par notre équipe — elles n'apparaissent jamais sur l'annonce publique.",
     "successTitle": "Votre machine a bien été soumise",
     "successMessage": "Merci, votre annonce a été transmise à notre équipe pour vérification. Une fois validée, elle sera publiée sur le site — nous vous recontactons si besoin de précisions.",
-    "photosPlaceholder": "Un lien par ligne (Drive, Photos, WhatsApp...)",
-    "photosHint": "Collez un ou plusieurs liens vers vos photos, ou envoyez-les par WhatsApp après l'envoi de ce formulaire.",
     "sections": {
       "machine": "Informations sur la machine",
       "contact": "Vos coordonnées",
       "media": "Photos et vidéo"
     }
+  },
+  "mediaUploader": {
+    "addPhotos": "Ajouter des photos",
+    "addVideo": "Ajouter une vidéo",
+    "uploading": "Envoi en cours…",
+    "mainPhotoBadge": "Principale",
+    "setAsMain": "Définir comme principale",
+    "remove": "Supprimer",
+    "replace": "Remplacer",
+    "maxReached": "Nombre maximum de photos atteint",
+    "notConfigured": "Le stockage des fichiers n'est pas encore configuré."
   },
   "services": {
     "pageTitle": "Nos services",

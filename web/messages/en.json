@@ -259,10 +259,9 @@
     }
   },
   "badges": {
-    "disponible": "Available",
-    "vendue": "Sold",
-    "reservee": "Reserved",
-    "nouveau": "New"
+    "published": "Available",
+    "sold": "Sold",
+    "reserved": "Reserved"
   },
   "machineDetail": {
     "galleryTitle": "Photo gallery",
@@ -314,13 +313,22 @@
     "privacyNote": "Your contact details stay private and are only visible to our team — they never appear on the public listing.",
     "successTitle": "Your machine has been submitted",
     "successMessage": "Thank you, your listing has been sent to our team for review. Once approved, it will be published on the site — we'll reach out if we need more details.",
-    "photosPlaceholder": "One link per line (Drive, Photos, WhatsApp...)",
-    "photosHint": "Paste one or more links to your photos, or send them via WhatsApp after submitting this form.",
     "sections": {
       "machine": "Machine information",
       "contact": "Your contact details",
       "media": "Photos and video"
     }
+  },
+  "mediaUploader": {
+    "addPhotos": "Add photos",
+    "addVideo": "Add a video",
+    "uploading": "Uploading…",
+    "mainPhotoBadge": "Main",
+    "setAsMain": "Set as main photo",
+    "remove": "Remove",
+    "replace": "Replace",
+    "maxReached": "Maximum number of photos reached",
+    "notConfigured": "File storage is not configured yet."
   },
   "services": {
     "pageTitle": "Our services",
