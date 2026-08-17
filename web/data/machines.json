@@ -1,0 +1,341 @@
+[
+  {
+    "id": "m1",
+    "slug": "haitian-mars-ii-160t-2015",
+    "brand": "Haitian",
+    "model": "MARS II 160",
+    "year": 2015,
+    "tonnage": 160,
+    "drive": "servo",
+    "category": "injection",
+    "status": "disponible",
+    "featured": true,
+    "wilaya": "Alger",
+    "price": 3200000,
+    "priceOnRequest": false,
+    "images": 4,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "1600 kN",
+      "screwDiameter": "40 mm",
+      "injectionVolume": "201 cm³",
+      "injectionPressure": "180 MPa",
+      "motor": "Pompe servo (économie d'énergie)",
+      "control": "Contrôleur numérique tactile",
+      "plc": "Contrôleur propriétaire Haitian",
+      "hmi": "Écran tactile couleur 10\"",
+      "pumpType": "Pompe à pistons servo-entraînée",
+      "condition": "Bon état, entretien régulier",
+      "hours": "≈ 28 000 h"
+    },
+    "description": "Presse à injecter servo-hydraulique bien entretenue, utilisée en production d'articles techniques. Fonctionnement stable, cycle d'injection régulier, aucune fuite hydraulique constatée lors de la dernière vérification.",
+    "worksPerformed": [
+      "Remplacement des joints hydrauliques principaux (2023)",
+      "Étalonnage des capteurs de pression et de position",
+      "Nettoyage complet du groupe de plastification"
+    ],
+    "defects": [
+      "Légère usure visuelle sur le carénage",
+      "Un voyant de signalisation à remplacer"
+    ],
+    "accessories": [
+      "Unité de régulation de température (2 zones)",
+      "Convoyeur de sortie pièces",
+      "Broyeur latéral compatible"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m2",
+    "slug": "engel-victory-330-2012",
+    "brand": "Engel",
+    "model": "Victory 330",
+    "year": 2012,
+    "tonnage": 330,
+    "drive": "hydraulique",
+    "category": "injection",
+    "status": "disponible",
+    "featured": true,
+    "wilaya": "Blida",
+    "price": null,
+    "priceOnRequest": true,
+    "images": 5,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "3300 kN",
+      "screwDiameter": "50 mm",
+      "injectionVolume": "412 cm³",
+      "injectionPressure": "165 MPa",
+      "motor": "Groupe hydraulique standard",
+      "control": "CC200 (à moderniser)",
+      "plc": "Non conforme aux standards actuels",
+      "hmi": "Écran monochrome d'origine",
+      "pumpType": "Pompe à palettes",
+      "condition": "État moyen, rénovation électrique recommandée",
+      "hours": "Non communiqué"
+    },
+    "description": "Machine robuste de fabrication européenne, mécaniquement saine mais dont l'armoire électrique et le contrôleur restent d'origine. Une rénovation du système de commande est recommandée avant remise en production intensive.",
+    "worksPerformed": [
+      "Diagnostic hydraulique complet réalisé",
+      "Vidange et remplacement du filtre à huile"
+    ],
+    "defects": [
+      "Contrôleur d'origine obsolète",
+      "Câblage électrique à vérifier avant mise en service"
+    ],
+    "accessories": [
+      "Trémie de chargement",
+      "Moule d'essai non inclus"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m3",
+    "slug": "krauss-maffei-cx160-2018",
+    "brand": "Krauss Maffei",
+    "model": "CX 160",
+    "year": 2018,
+    "tonnage": 160,
+    "drive": "servo",
+    "category": "injection",
+    "status": "reservee",
+    "featured": true,
+    "wilaya": "Oran",
+    "price": 5400000,
+    "priceOnRequest": false,
+    "images": 6,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "1600 kN",
+      "screwDiameter": "35 mm",
+      "injectionVolume": "153 cm³",
+      "injectionPressure": "190 MPa",
+      "motor": "Servo-entraînement basse consommation",
+      "control": "MC6 multiTouch",
+      "plc": "Intégré (MC6)",
+      "hmi": "Écran tactile 15\" multiTouch",
+      "pumpType": "Pompe servo",
+      "condition": "Excellent état",
+      "hours": "≈ 14 000 h"
+    },
+    "description": "Machine récente à très faible usure, utilisée pour la production de pièces techniques de précision. Contrôleur moderne, cycle rapide et stable, idéale pour un repreneur recherchant une machine servo performante sans travaux préalables.",
+    "worksPerformed": [
+      "Maintenance préventive constructeur suivie annuellement",
+      "Contrôle qualité des pièces produites archivé"
+    ],
+    "defects": [],
+    "accessories": [
+      "Régulateur de température 4 zones",
+      "Robot de dépose (compatible, non inclus)",
+      "Système de séchage matière"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m4",
+    "slug": "chen-hsong-jm88-mkiii-2008",
+    "brand": "Chen Hsong",
+    "model": "JM88-Mk3",
+    "year": 2008,
+    "tonnage": 88,
+    "drive": "hydraulique",
+    "category": "injection",
+    "status": "disponible",
+    "featured": false,
+    "wilaya": "Sétif",
+    "price": 1400000,
+    "priceOnRequest": false,
+    "images": 3,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "880 kN",
+      "screwDiameter": "32 mm",
+      "injectionVolume": "97 cm³",
+      "injectionPressure": "175 MPa",
+      "motor": "Groupe hydraulique standard",
+      "control": "Contrôleur d'origine",
+      "plc": "À remplacer",
+      "hmi": "Écran d'origine fonctionnel",
+      "pumpType": "Pompe à palettes",
+      "condition": "À rénover",
+      "hours": "Non communiqué"
+    },
+    "description": "Petite presse compacte, adaptée à la production de petites pièces techniques ou d'articles ménagers. Fonctionnelle mais nécessitant une rénovation électrique pour une remise en production fiable et sécurisée.",
+    "worksPerformed": [],
+    "defects": [
+      "Armoire électrique vétuste",
+      "Un vérin d'éjection à réviser"
+    ],
+    "accessories": [
+      "Trémie standard"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m5",
+    "slug": "sumitomo-demag-el-exis-sp-420-2016",
+    "brand": "Sumitomo Demag",
+    "model": "EL-EXIS SP 420",
+    "year": 2016,
+    "tonnage": 420,
+    "drive": "hybride",
+    "category": "injection",
+    "status": "disponible",
+    "featured": true,
+    "wilaya": "Constantine",
+    "price": null,
+    "priceOnRequest": true,
+    "images": 5,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "4200 kN",
+      "screwDiameter": "60 mm",
+      "injectionVolume": "603 cm³",
+      "injectionPressure": "170 MPa",
+      "motor": "Hybride électrique/hydraulique haute vitesse",
+      "control": "NC5 plus",
+      "plc": "Intégré (NC5 plus)",
+      "hmi": "Écran tactile couleur",
+      "pumpType": "Servo-pompe haute réactivité",
+      "condition": "Bon état",
+      "hours": "≈ 32 000 h"
+    },
+    "description": "Machine hybride haute performance destinée à des applications d'emballage à cycle rapide. Conserve une excellente répétabilité de cycle. Convient à un acheteur recherchant de la cadence sans repartir sur une machine neuve.",
+    "worksPerformed": [
+      "Remplacement de la courroie de plastification",
+      "Contrôle du système de verrouillage haute vitesse"
+    ],
+    "defects": [
+      "Peinture du bâti à reprendre par endroits"
+    ],
+    "accessories": [
+      "Système de changement de moule rapide",
+      "Convoyeur intégré"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m6",
+    "slug": "negri-bossi-canbio-90-2005",
+    "brand": "Negri Bossi",
+    "model": "Canbio 90",
+    "year": 2005,
+    "tonnage": 90,
+    "drive": "hydraulique",
+    "category": "injection",
+    "status": "vendue",
+    "featured": false,
+    "wilaya": "Annaba",
+    "price": null,
+    "priceOnRequest": true,
+    "images": 3,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "900 kN",
+      "screwDiameter": "30 mm",
+      "injectionVolume": "85 cm³",
+      "injectionPressure": "180 MPa",
+      "motor": "Groupe hydraulique standard",
+      "control": "VME (d'origine)",
+      "plc": "Remplacé par un PLC moderne en 2021",
+      "hmi": "Écran tactile ajouté lors du retrofit",
+      "pumpType": "Pompe à palettes",
+      "condition": "Rénovée en 2021",
+      "hours": "Non communiqué"
+    },
+    "description": "Machine ayant fait l'objet d'une rénovation électrique complète par Jimi Renovation & Installation en 2021 (retrofit PLC/HMI). Vendue à un atelier de sous-traitance local — exemple type d'intervention avant/après.",
+    "worksPerformed": [
+      "Retrofit électrique complet (PLC + HMI)",
+      "Remplacement de l'armoire électrique",
+      "Remise à niveau de la sécurité machine"
+    ],
+    "defects": [],
+    "accessories": [
+      "Trémie et doseur gravimétrique"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m7",
+    "slug": "yizumi-fe268-2019",
+    "brand": "Yizumi",
+    "model": "FE268",
+    "year": 2019,
+    "tonnage": 268,
+    "drive": "servo",
+    "category": "injection",
+    "status": "nouveau",
+    "featured": true,
+    "wilaya": "Tlemcen",
+    "price": 4600000,
+    "priceOnRequest": false,
+    "images": 4,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "2680 kN",
+      "screwDiameter": "45 mm",
+      "injectionVolume": "290 cm³",
+      "injectionPressure": "175 MPa",
+      "motor": "Servo-entraînement",
+      "control": "Contrôleur tactile couleur",
+      "plc": "Intégré",
+      "hmi": "Écran tactile 12\"",
+      "pumpType": "Pompe servo",
+      "condition": "Très bon état",
+      "hours": "≈ 9 000 h"
+    },
+    "description": "Machine récente à faible nombre d'heures, récemment mise sur le marché de l'occasion. Servo-entraînement à faible consommation énergétique, adaptée à la production d'articles ménagers et techniques de moyenne série.",
+    "worksPerformed": [
+      "Contrôle qualité pré-vente réalisé"
+    ],
+    "defects": [],
+    "accessories": [
+      "Régulateur de température 2 zones",
+      "Détecteur de pièce non éjectée"
+    ],
+    "isDemo": true
+  },
+  {
+    "id": "m8",
+    "slug": "arburg-allrounder-470c-2010",
+    "brand": "Arburg",
+    "model": "Allrounder 470 C",
+    "year": 2010,
+    "tonnage": 100,
+    "drive": "hydraulique",
+    "category": "injection",
+    "status": "disponible",
+    "featured": false,
+    "wilaya": "Béjaïa",
+    "price": 2100000,
+    "priceOnRequest": false,
+    "images": 3,
+    "videoUrl": null,
+    "specs": {
+      "clampingForce": "1000 kN",
+      "screwDiameter": "35 mm",
+      "injectionVolume": "121 cm³",
+      "injectionPressure": "185 MPa",
+      "motor": "Groupe hydraulique standard",
+      "control": "Selogica (d'origine)",
+      "plc": "Contrôleur Selogica fonctionnel",
+      "hmi": "Écran tactile d'origine",
+      "pumpType": "Pompe à pistons",
+      "condition": "Bon état, fonctionnelle",
+      "hours": "≈ 40 000 h"
+    },
+    "description": "Machine allemande réputée pour sa précision, utilisée en production de pièces techniques de haute exigence. Contrôleur Selogica toujours fonctionnel, adaptée aux ateliers recherchant fiabilité et répétabilité.",
+    "worksPerformed": [
+      "Révision hydraulique complète",
+      "Remplacement des flexibles haute pression"
+    ],
+    "defects": [
+      "Interface Selogica en fin de support constructeur"
+    ],
+    "accessories": [
+      "Doseur volumétrique",
+      "Trémie sécheuse"
+    ],
+    "isDemo": true
+  }
+]
