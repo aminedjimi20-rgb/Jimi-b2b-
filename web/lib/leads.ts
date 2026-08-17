@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import os from "os";
 import { randomUUID } from "crypto";
 
 export type LeadType = "buy" | "sell" | "service" | "contact";
@@ -12,7 +13,11 @@ export interface Lead {
   data: Record<string, string>;
 }
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+// Serverless platforms (Vercel, etc.) only allow writes under the OS temp
+// directory — the deployed app bundle itself is read-only. This store is
+// therefore ephemeral by design; see web/README.md for the production
+// migration path (a real database).
+const DATA_DIR = path.join(os.tmpdir(), "jimi-leads");
 const LEADS_FILE = path.join(DATA_DIR, "leads.json");
 
 async function ensureStore() {
@@ -25,9 +30,9 @@ async function ensureStore() {
 }
 
 export async function getLeads(): Promise<Lead[]> {
-  await ensureStore();
-  const raw = await fs.readFile(LEADS_FILE, "utf-8");
   try {
+    await ensureStore();
+    const raw = await fs.readFile(LEADS_FILE, "utf-8");
     return JSON.parse(raw) as Lead[];
   } catch {
     return [];

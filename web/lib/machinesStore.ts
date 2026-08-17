@@ -1,9 +1,14 @@
 import { promises as fs } from "fs";
 import path from "path";
+import os from "os";
 import { randomUUID } from "crypto";
 import type { Machine } from "@/lib/types";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+// Serverless platforms (Vercel, etc.) only allow writes under the OS temp
+// directory — the deployed app bundle itself is read-only. This store is
+// therefore ephemeral by design; see web/README.md for the production
+// migration path (a real database).
+const DATA_DIR = path.join(os.tmpdir(), "jimi-machines-store");
 const FILE = path.join(DATA_DIR, "machines.json");
 
 async function ensureStore() {
@@ -38,9 +43,9 @@ function slugify(input: string): string {
 }
 
 export async function getRuntimeMachines(): Promise<Machine[]> {
-  await ensureStore();
-  const raw = await fs.readFile(FILE, "utf-8");
   try {
+    await ensureStore();
+    const raw = await fs.readFile(FILE, "utf-8");
     return JSON.parse(raw) as Machine[];
   } catch {
     return [];
