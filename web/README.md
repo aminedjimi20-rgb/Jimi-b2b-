@@ -84,11 +84,42 @@ messages/             Traductions fr.json / ar.json / en.json
   compteur en temps réel — c'est la notification actuelle ; voir
   `lib/notifications.ts` pour le point d'extension email/WhatsApp une fois
   des identifiants disponibles) avec toutes les infos envoyées (machine,
-  photos, vidéo) et les coordonnées du vendeur (nom, téléphone, email —
-  jamais affichées publiquement, uniquement visibles côté admin), et choisit
-  **Approuver & publier**, **Rejeter** (avec note interne) ou **Demander des
+  photos, vidéo) et les coordonnées du vendeur, et choisit **Approuver &
+  publier**, **Rejeter** (avec note interne) ou **Demander des
   modifications** (repasse en brouillon avec une note, toujours modifiable
   et re-soumettable à validation).
+
+## Intermédiation contrôlée par Jimi (marketplace)
+
+Le site n'est **pas** une petite annonce classique en libre-service : Jimi
+reste l'intermédiaire entre acheteur et vendeur à chaque étape.
+
+- **Vendeur** (`lib/sellers.ts`) et **Acheteur** (`lib/buyers.ts`) sont des
+  fiches privées séparées, dédupliquées par numéro de téléphone (pas de
+  compte/connexion vendeur ou acheteur). Elles ne sont **jamais** intégrées
+  dans un objet `Machine` — seule une référence opaque (`sellerId`) y est
+  stockée.
+- **`PublicMachine`** (`lib/data.ts`) est une projection *allow-list* : toute
+  machine qui atteint une page publique ou un composant client (donc le
+  bundle envoyé au navigateur) passe par `toPublicMachine()`, qui ne
+  recopie que les champs explicitement autorisés. Un nouveau champ privé
+  ajouté plus tard à `Machine` reste donc exclu par défaut — la vie privée
+  est appliquée côté données, pas seulement cachée côté UI.
+- Sur une fiche machine publique, le bouton **« Je suis intéressé »**
+  (`components/MachineInterestForm.tsx`) ouvre un formulaire acheteur
+  (nom, entreprise, téléphone, WhatsApp, email, wilaya, message) qui POST
+  vers `/api/machine-interest` : il crée/retrouve un `BuyerProfile` et un
+  **`MachineLead`** (`lib/machineLeads.ts`) reliant acheteur + machine +
+  vendeur, avec un statut (`NEW` → `CONTACTED` → `QUALIFIED` →
+  `VISIT_SCHEDULED` → `NEGOTIATION` → `SOLD`/`LOST`) et une commission
+  interne (type, valeur, montant attendu, statut de paiement). Le vendeur
+  n'est **jamais** nommé ni contacté directement depuis cette page.
+- Dans `/admin`, les onglets **Vendeurs**, **Acheteurs** et **Leads**
+  affichent les coordonnées complètes et permettent d'appeler/écrire sur
+  WhatsApp chaque partie séparément — c'est Jimi qui décide quand (et si)
+  mettre en relation directe acheteur et vendeur ; rien n'est automatique.
+  L'onglet **Machines** permet aussi de **masquer** une annonce déjà
+  publiée sans la supprimer (icône œil barré).
 - Pour ajouter de vraies réalisations, éditez directement
   `data/projects.json` (structure prête, voir `lib/types.ts`) — il n'y a
   pas encore d'interface admin dédiée pour celles-ci.
