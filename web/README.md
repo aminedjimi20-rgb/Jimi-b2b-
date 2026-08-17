@@ -67,12 +67,28 @@ messages/             Traductions fr.json / ar.json / en.json
   actuellement », etc.) avec un appel à l'action vers WhatsApp/contact.
 - Les machines ajoutées depuis `/admin` (onglet **Machines**) sont stockées
   dans un dossier temporaire du serveur (`os.tmpdir()` — voir
-  `lib/machinesStore.ts`) et apparaissent immédiatement sur le site public.
+  `lib/machinesStore.ts`) et apparaissent immédiatement sur le site public
+  (ajout fait par un admin authentifié = publication directe).
   ⚠️ Ce stockage est **éphémère** sur les plateformes serverless (Vercel) :
   il peut être réinitialisé à chaque nouveau déploiement ou redémarrage.
   Pour une utilisation réelle en production, remplacez-le par une vraie
   base de données (voir ci-dessous) avant d'ajouter des machines qui
   doivent persister durablement.
+- **Modération obligatoire pour les annonces de vendeurs.** Le formulaire
+  public `/vendre-machine` ne publie jamais rien directement : chaque
+  soumission crée une machine avec `moderationStatus: "pending"`, invisible
+  sur `/machines`, la page d'accueil, la page détail et le sitemap tant
+  qu'un admin ne l'a pas approuvée (`lib/data.ts` → `getPublicMachines()`
+  filtre sur `moderationStatus === "published"`). L'admin consulte les
+  annonces en attente dans l'onglet **« Annonces à valider »** (badge de
+  compteur en temps réel — c'est la notification actuelle ; voir
+  `lib/notifications.ts` pour le point d'extension email/WhatsApp une fois
+  des identifiants disponibles) avec toutes les infos envoyées (machine,
+  photos, vidéo) et les coordonnées du vendeur (nom, téléphone, email —
+  jamais affichées publiquement, uniquement visibles côté admin), et choisit
+  **Approuver & publier**, **Rejeter** (avec note interne) ou **Demander des
+  modifications** (repasse en brouillon avec une note, toujours modifiable
+  et re-soumettable à validation).
 - Pour ajouter de vraies réalisations, éditez directement
   `data/projects.json` (structure prête, voir `lib/types.ts`) — il n'y a
   pas encore d'interface admin dédiée pour celles-ci.
