@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site.config";
 import { routing } from "@/i18n/routing";
-import { getMachines, getArticles } from "@/lib/data";
+import { getPublicMachines, getArticles } from "@/lib/data";
 
 const staticPaths = [
   "",
@@ -26,7 +26,7 @@ function localizedPath(path: string, locale: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const machines = await getMachines();
+  const machines = await getPublicMachines();
   const articles = getArticles();
 
   const dynamicPaths = [

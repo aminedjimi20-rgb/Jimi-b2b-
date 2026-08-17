@@ -1,6 +1,13 @@
 export type MachineStatus = "disponible" | "vendue" | "reservee" | "nouveau";
 export type MachineDrive = "hydraulique" | "servo" | "hybride";
 export type MachineCategory = "injection";
+export type ModerationStatus = "pending" | "published" | "rejected" | "draft";
+
+export interface MachineSeller {
+  name: string;
+  phone: string;
+  email?: string | null;
+}
 
 export interface MachineSpecs {
   clampingForce?: string;
@@ -34,12 +41,20 @@ export interface Machine {
   videoUrl?: string | null;
   videoThumbnail?: string | null;
   videoTitle?: string | null;
+  photos?: string[];
   specs: MachineSpecs;
   description: string;
   worksPerformed: string[];
   defects: string[];
   accessories: string[];
   isDemo: boolean;
+  /** Publication workflow state — distinct from the commercial `status` above.
+   *  Missing on legacy/demo records, which are treated as "published". */
+  moderationStatus?: ModerationStatus;
+  seller?: MachineSeller | null;
+  adminNote?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
 }
 
 export interface Project {

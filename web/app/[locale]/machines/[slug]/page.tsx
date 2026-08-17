@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { MachineArt } from "@/components/MachineArt";
 import { MachineVideoPlayer } from "@/components/MachineVideoPlayer";
 import { JsonLd } from "@/components/JsonLd";
-import { getMachineBySlug } from "@/lib/data";
+import { getPublicMachineBySlug } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
 import { getVideoProvider, getAutoVideoThumbnail, getVideoEmbedUrl } from "@/lib/video";
 import { Link } from "@/i18n/navigation";
@@ -29,7 +29,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const machine = await getMachineBySlug(slug);
+  const machine = await getPublicMachineBySlug(slug);
   if (!machine) return {};
   const t = await getTranslations({ locale, namespace: "machineDetail" });
   const title = `${machine.brand} ${machine.model} — ${machine.tonnage}T (${machine.year})`;
@@ -65,7 +65,7 @@ export default async function MachineDetailPage({
 }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const machine = await getMachineBySlug(slug);
+  const machine = await getPublicMachineBySlug(slug);
   if (!machine) notFound();
 
   const t = await getTranslations();

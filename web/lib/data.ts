@@ -9,20 +9,37 @@ export async function getMachines(): Promise<Machine[]> {
   return [...runtime, ...(machinesData as Machine[])];
 }
 
+/** Machines visible on the public website. A machine with no `moderationStatus`
+ *  (legacy/demo record) is treated as published; anything pending admin review,
+ *  rejected, or sent back as a draft must never reach public pages. */
+function isPublished(m: Machine): boolean {
+  return !m.moderationStatus || m.moderationStatus === "published";
+}
+
+export async function getPublicMachines(): Promise<Machine[]> {
+  const machines = await getMachines();
+  return machines.filter(isPublished);
+}
+
 export async function getMachineBySlug(slug: string): Promise<Machine | undefined> {
   const machines = await getMachines();
   return machines.find((m) => m.slug === slug);
 }
 
+export async function getPublicMachineBySlug(slug: string): Promise<Machine | undefined> {
+  const machines = await getPublicMachines();
+  return machines.find((m) => m.slug === slug);
+}
+
 export async function getFeaturedMachines(limit = 6): Promise<Machine[]> {
-  const machines = await getMachines();
+  const machines = await getPublicMachines();
   const featured = machines.filter((m) => m.featured);
   const pool = featured.length > 0 ? featured : machines;
   return pool.slice(0, limit);
 }
 
 export async function getMachineBrands(): Promise<string[]> {
-  const machines = await getMachines();
+  const machines = await getPublicMachines();
   return Array.from(new Set(machines.map((m) => m.brand))).sort();
 }
 

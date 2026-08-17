@@ -17,6 +17,20 @@ const DRIVE_LABELS: Record<MachineDrive, string> = {
   hybride: "Hybride",
 };
 
+const MODERATION_LABELS: Record<string, string> = {
+  pending: "En attente",
+  published: "Publiée",
+  rejected: "Rejetée",
+  draft: "Modifs demandées",
+};
+
+const MODERATION_TONE: Record<string, string> = {
+  pending: "bg-amber-50 text-amber-700",
+  published: "bg-emerald-50 text-emerald-700",
+  rejected: "bg-red-50 text-red-700",
+  draft: "bg-orange-50 text-orange-700",
+};
+
 export function MachinesTab({ initialMachines }: { initialMachines: Machine[] }) {
   const [machines, setMachines] = useState(initialMachines);
   const [showForm, setShowForm] = useState(false);
@@ -198,6 +212,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
               <th className="px-4 py-3 text-start">Tonnage</th>
               <th className="px-4 py-3 text-start">Wilaya</th>
               <th className="px-4 py-3 text-start">Statut</th>
+              <th className="px-4 py-3 text-start">Publication</th>
               <th className="px-4 py-3 text-start">Vidéo</th>
               <th className="px-4 py-3 text-start">Source</th>
               <th className="px-4 py-3 text-start"></th>
@@ -227,6 +242,19 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                           </option>
                         ))}
                       </select>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {m.isDemo ? (
+                      <span className="text-xs text-slate-400">—</span>
+                    ) : (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          MODERATION_TONE[m.moderationStatus ?? "published"]
+                        }`}
+                      >
+                        {MODERATION_LABELS[m.moderationStatus ?? "published"]}
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -270,7 +298,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                 </tr>
                 {editingVideoId === m.id && (
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
-                    <td colSpan={7} className="px-4 py-4">
+                    <td colSpan={8} className="px-4 py-4">
                       <form
                         onSubmit={(e) => saveVideo(m.id, e)}
                         className="grid grid-cols-1 gap-3 sm:grid-cols-3"

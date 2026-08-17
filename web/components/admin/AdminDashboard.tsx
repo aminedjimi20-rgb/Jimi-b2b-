@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { LeadsTab } from "./LeadsTab";
 import { MachinesTab } from "./MachinesTab";
+import { PendingListingsTab } from "./PendingListingsTab";
 import { SettingsTab } from "./SettingsTab";
 import type { Lead } from "@/lib/leads";
 import type { Machine } from "@/lib/types";
-import { Inbox, Factory, Settings2 } from "lucide-react";
+import { Inbox, Factory, Settings2, ClipboardCheck } from "lucide-react";
 
-type Tab = "leads" | "machines" | "settings";
+type Tab = "leads" | "pending" | "machines" | "settings";
 
 export function AdminDashboard({
   initialLeads,
@@ -21,8 +22,13 @@ export function AdminDashboard({
 }) {
   const [tab, setTab] = useState<Tab>("leads");
 
+  const pendingMachines = initialMachines.filter(
+    (m) => m.moderationStatus === "pending" || m.moderationStatus === "draft"
+  );
+
   const tabs: { key: Tab; label: string; icon: typeof Inbox; count?: number }[] = [
     { key: "leads", label: "Demandes reçues", icon: Inbox, count: initialLeads.length },
+    { key: "pending", label: "Annonces à valider", icon: ClipboardCheck, count: pendingMachines.length },
     { key: "machines", label: "Machines", icon: Factory, count: initialMachines.length },
     { key: "settings", label: "Paramètres", icon: Settings2 },
   ];
@@ -56,6 +62,7 @@ export function AdminDashboard({
       </div>
 
       {tab === "leads" && <LeadsTab initialLeads={initialLeads} />}
+      {tab === "pending" && <PendingListingsTab initialMachines={pendingMachines} />}
       {tab === "machines" && <MachinesTab initialMachines={initialMachines} />}
       {tab === "settings" && <SettingsTab usingDefaultPassword={usingDefaultPassword} />}
     </div>

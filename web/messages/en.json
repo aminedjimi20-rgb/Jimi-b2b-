@@ -252,7 +252,9 @@
     "title": "Want to sell your machine?",
     "intro": "If you own an injection machine and want to sell it, send us its details: we'll help you find a serious buyer.",
     "successTitle": "Your machine has been submitted",
-    "successMessage": "Thank you, your listing has been sent to our team. We'll contact you to confirm the details and give it visibility.",
+    "successMessage": "Thank you, your listing has been sent to our team for review. Once approved, it will be published on the site — we'll reach out if we need more details.",
+    "photosPlaceholder": "One link per line (Drive, Photos, WhatsApp...)",
+    "photosHint": "Paste one or more links to your photos, or send them via WhatsApp after submitting this form.",
     "sections": {
       "machine": "Machine information",
       "contact": "Your contact details",

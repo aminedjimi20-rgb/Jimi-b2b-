@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useLeadForm } from "./useLeadForm";
+import { useListingSubmission } from "./useListingSubmission";
 import { FieldWrapper, TextInput, TextArea, Select } from "./fields";
 import { SuccessMessage, ErrorMessage, HoneypotField } from "./FormStatusMessages";
 import { WhatsAppAlternative } from "./WhatsAppAlternative";
@@ -11,7 +11,7 @@ import { Send } from "lucide-react";
 
 export function SellerForm() {
   const t = useTranslations();
-  const { status, submit } = useLeadForm("sell");
+  const { status, submit } = useListingSubmission();
 
   if (status === "success") {
     return (
@@ -75,10 +75,17 @@ export function SellerForm() {
         <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-[var(--color-accent)]">
           {t("sellPage.sections.media")}
         </h2>
-        <p className="mb-3 text-xs text-[var(--color-text-muted)]">
-          {t("forms.fields.photos")}: joignez vos photos par WhatsApp ou email après l&apos;envoi de ce
-          formulaire — ou collez un lien (Drive, Photos, etc.) ci-dessous.
-        </p>
+        <FieldWrapper
+          label={t("forms.fields.photos")}
+          className="mb-4"
+        >
+          <TextArea
+            name="photos"
+            rows={3}
+            placeholder={t("sellPage.photosPlaceholder")}
+          />
+        </FieldWrapper>
+        <p className="mb-3 text-xs text-[var(--color-text-muted)]">{t("sellPage.photosHint")}</p>
         <FieldWrapper label={t("forms.fields.video")}>
           <TextInput name="video" type="url" placeholder={t("forms.placeholders.video")} />
         </FieldWrapper>

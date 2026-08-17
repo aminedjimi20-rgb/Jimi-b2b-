@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import type { Machine } from "@/lib/types";
+import type { Machine, MachineSeller, ModerationStatus } from "@/lib/types";
 
 // Serverless platforms (Vercel, etc.) only allow writes under the OS temp
 // directory — the deployed app bundle itself is read-only. This store is
@@ -34,6 +34,26 @@ export type AdminMachineInput = {
   videoUrl?: string | null;
   videoThumbnail?: string | null;
   videoTitle?: string | null;
+  photos?: string[];
+  moderationStatus?: ModerationStatus;
+  seller?: MachineSeller | null;
+  adminNote?: string | null;
+  reviewedAt?: string | null;
+};
+
+export type SellerListingInput = {
+  brand: string;
+  model: string;
+  tonnage: number;
+  year: number | null;
+  drive: Machine["drive"];
+  wilaya: string;
+  price: number | null;
+  priceOnRequest: boolean;
+  description: string;
+  videoUrl?: string | null;
+  photos?: string[];
+  seller: MachineSeller;
 };
 
 function slugify(input: string): string {
@@ -87,12 +107,67 @@ export async function addRuntimeMachine(input: AdminMachineInput): Promise<Machi
     videoUrl: input.videoUrl || null,
     videoThumbnail: input.videoThumbnail || null,
     videoTitle: input.videoTitle || null,
+    photos: input.photos ?? [],
     specs: {},
     description: input.description,
     worksPerformed: [],
     defects: [],
     accessories: [],
     isDemo: false,
+    // Added directly by an authenticated admin — no review queue needed.
+    moderationStatus: "published",
+    seller: null,
+    adminNote: null,
+    submittedAt: new Date().toISOString(),
+    reviewedAt: new Date().toISOString(),
+  };
+
+  machines.unshift(machine);
+  await saveRuntimeMachines(machines);
+  return machine;
+}
+
+/** Public "sell my machine" submission — always lands as PENDING, invisible on the site
+ *  until an admin approves it via `updateRuntimeMachine`. */
+export async function submitMachineForReview(input: SellerListingInput): Promise<Machine> {
+  const machines = await getRuntimeMachines();
+  const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year ?? "na"}`);
+  let slug = baseSlug;
+  let counter = 1;
+  while (machines.some((m) => m.slug === slug)) {
+    slug = `${baseSlug}-${counter++}`;
+  }
+
+  const machine: Machine = {
+    id: randomUUID(),
+    slug,
+    brand: input.brand,
+    model: input.model,
+    year: input.year ?? new Date().getFullYear(),
+    tonnage: input.tonnage,
+    drive: input.drive,
+    category: "injection",
+    status: "disponible",
+    featured: false,
+    wilaya: input.wilaya,
+    price: input.price,
+    priceOnRequest: input.priceOnRequest,
+    images: 0,
+    videoUrl: input.videoUrl || null,
+    videoThumbnail: null,
+    videoTitle: null,
+    photos: input.photos ?? [],
+    specs: {},
+    description: input.description,
+    worksPerformed: [],
+    defects: [],
+    accessories: [],
+    isDemo: false,
+    moderationStatus: "pending",
+    seller: input.seller,
+    adminNote: null,
+    submittedAt: new Date().toISOString(),
+    reviewedAt: null,
   };
 
   machines.unshift(machine);

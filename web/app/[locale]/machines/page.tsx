@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { MachinesExplorer } from "@/components/MachinesExplorer";
 import { EmptyState } from "@/components/EmptyState";
-import { getMachines, getMachineBrands } from "@/lib/data";
+import { getPublicMachines, getMachineBrands } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
 import { Factory } from "lucide-react";
 
@@ -34,7 +34,7 @@ export default async function MachinesPage({
   const t = await getTranslations("machines");
   const tw = await getTranslations("whatsappMessages");
   const tc = await getTranslations("cta");
-  const machines = await getMachines();
+  const machines = await getPublicMachines();
   const brands = await getMachineBrands();
 
   return (

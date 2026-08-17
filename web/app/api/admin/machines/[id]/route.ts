@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { updateRuntimeMachine, deleteRuntimeMachine, type AdminMachineInput } from "@/lib/machinesStore";
 import { sanitizeUrl } from "@/lib/sanitize";
+import type { ModerationStatus } from "@/lib/types";
+
+const VALID_MODERATION_STATUSES: ModerationStatus[] = ["pending", "published", "rejected", "draft"];
 
 export async function PATCH(
   request: NextRequest,
@@ -19,6 +22,20 @@ export async function PATCH(
   if ("videoThumbnail" in body) body.videoThumbnail = sanitizeUrl(body.videoThumbnail);
   if ("videoTitle" in body) {
     body.videoTitle = body.videoTitle ? String(body.videoTitle).slice(0, 200) : null;
+  }
+  if ("photos" in body) {
+    body.photos = Array.isArray(body.photos)
+      ? body.photos.map((p) => sanitizeUrl(p)).filter((p): p is string => Boolean(p)).slice(0, 10)
+      : [];
+  }
+  if ("adminNote" in body) {
+    body.adminNote = body.adminNote ? String(body.adminNote).slice(0, 1000) : null;
+  }
+  if ("moderationStatus" in body) {
+    if (!VALID_MODERATION_STATUSES.includes(body.moderationStatus as ModerationStatus)) {
+      return NextResponse.json({ error: "invalid_moderation_status" }, { status: 400 });
+    }
+    body.reviewedAt = new Date().toISOString();
   }
   const machine = await updateRuntimeMachine(id, body);
   if (!machine) {
