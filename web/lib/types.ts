@@ -32,6 +32,8 @@ export interface Machine {
   priceOnRequest: boolean;
   images: number;
   videoUrl?: string | null;
+  videoThumbnail?: string | null;
+  videoTitle?: string | null;
   specs: MachineSpecs;
   description: string;
   worksPerformed: string[];

@@ -194,6 +194,7 @@
     "noResults": "Aucune machine ne correspond à vos critères. Essayez d'élargir votre recherche ou envoyez-nous votre demande directement.",
     "noResultsCta": "Envoyer ma demande",
     "priceOnRequest": "Prix sur demande",
+    "videoBadge": "Vidéo disponible",
     "notFoundBanner": {
       "title": "Vous ne trouvez pas la machine qu'il vous faut ?",
       "subtitle": "Décrivez-nous votre besoin exact : tonnage, marque, budget. Nous cherchons pour vous.",
@@ -208,6 +209,7 @@
   },
   "machineDetail": {
     "galleryTitle": "Galerie photos",
+    "videoSectionTitle": "Voir la machine en fonctionnement",
     "specsTitle": "Fiche technique",
     "descriptionTitle": "Description technique",
     "worksTitle": "Travaux effectués",
@@ -440,6 +442,7 @@
   },
   "whatsappMessages": {
     "machineInterest": "Bonjour Jimi, je suis intéressé(e) par la machine {brand} {model} {tonnage}. Je souhaite avoir plus d'informations.",
+    "machineVideoInterest": "Bonjour Jimi, je suis intéressé(e) par la machine {brand} {model} {tonnage} et j'ai vu sa vidéo. Je souhaite avoir plus d'informations.",
     "serviceQuote": "Bonjour Jimi, je souhaite avoir un devis pour la rénovation de ma machine d'injection.",
     "generalContact": "Bonjour Jimi, j'aimerais avoir plus d'informations sur vos services.",
     "buyRequest": "Bonjour Jimi, je recherche une machine d'injection. Je souhaite vous transmettre mes critères.",

@@ -194,6 +194,7 @@
     "noResults": "لا توجد آلة مطابقة لمعاييرك. حاول توسيع البحث أو أرسل لنا طلبك مباشرة.",
     "noResultsCta": "إرسال طلبي",
     "priceOnRequest": "السعر عند الطلب",
+    "videoBadge": "فيديو متوفر",
     "notFoundBanner": {
       "title": "لم تجد الآلة التي تبحث عنها؟",
       "subtitle": "صف لنا احتياجك بدقة: التونّاج، العلامة، الميزانية. نبحث من أجلك.",
@@ -208,6 +209,7 @@
   },
   "machineDetail": {
     "galleryTitle": "معرض الصور",
+    "videoSectionTitle": "شاهد الآلة أثناء التشغيل",
     "specsTitle": "المواصفات التقنية",
     "descriptionTitle": "الوصف التقني",
     "worksTitle": "الأعمال المنجزة",
@@ -440,6 +442,7 @@
   },
   "whatsappMessages": {
     "machineInterest": "مرحبًا Jimi، أنا مهتم بآلة {brand} {model} {tonnage}. أرغب في الحصول على مزيد من المعلومات.",
+    "machineVideoInterest": "مرحبًا Jimi، أنا مهتم بآلة {brand} {model} {tonnage} وشاهدت فيديوها. أرغب في الحصول على مزيد من المعلومات.",
     "serviceQuote": "مرحبًا Jimi، أرغب في الحصول على عرض سعر لتجديد آلة الحقن الخاصة بي.",
     "generalContact": "مرحبًا Jimi، أرغب في مزيد من المعلومات حول خدماتكم.",
     "buyRequest": "مرحبًا Jimi، أبحث عن آلة حقن. أرغب في إرسال معاييري.",

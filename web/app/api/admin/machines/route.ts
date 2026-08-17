@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { getMachines } from "@/lib/data";
 import { addRuntimeMachine, type AdminMachineInput } from "@/lib/machinesStore";
+import { sanitizeUrl } from "@/lib/sanitize";
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) {
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
     price: body.price ? Number(body.price) : null,
     priceOnRequest: Boolean(body.priceOnRequest),
     description: body.description ?? "",
+    videoUrl: sanitizeUrl(body.videoUrl),
+    videoThumbnail: sanitizeUrl(body.videoThumbnail),
+    videoTitle: body.videoTitle ? String(body.videoTitle).slice(0, 200) : null,
   });
 
   return NextResponse.json({ ok: true, machine });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { updateRuntimeMachine, deleteRuntimeMachine, type AdminMachineInput } from "@/lib/machinesStore";
+import { sanitizeUrl } from "@/lib/sanitize";
 
 export async function PATCH(
   request: NextRequest,
@@ -13,6 +14,11 @@ export async function PATCH(
   const body = (await request.json().catch(() => null)) as Partial<AdminMachineInput> | null;
   if (!body) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+  }
+  if ("videoUrl" in body) body.videoUrl = sanitizeUrl(body.videoUrl);
+  if ("videoThumbnail" in body) body.videoThumbnail = sanitizeUrl(body.videoThumbnail);
+  if ("videoTitle" in body) {
+    body.videoTitle = body.videoTitle ? String(body.videoTitle).slice(0, 200) : null;
   }
   const machine = await updateRuntimeMachine(id, body);
   if (!machine) {

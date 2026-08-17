@@ -5,9 +5,11 @@ import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { MachineArt } from "@/components/MachineArt";
+import { MachineVideoPlayer } from "@/components/MachineVideoPlayer";
 import { JsonLd } from "@/components/JsonLd";
 import { getMachineBySlug } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
+import { getVideoProvider, getAutoVideoThumbnail, getVideoEmbedUrl } from "@/lib/video";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowLeft,
@@ -32,12 +34,19 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "machineDetail" });
   const title = `${machine.brand} ${machine.model} — ${machine.tonnage}T (${machine.year})`;
   const description = machine.description.slice(0, 155);
+  const hasFileVideo = machine.videoUrl && getVideoProvider(machine.videoUrl) === "file";
 
   return {
     title,
     description,
     alternates: { canonical: `/machines/${slug}` },
-    openGraph: { title, description },
+    openGraph: {
+      title,
+      description,
+      ...(hasFileVideo && machine.videoUrl
+        ? { videos: [{ url: machine.videoUrl, type: "video/mp4" }] }
+        : {}),
+    },
     other: { "machine-specs-title": t("specsTitle") },
   };
 }
@@ -67,6 +76,17 @@ export default async function MachineDetailPage({
       tonnage: `${machine.tonnage}T`,
     })
   );
+  const waVideoInterest = buildWhatsAppLink(
+    t("whatsappMessages.machineVideoInterest", {
+      brand: machine.brand,
+      model: machine.model,
+      tonnage: `${machine.tonnage}T`,
+    })
+  );
+  const videoThumbnail = machine.videoUrl
+    ? machine.videoThumbnail || getAutoVideoThumbnail(machine.videoUrl)
+    : null;
+  const videoEmbedUrl = machine.videoUrl ? getVideoEmbedUrl(machine.videoUrl) : null;
 
   const specRows: [string, string | undefined][] = [
     [t("machineDetail.specs.brand"), machine.brand],
@@ -113,6 +133,21 @@ export default async function MachineDetailPage({
           },
         }}
       />
+
+      {machine.videoUrl && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            name: machine.videoTitle || `${machine.brand} ${machine.model} — ${t("machineDetail.videoSectionTitle")}`,
+            description: machine.description,
+            thumbnailUrl: videoThumbnail ?? undefined,
+            ...(videoEmbedUrl
+              ? { embedUrl: videoEmbedUrl }
+              : { contentUrl: machine.videoUrl }),
+          }}
+        />
+      )}
 
       <section className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)] py-4">
         <Container>
@@ -163,6 +198,33 @@ export default async function MachineDetailPage({
                   </div>
                 ))}
               </div>
+
+              {machine.videoUrl && (
+                <>
+                  <h2 className="mt-10 mb-3 text-sm font-bold uppercase tracking-wide text-[var(--color-ink)]">
+                    {t("machineDetail.videoSectionTitle")}
+                  </h2>
+                  <MachineVideoPlayer
+                    videoUrl={machine.videoUrl}
+                    videoThumbnail={videoThumbnail}
+                    videoTitle={machine.videoTitle}
+                  />
+                  <div className="mt-4 flex flex-col items-start gap-2 rounded-lg bg-[var(--color-surface-2)] p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold text-[var(--color-ink)]">
+                      {t("machineDetail.interestedTitle")}
+                    </p>
+                    <Button
+                      href={waVideoInterest}
+                      external
+                      variant="whatsapp"
+                      size="sm"
+                      icon={<MessageCircle size={16} />}
+                    >
+                      {t("cta.contactWhatsapp")}
+                    </Button>
+                  </div>
+                </>
+              )}
 
               <h2 className="mt-10 mb-3 text-sm font-bold uppercase tracking-wide text-[var(--color-ink)]">
                 {t("machineDetail.descriptionTitle")}

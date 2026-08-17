@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { MachineArt } from "@/components/MachineArt";
 import type { Machine } from "@/lib/types";
-import { MapPin, Gauge, Calendar } from "lucide-react";
+import { MapPin, Gauge, Calendar, Video } from "lucide-react";
 
 const statusTone: Record<Machine["status"], "success" | "danger" | "warning" | "accent"> = {
   disponible: "success",
@@ -30,6 +30,14 @@ export function MachineCard({ machine, index = 0 }: { machine: Machine; index?: 
             </Badge>
           )}
         </div>
+        {machine.videoUrl && (
+          <div className="absolute inset-x-3 bottom-3 flex">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+              <Video size={13} />
+              {t("machines.videoBadge")}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">

@@ -31,6 +31,9 @@ export type AdminMachineInput = {
   price: number | null;
   priceOnRequest: boolean;
   description: string;
+  videoUrl?: string | null;
+  videoThumbnail?: string | null;
+  videoTitle?: string | null;
 };
 
 function slugify(input: string): string {
@@ -81,7 +84,9 @@ export async function addRuntimeMachine(input: AdminMachineInput): Promise<Machi
     price: input.price,
     priceOnRequest: input.priceOnRequest,
     images: 3,
-    videoUrl: null,
+    videoUrl: input.videoUrl || null,
+    videoThumbnail: input.videoThumbnail || null,
+    videoTitle: input.videoTitle || null,
     specs: {},
     description: input.description,
     worksPerformed: [],

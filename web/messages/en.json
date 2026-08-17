@@ -194,6 +194,7 @@
     "noResults": "No machine matches your criteria. Try widening your search or send us your request directly.",
     "noResultsCta": "Send my request",
     "priceOnRequest": "Price on request",
+    "videoBadge": "Video available",
     "notFoundBanner": {
       "title": "Can't find the machine you need?",
       "subtitle": "Tell us exactly what you need: tonnage, brand, budget. We'll search for you.",
@@ -208,6 +209,7 @@
   },
   "machineDetail": {
     "galleryTitle": "Photo gallery",
+    "videoSectionTitle": "Watch the machine in action",
     "specsTitle": "Technical specifications",
     "descriptionTitle": "Technical description",
     "worksTitle": "Work performed",
@@ -440,6 +442,7 @@
   },
   "whatsappMessages": {
     "machineInterest": "Hello Jimi, I'm interested in the {brand} {model} {tonnage} machine. I'd like more information.",
+    "machineVideoInterest": "Hello Jimi, I'm interested in the {brand} {model} {tonnage} machine and saw its video. I'd like more information.",
     "serviceQuote": "Hello Jimi, I'd like a quote for renovating my injection machine.",
     "generalContact": "Hello Jimi, I'd like more information about your services.",
     "buyRequest": "Hello Jimi, I'm looking for an injection machine. I'd like to send you my criteria.",

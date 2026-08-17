@@ -76,6 +76,13 @@ messages/             Traductions fr.json / ar.json / en.json
 - Pour ajouter de vraies réalisations, éditez directement
   `data/projects.json` (structure prête, voir `lib/types.ts`) — il n'y a
   pas encore d'interface admin dédiée pour celles-ci.
+- Chaque machine peut avoir sa propre vidéo (section « Voir la machine en
+  fonctionnement » sur sa page, badge « Vidéo disponible » sur sa carte).
+  Depuis `/admin` (ajout ou icône crayon sur une machine existante),
+  renseignez un lien MP4, YouTube ou Vimeo — la lecture s'adapte
+  automatiquement (`lib/video.ts`). Aucun upload de fichier n'est câblé
+  pour l'instant (seul un lien vidéo est demandé) ; le champ `videoUrl` de
+  `Machine` est prêt pour brancher un vrai stockage de fichiers plus tard.
 - Pour une mise en production sérieuse avec plusieurs administrateurs ou un
   fort volume de machines/leads, remplacez le stockage fichier
   (`lib/leads.ts`, `lib/machinesStore.ts`) par une vraie base de données
