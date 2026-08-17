@@ -6,7 +6,11 @@ import { getTranslations } from "next-intl/server";
 export async function Footer() {
   const t = await getTranslations();
   const year = new Date().getFullYear();
-  const waLink = buildWhatsAppLink(t("whatsappMessages.generalContact"));
+  const waLink = buildWhatsAppLink(t("whatsappMessages.generalContact"), siteConfig.contact.whatsappNumber);
+  const waLinkSecondary = buildWhatsAppLink(
+    t("whatsappMessages.generalContact"),
+    siteConfig.contact.whatsappNumberSecondary
+  );
 
   return (
     <footer className="border-t border-[var(--color-border)] bg-[var(--color-ink)] text-slate-300">
@@ -72,15 +76,27 @@ export async function Footer() {
           <ul className="mt-4 space-y-3 text-sm">
             <li className="flex items-start gap-2.5">
               <MessageCircle size={16} className="mt-0.5 shrink-0 text-[#25d366]" />
-              <a href={waLink} target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                WhatsApp
-              </a>
+              <span className="flex flex-wrap gap-x-2">
+                <a href={waLink} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                  {siteConfig.contact.phoneDisplay}
+                </a>
+                <span className="text-slate-600">/</span>
+                <a href={waLinkSecondary} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                  {siteConfig.contact.phoneDisplaySecondary}
+                </a>
+              </span>
             </li>
             <li className="flex items-start gap-2.5">
               <Phone size={16} className="mt-0.5 shrink-0 text-[var(--color-accent-2)]" />
-              <a href={`tel:${siteConfig.contact.phoneHref}`} className="hover:text-white">
-                {siteConfig.contact.phoneDisplay}
-              </a>
+              <span className="flex flex-wrap gap-x-2">
+                <a href={`tel:${siteConfig.contact.phoneHref}`} className="hover:text-white">
+                  {siteConfig.contact.phoneDisplay}
+                </a>
+                <span className="text-slate-600">/</span>
+                <a href={`tel:${siteConfig.contact.phoneHrefSecondary}`} className="hover:text-white">
+                  {siteConfig.contact.phoneDisplaySecondary}
+                </a>
+              </span>
             </li>
             <li className="flex items-start gap-2.5">
               <Mail size={16} className="mt-0.5 shrink-0 text-[var(--color-accent-2)]" />

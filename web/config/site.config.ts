@@ -3,12 +3,9 @@
  * -----------------------------------------------------------------
  * Toutes les informations "réelles" (téléphone, WhatsApp, email, adresse,
  * réseaux sociaux) sont centralisées ICI et nulle part ailleurs dans le
- * code. Remplacez les valeurs marquées [PLACEHOLDER] par les vraies
- * coordonnées avant la mise en ligne définitive — tout le site se
- * mettra à jour automatiquement.
- *
- * Vous pouvez aussi surcharger ces valeurs via des variables
- * d'environnement (fichier .env.local), sans toucher au code.
+ * code. Pour les changer, modifiez uniquement les valeurs ci-dessous (ou
+ * les variables d'environnement correspondantes dans .env.local) — tout
+ * le site se met à jour automatiquement.
  */
 
 export const siteConfig = {
@@ -20,12 +17,17 @@ export const siteConfig = {
     en: "Plastic injection machines & industrial automation solutions",
   },
 
-  // --- Coordonnées (à remplacer par les vraies informations) ---
+  // --- Coordonnées ---
   contact: {
-    whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "213555000000", // format international sans "+" ni espaces
-    phoneDisplay: process.env.NEXT_PUBLIC_PHONE_DISPLAY || "[PHONE_NUMBER]",
-    phoneHref: process.env.NEXT_PUBLIC_PHONE_HREF || "+213555000000",
-    email: process.env.NEXT_PUBLIC_EMAIL || "[EMAIL]",
+    // Numéro principal, utilisé pour tous les boutons WhatsApp et le lien "tel:" du site.
+    whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "213654486224", // format international sans "+" ni espaces
+    phoneDisplay: process.env.NEXT_PUBLIC_PHONE_DISPLAY || "+213 654 486 224",
+    phoneHref: process.env.NEXT_PUBLIC_PHONE_HREF || "+213654486224",
+    // Second numéro joignable (WhatsApp et téléphone) — affiché en complément sur la page Contact et le footer.
+    whatsappNumberSecondary: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_2 || "213777168962",
+    phoneDisplaySecondary: process.env.NEXT_PUBLIC_PHONE_DISPLAY_2 || "+213 777 168 962",
+    phoneHrefSecondary: process.env.NEXT_PUBLIC_PHONE_HREF_2 || "+213777168962",
+    email: process.env.NEXT_PUBLIC_EMAIL || "aminedjimi20@gmail.com",
     addressLine: {
       fr: "Algérie — Déplacement possible dans toutes les wilayas",
       ar: "الجزائر — التنقل ممكن إلى جميع الولايات",

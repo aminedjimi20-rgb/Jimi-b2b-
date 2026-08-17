@@ -2,34 +2,49 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { siteConfig, buildWhatsAppLink } from "@/config/site.config";
 import type { Locale } from "@/i18n/routing";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export async function ContactInfoPanel() {
   const t = await getTranslations();
   const locale = (await getLocale()) as Locale;
-  const waLink = buildWhatsAppLink(t("whatsappMessages.generalContact"));
+  const waLink = buildWhatsAppLink(t("whatsappMessages.generalContact"), siteConfig.contact.whatsappNumber);
+  const waLinkSecondary = buildWhatsAppLink(
+    t("whatsappMessages.generalContact"),
+    siteConfig.contact.whatsappNumberSecondary
+  );
 
-  const rows = [
+  const rows: {
+    icon: LucideIcon;
+    label: string;
+    tone: string;
+    links: { value: string; href: string; external?: boolean }[];
+  }[] = [
     {
       icon: MessageCircle,
       label: "WhatsApp",
-      value: siteConfig.contact.phoneDisplay,
-      href: waLink,
-      external: true,
       tone: "text-[#1fa855]",
+      links: [
+        { value: siteConfig.contact.phoneDisplay, href: waLink, external: true },
+        { value: siteConfig.contact.phoneDisplaySecondary, href: waLinkSecondary, external: true },
+      ],
     },
     {
       icon: Phone,
       label: t("forms.fields.phone"),
-      value: siteConfig.contact.phoneDisplay,
-      href: `tel:${siteConfig.contact.phoneHref}`,
       tone: "text-[var(--color-accent)]",
+      links: [
+        { value: siteConfig.contact.phoneDisplay, href: `tel:${siteConfig.contact.phoneHref}` },
+        {
+          value: siteConfig.contact.phoneDisplaySecondary,
+          href: `tel:${siteConfig.contact.phoneHrefSecondary}`,
+        },
+      ],
     },
     {
       icon: Mail,
       label: t("forms.fields.email"),
-      value: siteConfig.contact.email,
-      href: `mailto:${siteConfig.contact.email}`,
       tone: "text-[var(--color-accent)]",
+      links: [{ value: siteConfig.contact.email, href: `mailto:${siteConfig.contact.email}` }],
     },
   ];
 
@@ -45,14 +60,20 @@ export async function ContactInfoPanel() {
               </span>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">{row.label}</p>
-                <a
-                  href={row.href}
-                  target={row.external ? "_blank" : undefined}
-                  rel={row.external ? "noopener noreferrer" : undefined}
-                  className="text-sm font-medium text-white hover:underline"
-                >
-                  {row.value}
-                </a>
+                <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                  {row.links.map((link, i) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      className="text-sm font-medium text-white hover:underline"
+                    >
+                      {link.value}
+                      {i < row.links.length - 1 && <span className="text-slate-500"> /</span>}
+                    </a>
+                  ))}
+                </div>
               </div>
             </li>
           ))}

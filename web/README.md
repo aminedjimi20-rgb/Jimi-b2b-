@@ -25,22 +25,25 @@ npm run start
 ## Configuration — une seule source de vérité
 
 Toutes les informations de contact (WhatsApp, téléphone, email, URL du site)
-sont centralisées dans **`config/site.config.ts`**, surchageables via des
-variables d'environnement (`.env.local`, voir `.env.example`). Modifiez-les à
-un seul endroit : elles se propagent automatiquement partout sur le site
+sont centralisées dans **`config/site.config.ts`**, avec les vraies
+coordonnées de Jimi Renovation & Installation déjà en valeur par défaut —
+aucune configuration n'est requise pour que le site fonctionne. Ces valeurs
+restent surchargeables via des variables d'environnement (`.env.local`, voir
+`.env.example`) si elles doivent changer, sans toucher au code. Modifiez-les
+à un seul endroit : elles se propagent automatiquement partout sur le site
 (navbar, footer, boutons WhatsApp dynamiques, JSON-LD, sitemap...).
 
-**Placeholders à remplacer avant la mise en ligne réelle :**
+**Coordonnées actuelles (modifiables via variables d'environnement) :**
 
-| Variable                      | Utilisation                                  |
-| ------------------------------ | --------------------------------------------- |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER`  | Numéro WhatsApp (format international)        |
-| `NEXT_PUBLIC_PHONE_DISPLAY`    | Téléphone affiché                             |
-| `NEXT_PUBLIC_PHONE_HREF`       | Téléphone pour les liens `tel:`               |
-| `NEXT_PUBLIC_EMAIL`            | Email de contact                              |
-| `NEXT_PUBLIC_SITE_URL`         | URL publique (SEO, sitemap, Open Graph)        |
-| `ADMIN_PASSWORD`               | Mot de passe du tableau de bord `/admin`      |
-| `ADMIN_SESSION_SECRET`         | Clé secrète de session admin (chaîne aléatoire)|
+| Variable                          | Valeur actuelle          | Utilisation                                    |
+| ---------------------------------- | ------------------------- | ----------------------------------------------- |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER`      | +213 654 486 224          | Numéro WhatsApp principal (tous les boutons)     |
+| `NEXT_PUBLIC_PHONE_DISPLAY` / `_HREF` | +213 654 486 224       | Téléphone principal affiché / lien `tel:`        |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER_2`, `NEXT_PUBLIC_PHONE_DISPLAY_2` / `_HREF_2` | +213 777 168 962 | Second numéro (footer + page Contact) |
+| `NEXT_PUBLIC_EMAIL`                | aminedjimi20@gmail.com    | Email de contact                                 |
+| `NEXT_PUBLIC_SITE_URL`             | —                         | URL publique (SEO, sitemap, Open Graph) — à définir selon le domaine final |
+| `ADMIN_PASSWORD`                   | —                         | Mot de passe du tableau de bord `/admin` — **à définir avant mise en production** |
+| `ADMIN_SESSION_SECRET`             | —                         | Clé secrète de session admin (chaîne aléatoire)  |
 
 ## Structure
 
