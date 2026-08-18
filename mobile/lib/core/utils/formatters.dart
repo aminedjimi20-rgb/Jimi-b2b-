@@ -2,8 +2,11 @@ import 'package:intl/intl.dart';
 
 final _currencyFormat = NumberFormat.currency(locale: 'fr_FR', symbol: 'DA', decimalDigits: 2);
 final _dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
+final _shortDateFormat = DateFormat('dd/MM/yyyy', 'fr_FR');
 
 String formatMoney(double value) => _currencyFormat.format(value);
+
+String formatShortDate(DateTime value) => _shortDateFormat.format(value);
 
 // The backend always serializes DateTime as UTC ('Z'-suffixed ISO8601) —
 // .toLocal() converts to the device's own timezone before formatting.

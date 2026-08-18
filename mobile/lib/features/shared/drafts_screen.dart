@@ -6,7 +6,9 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_value_widget.dart';
 import '../admin/orders/admin_create_order_screen.dart';
+import '../admin/stock/admin_stock_receipt_form_screen.dart';
 import '../client/cart/checkout_screen.dart';
+import '../employee/bon_entree/employee_bon_entree_form_screen.dart';
 import '../employee/orders/employee_create_order_screen.dart';
 
 class _DraftInfo {
@@ -18,12 +20,16 @@ class _DraftInfo {
 
 const _kDraftInfo = <String, _DraftInfo>{
   'admin_create_order': _DraftInfo('Bon de commande (Admin)', Icons.receipt_long_outlined, _adminOrderBuilder),
+  'admin_stock_receipt_form': _DraftInfo('Bon de réception (Admin)', Icons.move_to_inbox_outlined, _adminStockReceiptBuilder),
   'employee_create_order': _DraftInfo('Vente comptoir (Employé)', Icons.point_of_sale_outlined, _employeeOrderBuilder),
+  'employee_bon_entree_form': _DraftInfo('Bon d\'entrée (Employé)', Icons.move_to_inbox_outlined, _employeeBonEntreeBuilder),
   'client_checkout': _DraftInfo('Panier / Commande', Icons.shopping_cart_outlined, _checkoutBuilder),
 };
 
 Widget _adminOrderBuilder(BuildContext context) => const AdminCreateOrderScreen();
+Widget _adminStockReceiptBuilder(BuildContext context) => const AdminStockReceiptFormScreen();
 Widget _employeeOrderBuilder(BuildContext context) => const EmployeeCreateOrderScreen();
+Widget _employeeBonEntreeBuilder(BuildContext context) => const EmployeeBonEntreeFormScreen();
 Widget _checkoutBuilder(BuildContext context) => const CheckoutScreen();
 
 final _draftsProvider = FutureProvider.autoDispose<List<({String formKey, DateTime updatedAt})>>((ref) {

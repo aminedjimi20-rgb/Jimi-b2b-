@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/drafts/form_draft_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/draft_resume_banner.dart';
 import '../../../models/fabricant.dart';
 import '../../../models/product.dart';
 import '../../../services/stock_receipts_api.dart';
@@ -13,6 +15,8 @@ import '../products/admin_image_search_screen.dart';
 import '../products/admin_product_form_screen.dart';
 import '../products/admin_product_tile.dart';
 import 'admin_stock_receipt_detail_screen.dart';
+
+const _draftFormKey = 'admin_stock_receipt_form';
 
 final _fabricantsForReceiptProvider = FutureProvider.autoDispose<List<Fabricant>>((ref) => ref.watch(fabricantsApiProvider).list());
 final _productsForReceiptProvider = FutureProvider.autoDispose<List<AdminProduct>>((ref) => ref.watch(productsApiProvider).listAdmin());
@@ -61,10 +65,85 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
   bool _saving = false;
   String? _error;
 
+  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
+  bool _draftChecked = false;
+  Map<String, dynamic>? _pendingDraft;
+
   double get _totalAchat => _lines.fold(0.0, (sum, l) => sum + l.sousTotalAchat);
   double get _remiseValue => double.tryParse(_remise.text.replaceAll(',', '.')) ?? 0;
   double get _montantRemise => _totalAchat * _remiseValue / 100;
   double get _totalApresRemise => _totalAchat - _montantRemise;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDraft();
+  }
+
+  Future<void> _loadDraft() async {
+    final draft = await _draftStore.load();
+    if (!mounted) return;
+    setState(() {
+      _pendingDraft = draft;
+      _draftChecked = true;
+    });
+  }
+
+  Map<String, dynamic> _currentDraftData() => {
+        'fabricantId': _fabricant?.id,
+        'fabricantNom': _fabricant?.nom,
+        'items': _lines
+            .map((l) => {
+                  'productId': l.product.id,
+                  'cartons': l.cartons.text,
+                  'unitesParCarton': l.unitesParCarton.text,
+                  'prixAchat': l.prixAchat.text,
+                  'prixVente': l.prixVente.text,
+                })
+            .toList(),
+        'notes': _notes.text,
+        'remise': _remise.text,
+      };
+
+  Future<void> _resumeDraft(Map<String, dynamic> data) async {
+    final fabricants = await ref.read(_fabricantsForReceiptProvider.future);
+    final products = await ref.read(_productsForReceiptProvider.future);
+    if (!mounted) return;
+
+    final fabricantId = data['fabricantId'] as String?;
+    Fabricant? fabricant;
+    for (final f in fabricants) {
+      if (f.id == fabricantId) fabricant = f;
+    }
+
+    final lines = <_ReceiptLine>[];
+    for (final item in (data['items'] as List<dynamic>? ?? [])) {
+      AdminProduct? product;
+      for (final p in products) {
+        if (p.id == item['productId']) product = p;
+      }
+      if (product == null) continue;
+      final line = _ReceiptLine(product)
+        ..cartons.text = item['cartons'] as String? ?? '1'
+        ..unitesParCarton.text = item['unitesParCarton'] as String? ?? '${product.uniteParCarton ?? 1}'
+        ..prixAchat.text = item['prixAchat'] as String? ?? product.prixAchat.toString()
+        ..prixVente.text = item['prixVente'] as String? ?? product.prixVente.toString();
+      lines.add(line);
+    }
+
+    setState(() {
+      _fabricant = fabricant;
+      for (final l in _lines) {
+        l.dispose();
+      }
+      _lines
+        ..clear()
+        ..addAll(lines);
+      _notes.text = data['notes'] as String? ?? '';
+      _remise.text = data['remise'] as String? ?? '';
+      _pendingDraft = null;
+    });
+  }
 
   Future<void> _pickFabricant() async {
     final fabricants = await ref.read(_fabricantsForReceiptProvider.future);
@@ -155,6 +234,7 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
             remisePourcentage: _remiseValue > 0 ? _remiseValue : null,
           );
+      await _draftStore.clear();
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => AdminStockReceiptDetailScreen(receiptId: receipt.id)));
       }
@@ -172,16 +252,29 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
     }
     _notes.dispose();
     _remise.dispose();
+    _draftStore.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_draftChecked && _pendingDraft == null) {
+      _draftStore.save(_currentDraftData());
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Bon de réception')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
+          if (_pendingDraft != null)
+            DraftResumeBanner(
+              onResume: () => _resumeDraft(_pendingDraft!),
+              onDismiss: () {
+                _draftStore.clear();
+                setState(() => _pendingDraft = null);
+              },
+            ),
           Text('Fabricant', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(

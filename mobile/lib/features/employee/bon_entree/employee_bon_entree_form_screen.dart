@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_exception.dart';
+import '../../../core/drafts/form_draft_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/draft_resume_banner.dart';
 import '../../../models/employee_permissions.dart';
 import '../../../models/employee_product.dart';
 import '../../../models/fabricant.dart';
@@ -18,6 +20,8 @@ import '../employee_session.dart';
 import 'employee_bon_entree_detail_screen.dart';
 import 'employee_new_product_screen.dart';
 import 'fournisseur_picker_sheet.dart';
+
+const _draftFormKey = 'employee_bon_entree_form';
 
 final _transporteursForBonEntreeProvider = FutureProvider.autoDispose<List<Transporteur>>((ref) => ref.watch(transporteursApiProvider).list());
 
@@ -70,6 +74,13 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
   bool _saving = false;
   String? _error;
 
+  // Local auto-draft only guards a brand-new bon (never yet sent to the
+  // server) — resuming an already-saved server BROUILLON loads straight
+  // from `existing` below, which is itself durable (see Phase 38).
+  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
+  bool _draftChecked = false;
+  Map<String, dynamic>? _pendingDraft;
+
   bool get _isEditing => widget.existing != null;
 
   double get _totalAchat => _lines.fold(0.0, (sum, l) => sum + l.sousTotalAchat);
@@ -78,9 +89,73 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
   double get _fraisLivraisonValue => double.tryParse(_fraisLivraison.text.replaceAll(',', '.')) ?? 0;
   double get _totalApresRemise => _totalAchat - _montantRemise + _fraisLivraisonValue;
 
+  Future<void> _loadDraft() async {
+    final draft = await _draftStore.load();
+    if (!mounted) return;
+    setState(() {
+      _pendingDraft = draft;
+      _draftChecked = true;
+    });
+  }
+
+  Map<String, dynamic> _currentDraftData() => {
+        'fabricantId': _fabricant?.id,
+        'fabricantNom': _fabricant?.nom,
+        'numeroBonFournisseur': _numeroBonFournisseur.text,
+        'notes': _notes.text,
+        'remise': _remise.text,
+        'livraisonActive': _livraisonActive,
+        'transporteurId': _transporteur?.id,
+        'transporteurNom': _transporteur?.nom,
+        'destination': _destination.text,
+        'fraisLivraison': _fraisLivraison.text,
+        'items': _lines
+            .map((l) => {
+                  'productId': l.productId,
+                  'nom': l.nom,
+                  'imageUrl': l.imageUrl,
+                  'cartons': l.cartons.text,
+                  'unitesParCarton': l.unitesParCarton.text,
+                  'prixAchat': l.prixAchat.text,
+                })
+            .toList(),
+      };
+
+  void _resumeDraft(Map<String, dynamic> data) {
+    final lines = (data['items'] as List<dynamic>? ?? []).map((item) {
+      return _BonEntreeLine(
+        productId: item['productId'] as String,
+        nom: item['nom'] as String,
+        imageUrl: item['imageUrl'] as String?,
+        initialPrixAchat: item['prixAchat'] as String?,
+      )
+        ..cartons.text = item['cartons'] as String? ?? '1'
+        ..unitesParCarton.text = item['unitesParCarton'] as String? ?? '1';
+    }).toList();
+
+    setState(() {
+      _fabricant = data['fabricantId'] != null ? Fabricant(id: data['fabricantId'] as String, nom: data['fabricantNom'] as String? ?? '') : null;
+      _numeroBonFournisseur.text = data['numeroBonFournisseur'] as String? ?? '';
+      _notes.text = data['notes'] as String? ?? '';
+      _remise.text = data['remise'] as String? ?? '';
+      _livraisonActive = data['livraisonActive'] as bool? ?? false;
+      _transporteur = data['transporteurId'] != null ? Transporteur(id: data['transporteurId'] as String, nom: data['transporteurNom'] as String? ?? '') : null;
+      _destination.text = data['destination'] as String? ?? '';
+      _fraisLivraison.text = data['fraisLivraison'] as String? ?? '';
+      for (final l in _lines) {
+        l.dispose();
+      }
+      _lines
+        ..clear()
+        ..addAll(lines);
+      _pendingDraft = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    if (!_isEditing) _loadDraft();
     final existing = widget.existing;
     if (existing != null) {
       _fabricant = Fabricant(id: existing.fabricantId, nom: existing.fabricantNom);
@@ -205,6 +280,7 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
               destination: _livraisonActive && _destination.text.trim().isNotEmpty ? _destination.text.trim() : null,
               fraisLivraison: _livraisonActive ? _fraisLivraisonValue : null,
             );
+      if (!_isEditing) await _draftStore.clear();
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => EmployeeBonEntreeDetailScreen(receiptId: receipt.id)));
       }
@@ -225,11 +301,15 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
     _remise.dispose();
     _destination.dispose();
     _fraisLivraison.dispose();
+    _draftStore.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isEditing && _draftChecked && _pendingDraft == null) {
+      _draftStore.save(_currentDraftData());
+    }
     final permissions = ref.watch(employeePermissionsProvider).valueOrNull ?? EmployeePermissions();
 
     return Scaffold(
@@ -237,6 +317,14 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
+          if (_pendingDraft != null)
+            DraftResumeBanner(
+              onResume: () => _resumeDraft(_pendingDraft!),
+              onDismiss: () {
+                _draftStore.clear();
+                setState(() => _pendingDraft = null);
+              },
+            ),
           Text('Fournisseur', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(

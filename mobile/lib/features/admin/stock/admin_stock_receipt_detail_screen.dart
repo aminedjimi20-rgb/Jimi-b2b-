@@ -39,6 +39,24 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
   bool _generating = false;
   bool _deleting = false;
   bool _recordingPayment = false;
+  bool _confirming = false;
+
+  /// A bon created by an Employee (Phase 38) stays BROUILLON — no stock/coût
+  /// effect at all — until an Admin (or the Employee, from their own screen)
+  /// confirms it; this is the Admin-side entry point for that transition.
+  Future<void> _confirmBrouillon(StockReceiptView r) async {
+    setState(() => _confirming = true);
+    try {
+      await ref.read(stockReceiptsApiProvider).confirmForAdmin(r.id);
+      ref.invalidate(_receiptProvider(widget.receiptId));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e is ApiException ? e.message : 'Erreur lors de la confirmation.')));
+      }
+    } finally {
+      if (mounted) setState(() => _confirming = false);
+    }
+  }
 
   Future<void> _recordPayment(StockReceiptView r) async {
     final result = await showDialog<_ReceiptPaymentInput>(
@@ -254,18 +272,45 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                   children: [
                     Text(r.reference, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    _StatusChip(
-                      label: paymentStatusLabel(r.statutPaiement),
-                      color: r.statutPaiement == 'PAYE'
-                          ? AppTheme.success
-                          : r.statutPaiement == 'PARTIEL'
-                              ? AppTheme.warning
-                              : AppTheme.danger,
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        if (r.isBrouillon)
+                          const _StatusChip(label: 'BROUILLON', color: AppTheme.warning)
+                        else
+                          _StatusChip(
+                            label: paymentStatusLabel(r.statutPaiement),
+                            color: r.statutPaiement == 'PAYE'
+                                ? AppTheme.success
+                                : r.statutPaiement == 'PARTIEL'
+                                    ? AppTheme.warning
+                                    : AppTheme.danger,
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Text('Fabricant: ${r.fabricantNom}'),
+                    if (r.employeeNom != null) Text('Créé par: ${r.employeeNom}'),
                     Text('Date: ${formatDate(r.createdAt)}'),
                     if (r.notes != null && r.notes!.isNotEmpty) Text('Notes: ${r.notes}'),
+                    if (r.isBrouillon) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        "Ce bon n'a encore rien ajouté au stock — le stock, le prix d'achat et le solde fournisseur ne seront mis à jour qu'à la confirmation.",
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _confirming ? null : () => _confirmBrouillon(r),
+                          icon: _confirming
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.check_circle_outline),
+                          label: const Text('Confirmer ce brouillon (ajoute le stock)'),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -324,7 +369,7 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Sous-total achat'),
+                      Text(r.isBrouillon ? 'Sous-total achat (estimé)' : 'Sous-total achat'),
                       Text(formatMoney(r.totalAchat)),
                     ],
                   ),
@@ -342,33 +387,38 @@ class _AdminStockReceiptDetailScreenState extends ConsumerState<AdminStockReceip
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total dû', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(r.isBrouillon ? 'Total dû (estimé)' : 'Total dû', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       Text(formatMoney(r.totalApresRemise), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary)),
                     ],
                   ),
-                  const Divider(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Payé au fournisseur'),
-                      Text(formatMoney(r.montantPaye), style: const TextStyle(color: AppTheme.success)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Reste à payer'),
-                      Text(
-                        formatMoney(r.montantRestant),
-                        style: TextStyle(color: r.montantRestant > 0 ? AppTheme.danger : AppTheme.success, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+                  // Le paiement fournisseur n'existe qu'une fois le bon confirmé
+                  // (voir Phase 38) — l'afficher pour un brouillon suggérerait à
+                  // tort qu'un solde est déjà dû.
+                  if (!r.isBrouillon) ...[
+                    const Divider(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Payé au fournisseur'),
+                        Text(formatMoney(r.montantPaye), style: const TextStyle(color: AppTheme.success)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Reste à payer'),
+                        Text(
+                          formatMoney(r.montantRestant),
+                          style: TextStyle(color: r.montantRestant > 0 ? AppTheme.danger : AppTheme.success, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
-            if (r.montantRestant > 0) ...[
+            if (!r.isBrouillon && r.montantRestant > 0) ...[
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
