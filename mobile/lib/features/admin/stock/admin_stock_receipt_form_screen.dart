@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/drafts/form_draft_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/draft_resume_banner.dart';
 import '../../../models/fabricant.dart';
 import '../../../models/product.dart';
 import '../../../services/stock_receipts_api.dart';
@@ -16,7 +16,11 @@ import '../products/admin_product_form_screen.dart';
 import '../products/admin_product_tile.dart';
 import 'admin_stock_receipt_detail_screen.dart';
 
-const _draftFormKey = 'admin_stock_receipt_form';
+/// Each in-progress bon gets its own draft slot (`$_adminStockReceiptDraftKeyPrefix<uuid>`)
+/// instead of one shared key — starting a second bon while a first is still
+/// unsaved must never silently overwrite it. AdminStockReceiptsScreen lists
+/// every key under this prefix as its own brouillon card.
+const adminStockReceiptDraftKeyPrefix = 'admin_stock_receipt_form:';
 
 final _fabricantsForReceiptProvider = FutureProvider.autoDispose<List<Fabricant>>((ref) => ref.watch(fabricantsApiProvider).list());
 final _productsForReceiptProvider = FutureProvider.autoDispose<List<AdminProduct>>((ref) => ref.watch(productsApiProvider).listAdmin());
@@ -51,7 +55,13 @@ class _ReceiptLine {
 /// picks/creates the fabricant, adds existing or brand-new articles with
 /// cartons/unités-par-carton, and updates real stock on submit.
 class AdminStockReceiptFormScreen extends ConsumerStatefulWidget {
-  const AdminStockReceiptFormScreen({super.key});
+  const AdminStockReceiptFormScreen({super.key, this.draftKey});
+
+  /// Pass an existing draft's key (from AdminStockReceiptsScreen's
+  /// brouillons section) to resume it directly — omit to start a brand-new
+  /// bon, which gets its own fresh key so it never collides with another
+  /// unfinished one.
+  final String? draftKey;
 
   @override
   ConsumerState<AdminStockReceiptFormScreen> createState() => _AdminStockReceiptFormScreenState();
@@ -65,9 +75,12 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
   bool _saving = false;
   String? _error;
 
-  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
-  bool _draftChecked = false;
-  Map<String, dynamic>? _pendingDraft;
+  late final String _draftKey = widget.draftKey ?? '$adminStockReceiptDraftKeyPrefix${const Uuid().v4()}';
+  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftKey);
+  // Gates autosave until we know what (if anything) to load first — saving
+  // the still-empty initial state would otherwise race the resume load and
+  // wipe out the very draft we're trying to open.
+  bool _draftReady = false;
 
   double get _totalAchat => _lines.fold(0.0, (sum, l) => sum + l.sousTotalAchat);
   double get _remiseValue => double.tryParse(_remise.text.replaceAll(',', '.')) ?? 0;
@@ -77,16 +90,20 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
   @override
   void initState() {
     super.initState();
-    _loadDraft();
+    if (widget.draftKey != null) {
+      _resumeFromDraftKey();
+    } else {
+      _draftReady = true;
+    }
   }
 
-  Future<void> _loadDraft() async {
+  Future<void> _resumeFromDraftKey() async {
     final draft = await _draftStore.load();
     if (!mounted) return;
-    setState(() {
-      _pendingDraft = draft;
-      _draftChecked = true;
-    });
+    if (draft != null) {
+      await _resumeDraft(draft);
+    }
+    setState(() => _draftReady = true);
   }
 
   Map<String, dynamic> _currentDraftData() => {
@@ -141,7 +158,6 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
         ..addAll(lines);
       _notes.text = data['notes'] as String? ?? '';
       _remise.text = data['remise'] as String? ?? '';
-      _pendingDraft = null;
     });
   }
 
@@ -258,7 +274,7 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
 
   @override
   Widget build(BuildContext context) {
-    if (_draftChecked && _pendingDraft == null) {
+    if (_draftReady) {
       _draftStore.save(_currentDraftData());
     }
 
@@ -267,14 +283,6 @@ class _AdminStockReceiptFormScreenState extends ConsumerState<AdminStockReceiptF
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
-          if (_pendingDraft != null)
-            DraftResumeBanner(
-              onResume: () => _resumeDraft(_pendingDraft!),
-              onDismiss: () {
-                _draftStore.clear();
-                setState(() => _pendingDraft = null);
-              },
-            ),
           Text('Fabricant', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(

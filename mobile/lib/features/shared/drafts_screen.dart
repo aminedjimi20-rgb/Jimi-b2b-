@@ -15,22 +15,39 @@ class _DraftInfo {
   const _DraftInfo(this.label, this.icon, this.builder);
   final String label;
   final IconData icon;
-  final WidgetBuilder builder;
+  final Widget Function(BuildContext context, String formKey) builder;
 }
 
-const _kDraftInfo = <String, _DraftInfo>{
+/// Exact-key forms — one shared draft slot per form kind.
+const _kExactDraftInfo = <String, _DraftInfo>{
   'admin_create_order': _DraftInfo('Bon de commande (Admin)', Icons.receipt_long_outlined, _adminOrderBuilder),
-  'admin_stock_receipt_form': _DraftInfo('Bon de réception (Admin)', Icons.move_to_inbox_outlined, _adminStockReceiptBuilder),
   'employee_create_order': _DraftInfo('Vente comptoir (Employé)', Icons.point_of_sale_outlined, _employeeOrderBuilder),
-  'employee_bon_entree_form': _DraftInfo('Bon d\'entrée (Employé)', Icons.move_to_inbox_outlined, _employeeBonEntreeBuilder),
   'client_checkout': _DraftInfo('Panier / Commande', Icons.shopping_cart_outlined, _checkoutBuilder),
 };
 
-Widget _adminOrderBuilder(BuildContext context) => const AdminCreateOrderScreen();
-Widget _adminStockReceiptBuilder(BuildContext context) => const AdminStockReceiptFormScreen();
-Widget _employeeOrderBuilder(BuildContext context) => const EmployeeCreateOrderScreen();
-Widget _employeeBonEntreeBuilder(BuildContext context) => const EmployeeBonEntreeFormScreen();
-Widget _checkoutBuilder(BuildContext context) => const CheckoutScreen();
+/// "Family" forms — a screen where several unrelated bons can be in
+/// progress at once, so each got its own `<prefix><uuid>` key (see
+/// AdminStockReceiptFormScreen/EmployeeBonEntreeFormScreen) instead of one
+/// shared slot; matched here by prefix rather than exact key.
+const _kPrefixDraftInfo = <String, _DraftInfo>{
+  adminStockReceiptDraftKeyPrefix: _DraftInfo('Bon de réception (Admin)', Icons.move_to_inbox_outlined, _adminStockReceiptBuilder),
+  employeeBonEntreeDraftKeyPrefix: _DraftInfo('Bon d\'entrée (Employé)', Icons.move_to_inbox_outlined, _employeeBonEntreeBuilder),
+};
+
+_DraftInfo? _infoFor(String formKey) {
+  final exact = _kExactDraftInfo[formKey];
+  if (exact != null) return exact;
+  for (final entry in _kPrefixDraftInfo.entries) {
+    if (formKey.startsWith(entry.key)) return entry.value;
+  }
+  return null;
+}
+
+Widget _adminOrderBuilder(BuildContext context, String formKey) => const AdminCreateOrderScreen();
+Widget _adminStockReceiptBuilder(BuildContext context, String formKey) => AdminStockReceiptFormScreen(draftKey: formKey);
+Widget _employeeOrderBuilder(BuildContext context, String formKey) => const EmployeeCreateOrderScreen();
+Widget _employeeBonEntreeBuilder(BuildContext context, String formKey) => EmployeeBonEntreeFormScreen(localDraftKey: formKey);
+Widget _checkoutBuilder(BuildContext context, String formKey) => const CheckoutScreen();
 
 final _draftsProvider = FutureProvider.autoDispose<List<({String formKey, DateTime updatedAt})>>((ref) {
   return ref.watch(appDatabaseProvider).readAllDrafts();
@@ -95,7 +112,7 @@ class DraftsScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, i) {
                 final draft = items[i];
-                final info = _kDraftInfo[draft.formKey];
+                final info = _infoFor(draft.formKey);
                 return Card(
                   child: ListTile(
                     leading: Icon(info?.icon ?? Icons.edit_note_outlined, color: AppTheme.primary),
@@ -105,7 +122,9 @@ class DraftsScreen extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         TextButton(
-                          onPressed: info == null ? null : () => Navigator.of(context).push(MaterialPageRoute(builder: info.builder)),
+                          onPressed: info == null
+                              ? null
+                              : () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => info.builder(ctx, draft.formKey))),
                           child: const Text('Reprendre'),
                         ),
                         IconButton(

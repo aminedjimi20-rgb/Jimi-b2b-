@@ -14,8 +14,6 @@ import '../bons_search/admin_bons_search_screen.dart';
 import 'admin_stock_receipt_detail_screen.dart';
 import 'admin_stock_receipt_form_screen.dart';
 
-const _draftFormKey = 'admin_stock_receipt_form';
-
 enum _SortOption { recent, oldest, amountAsc, amountDesc, fabricantAz, fabricantZa, articleCount }
 
 extension on _SortOption {
@@ -44,8 +42,10 @@ final _stockReceiptsProvider = FutureProvider.autoDispose<List<StockReceiptView>
   return ref.watch(stockReceiptsApiProvider).list();
 });
 
-final _localDraftProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((ref) {
-  return ref.watch(appDatabaseProvider).readDraft(_draftFormKey);
+typedef _LocalDraftRow = ({String formKey, Map<String, dynamic> data, DateTime updatedAt});
+
+final _localDraftsProvider = FutureProvider.autoDispose<List<_LocalDraftRow>>((ref) {
+  return ref.watch(appDatabaseProvider).readDraftsByPrefix(adminStockReceiptDraftKeyPrefix);
 });
 
 /// List of past "bons de réception" (goods received from fabricants) — any
@@ -76,16 +76,37 @@ class _AdminStockReceiptsScreenState extends ConsumerState<AdminStockReceiptsScr
     return r.items.any((i) => i.nom.toLowerCase().contains(q) || i.code.toLowerCase().contains(q));
   }
 
-  Future<void> _openForm() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminStockReceiptFormScreen()));
+  Future<void> _openForm({String? draftKey}) async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdminStockReceiptFormScreen(draftKey: draftKey)));
     ref.invalidate(_stockReceiptsProvider);
-    ref.invalidate(_localDraftProvider);
+    ref.invalidate(_localDraftsProvider);
+  }
+
+  Future<void> _discardLocalDraft(String formKey) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer ce brouillon ?'),
+        content: const Text('Le contenu non enregistré sera perdu.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(appDatabaseProvider).clearDraft(formKey);
+    ref.invalidate(_localDraftsProvider);
   }
 
   @override
   Widget build(BuildContext context) {
     final receiptsAsync = ref.watch(_stockReceiptsProvider);
-    final draftAsync = ref.watch(_localDraftProvider);
+    final draftsAsync = ref.watch(_localDraftsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -133,13 +154,13 @@ class _AdminStockReceiptsScreenState extends ConsumerState<AdminStockReceiptsScr
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(_stockReceiptsProvider);
-          ref.invalidate(_localDraftProvider);
+          ref.invalidate(_localDraftsProvider);
         },
         child: AsyncValueWidget<List<StockReceiptView>>(
           value: receiptsAsync,
           onRetry: () => ref.invalidate(_stockReceiptsProvider),
           data: (allItems) {
-            final draft = draftAsync.valueOrNull;
+            final localDrafts = draftsAsync.valueOrNull ?? const <_LocalDraftRow>[];
             final serverBrouillons = allItems.where((r) => r.isBrouillon).toList();
             var confirmed = allItems.where((r) => !r.isBrouillon).toList();
 
@@ -149,7 +170,7 @@ class _AdminStockReceiptsScreenState extends ConsumerState<AdminStockReceiptsScr
             if (_query.isNotEmpty) confirmed = confirmed.where((r) => _matches(r, _query)).toList();
             confirmed.sort(_sort.compare);
 
-            final hasBrouillons = draft != null || serverBrouillons.isNotEmpty;
+            final hasBrouillons = localDrafts.isNotEmpty || serverBrouillons.isNotEmpty;
             final isFiltered = _query.isNotEmpty || _dateFilter != QuickDateFilter.all;
 
             return Column(
@@ -193,7 +214,12 @@ class _AdminStockReceiptsScreenState extends ConsumerState<AdminStockReceiptsScr
                         : "Aucun bon de réception pour le moment.\nCréez-en un quand une livraison arrive.",
                     pinnedHeader: !hasBrouillons
                         ? null
-                        : _BrouillonsSection(localDraft: draft, serverBrouillons: serverBrouillons, onOpenLocalDraft: _openForm),
+                        : _BrouillonsSection(
+                            localDrafts: localDrafts,
+                            serverBrouillons: serverBrouillons,
+                            onOpenDraft: (key) => _openForm(draftKey: key),
+                            onDiscardDraft: _discardLocalDraft,
+                          ),
                     itemBuilder: (context, r) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Card(
@@ -221,11 +247,17 @@ class _AdminStockReceiptsScreenState extends ConsumerState<AdminStockReceiptsScr
 }
 
 class _BrouillonsSection extends StatelessWidget {
-  const _BrouillonsSection({required this.localDraft, required this.serverBrouillons, required this.onOpenLocalDraft});
+  const _BrouillonsSection({
+    required this.localDrafts,
+    required this.serverBrouillons,
+    required this.onOpenDraft,
+    required this.onDiscardDraft,
+  });
 
-  final Map<String, dynamic>? localDraft;
+  final List<_LocalDraftRow> localDrafts;
   final List<StockReceiptView> serverBrouillons;
-  final VoidCallback onOpenLocalDraft;
+  final void Function(String formKey) onOpenDraft;
+  final void Function(String formKey) onDiscardDraft;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +268,13 @@ class _BrouillonsSection extends StatelessWidget {
         children: [
           Text('BROUILLONS', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.warning)),
           const SizedBox(height: 8),
-          if (localDraft != null) _LocalDraftCard(data: localDraft!, onTap: onOpenLocalDraft),
+          for (final draft in localDrafts)
+            _LocalDraftCard(
+              data: draft.data,
+              updatedAt: draft.updatedAt,
+              onTap: () => onOpenDraft(draft.formKey),
+              onDiscard: () => onDiscardDraft(draft.formKey),
+            ),
           for (final r in serverBrouillons) _ServerBrouillonCard(receipt: r),
         ],
       ),
@@ -245,9 +283,11 @@ class _BrouillonsSection extends StatelessWidget {
 }
 
 class _LocalDraftCard extends StatelessWidget {
-  const _LocalDraftCard({required this.data, required this.onTap});
+  const _LocalDraftCard({required this.data, required this.updatedAt, required this.onTap, required this.onDiscard});
   final Map<String, dynamic> data;
+  final DateTime updatedAt;
   final VoidCallback onTap;
+  final VoidCallback onDiscard;
 
   @override
   Widget build(BuildContext context) {
@@ -259,8 +299,14 @@ class _LocalDraftCard extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.edit_note_outlined, color: AppTheme.warning),
         title: Text(fabricantNom == null || fabricantNom.isEmpty ? 'Bon fournisseur brouillon' : 'Bon fournisseur brouillon · $fabricantNom'),
-        subtitle: Text('${items.length} article${items.length == 1 ? '' : 's'} · non enregistré'),
-        trailing: TextButton(onPressed: onTap, child: const Text('Continuer')),
+        subtitle: Text('${items.length} article${items.length == 1 ? '' : 's'} · modifié ${formatDate(updatedAt)}'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(onPressed: onTap, child: const Text('Continuer')),
+            IconButton(icon: const Icon(Icons.delete_outline, color: AppTheme.danger), tooltip: 'Supprimer', onPressed: onDiscard),
+          ],
+        ),
         onTap: onTap,
       ),
     );

@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/drafts/form_draft_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/draft_resume_banner.dart';
 import '../../../models/employee_permissions.dart';
 import '../../../models/employee_product.dart';
 import '../../../models/fabricant.dart';
@@ -21,7 +21,10 @@ import 'employee_bon_entree_detail_screen.dart';
 import 'employee_new_product_screen.dart';
 import 'fournisseur_picker_sheet.dart';
 
-const _draftFormKey = 'employee_bon_entree_form';
+/// Each in-progress local brouillon gets its own draft slot (see the
+/// matching comment on AdminStockReceiptFormScreen) instead of one shared
+/// key, so starting a second bon never silently overwrites a first.
+const employeeBonEntreeDraftKeyPrefix = 'employee_bon_entree_form:';
 
 final _transporteursForBonEntreeProvider = FutureProvider.autoDispose<List<Transporteur>>((ref) => ref.watch(transporteursApiProvider).list());
 
@@ -52,10 +55,14 @@ class _BonEntreeLine {
 /// confirmé (voir l'écran détail) : aucun effet sur le stock ni sur le solde
 /// fournisseur n'est appliqué ici, seulement lors de la confirmation.
 class EmployeeBonEntreeFormScreen extends ConsumerStatefulWidget {
-  const EmployeeBonEntreeFormScreen({super.key, this.existing});
+  const EmployeeBonEntreeFormScreen({super.key, this.existing, this.localDraftKey});
 
-  /// Non-null pour modifier un brouillon déjà créé.
+  /// Non-null pour modifier un brouillon déjà envoyé au serveur (Phase 38).
   final StockReceiptView? existing;
+
+  /// Non-null pour reprendre directement un brouillon purement local (voir
+  /// EmployeeBonEntreeListScreen) — mutuellement exclusif avec [existing].
+  final String? localDraftKey;
 
   @override
   ConsumerState<EmployeeBonEntreeFormScreen> createState() => _EmployeeBonEntreeFormScreenState();
@@ -76,10 +83,12 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
 
   // Local auto-draft only guards a brand-new bon (never yet sent to the
   // server) — resuming an already-saved server BROUILLON loads straight
-  // from `existing` below, which is itself durable (see Phase 38).
-  late final FormDraftStore _draftStore = createFormDraftStore(ref, _draftFormKey);
-  bool _draftChecked = false;
-  Map<String, dynamic>? _pendingDraft;
+  // from `existing` below, which is itself durable (see Phase 38). Each
+  // brand-new bon gets its own key so a second one never overwrites a
+  // first still-unsaved draft.
+  late final String _localDraftKey = widget.localDraftKey ?? '$employeeBonEntreeDraftKeyPrefix${const Uuid().v4()}';
+  late final FormDraftStore _draftStore = createFormDraftStore(ref, _localDraftKey);
+  bool _draftReady = false;
 
   bool get _isEditing => widget.existing != null;
 
@@ -92,10 +101,8 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
   Future<void> _loadDraft() async {
     final draft = await _draftStore.load();
     if (!mounted) return;
-    setState(() {
-      _pendingDraft = draft;
-      _draftChecked = true;
-    });
+    if (draft != null) _resumeDraft(draft);
+    setState(() => _draftReady = true);
   }
 
   Map<String, dynamic> _currentDraftData() => {
@@ -148,14 +155,19 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
       _lines
         ..clear()
         ..addAll(lines);
-      _pendingDraft = null;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    if (!_isEditing) _loadDraft();
+    if (!_isEditing) {
+      if (widget.localDraftKey != null) {
+        _loadDraft();
+      } else {
+        _draftReady = true;
+      }
+    }
     final existing = widget.existing;
     if (existing != null) {
       _fabricant = Fabricant(id: existing.fabricantId, nom: existing.fabricantNom);
@@ -307,7 +319,7 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
 
   @override
   Widget build(BuildContext context) {
-    if (!_isEditing && _draftChecked && _pendingDraft == null) {
+    if (!_isEditing && _draftReady) {
       _draftStore.save(_currentDraftData());
     }
     final permissions = ref.watch(employeePermissionsProvider).valueOrNull ?? EmployeePermissions();
@@ -317,14 +329,6 @@ class _EmployeeBonEntreeFormScreenState extends ConsumerState<EmployeeBonEntreeF
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
-          if (_pendingDraft != null)
-            DraftResumeBanner(
-              onResume: () => _resumeDraft(_pendingDraft!),
-              onDismiss: () {
-                _draftStore.clear();
-                setState(() => _pendingDraft = null);
-              },
-            ),
           Text('Fournisseur', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(

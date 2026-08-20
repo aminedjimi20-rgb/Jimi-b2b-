@@ -171,4 +171,21 @@ class AppDatabase {
     final rows = await db.query('form_drafts', orderBy: 'updatedAt DESC');
     return rows.map((r) => (formKey: r['formKey'] as String, updatedAt: DateTime.fromMillisecondsSinceEpoch(r['updatedAt'] as int))).toList();
   }
+
+  /// Every draft under a "family" of keys (e.g. `admin_stock_receipt_form:`
+  /// + a per-bon uuid) — a screen that can have several unrelated
+  /// in-progress bons at once (start one, get interrupted, start another)
+  /// uses a unique key per bon instead of one fixed key, so this is how a
+  /// list screen finds "all of them" to show as separate brouillon cards.
+  Future<List<({String formKey, Map<String, dynamic> data, DateTime updatedAt})>> readDraftsByPrefix(String prefix) async {
+    final db = await database;
+    final rows = await db.query('form_drafts', where: 'formKey LIKE ?', whereArgs: ['$prefix%'], orderBy: 'updatedAt DESC');
+    return rows
+        .map((r) => (
+              formKey: r['formKey'] as String,
+              data: jsonDecode(r['dataJson'] as String) as Map<String, dynamic>,
+              updatedAt: DateTime.fromMillisecondsSinceEpoch(r['updatedAt'] as int),
+            ))
+        .toList();
+  }
 }
