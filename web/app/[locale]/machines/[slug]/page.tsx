@@ -170,7 +170,7 @@ export default async function MachineDetailPage({
               {machine.photos && machine.photos.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {machine.photos.map((url, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Supabase Storage domain, unknown at build time
+                    // eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Firebase Storage domain, unknown at build time
                     <img
                       key={url}
                       src={url}

@@ -58,29 +58,30 @@ développement local (pratique, zéro configuration), mais **n'est pas une
 persistance réelle** : c'est pour ça qu'une machine approuvée pouvait
 sembler avoir disparu.
 
-La vraie base de données est **Supabase** (Postgres + Storage), déjà câblée
-dans le code (`lib/supabase.ts`, `lib/sellers.ts`, `lib/buyers.ts`,
+La vraie base de données est **Firebase** (Firestore + Storage), déjà câblée
+dans le code (`lib/firebaseAdmin.ts`, `lib/sellers.ts`, `lib/buyers.ts`,
 `lib/machinesStore.ts`, `lib/machineLeads.ts`, `lib/leads.ts` basculent
-automatiquement sur Supabase dès que les variables d'environnement sont
-présentes). Mise en place (une seule fois) :
+automatiquement sur Firestore dès que les variables d'environnement sont
+présentes). Mise en place complète : voir **`web/firebase/README.md`**
+(créer le projet, activer Firestore + Storage, publier les règles de
+sécurité, générer la clé de compte de service, configurer Vercel).
+Résumé rapide :
 
-1. Créer un projet gratuit sur [supabase.com](https://supabase.com).
-2. Dans **SQL Editor**, coller le contenu de `web/supabase/schema.sql` et
-   l'exécuter (crée les tables `machines`, `sellers`, `buyers`,
-   `machine_leads`, `leads`, avec Row Level Security activée et **aucune
-   policy** — seule la clé `service_role`, utilisée uniquement côté serveur,
-   peut donc lire/écrire ces données).
-3. Dans **Project Settings → API**, copier 3 valeurs vers les variables
-   d'environnement de Vercel (Project Settings → Environment Variables) :
-   - `SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_URL` = Project URL
-   - `SUPABASE_SERVICE_ROLE_KEY` = clé `service_role` (secrète, jamais
-     exposée au navigateur)
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = clé `anon`/`public` (nécessaire pour
-     que le navigateur envoie directement les photos/vidéos vers Supabase
-     Storage sans passer par le serveur)
-4. Redéployer. Le bucket de stockage `machine-media` (public en lecture) est
-   créé automatiquement au premier envoi de photo/vidéo — aucune étape
-   manuelle supplémentaire côté Storage.
+1. Créer un projet gratuit sur [firebase.google.com](https://firebase.google.com).
+2. Activer **Firestore Database** (mode production) et **Storage**.
+3. Publier `web/firebase/firestore.rules` et `web/firebase/storage.rules`
+   (Firebase Console → Firestore/Storage → onglet Règles — Firestore refuse
+   tout accès direct du navigateur ; seule la clé de service, utilisée
+   uniquement côté serveur, peut lire/écrire).
+4. Project Settings → **Comptes de service** → générer une clé privée
+   (fichier JSON) → copier `project_id`/`client_email`/`private_key` vers
+   `FIREBASE_PROJECT_ID`/`FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`.
+5. Project Settings → **Général** → config de l'app web → copier les
+   valeurs publiques vers `NEXT_PUBLIC_FIREBASE_*` (nécessaires pour que le
+   navigateur envoie directement les photos/vidéos vers Firebase Storage,
+   sans passer par le serveur — pas de limite de taille de requête Vercel).
+6. Ajouter ces 7 variables dans Vercel (Project Settings → Environment
+   Variables) et redéployer.
 
 Voir `.env.example` pour le nom exact de chaque variable.
 
@@ -93,8 +94,8 @@ app/api/              Route handlers (leads, admin)
 components/           Composants UI, sections de page, formulaires
 config/site.config.ts Configuration centrale (coordonnées, SEO)
 data/                 Données de démonstration (machines, réalisations, articles)
-lib/                  Accès aux données, i18n helpers, Supabase (DB + Storage)
-supabase/schema.sql   Script SQL à exécuter une fois dans Supabase
+lib/                  Accès aux données, i18n helpers, Firebase (Firestore + Storage)
+firebase/             Règles de sécurité + guide de mise en place Firebase
 messages/             Traductions fr.json / ar.json / en.json
 ```
 
@@ -106,7 +107,7 @@ messages/             Traductions fr.json / ar.json / en.json
   d'accueil affichent un état vide honnête (« Aucune machine disponible
   actuellement », etc.) avec un appel à l'action vers WhatsApp/contact.
 - Les machines ajoutées depuis `/admin` (onglet **Machines**) sont
-  persistées dans Supabase (voir section précédente) et apparaissent
+  persistées dans Firestore (voir section précédente) et apparaissent
   immédiatement sur le site public (ajout fait par un admin authentifié =
   publication directe).
 - **Statut unique.** Une machine a un seul champ `status`, partout le même
@@ -170,9 +171,10 @@ reste l'intermédiaire entre acheteur et vendeur à chaque étape.
   plusieurs photos. Sur `/vendre-machine`, le vendeur choisit ses photos et
   sa vidéo directement depuis la galerie/l'appareil de son téléphone
   (`components/forms/MediaUploader.tsx`) : les fichiers sont envoyés
-  directement du navigateur vers Supabase Storage (URL d'upload signée,
-  générée par `/api/upload/sign`), jamais en base64 ni via
-  `localStorage`. La première photo de la liste est la **photo
+  directement du navigateur vers Firebase Storage (avec une vraie barre de
+  progression par fichier), jamais en base64 ni via `localStorage` — voir
+  `web/firebase/storage.rules` pour les limites de taille/type appliquées.
+  La première photo de la liste est la **photo
   principale** (réordonnable, un bouton dédié permet d'en choisir une
   autre) et c'est elle qui apparaît sur la carte, la page d'accueil, la
   fiche détail et l'aperçu Open Graph. Un lien YouTube/Vimeo/MP4 direct

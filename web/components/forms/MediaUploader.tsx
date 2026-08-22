@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { getFirebaseStorage } from "@/lib/firebaseClient";
 import { ImagePlus, VideoIcon, X, Star, ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
-const BUCKET = "machine-media";
 const PHOTO_ACCEPT = "image/jpeg,image/jpg,image/png,image/webp";
 const VIDEO_ACCEPT = "video/mp4,video/webm";
 
@@ -32,22 +32,27 @@ const DEFAULT_LABELS: UploaderLabels = {
   notConfigured: "Le stockage des fichiers n'est pas encore configuré.",
 };
 
-async function uploadOne(file: File, kind: "photo" | "video"): Promise<string> {
-  const res = await fetch("/api/upload/sign", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contentType: file.type, kind }),
+function uploadOne(
+  file: File,
+  kind: "photo" | "video",
+  onProgress: (pct: number) => void
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const storage = getFirebaseStorage();
+    if (!storage) {
+      reject(new Error("Configuration de stockage manquante."));
+      return;
+    }
+    const ext = file.name.split(".").pop()?.toLowerCase() || (kind === "photo" ? "jpg" : "mp4");
+    const path = `machines/${kind}s/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const task = uploadBytesResumable(storageRef(storage, path), file, { contentType: file.type });
+    task.on(
+      "state_changed",
+      (snapshot) => onProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)),
+      (error) => reject(new Error(error.message)),
+      () => getDownloadURL(task.snapshot.ref).then(resolve).catch(reject)
+    );
   });
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({}) as { message?: string });
-    throw new Error(j.message || "Échec de l'envoi du fichier.");
-  }
-  const { token, path, publicUrl } = (await res.json()) as { token: string; path: string; publicUrl: string };
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) throw new Error("Configuration de stockage manquante.");
-  const { error } = await supabase.storage.from(BUCKET).uploadToSignedUrl(path, token, file);
-  if (error) throw new Error(error.message);
-  return publicUrl;
 }
 
 function formatSize(bytes: number): string {
@@ -55,7 +60,7 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 }
 
-type UploadItem = { id: string; name: string; status: "uploading" | "error"; error?: string };
+type UploadItem = { id: string; name: string; status: "uploading" | "error"; progress: number; error?: string };
 
 export function PhotoUploader({
   value,
@@ -78,9 +83,11 @@ export function PhotoUploader({
     let current = value;
     for (const file of files) {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      setItems((prev) => [...prev, { id, name: file.name, status: "uploading" }]);
+      setItems((prev) => [...prev, { id, name: file.name, status: "uploading", progress: 0 }]);
       try {
-        const url = await uploadOne(file, "photo");
+        const url = await uploadOne(file, "photo", (progress) =>
+          setItems((prev) => prev.map((it) => (it.id === id ? { ...it, progress } : it)))
+        );
         current = [...current, url];
         onChange(current);
         setItems((prev) => prev.filter((it) => it.id !== id));
@@ -109,7 +116,7 @@ export function PhotoUploader({
     onChange(next);
   }
 
-  function retry(id: string) {
+  function dismiss(id: string) {
     setItems((prev) => prev.filter((it) => it.id !== id));
   }
 
@@ -119,7 +126,7 @@ export function PhotoUploader({
         <div className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {value.map((url, i) => (
             <div key={url} className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--color-border)]">
-              {/* eslint-disable-next-line @next/next/no-img-element -- external Supabase Storage URL */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- external Firebase Storage URL */}
               <img src={url} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
               {i === 0 && (
                 <span className="absolute left-1.5 top-1.5 rounded-full bg-[var(--color-accent)] px-2 py-0.5 text-[10px] font-bold text-white">
@@ -180,20 +187,32 @@ export function PhotoUploader({
           {items.map((it) => (
             <div
               key={it.id}
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
+              className={`overflow-hidden rounded-lg border text-xs ${
                 it.status === "error" ? "border-red-200 bg-red-50 text-red-700" : "border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)]"
               }`}
             >
-              {it.status === "uploading" ? (
-                <Loader2 size={14} className="shrink-0 animate-spin" />
-              ) : (
-                <AlertCircle size={14} className="shrink-0" />
-              )}
-              <span className="flex-1 truncate">{it.status === "uploading" ? `${labels.uploading} ${it.name}` : it.error}</span>
-              {it.status === "error" && (
-                <button type="button" onClick={() => retry(it.id)} className="shrink-0 font-semibold hover:underline">
-                  OK
-                </button>
+              <div className="flex items-center gap-2 px-3 py-2">
+                {it.status === "uploading" ? (
+                  <Loader2 size={14} className="shrink-0 animate-spin" />
+                ) : (
+                  <AlertCircle size={14} className="shrink-0" />
+                )}
+                <span className="flex-1 truncate">
+                  {it.status === "uploading" ? `${labels.uploading} ${it.name} (${it.progress}%)` : it.error}
+                </span>
+                {it.status === "error" && (
+                  <button type="button" onClick={() => dismiss(it.id)} className="shrink-0 font-semibold hover:underline">
+                    OK
+                  </button>
+                )}
+              </div>
+              {it.status === "uploading" && (
+                <div className="h-1 w-full bg-[var(--color-border)]">
+                  <div
+                    className="h-1 bg-[var(--color-accent)] transition-all"
+                    style={{ width: `${it.progress}%` }}
+                  />
+                </div>
               )}
             </div>
           ))}
@@ -233,6 +252,7 @@ export function VideoUploader({
   labels?: UploaderLabels;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
@@ -243,8 +263,9 @@ export function VideoUploader({
     setError(null);
     setFileSize(file.size);
     setUploading(true);
+    setProgress(0);
     try {
-      const url = await uploadOne(file, "video");
+      const url = await uploadOne(file, "video", setProgress);
       onChange(url);
     } catch (e) {
       setError((e as Error).message);
@@ -299,8 +320,13 @@ export function VideoUploader({
       )}
 
       {uploading && (
-        <div className="mb-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
-          <Loader2 size={14} className="shrink-0 animate-spin" /> {labels.uploading}
+        <div className="mb-3 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)]">
+          <div className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--color-text-muted)]">
+            <Loader2 size={14} className="shrink-0 animate-spin" /> {labels.uploading} ({progress}%)
+          </div>
+          <div className="h-1 w-full bg-[var(--color-border)]">
+            <div className="h-1 bg-[var(--color-accent)] transition-all" style={{ width: `${progress}%` }} />
+          </div>
         </div>
       )}
 

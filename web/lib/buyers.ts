@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
+import { getFirestoreAdmin, isFirebaseConfigured } from "@/lib/firebaseAdmin";
 
 export interface BuyerProfile {
   id: string;
@@ -21,54 +21,29 @@ function normalizePhone(phone: string): string {
   return phone.replace(/[^\d]/g, "");
 }
 
-function fromRow(row: Record<string, unknown>): BuyerProfile {
-  return {
-    id: row.id as string,
-    name: row.name as string,
-    company: (row.company as string | null) ?? null,
-    phone: row.phone as string,
-    whatsapp: (row.whatsapp as string | null) ?? null,
-    email: (row.email as string | null) ?? null,
-    wilaya: (row.wilaya as string | null) ?? null,
-    createdAt: row.created_at as string,
-  };
-}
+const COLLECTION = "buyers";
 
-// ---- Supabase-backed implementation (production) --------------------------
+// ---- Firestore-backed implementation (production) -------------------------
 
 async function dbGetBuyers(): Promise<BuyerProfile[]> {
-  const { data, error } = await getSupabaseAdmin()
-    .from("buyers")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []).map(fromRow);
+  const snap = await getFirestoreAdmin().collection(COLLECTION).orderBy("createdAt", "desc").get();
+  return snap.docs.map((d) => d.data() as BuyerProfile);
 }
 
 async function dbFindOrCreateBuyer(input: BuyerInput): Promise<BuyerProfile> {
-  const supabase = getSupabaseAdmin();
-  const { data: existing } = await supabase.from("buyers").select("*");
-  const match = (existing ?? []).find((b) => normalizePhone(b.phone) === normalizePhone(input.phone));
-  if (match) return fromRow(match);
+  const db = getFirestoreAdmin();
+  const phoneNormalized = normalizePhone(input.phone);
+  const existing = await db.collection(COLLECTION).where("phoneNormalized", "==", phoneNormalized).limit(1).get();
+  if (!existing.empty) return existing.docs[0].data() as BuyerProfile;
 
-  const { data, error } = await supabase
-    .from("buyers")
-    .insert({
-      name: input.name,
-      company: input.company,
-      phone: input.phone,
-      whatsapp: input.whatsapp,
-      email: input.email,
-      wilaya: input.wilaya,
-    })
-    .select("*")
-    .single();
-  if (error) throw error;
-  return fromRow(data);
+  const ref = db.collection(COLLECTION).doc();
+  const buyer: BuyerProfile = { id: ref.id, createdAt: new Date().toISOString(), ...input };
+  await ref.set({ ...buyer, phoneNormalized });
+  return buyer;
 }
 
-// ---- Ephemeral file-based fallback (local dev only — NOT the production
-// fix; data does not survive across Vercel serverless instances) -----------
+// ---- Ephemeral file-based fallback (local dev only — see lib/sellers.ts
+// for why this is not the production fix) -----------------------------
 
 const DATA_DIR = path.join(os.tmpdir(), "jimi-buyers-store");
 const FILE = path.join(DATA_DIR, "buyers.json");
@@ -106,7 +81,7 @@ async function fileFindOrCreateBuyer(input: BuyerInput): Promise<BuyerProfile> {
 // ---- Public API -------------------------------------------------------
 
 export async function getBuyers(): Promise<BuyerProfile[]> {
-  return isSupabaseConfigured() ? dbGetBuyers() : fileGetBuyers();
+  return isFirebaseConfigured() ? dbGetBuyers() : fileGetBuyers();
 }
 
 export async function getBuyerById(id: string): Promise<BuyerProfile | undefined> {
@@ -117,5 +92,5 @@ export async function getBuyerById(id: string): Promise<BuyerProfile | undefined
 /** Finds an existing buyer by phone number, or creates a new profile — same
  *  de-duplication approach as findOrCreateSeller (no buyer login exists). */
 export async function findOrCreateBuyer(input: BuyerInput): Promise<BuyerProfile> {
-  return isSupabaseConfigured() ? dbFindOrCreateBuyer(input) : fileFindOrCreateBuyer(input);
+  return isFirebaseConfigured() ? dbFindOrCreateBuyer(input) : fileFindOrCreateBuyer(input);
 }

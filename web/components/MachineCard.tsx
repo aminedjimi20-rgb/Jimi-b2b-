@@ -25,7 +25,7 @@ export function MachineCard({ machine, index = 0 }: { machine: PublicMachine; in
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-ink)]">
         {machine.photos && machine.photos.length > 0 ? (
-          // eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Supabase Storage domain, unknown at build time
+          // eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Firebase Storage domain, unknown at build time
           <img
             src={machine.photos[0]}
             alt={`${machine.brand} ${machine.model}`}

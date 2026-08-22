@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
+import { getFirestoreAdmin, isFirebaseConfigured } from "@/lib/firebaseAdmin";
 
 export type LeadStatus =
   | "new"
@@ -43,6 +43,8 @@ export type MachineLeadInput = Pick<
   "machineId" | "machineSlug" | "machineLabel" | "sellerId" | "buyerId" | "message"
 >;
 
+type UpdatePatch = Partial<Pick<MachineLead, "status" | "adminNote">> & { commission?: Partial<Commission> };
+
 const DEFAULT_COMMISSION: Commission = {
   type: "percentage",
   value: 0,
@@ -50,92 +52,55 @@ const DEFAULT_COMMISSION: Commission = {
   status: "pending",
 };
 
-function fromRow(row: Record<string, unknown>): MachineLead {
-  return {
-    id: row.id as string,
-    machineId: row.machine_id as string,
-    machineSlug: row.machine_slug as string,
-    machineLabel: row.machine_label as string,
-    sellerId: (row.seller_id as string | null) ?? null,
-    buyerId: row.buyer_id as string,
-    message: (row.message as string) ?? "",
-    status: row.status as LeadStatus,
-    commission: {
-      type: row.commission_type as CommissionType,
-      value: Number(row.commission_value ?? 0),
-      expectedAmount: row.commission_expected_amount === null ? null : Number(row.commission_expected_amount),
-      status: row.commission_status as CommissionStatus,
-    },
-    adminNote: (row.admin_note as string | null) ?? null,
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-  };
-}
+const COLLECTION = "machineLeads";
 
-type UpdatePatch = Partial<Pick<MachineLead, "status" | "adminNote">> & { commission?: Partial<Commission> };
-
-function toUpdateRow(patch: UpdatePatch): Record<string, unknown> {
-  const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if ("status" in patch) row.status = patch.status;
-  if ("adminNote" in patch) row.admin_note = patch.adminNote;
-  if (patch.commission) {
-    if ("type" in patch.commission) row.commission_type = patch.commission.type;
-    if ("value" in patch.commission) row.commission_value = patch.commission.value;
-    if ("expectedAmount" in patch.commission) row.commission_expected_amount = patch.commission.expectedAmount;
-    if ("status" in patch.commission) row.commission_status = patch.commission.status;
-  }
-  return row;
-}
-
-// ---- Supabase-backed implementation (production) --------------------------
+// ---- Firestore-backed implementation (production) -------------------------
 
 async function dbGetMachineLeads(): Promise<MachineLead[]> {
-  const { data, error } = await getSupabaseAdmin()
-    .from("machine_leads")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []).map(fromRow);
+  const snap = await getFirestoreAdmin().collection(COLLECTION).orderBy("createdAt", "desc").get();
+  return snap.docs.map((d) => d.data() as MachineLead);
 }
 
 async function dbAddMachineLead(input: MachineLeadInput): Promise<MachineLead> {
-  const { data, error } = await getSupabaseAdmin()
-    .from("machine_leads")
-    .insert({
-      machine_id: input.machineId,
-      machine_slug: input.machineSlug,
-      machine_label: input.machineLabel,
-      seller_id: input.sellerId,
-      buyer_id: input.buyerId,
-      message: input.message,
-      status: "new",
-      commission_type: DEFAULT_COMMISSION.type,
-      commission_value: DEFAULT_COMMISSION.value,
-      commission_status: DEFAULT_COMMISSION.status,
-    })
-    .select("*")
-    .single();
-  if (error) throw error;
-  return fromRow(data);
+  const db = getFirestoreAdmin();
+  const ref = db.collection(COLLECTION).doc();
+  const now = new Date().toISOString();
+  const lead: MachineLead = {
+    id: ref.id,
+    ...input,
+    status: "new",
+    commission: { ...DEFAULT_COMMISSION },
+    adminNote: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await ref.set(lead);
+  return lead;
 }
 
 async function dbUpdateMachineLead(id: string, patch: UpdatePatch): Promise<MachineLead | null> {
-  const { data, error } = await getSupabaseAdmin()
-    .from("machine_leads")
-    .update(toUpdateRow(patch))
-    .eq("id", id)
-    .select("*")
-    .single();
-  if (error) return null;
-  return fromRow(data);
+  const db = getFirestoreAdmin();
+  const ref = db.collection(COLLECTION).doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const current = snap.data() as MachineLead;
+  const { commission, ...rest } = patch;
+  const next: MachineLead = {
+    ...current,
+    ...rest,
+    commission: commission ? { ...current.commission, ...commission } : current.commission,
+    updatedAt: new Date().toISOString(),
+  };
+  await ref.set(next);
+  return next;
 }
 
 async function dbDeleteMachineLead(id: string): Promise<void> {
-  await getSupabaseAdmin().from("machine_leads").delete().eq("id", id);
+  await getFirestoreAdmin().collection(COLLECTION).doc(id).delete();
 }
 
-// ---- Ephemeral file-based fallback (local dev only — NOT the production
-// fix; data does not survive across Vercel serverless instances) -----------
+// ---- Ephemeral file-based fallback (local dev only — see lib/sellers.ts
+// for why this is not the production fix) -----------------------------
 
 const DATA_DIR = path.join(os.tmpdir(), "jimi-machine-leads-store");
 const FILE = path.join(DATA_DIR, "machine-leads.json");
@@ -205,17 +170,17 @@ async function fileDeleteMachineLead(id: string): Promise<void> {
 // ---- Public API -------------------------------------------------------
 
 export async function getMachineLeads(): Promise<MachineLead[]> {
-  return isSupabaseConfigured() ? dbGetMachineLeads() : fileGetMachineLeads();
+  return isFirebaseConfigured() ? dbGetMachineLeads() : fileGetMachineLeads();
 }
 
 export async function addMachineLead(input: MachineLeadInput): Promise<MachineLead> {
-  return isSupabaseConfigured() ? dbAddMachineLead(input) : fileAddMachineLead(input);
+  return isFirebaseConfigured() ? dbAddMachineLead(input) : fileAddMachineLead(input);
 }
 
 export async function updateMachineLead(id: string, patch: UpdatePatch): Promise<MachineLead | null> {
-  return isSupabaseConfigured() ? dbUpdateMachineLead(id, patch) : fileUpdateMachineLead(id, patch);
+  return isFirebaseConfigured() ? dbUpdateMachineLead(id, patch) : fileUpdateMachineLead(id, patch);
 }
 
 export async function deleteMachineLead(id: string): Promise<void> {
-  return isSupabaseConfigured() ? dbDeleteMachineLead(id) : fileDeleteMachineLead(id);
+  return isFirebaseConfigured() ? dbDeleteMachineLead(id) : fileDeleteMachineLead(id);
 }

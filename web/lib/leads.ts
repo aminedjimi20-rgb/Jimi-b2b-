@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
+import { getFirestoreAdmin, isFirebaseConfigured } from "@/lib/firebaseAdmin";
 
 export type LeadType = "buy" | "sell" | "service" | "contact";
 
@@ -14,43 +14,32 @@ export interface Lead {
   data: Record<string, string>;
 }
 
-function fromRow(row: Record<string, unknown>): Lead {
-  return {
-    id: row.id as string,
-    type: row.type as LeadType,
-    createdAt: row.created_at as string,
-    status: row.status as Lead["status"],
-    data: (row.data as Record<string, string>) ?? {},
-  };
-}
+const COLLECTION = "leads";
 
-// ---- Supabase-backed implementation (production) --------------------------
+// ---- Firestore-backed implementation (production) --------------------------
 
 async function dbGetLeads(): Promise<Lead[]> {
-  const { data, error } = await getSupabaseAdmin().from("leads").select("*").order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []).map(fromRow);
+  const snap = await getFirestoreAdmin().collection(COLLECTION).orderBy("createdAt", "desc").get();
+  return snap.docs.map((d) => d.data() as Lead);
 }
 
 async function dbAddLead(type: LeadType, data: Record<string, string>): Promise<Lead> {
-  const { data: row, error } = await getSupabaseAdmin()
-    .from("leads")
-    .insert({ type, status: "new", data })
-    .select("*")
-    .single();
-  if (error) throw error;
-  return fromRow(row);
+  const db = getFirestoreAdmin();
+  const ref = db.collection(COLLECTION).doc();
+  const lead: Lead = { id: ref.id, type, createdAt: new Date().toISOString(), status: "new", data };
+  await ref.set(lead);
+  return lead;
 }
 
 async function dbUpdateLeadStatus(id: string, status: Lead["status"]): Promise<void> {
-  await getSupabaseAdmin().from("leads").update({ status }).eq("id", id);
+  await getFirestoreAdmin().collection(COLLECTION).doc(id).update({ status });
 }
 
 async function dbDeleteLead(id: string): Promise<void> {
-  await getSupabaseAdmin().from("leads").delete().eq("id", id);
+  await getFirestoreAdmin().collection(COLLECTION).doc(id).delete();
 }
 
-// ---- Ephemeral file-based fallback (local dev only — see machinesStore.ts
+// ---- Ephemeral file-based fallback (local dev only — see lib/sellers.ts
 // for why this is not the production fix) -----------------------------
 
 const DATA_DIR = path.join(os.tmpdir(), "jimi-leads");
@@ -99,17 +88,17 @@ async function fileDeleteLead(id: string): Promise<void> {
 // ---- Public API -------------------------------------------------------
 
 export async function getLeads(): Promise<Lead[]> {
-  return isSupabaseConfigured() ? dbGetLeads() : fileGetLeads();
+  return isFirebaseConfigured() ? dbGetLeads() : fileGetLeads();
 }
 
 export async function addLead(type: LeadType, data: Record<string, string>): Promise<Lead> {
-  return isSupabaseConfigured() ? dbAddLead(type, data) : fileAddLead(type, data);
+  return isFirebaseConfigured() ? dbAddLead(type, data) : fileAddLead(type, data);
 }
 
 export async function updateLeadStatus(id: string, status: Lead["status"]): Promise<void> {
-  return isSupabaseConfigured() ? dbUpdateLeadStatus(id, status) : fileUpdateLeadStatus(id, status);
+  return isFirebaseConfigured() ? dbUpdateLeadStatus(id, status) : fileUpdateLeadStatus(id, status);
 }
 
 export async function deleteLead(id: string): Promise<void> {
-  return isSupabaseConfigured() ? dbDeleteLead(id) : fileDeleteLead(id);
+  return isFirebaseConfigured() ? dbDeleteLead(id) : fileDeleteLead(id);
 }
