@@ -18,7 +18,8 @@ const VIDEO_TYPES: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? "unknown";
-  if (isRateLimited(`upload-sign:${ip}`)) {
+  // One form (several photos + a video) legitimately needs many calls here.
+  if (isRateLimited(`upload-sign:${ip}`, 60)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 

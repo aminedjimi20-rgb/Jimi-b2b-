@@ -4,7 +4,7 @@ import { isRateLimited } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? "unknown";
-  if (isRateLimited(`admin-login:${ip}`)) {
+  if (isRateLimited(`admin-login:${ip}`, 8)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
