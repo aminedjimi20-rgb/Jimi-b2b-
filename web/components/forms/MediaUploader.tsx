@@ -1,8 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { getFirebaseStorage } from "@/lib/firebaseClient";
 import { ImagePlus, VideoIcon, X, Star, ChevronLeft, ChevronRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 const PHOTO_ACCEPT = "image/jpeg,image/jpg,image/png,image/webp";
@@ -32,26 +30,49 @@ const DEFAULT_LABELS: UploaderLabels = {
   notConfigured: "Le stockage des fichiers n'est pas encore configuré.",
 };
 
+// Uploads straight from the browser to Cloudinary (unsigned upload preset) —
+// no server round-trip, no signed URL, no billing account required. Cloud
+// name and preset are public by design (the preset itself, configured in the
+// Cloudinary dashboard, is what restricts folder/size/format — see
+// cloudinary/README.md).
 function uploadOne(
   file: File,
   kind: "photo" | "video",
   onProgress: (pct: number) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const storage = getFirebaseStorage();
-    if (!storage) {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !preset) {
       reject(new Error("Configuration de stockage manquante."));
       return;
     }
-    const ext = file.name.split(".").pop()?.toLowerCase() || (kind === "photo" ? "jpg" : "mp4");
-    const path = `machines/${kind}s/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const task = uploadBytesResumable(storageRef(storage, path), file, { contentType: file.type });
-    task.on(
-      "state_changed",
-      (snapshot) => onProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)),
-      (error) => reject(new Error(error.message)),
-      () => getDownloadURL(task.snapshot.ref).then(resolve).catch(reject)
-    );
+
+    const resourceType = kind === "photo" ? "image" : "video";
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", preset);
+    formData.append("folder", `machines/${kind}s`);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          resolve(data.secure_url as string);
+        } catch {
+          reject(new Error("Réponse invalide du stockage."));
+        }
+      } else {
+        reject(new Error("Échec de l'envoi du fichier."));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Échec de l'envoi du fichier (réseau)."));
+    xhr.send(formData);
   });
 }
 

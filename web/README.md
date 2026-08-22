@@ -58,29 +58,29 @@ développement local (pratique, zéro configuration), mais **n'est pas une
 persistance réelle** : c'est pour ça qu'une machine approuvée pouvait
 sembler avoir disparu.
 
-La vraie base de données est **Firebase** (Firestore + Storage), déjà câblée
-dans le code (`lib/firebaseAdmin.ts`, `lib/sellers.ts`, `lib/buyers.ts`,
+La vraie base de données est **Firebase Firestore**, déjà câblée dans le
+code (`lib/firebaseAdmin.ts`, `lib/sellers.ts`, `lib/buyers.ts`,
 `lib/machinesStore.ts`, `lib/machineLeads.ts`, `lib/leads.ts` basculent
 automatiquement sur Firestore dès que les variables d'environnement sont
-présentes). Mise en place complète : voir **`web/firebase/README.md`**
-(créer le projet, activer Firestore + Storage, publier les règles de
-sécurité, générer la clé de compte de service, configurer Vercel).
-Résumé rapide :
+présentes). Les photos/vidéos sont hébergées sur **Cloudinary** plutôt que
+Firebase Storage — Firebase Storage exige le plan payant Blaze (carte
+bancaire), Cloudinary a un plan gratuit sans carte bancaire du tout.
 
-1. Créer un projet gratuit sur [firebase.google.com](https://firebase.google.com).
-2. Activer **Firestore Database** (mode production) et **Storage**.
-3. Publier `web/firebase/firestore.rules` et `web/firebase/storage.rules`
-   (Firebase Console → Firestore/Storage → onglet Règles — Firestore refuse
-   tout accès direct du navigateur ; seule la clé de service, utilisée
-   uniquement côté serveur, peut lire/écrire).
-4. Project Settings → **Comptes de service** → générer une clé privée
-   (fichier JSON) → copier `project_id`/`client_email`/`private_key` vers
+Mise en place complète : voir **`web/firebase/README.md`** (base de
+données) et **`web/cloudinary/README.md`** (photos/vidéos). Résumé rapide :
+
+1. Créer un projet gratuit sur [console.firebase.google.com](https://console.firebase.google.com),
+   activer **Firestore Database** (mode production), publier
+   `web/firebase/firestore.rules` (refuse tout accès direct du navigateur —
+   seule la clé de service, utilisée uniquement côté serveur, peut
+   lire/écrire), puis Project Settings → **Comptes de service** → générer
+   une clé privée → copier `project_id`/`client_email`/`private_key` vers
    `FIREBASE_PROJECT_ID`/`FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`.
-5. Project Settings → **Général** → config de l'app web → copier les
-   valeurs publiques vers `NEXT_PUBLIC_FIREBASE_*` (nécessaires pour que le
-   navigateur envoie directement les photos/vidéos vers Firebase Storage,
-   sans passer par le serveur — pas de limite de taille de requête Vercel).
-6. Ajouter ces 7 variables dans Vercel (Project Settings → Environment
+2. Créer un compte gratuit sur [cloudinary.com](https://cloudinary.com)
+   (aucune carte requise), créer un **upload preset non signé**, copier le
+   cloud name et le nom du preset vers `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+   et `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET`.
+3. Ajouter ces 5 variables dans Vercel (Project Settings → Environment
    Variables) et redéployer.
 
 Voir `.env.example` pour le nom exact de chaque variable.
@@ -95,7 +95,8 @@ components/           Composants UI, sections de page, formulaires
 config/site.config.ts Configuration centrale (coordonnées, SEO)
 data/                 Données de démonstration (machines, réalisations, articles)
 lib/                  Accès aux données, i18n helpers, Firebase (Firestore + Storage)
-firebase/             Règles de sécurité + guide de mise en place Firebase
+firebase/             Règles de sécurité + guide de mise en place Firestore
+cloudinary/           Guide de mise en place du stockage photos/vidéos
 messages/             Traductions fr.json / ar.json / en.json
 ```
 
@@ -171,10 +172,11 @@ reste l'intermédiaire entre acheteur et vendeur à chaque étape.
   plusieurs photos. Sur `/vendre-machine`, le vendeur choisit ses photos et
   sa vidéo directement depuis la galerie/l'appareil de son téléphone
   (`components/forms/MediaUploader.tsx`) : les fichiers sont envoyés
-  directement du navigateur vers Firebase Storage (avec une vraie barre de
+  directement du navigateur vers Cloudinary (avec une vraie barre de
   progression par fichier), jamais en base64 ni via `localStorage` — voir
-  `web/firebase/storage.rules` pour les limites de taille/type appliquées.
-  La première photo de la liste est la **photo
+  `web/cloudinary/README.md` pour les limites de taille/type appliquées
+  (configurées côté "upload preset" Cloudinary, pas dans ce dépôt). La
+  première photo de la liste est la **photo
   principale** (réordonnable, un bouton dédié permet d'en choisir une
   autre) et c'est elle qui apparaît sur la carte, la page d'accueil, la
   fiche détail et l'aperçu Open Graph. Un lien YouTube/Vimeo/MP4 direct
