@@ -10,6 +10,22 @@ import { getFirestore, type Firestore } from "firebase-admin/firestore";
 let app: App | null = null;
 let db: Firestore | null = null;
 
+// Vercel's env var UI (especially pasted from a mobile browser) can mangle a
+// multi-line PEM key: wrapping quotes get typed in literally, real newlines
+// get flattened, or escaped "\n" sequences stay escaped. Normalize all of
+// that instead of demanding one exact paste format.
+function normalizePrivateKey(raw: string): string {
+  let key = raw.trim();
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1);
+  }
+  key = key.replace(/\r\n/g, "\n").replace(/\\n/g, "\n").trim();
+  return key;
+}
+
 export function isFirebaseConfigured(): boolean {
   return Boolean(
     process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY
@@ -28,9 +44,7 @@ export function getFirestoreAdmin(): Firestore {
         credential: cert({
           projectId: process.env.FIREBASE_PROJECT_ID,
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          // Vercel env vars are single-line: the service account's real
-          // newlines are stored escaped as literal "\n" and must be restored.
-          privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+          privateKey: normalizePrivateKey(process.env.FIREBASE_PRIVATE_KEY!),
         }),
       });
     } else {
