@@ -6,15 +6,29 @@
   "nav": {
     "home": "Accueil",
     "machines": "Machines",
+    "machinesShort": "Machines",
     "buy": "Acheter une machine",
     "buyShort": "Acheter",
     "sell": "Vendre une machine",
     "sellShort": "Vendre",
     "services": "Services",
+    "pieces": "Pièces industrielles",
+    "piecesShort": "Pièces",
     "realisations": "Réalisations",
     "blog": "Conseils & Actualités",
     "blogShort": "Conseils",
     "contact": "Contact",
+    "machinesMenu": {
+      "available": "Machines disponibles",
+      "sell": "Vente de machines",
+      "buy": "Achat de machines"
+    },
+    "piecesMenu": {
+      "electronique": "Électronique & électricité",
+      "moules": "Moules",
+      "hydraulique": "Hydraulique",
+      "mecanique": "Mécanique"
+    },
     "servicesMenu": {
       "renovation": "Rénovation de machines d'injection",
       "automation": "Automatisation industrielle",
@@ -230,6 +244,8 @@
   "machines": {
     "pageTitle": "Machines d'injection disponibles",
     "pageSubtitle": "Machines suivies par Jimi Renovation & Installation, avec vérification technique de premier niveau.",
+    "seoTitle": "Vente de machines industrielles Algérie | Jimi Renovation & Installation",
+    "seoDescription": "Vente de machines d'injection plastique industrielles en Algérie : catalogue vérifié, prix ou prix sur demande, intermédiation sécurisée par Jimi Renovation & Installation.",
     "emptyCatalog": {
       "title": "Aucune machine disponible actuellement",
       "subtitle": "Notre catalogue est en cours de constitution. Décrivez-nous votre besoin et nous vous recontactons avec des propositions correspondantes."
@@ -256,6 +272,56 @@
       "title": "Vous ne trouvez pas la machine qu'il vous faut ?",
       "subtitle": "Décrivez-nous votre besoin exact : tonnage, marque, budget. Nous cherchons pour vous.",
       "cta": "Je cherche une machine"
+    }
+  },
+  "pieces": {
+    "eyebrow": "Pièces industrielles",
+    "pageTitle": "Pièces industrielles",
+    "pageSubtitle": "Un large catalogue de pièces détachées pour machines industrielles : électronique, moules, hydraulique et mécanique — neuves, d'occasion ou rénovées.",
+    "seoTitle": "Pièces industrielles Algérie | Électronique, moules, hydraulique, mécanique",
+    "seoDescription": "Catalogue de pièces industrielles en Algérie : pièces électroniques et électriques, moules d'injection plastique, pièces hydrauliques et mécaniques. Neuves, d'occasion ou rénovées.",
+    "viewCategory": "Voir la catégorie",
+    "reference": "Réf.",
+    "requestPrice": "Demander le prix",
+    "whatsappRequest": "Bonjour Jimi, je souhaite avoir le prix de la pièce \"{name}\" (réf. {reference}).",
+    "condition": {
+      "neuf": "Neuve",
+      "occasion": "Occasion",
+      "renove": "Rénovée"
+    },
+    "emptyCategory": {
+      "title": "Aucune pièce disponible actuellement dans cette catégorie",
+      "subtitle": "Notre catalogue de pièces est en cours de constitution. Décrivez-nous la référence recherchée et nous vous recontactons rapidement."
+    },
+    "categories": {
+      "electronique": {
+        "title": "Électronique & électricité",
+        "description": "Cartes électroniques, relais, contacteurs, capteurs, variateurs, alimentations et composants électriques/électroniques pour machines industrielles.",
+        "seoTitle": "Pièces électriques et électroniques industrielles Algérie",
+        "seoDescription": "Cartes électroniques, relais, contacteurs, capteurs, variateurs, alimentations et composants électriques/électroniques pour machines industrielles en Algérie.",
+        "examples": ["Cartes électroniques", "Relais", "Contacteurs", "Capteurs", "Variateurs", "Alimentations", "Composants électriques", "Composants électroniques"]
+      },
+      "moules": {
+        "title": "Moules",
+        "description": "Moules d'injection plastique, moules industriels, pièces et accessoires de moules.",
+        "seoTitle": "Moules injection plastique Algérie",
+        "seoDescription": "Moules d'injection plastique, moules industriels et pièces/accessoires de moules disponibles en Algérie.",
+        "examples": ["Moules d'injection plastique", "Moules industriels", "Pièces et accessoires de moules"]
+      },
+      "hydraulique": {
+        "title": "Hydraulique",
+        "description": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques.",
+        "seoTitle": "Pièces hydrauliques industrielles Algérie",
+        "seoDescription": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques pour machines industrielles en Algérie.",
+        "examples": ["Pompes hydrauliques", "Vérins", "Distributeurs", "Électrovannes", "Flexibles", "Raccords", "Composants hydrauliques"]
+      },
+      "mecanique": {
+        "title": "Mécanique",
+        "description": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles.",
+        "seoTitle": "Pièces mécaniques industrielles Algérie",
+        "seoDescription": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles disponibles en Algérie.",
+        "examples": ["Roulements", "Courroies", "Engrenages", "Pignons", "Arbres", "Accouplements", "Pièces mécaniques industrielles"]
+      }
     }
   },
   "badges": {
@@ -300,6 +366,8 @@
   "buyPage": {
     "title": "Je cherche une machine",
     "subtitle": "Décrivez précisément votre besoin : nous recherchons activement la machine correspondante dans notre réseau.",
+    "seoTitle": "Achat de machines industrielles Algérie | Jimi Renovation & Installation",
+    "seoDescription": "Achat de machines d'injection plastique industrielles en Algérie : décrivez votre besoin, Jimi Renovation & Installation recherche la machine correspondante dans son réseau.",
     "successTitle": "Votre demande a bien été envoyée",
     "successMessage": "Merci, votre recherche a été enregistrée. Nous revenons vers vous rapidement avec des propositions correspondant à votre besoin.",
     "sections": {

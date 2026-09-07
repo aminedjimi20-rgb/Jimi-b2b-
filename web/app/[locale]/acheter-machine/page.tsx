@@ -12,8 +12,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "buyPage" });
   return {
-    title: t("title"),
-    description: t("subtitle"),
+    title: t("seoTitle"),
+    description: t("seoDescription"),
     alternates: { canonical: "/acheter-machine" },
   };
 }

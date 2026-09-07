@@ -35,6 +35,7 @@ export async function Footer() {
             <li><Link href="/machines" className="hover:text-white">{t("nav.machines")}</Link></li>
             <li><Link href="/acheter-machine" className="hover:text-white">{t("nav.buy")}</Link></li>
             <li><Link href="/vendre-machine" className="hover:text-white">{t("nav.sell")}</Link></li>
+            <li><Link href="/pieces-industrielles" className="hover:text-white">{t("nav.pieces")}</Link></li>
             <li><Link href="/realisations" className="hover:text-white">{t("nav.realisations")}</Link></li>
             <li><Link href="/blog" className="hover:text-white">{t("nav.blog")}</Link></li>
             <li><Link href="/contact" className="hover:text-white">{t("nav.contact")}</Link></li>

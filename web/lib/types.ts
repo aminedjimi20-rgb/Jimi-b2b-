@@ -55,6 +55,28 @@ export interface Machine {
   reviewedAt?: string | null;
 }
 
+// Pièces industrielles : catalogue admin-only, séparé des machines (pas de
+// workflow de soumission vendeur ni de modération — Jimi ajoute directement
+// les références depuis l'admin, comme pour "Ajouter une machine").
+export type PartCategory = "electronique" | "moules" | "hydraulique" | "mecanique";
+export type PartCondition = "neuf" | "occasion" | "renove";
+export type PartStatus = "draft" | "published";
+
+export interface Part {
+  id: string;
+  slug: string;
+  category: PartCategory;
+  name: string;
+  reference: string;
+  description: string;
+  condition: PartCondition;
+  price: number | null;
+  priceOnRequest: boolean;
+  photos: string[];
+  status: PartStatus;
+  isDemo: boolean;
+}
+
 export interface Project {
   id: string;
   slug: string;

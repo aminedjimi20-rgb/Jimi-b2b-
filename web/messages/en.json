@@ -6,15 +6,29 @@
   "nav": {
     "home": "Home",
     "machines": "Machines",
+    "machinesShort": "Machines",
     "buy": "Buy a machine",
     "buyShort": "Buy",
     "sell": "Sell a machine",
     "sellShort": "Sell",
     "services": "Services",
+    "pieces": "Industrial parts",
+    "piecesShort": "Parts",
     "realisations": "Projects",
     "blog": "Insights & News",
     "blogShort": "Insights",
     "contact": "Contact",
+    "machinesMenu": {
+      "available": "Available machines",
+      "sell": "Sell machines",
+      "buy": "Buy machines"
+    },
+    "piecesMenu": {
+      "electronique": "Electronics & electrical",
+      "moules": "Molds",
+      "hydraulique": "Hydraulics",
+      "mecanique": "Mechanical"
+    },
     "servicesMenu": {
       "renovation": "Injection machine renovation",
       "automation": "Industrial automation",
@@ -228,6 +242,8 @@
     }
   },
   "machines": {
+    "seoTitle": "Industrial machines for sale Algeria | Jimi Renovation & Installation",
+    "seoDescription": "Industrial plastic injection machines for sale in Algeria: verified catalog, listed price or price on request, secure intermediation by Jimi Renovation & Installation.",
     "pageTitle": "Available injection machines",
     "pageSubtitle": "Machines tracked by Jimi Renovation & Installation, with first-level technical verification.",
     "emptyCatalog": {
@@ -256,6 +272,56 @@
       "title": "Can't find the machine you need?",
       "subtitle": "Tell us exactly what you need: tonnage, brand, budget. We'll search for you.",
       "cta": "I'm looking for a machine"
+    }
+  },
+  "pieces": {
+    "eyebrow": "Industrial parts",
+    "pageTitle": "Industrial parts",
+    "pageSubtitle": "A wide catalog of spare parts for industrial machines: electronics, molds, hydraulics and mechanical — new, used or refurbished.",
+    "seoTitle": "Industrial parts Algeria | Electronics, molds, hydraulics, mechanical",
+    "seoDescription": "Industrial parts catalog in Algeria: electrical and electronic parts, plastic injection molds, hydraulic and mechanical parts. New, used or refurbished.",
+    "viewCategory": "View category",
+    "reference": "Ref.",
+    "requestPrice": "Request price",
+    "whatsappRequest": "Hello Jimi, I'd like the price for the part \"{name}\" (ref. {reference}).",
+    "condition": {
+      "neuf": "New",
+      "occasion": "Used",
+      "renove": "Refurbished"
+    },
+    "emptyCategory": {
+      "title": "No parts currently available in this category",
+      "subtitle": "Our parts catalog is being built up. Tell us the reference you're looking for and we'll get back to you quickly."
+    },
+    "categories": {
+      "electronique": {
+        "title": "Electronics & electrical",
+        "description": "Circuit boards, relays, contactors, sensors, drives, power supplies and electrical/electronic components for industrial machines.",
+        "seoTitle": "Electrical and electronic industrial parts Algeria",
+        "seoDescription": "Circuit boards, relays, contactors, sensors, drives, power supplies and electrical/electronic components for industrial machines in Algeria.",
+        "examples": ["Circuit boards", "Relays", "Contactors", "Sensors", "Drives", "Power supplies", "Electrical components", "Electronic components"]
+      },
+      "moules": {
+        "title": "Molds",
+        "description": "Plastic injection molds, industrial molds, mold parts and accessories.",
+        "seoTitle": "Plastic injection molds Algeria",
+        "seoDescription": "Plastic injection molds, industrial molds and mold parts/accessories available in Algeria.",
+        "examples": ["Plastic injection molds", "Industrial molds", "Mold parts and accessories"]
+      },
+      "hydraulique": {
+        "title": "Hydraulics",
+        "description": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components.",
+        "seoTitle": "Industrial hydraulic parts Algeria",
+        "seoDescription": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components for industrial machines in Algeria.",
+        "examples": ["Hydraulic pumps", "Cylinders", "Valves", "Solenoid valves", "Hoses", "Fittings", "Hydraulic components"]
+      },
+      "mecanique": {
+        "title": "Mechanical",
+        "description": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts.",
+        "seoTitle": "Industrial mechanical parts Algeria",
+        "seoDescription": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts available in Algeria.",
+        "examples": ["Bearings", "Belts", "Gears", "Sprockets", "Shafts", "Couplings", "Industrial mechanical parts"]
+      }
     }
   },
   "badges": {
@@ -298,6 +364,8 @@
     }
   },
   "buyPage": {
+    "seoTitle": "Buy industrial machines Algeria | Jimi Renovation & Installation",
+    "seoDescription": "Buy industrial plastic injection machines in Algeria: describe your need, Jimi Renovation & Installation searches its network for the matching machine.",
     "title": "I'm looking for a machine",
     "subtitle": "Describe your need precisely: we actively search our network for a matching machine.",
     "successTitle": "Your request has been sent",

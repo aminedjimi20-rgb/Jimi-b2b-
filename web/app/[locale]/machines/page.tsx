@@ -18,8 +18,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "machines" });
   return {
-    title: t("pageTitle"),
-    description: t("pageSubtitle"),
+    title: t("seoTitle"),
+    description: t("seoDescription"),
     alternates: { canonical: "/machines" },
   };
 }

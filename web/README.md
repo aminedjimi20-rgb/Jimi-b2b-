@@ -182,6 +182,21 @@ reste l'intermédiaire entre acheteur et vendeur à chaque étape.
   fiche détail et l'aperçu Open Graph. Un lien YouTube/Vimeo/MP4 direct
   reste aussi accepté pour la vidéo (`lib/video.ts`).
 
+## Pièces industrielles
+
+En complément du catalogue de machines, `/pieces-industrielles` présente un
+second catalogue, plus simple, de pièces détachées réparties en 4 catégories
+fixes : **Électronique & électricité**, **Moules**, **Hydraulique**,
+**Mécanique** (`lib/types.ts` → `Part`, `PartCategory`). Contrairement aux
+machines, il n'y a pas de soumission publique ni de modération : c'est un
+catalogue géré uniquement depuis `/admin` (onglet **Pièces**), persistant
+dans Firestore comme le reste (`lib/partsStore.ts`, même bascule Firestore ⇄
+fichier temporaire que `lib/machinesStore.ts`). Chaque pièce publiée
+(référence, état neuf/occasion/rénové, prix ou prix sur demande, photos)
+apparaît immédiatement dans sa catégorie ; les boutons **Demander le prix**
+(WhatsApp pré-rempli) et **Contact** permettent de joindre Jimi sans jamais
+exposer de formulaire de vente publique pour les pièces.
+
 ## Tableau de bord admin
 
 Accessible sur `/admin` (mot de passe défini par `ADMIN_PASSWORD`, valeur par
@@ -193,6 +208,8 @@ production**). Permet de :
   valider**) ;
 - ajouter / modifier le statut / masquer / supprimer des machines
   (onglet **Machines**) ;
+- ajouter / publier / masquer / supprimer des pièces industrielles
+  (onglet **Pièces**) ;
 - consulter les fiches vendeurs et acheteurs avec leurs coordonnées
   privées (onglets **Vendeurs**, **Acheteurs**) ;
 - gérer le pipeline de deals et la commission de chaque mise en relation
