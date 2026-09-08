@@ -114,7 +114,7 @@ export function AiTesterTab() {
 
   const qualificationEntries = conversation
     ? (Object.entries(conversation.qualification) as [keyof QualificationData, unknown][]).filter(
-        ([, v]) => v !== null && v !== undefined && v !== ""
+        ([, v]) => v !== null && v !== undefined && v !== "" && v !== false && v !== "non precise"
       )
     : [];
 

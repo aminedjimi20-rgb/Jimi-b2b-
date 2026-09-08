@@ -1,58 +1,38 @@
 import { z } from "zod";
 import { DETECTED_LANGUAGES, LEAD_CATEGORIES } from "@/lib/types";
 
-/** Schéma de sortie structurée du tour de conversation IA. Chaque champ de
- *  qualification est nullable/optionnel : le modèle ne doit renseigner que
- *  ce que le client a réellement dit, jamais inventer une valeur — voir la
- *  règle "NE PAS INVENTER" dans le prompt système (lib/ai/agent.ts). */
+/** Schéma de sortie structurée du tour de conversation IA.
+ *
+ * IMPORTANT — pas de `.describe()` à l'intérieur de `QualificationSchema` (ni
+ * sur l'objet, ni sur ses champs) : Anthropic convertit chaque schéma
+ * annoté d'une description en `$ref` vers `$defs`, et le faire sur les 16
+ * champs de qualification a fait dépasser la limite de complexité de
+ * l'API ("Schema is too complex", 400). Les descriptions au niveau
+ * `AgentTurnSchema` (champs scalaires, non imbriqués) restent sans risque.
+ * Le sens de chaque champ de qualification est expliqué dans le prompt
+ * système (lib/ai/agent.ts) plutôt que dans le schéma.
+ *
+ * Convention "valeur inconnue" (pour rester compatible avec la règle
+ * "NE PAS INVENTER") : chaîne vide `""` pour les champs texte, `false` pour
+ * les booléens tant que le client n'a rien confirmé — jamais de valeur
+ * plausible mais non dite par le client. */
 export const QualificationSchema = z.object({
-  machineType: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Type de machine recherchée/vendue (ex. 'presse à injection'). null si non mentionné."),
-  productToManufacture: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Produit que le client veut fabriquer avec la machine."),
-  desiredCapacity: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Capacité/production souhaitée, ex. '1000 bouteilles/heure'."),
-  budget: z.string().nullable().optional().describe("Budget approximatif mentionné par le client, tel quel."),
-  condition: z
-    .enum(["neuf", "occasion"])
-    .nullable()
-    .optional()
-    .describe("Préférence neuf/occasion si exprimée."),
-  partReference: z.string().nullable().optional().describe("Référence ou nom de la pièce recherchée."),
-  partBrand: z.string().nullable().optional().describe("Marque de la pièce ou de la machine concernée."),
-  machineModel: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Modèle de la machine concernée (pièce ou intervention)."),
-  quantity: z.string().nullable().optional().describe("Quantité demandée."),
-  issueDescription: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Description de la panne/du problème pour une demande d'intervention."),
-  location: z.string().nullable().optional().describe("Localisation du client (wilaya/ville)."),
-  timeline: z.string().nullable().optional().describe("Délai souhaité par le client."),
-  phone: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Numéro de téléphone si donné explicitement et différent du numéro WhatsApp utilisé."),
-  urgent: z.boolean().nullable().optional().describe("true si le client indique une urgence."),
-  photosReceived: z
-    .boolean()
-    .optional()
-    .describe("true si le client a envoyé au moins une photo dans cette conversation."),
-  quoteRequested: z.boolean().optional().describe("true si le client demande explicitement un devis."),
+  machineType: z.string(),
+  productToManufacture: z.string(),
+  desiredCapacity: z.string(),
+  budget: z.string(),
+  condition: z.enum(["neuf", "occasion", "non precise"]),
+  partReference: z.string(),
+  partBrand: z.string(),
+  machineModel: z.string(),
+  quantity: z.string(),
+  issueDescription: z.string(),
+  location: z.string(),
+  timeline: z.string(),
+  phone: z.string(),
+  urgent: z.boolean(),
+  photosReceived: z.boolean(),
+  quoteRequested: z.boolean(),
 });
 
 export const AgentTurnSchema = z.object({
@@ -64,11 +44,8 @@ export const AgentTurnSchema = z.object({
   language: z.enum(DETECTED_LANGUAGES).describe("Langue détectée du dernier message du client."),
   category: z
     .enum(LEAD_CATEGORIES)
-    .nullable()
-    .describe("Catégorie de besoin détectée à partir de toute la conversation, null si pas encore clair."),
-  qualification: QualificationSchema.describe(
-    "Informations de qualification à jour, reprises de TOUTE la conversation (garder les valeurs déjà connues, ajouter les nouvelles, ne jamais effacer une valeur connue sauf contradiction explicite du client)."
-  ),
+    .describe("Catégorie de besoin détectée à partir de toute la conversation ; 'other' si pas encore clair."),
+  qualification: QualificationSchema,
   humanHandoffRequested: z
     .boolean()
     .describe(

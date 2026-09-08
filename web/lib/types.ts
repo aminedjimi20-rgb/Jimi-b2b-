@@ -175,7 +175,7 @@ export interface QualificationData {
   productToManufacture?: string | null;
   desiredCapacity?: string | null;
   budget?: string | null;
-  condition?: "neuf" | "occasion" | null;
+  condition?: "neuf" | "occasion" | "non precise" | null;
   partReference?: string | null;
   partBrand?: string | null;
   machineModel?: string | null;
@@ -185,8 +185,8 @@ export interface QualificationData {
   timeline?: string | null;
   phone?: string | null;
   urgent?: boolean | null;
-  photosReceived?: boolean;
-  quoteRequested?: boolean;
+  photosReceived?: boolean | null;
+  quoteRequested?: boolean | null;
 }
 
 export interface Conversation {

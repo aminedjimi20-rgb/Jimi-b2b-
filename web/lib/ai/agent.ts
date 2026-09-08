@@ -1,4 +1,4 @@
-import type { Conversation, ConversationMessage } from "@/lib/types";
+import type { Conversation, ConversationMessage, QualificationData } from "@/lib/types";
 import { buildKnowledgeBaseText } from "@/lib/ai/knowledgeBase";
 import { getAiProvider } from "@/lib/ai/provider";
 import { computeLeadScore } from "@/lib/leadScoring";
@@ -19,7 +19,7 @@ const CATEGORY_LABELS = [
   "quote_request — demande de devis (sans catégorie plus précise identifiée)",
   "installation — installation",
   "after_sales — service après-vente",
-  "other — autre demande",
+  "other — autre demande, ou catégorie pas encore claire",
 ].join("\n");
 
 function buildSystemPrompt(knowledgeBase: string): string {
@@ -45,12 +45,19 @@ ${CATEGORY_LABELS}
 QUALIFICATION COMMERCIALE
 Ton but n'est pas seulement de répondre : transforme progressivement la conversation en
 opportunité commerciale qualifiée, en amenant naturellement le client à préciser (selon la
-catégorie) : type de machine, produit à fabriquer, capacité/production souhaitée, budget
-approximatif, neuf ou occasion, localisation, délai souhaité, téléphone si différent du WhatsApp
-utilisé — ou pour une pièce : référence/nom, marque, modèle de machine, quantité, urgence,
-localisation — ou pour une intervention : type de panne, machine concernée, marque/modèle,
-localisation, disponibilité. Renseigne le champ "qualification" avec tout ce que tu apprends,
-message après message, sans jamais effacer une information déjà connue.
+catégorie) : type de machine (machineType), produit à fabriquer (productToManufacture),
+capacité/production souhaitée (desiredCapacity), budget approximatif (budget), neuf ou occasion
+(condition), localisation (location), délai souhaité (timeline), téléphone si différent du
+WhatsApp utilisé (phone) — ou pour une pièce : référence/nom (partReference), marque (partBrand),
+modèle de machine (machineModel), quantité (quantity), urgence (urgent), localisation — ou pour
+une intervention : type de panne (issueDescription), machine concernée (machineModel, partBrand),
+localisation, disponibilité. Mets photosReceived à true si le client a envoyé une photo, et
+quoteRequested à true s'il demande explicitement un devis.
+
+Renseigne le champ "qualification" avec TOUS ces champs à chaque tour : pour un champ texte
+utilise une chaîne vide "" si l'information n'est pas encore connue (jamais une valeur inventée),
+pour condition utilise "non precise", pour un booléen utilise false. Reprends les valeurs déjà
+connues des tours précédents (ne les remets jamais à "" par oubli), et ajoute les nouvelles.
 
 PHOTOS
 Encourage l'envoi d'une photo quand cela peut aider à identifier une pièce, une machine, une
@@ -88,6 +95,20 @@ function toHistoryTurns(
       content: m.content,
       imageUrls: m.mediaUrls,
     }));
+}
+
+/** Fusionne la qualification déjà connue avec celle renvoyée par l'IA à ce
+ *  tour, sans jamais laisser une valeur "inconnue" (chaîne vide, false,
+ *  null) écraser une valeur déjà connue — filet de sécurité si le modèle
+ *  oublie de reprendre une information déjà obtenue. */
+function mergeQualification(existing: QualificationData, incoming: QualificationData): QualificationData {
+  const merged: Record<string, unknown> = { ...existing };
+  for (const [key, value] of Object.entries(incoming)) {
+    if (value !== null && value !== undefined && value !== "" && value !== false) {
+      merged[key] = value;
+    }
+  }
+  return merged as QualificationData;
 }
 
 /** true si l'IA est autorisée à répondre automatiquement dans cette
@@ -134,7 +155,7 @@ export async function runAgentTurn(params: {
     createdAt: new Date().toISOString(),
   };
 
-  const mergedQualification = { ...conversation.qualification, ...output.qualification };
+  const mergedQualification = mergeQualification(conversation.qualification, output.qualification);
   const { score, reasons } = computeLeadScore(mergedQualification, output.category);
 
   const updatedConversation: Conversation = {
