@@ -11,12 +11,14 @@ import { PartsTab } from "./PartsTab";
 import { ProjectsTab } from "./ProjectsTab";
 import { TestimonialsTab } from "./TestimonialsTab";
 import { SettingsTab } from "./SettingsTab";
+import { AiTesterTab } from "./AiTesterTab";
 import type { Lead } from "@/lib/leads";
 import type { Machine, Part, Project, Testimonial } from "@/lib/types";
 import type { SellerProfile } from "@/lib/sellers";
 import type { BuyerProfile } from "@/lib/buyers";
 import type { MachineLead } from "@/lib/machineLeads";
 import type { ServiceVideos } from "@/lib/serviceVideos";
+import type { BusinessInfo } from "@/lib/businessInfoStore";
 import {
   Inbox,
   Factory,
@@ -28,6 +30,7 @@ import {
   Cog,
   ClipboardList,
   Quote,
+  Bot,
 } from "lucide-react";
 
 type Tab =
@@ -40,6 +43,7 @@ type Tab =
   | "sellers"
   | "buyers"
   | "machineLeads"
+  | "aiTester"
   | "settings";
 
 export function AdminDashboard({
@@ -52,6 +56,7 @@ export function AdminDashboard({
   initialProjects,
   initialTestimonials,
   initialServiceVideos,
+  initialBusinessInfo,
   usingDefaultPassword,
 }: {
   initialLeads: Lead[];
@@ -63,6 +68,7 @@ export function AdminDashboard({
   initialProjects: Project[];
   initialTestimonials: Testimonial[];
   initialServiceVideos: ServiceVideos;
+  initialBusinessInfo: BusinessInfo;
   usingDefaultPassword: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("leads");
@@ -80,6 +86,7 @@ export function AdminDashboard({
     { key: "testimonials", label: "Témoignages", icon: Quote, count: pendingTestimonials.length },
     { key: "sellers", label: "Vendeurs", icon: UserSquare2, count: initialSellers.length },
     { key: "buyers", label: "Acheteurs", icon: Users, count: initialBuyers.length },
+    { key: "aiTester", label: "Assistant IA", icon: Bot },
     { key: "settings", label: "Paramètres", icon: Settings2 },
   ];
 
@@ -128,8 +135,13 @@ export function AdminDashboard({
       {tab === "testimonials" && <TestimonialsTab initialTestimonials={initialTestimonials} />}
       {tab === "sellers" && <SellersTab initialSellers={initialSellers} machines={initialMachines} />}
       {tab === "buyers" && <BuyersTab initialBuyers={initialBuyers} leads={initialMachineLeads} />}
+      {tab === "aiTester" && <AiTesterTab />}
       {tab === "settings" && (
-        <SettingsTab usingDefaultPassword={usingDefaultPassword} initialServiceVideos={initialServiceVideos} />
+        <SettingsTab
+          usingDefaultPassword={usingDefaultPassword}
+          initialServiceVideos={initialServiceVideos}
+          initialBusinessInfo={initialBusinessInfo}
+        />
       )}
     </div>
   );

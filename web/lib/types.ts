@@ -114,6 +114,98 @@ export interface Testimonial {
   isDemo: boolean;
 }
 
+// Assistant IA commercial (WhatsApp + testeur admin) : une Conversation par
+// client (identifié par son numéro WhatsApp, ou "test" pour le simulateur
+// admin), avec ses messages, son statut de prise en charge, sa catégorie de
+// besoin, les informations extraites et son score commercial.
+export type ConversationChannel = "whatsapp" | "test";
+
+// AI_ACTIVE : l'IA répond automatiquement.
+// HUMAN_REQUIRED : l'IA a détecté qu'un humain doit reprendre la main mais
+//   personne ne l'a encore fait (ex. client hostile, cas hors périmètre).
+// HUMAN_ACTIVE : un admin a pris la main, l'IA ne répond plus.
+// CLOSED : conversation terminée.
+export type ConversationStatus = "AI_ACTIVE" | "HUMAN_REQUIRED" | "HUMAN_ACTIVE" | "CLOSED";
+
+export type MessageRole = "user" | "assistant" | "system";
+
+export const DETECTED_LANGUAGES = ["darija", "fr", "ar", "en"] as const;
+export type DetectedLanguage = (typeof DETECTED_LANGUAGES)[number];
+
+// Exportée en const tuple (plutôt qu'un simple union type) pour pouvoir être
+// réutilisée telle quelle comme schéma Zod (z.enum) par l'agent IA — une
+// seule liste, jamais de risque de désynchronisation entre le type et le
+// schéma envoyé au modèle.
+export const LEAD_CATEGORIES = [
+  "buy_machine",
+  "sell_machine",
+  "part_electronic",
+  "part_electrical",
+  "part_hydraulic",
+  "part_mechanical",
+  "mold",
+  "maintenance",
+  "repair",
+  "renovation",
+  "automation",
+  "commissioning",
+  "quote_request",
+  "installation",
+  "after_sales",
+  "other",
+] as const;
+export type LeadCategory = (typeof LEAD_CATEGORIES)[number];
+
+export const LEAD_SCORE_LEVELS = ["HOT", "WARM", "COLD"] as const;
+export type LeadScoreLevel = (typeof LEAD_SCORE_LEVELS)[number];
+
+export interface ConversationMessage {
+  id: string;
+  role: MessageRole;
+  content: string;
+  mediaUrls?: string[];
+  createdAt: string;
+}
+
+/** Informations de qualification commerciale extraites de la conversation.
+ *  Tous les champs sont optionnels : l'IA ne doit renseigner que ce que le
+ *  client a réellement dit, jamais inventer une valeur. */
+export interface QualificationData {
+  machineType?: string | null;
+  productToManufacture?: string | null;
+  desiredCapacity?: string | null;
+  budget?: string | null;
+  condition?: "neuf" | "occasion" | null;
+  partReference?: string | null;
+  partBrand?: string | null;
+  machineModel?: string | null;
+  quantity?: string | null;
+  issueDescription?: string | null;
+  location?: string | null;
+  timeline?: string | null;
+  phone?: string | null;
+  urgent?: boolean | null;
+  photosReceived?: boolean;
+  quoteRequested?: boolean;
+}
+
+export interface Conversation {
+  id: string;
+  channel: ConversationChannel;
+  customerPhone: string | null;
+  customerName: string | null;
+  status: ConversationStatus;
+  language: DetectedLanguage | null;
+  category: LeadCategory | null;
+  score: LeadScoreLevel;
+  scoreReasons: string[];
+  qualification: QualificationData;
+  summary: string | null;
+  messages: ConversationMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Article {
   id: string;
   slug: string;

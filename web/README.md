@@ -237,6 +237,55 @@ Dans les deux cas, la modération se fait dans le même onglet **Témoignages**
 (badge = nombre d'avis en attente) : Publier / Rejeter / Supprimer. Seuls les
 témoignages **Publiés** apparaissent sur la page d'accueil.
 
+## Assistant IA commercial (WhatsApp)
+
+Une automatisation commerciale complète, construite pour être testée entièrement
+avant de brancher WhatsApp :
+
+- **Modèle de données** (`lib/types.ts`, `lib/conversationsStore.ts`) : une
+  `Conversation` par client (WhatsApp) ou par test admin, avec ses messages,
+  son statut de prise en charge (`AI_ACTIVE` / `HUMAN_REQUIRED` /
+  `HUMAN_ACTIVE` / `CLOSED`), sa catégorie de besoin, les informations de
+  qualification extraites et son score commercial.
+- **Base de connaissances** (`lib/ai/knowledgeBase.ts` + `lib/businessInfoStore.ts`) :
+  agrège le catalogue publié (machines, pièces, moules) et les informations
+  commerciales éditables depuis `/admin` → **Paramètres** → « Base de
+  connaissances de l'IA » (marques, services, zones d'intervention,
+  conditions, FAQ). C'est la **seule** source autorisée pour l'IA — elle ne
+  doit jamais inventer un prix, un délai ou une caractéristique absente de
+  cette base.
+- **Agent IA** (`lib/ai/agent.ts`, `lib/ai/provider.ts`, `lib/ai/anthropicProvider.ts`) :
+  utilise l'API Claude (Anthropic, modèle `claude-opus-5`) avec sortie
+  structurée pour répondre en darija/français/arabe/anglais (détection
+  automatique), qualifier progressivement le besoin (une question à la
+  fois) et signaler quand un humain doit reprendre la main. Le fournisseur
+  IA est isolé derrière une interface (`AiProvider`) pour pouvoir en changer
+  plus tard sans toucher au reste du code.
+- **Scoring des leads** (`lib/leadScoring.ts`) : HOT / WARM / COLD par un
+  système de points simple et modifiable (constantes en haut du fichier).
+- **Webhook WhatsApp** (`app/api/whatsapp/webhook/route.ts`, `lib/whatsapp.ts`) :
+  implémentation complète de la Cloud API Meta (vérification de signature,
+  réception, envoi), mais **désactivée (503)** tant que les 4 variables
+  `WHATSAPP_PHONE_NUMBER_ID` / `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_APP_SECRET`
+  / `WHATSAPP_VERIFY_TOKEN` ne sont pas configurées — aucune migration de
+  numéro n'est faite automatiquement.
+- **Testeur admin** (`/admin` → onglet **Assistant IA**) : simule une
+  conversation client sans jamais toucher WhatsApp — 10 scénarios prêts à
+  l'emploi (achat/vente machine, pièces par catégorie, moule, intervention,
+  demande de prix, envoi de photo, darija avec fautes), avec affichage en
+  direct de la réponse, de la langue/catégorie détectées, des données
+  extraites, du score et du résumé.
+
+**Pour activer l'IA** (testeur admin ou WhatsApp) : ajoutez `ANTHROPIC_API_KEY`
+dans les variables d'environnement (voir `.env.example`) — sans elle, le
+testeur affiche une erreur claire au lieu d'échouer silencieusement.
+
+**Pour activer WhatsApp** une fois l'IA validée dans le testeur : créez un
+compte Meta Business + WhatsApp Business Platform (Cloud API), renseignez les
+4 variables `WHATSAPP_*`, puis enregistrez l'URL
+`https://<votre-domaine>/api/whatsapp/webhook` comme webhook dans la
+configuration Meta. Aucun changement de code n'est nécessaire à ce moment-là.
+
 ## Tableau de bord admin
 
 Accessible sur `/admin` (mot de passe défini par `ADMIN_PASSWORD`, valeur par
@@ -255,6 +304,8 @@ production**). Permet de :
 - ajouter/retirer la vidéo de chaque page Service (onglet **Paramètres**) ;
 - valider/rejeter/supprimer les témoignages soumis par les clients, ou en
   ajouter un directement (onglet **Témoignages**) ;
+- tester l'assistant IA commercial sur des scénarios simulés, avant de le
+  connecter à WhatsApp (onglet **Assistant IA**) ;
 - consulter les fiches vendeurs et acheteurs avec leurs coordonnées
   privées (onglets **Vendeurs**, **Acheteurs**) ;
 - gérer le pipeline de deals et la commission de chaque mise en relation

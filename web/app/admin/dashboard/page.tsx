@@ -6,6 +6,7 @@ import { getSellers } from "@/lib/sellers";
 import { getBuyers } from "@/lib/buyers";
 import { getMachineLeads } from "@/lib/machineLeads";
 import { getServiceVideos } from "@/lib/serviceVideos";
+import { getBusinessInfo } from "@/lib/businessInfoStore";
 import { AdminTopBar } from "@/components/admin/AdminTopBar";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
@@ -16,7 +17,7 @@ export default async function AdminDashboardPage() {
     redirect("/admin");
   }
 
-  const [leads, machines, sellers, buyers, machineLeads, parts, projects, testimonials, serviceVideos] =
+  const [leads, machines, sellers, buyers, machineLeads, parts, projects, testimonials, serviceVideos, businessInfo] =
     await Promise.all([
       getLeads(),
       getMachines(),
@@ -27,6 +28,7 @@ export default async function AdminDashboardPage() {
       getProjects(),
       getTestimonials(),
       getServiceVideos(),
+      getBusinessInfo(),
     ]);
 
   return (
@@ -42,6 +44,7 @@ export default async function AdminDashboardPage() {
         initialProjects={projects}
         initialTestimonials={testimonials}
         initialServiceVideos={serviceVideos}
+        initialBusinessInfo={businessInfo}
         usingDefaultPassword={usingDefaultPassword()}
       />
     </>
