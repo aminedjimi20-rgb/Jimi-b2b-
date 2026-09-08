@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated, usingDefaultPassword } from "@/lib/adminAuth";
 import { getLeads } from "@/lib/leads";
-import { getMachines, getParts, getProjects } from "@/lib/data";
+import { getMachines, getParts, getProjects, getTestimonials } from "@/lib/data";
 import { getSellers } from "@/lib/sellers";
 import { getBuyers } from "@/lib/buyers";
 import { getMachineLeads } from "@/lib/machineLeads";
@@ -16,16 +16,18 @@ export default async function AdminDashboardPage() {
     redirect("/admin");
   }
 
-  const [leads, machines, sellers, buyers, machineLeads, parts, projects, serviceVideos] = await Promise.all([
-    getLeads(),
-    getMachines(),
-    getSellers(),
-    getBuyers(),
-    getMachineLeads(),
-    getParts(),
-    getProjects(),
-    getServiceVideos(),
-  ]);
+  const [leads, machines, sellers, buyers, machineLeads, parts, projects, testimonials, serviceVideos] =
+    await Promise.all([
+      getLeads(),
+      getMachines(),
+      getSellers(),
+      getBuyers(),
+      getMachineLeads(),
+      getParts(),
+      getProjects(),
+      getTestimonials(),
+      getServiceVideos(),
+    ]);
 
   return (
     <>
@@ -38,6 +40,7 @@ export default async function AdminDashboardPage() {
         initialMachineLeads={machineLeads}
         initialParts={parts}
         initialProjects={projects}
+        initialTestimonials={testimonials}
         initialServiceVideos={serviceVideos}
         usingDefaultPassword={usingDefaultPassword()}
       />

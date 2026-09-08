@@ -9,9 +9,10 @@ import { BuyersTab } from "./BuyersTab";
 import { MachineLeadsTab } from "./MachineLeadsTab";
 import { PartsTab } from "./PartsTab";
 import { ProjectsTab } from "./ProjectsTab";
+import { TestimonialsTab } from "./TestimonialsTab";
 import { SettingsTab } from "./SettingsTab";
 import type { Lead } from "@/lib/leads";
-import type { Machine, Part, Project } from "@/lib/types";
+import type { Machine, Part, Project, Testimonial } from "@/lib/types";
 import type { SellerProfile } from "@/lib/sellers";
 import type { BuyerProfile } from "@/lib/buyers";
 import type { MachineLead } from "@/lib/machineLeads";
@@ -26,6 +27,7 @@ import {
   Handshake,
   Cog,
   ClipboardList,
+  Quote,
 } from "lucide-react";
 
 type Tab =
@@ -34,6 +36,7 @@ type Tab =
   | "machines"
   | "parts"
   | "projects"
+  | "testimonials"
   | "sellers"
   | "buyers"
   | "machineLeads"
@@ -47,6 +50,7 @@ export function AdminDashboard({
   initialMachineLeads,
   initialParts,
   initialProjects,
+  initialTestimonials,
   initialServiceVideos,
   usingDefaultPassword,
 }: {
@@ -57,12 +61,14 @@ export function AdminDashboard({
   initialMachineLeads: MachineLead[];
   initialParts: Part[];
   initialProjects: Project[];
+  initialTestimonials: Testimonial[];
   initialServiceVideos: ServiceVideos;
   usingDefaultPassword: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("leads");
 
   const pendingMachines = initialMachines.filter((m) => m.status === "pending" || m.status === "draft");
+  const pendingTestimonials = initialTestimonials.filter((t) => t.status === "pending");
 
   const tabs: { key: Tab; label: string; icon: typeof Inbox; count?: number }[] = [
     { key: "leads", label: "Demandes reçues", icon: Inbox, count: initialLeads.length },
@@ -71,6 +77,7 @@ export function AdminDashboard({
     { key: "machines", label: "Machines", icon: Factory, count: initialMachines.length },
     { key: "parts", label: "Pièces", icon: Cog, count: initialParts.length },
     { key: "projects", label: "Réalisations", icon: ClipboardList, count: initialProjects.length },
+    { key: "testimonials", label: "Témoignages", icon: Quote, count: pendingTestimonials.length },
     { key: "sellers", label: "Vendeurs", icon: UserSquare2, count: initialSellers.length },
     { key: "buyers", label: "Acheteurs", icon: Users, count: initialBuyers.length },
     { key: "settings", label: "Paramètres", icon: Settings2 },
@@ -118,6 +125,7 @@ export function AdminDashboard({
       {tab === "machines" && <MachinesTab initialMachines={initialMachines} />}
       {tab === "parts" && <PartsTab initialParts={initialParts} />}
       {tab === "projects" && <ProjectsTab initialProjects={initialProjects} />}
+      {tab === "testimonials" && <TestimonialsTab initialTestimonials={initialTestimonials} />}
       {tab === "sellers" && <SellersTab initialSellers={initialSellers} machines={initialMachines} />}
       {tab === "buyers" && <BuyersTab initialBuyers={initialBuyers} leads={initialMachineLeads} />}
       {tab === "settings" && (

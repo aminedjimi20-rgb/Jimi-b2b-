@@ -229,8 +229,9 @@
     },
     "testimonials": {
       "title": "Témoignages clients",
-      "subtitle": "Cet espace accueillera prochainement les retours de nos clients.",
-      "emptyState": "Les témoignages clients seront publiés ici au fur et à mesure des projets réalisés."
+      "subtitle": "Ce que nos clients disent de notre travail.",
+      "emptyState": "Les témoignages clients seront publiés ici au fur et à mesure des projets réalisés.",
+      "cta": "Laisser un avis"
     },
     "faq": {
       "title": "Questions fréquentes",
@@ -418,6 +419,18 @@
         "description": "Moule d'injection plastique ou moule industriel"
       }
     }
+  },
+  "testimonialForm": {
+    "eyebrow": "Avis client",
+    "pageTitle": "Laisser un avis",
+    "pageSubtitle": "Votre retour nous aide à nous améliorer et aide d'autres clients à nous faire confiance.",
+    "rating": "Votre note",
+    "message": "Votre témoignage",
+    "messagePlaceholder": "Décrivez votre expérience avec Jimi Renovation & Installation...",
+    "moderationNote": "Votre témoignage sera publié sur le site après vérification par notre équipe.",
+    "submit": "Envoyer mon avis",
+    "successTitle": "Merci pour votre avis !",
+    "successMessage": "Votre témoignage a bien été reçu. Il sera publié sur le site après vérification."
   },
   "mediaUploader": {
     "addPhotos": "Ajouter des photos",

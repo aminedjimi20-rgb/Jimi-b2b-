@@ -19,6 +19,7 @@ const staticPaths = [
   "/services/automatisation-industrielle",
   "/services/maintenance-depannage",
   "/realisations",
+  "/avis",
   "/blog",
   "/contact",
 ];

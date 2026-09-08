@@ -229,8 +229,9 @@
     },
     "testimonials": {
       "title": "Client testimonials",
-      "subtitle": "This space will soon feature feedback from our clients.",
-      "emptyState": "Client testimonials will be published here as projects are completed."
+      "subtitle": "What our clients say about our work.",
+      "emptyState": "Client testimonials will be published here as projects are completed.",
+      "cta": "Leave a review"
     },
     "faq": {
       "title": "Frequently asked questions",
@@ -418,6 +419,18 @@
         "description": "Plastic injection mold or industrial mold"
       }
     }
+  },
+  "testimonialForm": {
+    "eyebrow": "Client review",
+    "pageTitle": "Leave a review",
+    "pageSubtitle": "Your feedback helps us improve and helps other clients trust us.",
+    "rating": "Your rating",
+    "message": "Your testimonial",
+    "messagePlaceholder": "Describe your experience with Jimi Renovation & Installation...",
+    "moderationNote": "Your testimonial will be published on the site after review by our team.",
+    "submit": "Send my review",
+    "successTitle": "Thank you for your review!",
+    "successMessage": "Your testimonial has been received. It will be published on the site after review."
   },
   "mediaUploader": {
     "addPhotos": "Add photos",

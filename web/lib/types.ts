@@ -95,6 +95,22 @@ export interface Project {
   isDemo: boolean;
 }
 
+// Client testimonials : soumission publique (toujours "pending", jamais
+// publiée directement) OU ajout direct par l'admin (publié immédiatement) —
+// même logique de modération que les annonces de machines.
+export type TestimonialStatus = "pending" | "published" | "rejected";
+
+export interface Testimonial {
+  id: string;
+  name: string;
+  company?: string | null;
+  message: string;
+  rating: number;
+  status: TestimonialStatus;
+  submittedAt: string;
+  isDemo: boolean;
+}
+
 export interface Article {
   id: string;
   slug: string;

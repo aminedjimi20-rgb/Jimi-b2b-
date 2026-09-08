@@ -2,10 +2,12 @@ import machinesData from "@/data/machines.json";
 import projectsData from "@/data/projects.json";
 import articlesData from "@/data/articles.json";
 import partsData from "@/data/parts.json";
-import type { Machine, Project, Article, Part, PartCategory } from "@/lib/types";
+import testimonialsData from "@/data/testimonials.json";
+import type { Machine, Project, Article, Part, PartCategory, Testimonial } from "@/lib/types";
 import { getRuntimeMachines } from "@/lib/machinesStore";
 import { getRuntimeParts } from "@/lib/partsStore";
 import { getRuntimeProjects } from "@/lib/projectsStore";
+import { getRuntimeTestimonials } from "@/lib/testimonialsStore";
 
 export async function getMachines(): Promise<Machine[]> {
   const runtime = await getRuntimeMachines();
@@ -126,4 +128,14 @@ export async function getPublicParts(): Promise<Part[]> {
 export async function getPublicPartsByCategory(category: PartCategory): Promise<Part[]> {
   const parts = await getPublicParts();
   return parts.filter((p) => p.category === category);
+}
+
+export async function getTestimonials(): Promise<Testimonial[]> {
+  const runtime = await getRuntimeTestimonials();
+  return [...runtime, ...(testimonialsData as Testimonial[])];
+}
+
+export async function getPublicTestimonials(): Promise<Testimonial[]> {
+  const testimonials = await getTestimonials();
+  return testimonials.filter((t) => t.status === "published");
 }

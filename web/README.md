@@ -215,6 +215,25 @@ lecteur que les fiches machines (`components/MachineVideoPlayer.tsx`,
   les pièces, c'est un catalogue géré uniquement depuis l'admin (pas de
   soumission publique), persistant dans Firestore (`lib/projectsStore.ts`).
 
+## Témoignages clients
+
+Contrairement aux pièces/réalisations, les témoignages ont **une double
+entrée** (`lib/testimonialsStore.ts`, même bascule Firestore ⇄ fichier
+temporaire) :
+
+- **Soumission publique** : un client laisse son avis (note 1-5, texte, nom,
+  entreprise optionnelle) depuis `/avis` (formulaire accessible via le bouton
+  « Laisser un avis » sous la section Témoignages de la page d'accueil).
+  Comme pour `/vendre-machine`, l'avis arrive toujours avec le statut
+  **En attente** — jamais publié directement.
+- **Ajout direct par l'admin** : un témoignage recueilli par téléphone/
+  WhatsApp peut être saisi directement depuis `/admin` → onglet
+  **Témoignages** (« Ajouter un témoignage »), publié immédiatement.
+
+Dans les deux cas, la modération se fait dans le même onglet **Témoignages**
+(badge = nombre d'avis en attente) : Publier / Rejeter / Supprimer. Seuls les
+témoignages **Publiés** apparaissent sur la page d'accueil.
+
 ## Tableau de bord admin
 
 Accessible sur `/admin` (mot de passe défini par `ADMIN_PASSWORD`, valeur par
@@ -231,6 +250,8 @@ production**). Permet de :
 - ajouter / publier / masquer / supprimer des réalisations, avec vidéo
   (onglet **Réalisations**) ;
 - ajouter/retirer la vidéo de chaque page Service (onglet **Paramètres**) ;
+- valider/rejeter/supprimer les témoignages soumis par les clients, ou en
+  ajouter un directement (onglet **Témoignages**) ;
 - consulter les fiches vendeurs et acheteurs avec leurs coordonnées
   privées (onglets **Vendeurs**, **Acheteurs**) ;
 - gérer le pipeline de deals et la commission de chaque mise en relation
