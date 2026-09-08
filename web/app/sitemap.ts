@@ -8,6 +8,7 @@ const staticPaths = [
   "/machines",
   "/acheter-machine",
   "/vendre-machine",
+  "/vendre-equipement",
   "/pieces-industrielles",
   "/pieces-industrielles/electronique",
   "/pieces-industrielles/moules",

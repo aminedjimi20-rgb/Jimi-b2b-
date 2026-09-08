@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { buildWhatsAppLink } from "@/config/site.config";
-import { ArrowRight, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, MessageCircle, ShieldCheck, Tag } from "lucide-react";
 
 export async function Hero() {
   const t = await getTranslations();
@@ -42,7 +42,7 @@ export async function Hero() {
           </p>
 
           <div
-            className="animate-fade-up mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+            className="animate-fade-up mt-9 flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row"
             style={{ animationDelay: "220ms" }}
           >
             <Button href="/machines" size="lg" icon={<ArrowRight size={18} />}>
@@ -53,6 +53,15 @@ export async function Hero() {
             </Button>
             <Button href={waLink} external size="lg" variant="whatsapp" icon={<MessageCircle size={18} />}>
               {t("cta.whatsapp")}
+            </Button>
+            <Button
+              href="/vendre-equipement"
+              size="lg"
+              variant="primary"
+              className="!bg-[var(--color-accent-2)] hover:!bg-[#00968a]"
+              icon={<Tag size={18} />}
+            >
+              {t("cta.sellEquipment")}
             </Button>
           </div>
 

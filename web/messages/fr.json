@@ -47,6 +47,7 @@
     "requestInfo": "Demander plus d'informations",
     "scheduleInspection": "Prendre rendez-vous pour inspection",
     "proposeMachine": "Proposer ma machine",
+    "sellEquipment": "Vendre un équipement",
     "sendMyRequest": "Envoyer ma demande",
     "viewAll": "Voir tout",
     "readMore": "Lire l'article",
@@ -387,6 +388,36 @@
       "media": "Photos et vidéo"
     }
   },
+  "sellEquipment": {
+    "eyebrow": "Vendre un équipement",
+    "pageTitle": "Vendre un équipement",
+    "pageSubtitle": "Machine industrielle, pièce détachée ou moule : dites-nous ce que vous souhaitez vendre, nous vous recontactons rapidement.",
+    "seoTitle": "Vendre un équipement industriel Algérie | Jimi Renovation & Installation",
+    "seoDescription": "Vendez une machine industrielle, une pièce détachée ou un moule en Algérie : décrivez votre équipement, Jimi Renovation & Installation vous recontacte rapidement.",
+    "typePrompt": "Que souhaitez-vous vendre ?",
+    "changeType": "Changer le type d'équipement",
+    "successTitle": "Votre proposition a bien été envoyée",
+    "successMessage": "Merci, nous avons bien reçu les informations sur votre équipement. Notre équipe vous recontacte rapidement.",
+    "sections": {
+      "equipment": "Informations sur l'équipement",
+      "contact": "Vos coordonnées",
+      "media": "Photos"
+    },
+    "types": {
+      "machine": {
+        "label": "Machine industrielle",
+        "description": "Presse à injection, ligne de production, équipement complet"
+      },
+      "piece": {
+        "label": "Pièce détachée",
+        "description": "Électronique, hydraulique, mécanique..."
+      },
+      "moule": {
+        "label": "Moule",
+        "description": "Moule d'injection plastique ou moule industriel"
+      }
+    }
+  },
   "mediaUploader": {
     "addPhotos": "Ajouter des photos",
     "addVideo": "Ajouter une vidéo",
@@ -581,6 +612,7 @@
       "wilaya": "Wilaya",
       "message": "Message",
       "brand": "Marque",
+      "reference": "Marque / référence (si disponible)",
       "model": "Modèle",
       "tonnage": "Tonnage",
       "tonnageMin": "Tonnage minimum",
@@ -647,7 +679,8 @@
     "serviceQuote": "Bonjour Jimi, je souhaite avoir un devis pour la rénovation de ma machine d'injection.",
     "generalContact": "Bonjour Jimi, j'aimerais avoir plus d'informations sur vos services.",
     "buyRequest": "Bonjour Jimi, je recherche une machine d'injection. Je souhaite vous transmettre mes critères.",
-    "sellRequest": "Bonjour Jimi, je souhaite vous proposer une machine d'injection à la vente."
+    "sellRequest": "Bonjour Jimi, je souhaite vous proposer une machine d'injection à la vente.",
+    "sellEquipmentRequest": "Bonjour Jimi, je souhaite vous proposer à la vente un équipement (machine, pièce ou moule)."
   },
   "notFound": {
     "title": "Page introuvable",

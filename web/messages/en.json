@@ -47,6 +47,7 @@
     "requestInfo": "Request more information",
     "scheduleInspection": "Schedule an inspection",
     "proposeMachine": "Submit my machine",
+    "sellEquipment": "Sell equipment",
     "sendMyRequest": "Send my request",
     "viewAll": "View all",
     "readMore": "Read article",
@@ -387,6 +388,36 @@
       "media": "Photos and video"
     }
   },
+  "sellEquipment": {
+    "eyebrow": "Sell equipment",
+    "pageTitle": "Sell equipment",
+    "pageSubtitle": "Industrial machine, spare part, or mold: tell us what you'd like to sell, we'll get back to you quickly.",
+    "seoTitle": "Sell industrial equipment Algeria | Jimi Renovation & Installation",
+    "seoDescription": "Sell an industrial machine, a spare part, or a mold in Algeria: describe your equipment, Jimi Renovation & Installation gets back to you quickly.",
+    "typePrompt": "What would you like to sell?",
+    "changeType": "Change equipment type",
+    "successTitle": "Your submission has been sent",
+    "successMessage": "Thank you, we've received the information about your equipment. Our team will get back to you quickly.",
+    "sections": {
+      "equipment": "Equipment information",
+      "contact": "Your contact details",
+      "media": "Photos"
+    },
+    "types": {
+      "machine": {
+        "label": "Industrial machine",
+        "description": "Injection press, production line, complete equipment"
+      },
+      "piece": {
+        "label": "Spare part",
+        "description": "Electronics, hydraulics, mechanical..."
+      },
+      "moule": {
+        "label": "Mold",
+        "description": "Plastic injection mold or industrial mold"
+      }
+    }
+  },
   "mediaUploader": {
     "addPhotos": "Add photos",
     "addVideo": "Add a video",
@@ -581,6 +612,7 @@
       "wilaya": "Wilaya",
       "message": "Message",
       "brand": "Brand",
+      "reference": "Brand / reference (if available)",
       "model": "Model",
       "tonnage": "Tonnage",
       "tonnageMin": "Minimum tonnage",
@@ -647,7 +679,8 @@
     "serviceQuote": "Hello Jimi, I'd like a quote for renovating my injection machine.",
     "generalContact": "Hello Jimi, I'd like more information about your services.",
     "buyRequest": "Hello Jimi, I'm looking for an injection machine. I'd like to send you my criteria.",
-    "sellRequest": "Hello Jimi, I'd like to offer an injection machine for sale."
+    "sellRequest": "Hello Jimi, I'd like to offer an injection machine for sale.",
+    "sellEquipmentRequest": "Hello Jimi, I'd like to offer equipment for sale (machine, part or mold)."
   },
   "notFound": {
     "title": "Page not found",

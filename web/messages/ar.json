@@ -47,6 +47,7 @@
     "requestInfo": "طلب مزيد من المعلومات",
     "scheduleInspection": "حجز موعد للمعاينة",
     "proposeMachine": "اقتراح آلتي للبيع",
+    "sellEquipment": "بيع معدة",
     "sendMyRequest": "إرسال طلبي",
     "viewAll": "عرض الكل",
     "readMore": "قراءة المقال",
@@ -387,6 +388,36 @@
       "media": "الصور والفيديو"
     }
   },
+  "sellEquipment": {
+    "eyebrow": "بيع معدة",
+    "pageTitle": "بيع معدة",
+    "pageSubtitle": "آلة صناعية، قطعة غيار أو قالب: أخبرنا بما ترغب في بيعه وسنتواصل معك بسرعة.",
+    "seoTitle": "بيع معدة صناعية الجزائر | Jimi Renovation & Installation",
+    "seoDescription": "بيع آلة صناعية، قطعة غيار أو قالب في الجزائر: صف معدتك، وستتواصل معك Jimi Renovation & Installation بسرعة.",
+    "typePrompt": "ماذا ترغب في بيعه؟",
+    "changeType": "تغيير نوع المعدة",
+    "successTitle": "تم إرسال عرضك بنجاح",
+    "successMessage": "شكرًا لك، وصلتنا معلومات معدتك. سيتواصل معك فريقنا بسرعة.",
+    "sections": {
+      "equipment": "معلومات المعدة",
+      "contact": "معلومات التواصل",
+      "media": "الصور"
+    },
+    "types": {
+      "machine": {
+        "label": "آلة صناعية",
+        "description": "آلة حقن، خط إنتاج، معدة كاملة"
+      },
+      "piece": {
+        "label": "قطعة غيار",
+        "description": "إلكترونيك، هيدروليك، ميكانيك..."
+      },
+      "moule": {
+        "label": "قالب",
+        "description": "قالب حقن بلاستيك أو قالب صناعي"
+      }
+    }
+  },
   "mediaUploader": {
     "addPhotos": "إضافة صور",
     "addVideo": "إضافة فيديو",
@@ -581,6 +612,7 @@
       "wilaya": "الولاية",
       "message": "الرسالة",
       "brand": "العلامة",
+      "reference": "العلامة / المرجع (إن وُجد)",
       "model": "الطراز",
       "tonnage": "التونّاج",
       "tonnageMin": "التونّاج الأدنى",
@@ -647,7 +679,8 @@
     "serviceQuote": "مرحبًا Jimi، أرغب في الحصول على عرض سعر لتجديد آلة الحقن الخاصة بي.",
     "generalContact": "مرحبًا Jimi، أرغب في مزيد من المعلومات حول خدماتكم.",
     "buyRequest": "مرحبًا Jimi، أبحث عن آلة حقن. أرغب في إرسال معاييري.",
-    "sellRequest": "مرحبًا Jimi، أرغب في عرض آلة حقن للبيع."
+    "sellRequest": "مرحبًا Jimi، أرغب في عرض آلة حقن للبيع.",
+    "sellEquipmentRequest": "مرحبًا Jimi، أرغب في عرض معدة للبيع (آلة، قطعة غيار أو قالب)."
   },
   "notFound": {
     "title": "الصفحة غير موجودة",

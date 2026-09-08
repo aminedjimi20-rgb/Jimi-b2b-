@@ -6,7 +6,7 @@ import { Trash2, RefreshCw, MessageCircle, Phone, Mail } from "lucide-react";
 
 const TYPE_LABELS: Record<LeadType, string> = {
   buy: "Recherche machine",
-  sell: "Vente machine",
+  sell: "Vente équipement",
   service: "Demande de service",
   contact: "Contact",
 };
@@ -23,6 +23,19 @@ const STATUS_LABELS: Record<Lead["status"], string> = {
   contacted: "Contacté",
   closed: "Clôturé",
 };
+
+/** The "Vendre un équipement" form (pièce/moule) stores its photos as a JSON
+ *  array string in lead.data.photos — parse it back for a thumbnail preview
+ *  instead of dumping raw JSON in the generic key/value list below. */
+function parsePhotos(raw: string | undefined): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((p): p is string => typeof p === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
   const [leads, setLeads] = useState(initialLeads);
@@ -130,13 +143,30 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
-                {Object.entries(lead.data).map(([key, value]) => (
-                  <div key={key} className="flex gap-1.5">
-                    <span className="shrink-0 font-medium text-[var(--color-text-muted)]">{key}:</span>
-                    <span className="text-[var(--color-text)]">{value}</span>
-                  </div>
-                ))}
+                {Object.entries(lead.data)
+                  .filter(([key]) => key !== "photos")
+                  .map(([key, value]) => (
+                    <div key={key} className="flex gap-1.5">
+                      <span className="shrink-0 font-medium text-[var(--color-text-muted)]">{key}:</span>
+                      <span className="text-[var(--color-text)]">{value}</span>
+                    </div>
+                  ))}
               </div>
+
+              {parsePhotos(lead.data.photos).length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {parsePhotos(lead.data.photos).map((url, i) => (
+                    <a key={url} href={url} target="_blank" rel="noopener noreferrer">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- photos live on a user-configured Cloudinary domain, unknown at build time */}
+                      <img
+                        src={url}
+                        alt={`Photo ${i + 1}`}
+                        className="h-16 w-16 rounded-md border border-[var(--color-border)] object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
 
               {(lead.data.phone || lead.data.email) && (
                 <div className="mt-3 flex flex-wrap gap-3 border-t border-[var(--color-border)] pt-3">
