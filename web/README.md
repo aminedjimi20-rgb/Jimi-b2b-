@@ -197,6 +197,24 @@ apparaît immédiatement dans sa catégorie ; les boutons **Demander le prix**
 (WhatsApp pré-rempli) et **Contact** permettent de joindre Jimi sans jamais
 exposer de formulaire de vente publique pour les pièces.
 
+## Vidéos explicatives
+
+Deux endroits permettent d'ajouter une vidéo (YouTube, Vimeo ou lien MP4
+direct) pour expliquer une prestation ou un projet, réutilisant le même
+lecteur que les fiches machines (`components/MachineVideoPlayer.tsx`,
+`lib/video.ts`) :
+
+- **Pages Services** (Rénovation, Automatisation, Maintenance) : une vidéo
+  optionnelle par page, gérée depuis `/admin` → onglet **Paramètres** →
+  section « Vidéos des pages Services » (`lib/serviceVideos.ts`). Laisser le
+  champ lien vide puis enregistrer retire la vidéo.
+- **Réalisations** (`/realisations`) : chaque réalisation a désormais sa
+  propre page de détail (`/realisations/[slug]`) où une vidéo peut être
+  ajoutée/modifiée depuis `/admin` → onglet **Réalisations** (icône crayon
+  sur chaque ligne), en plus du titre/problème/solution/résultat. Comme pour
+  les pièces, c'est un catalogue géré uniquement depuis l'admin (pas de
+  soumission publique), persistant dans Firestore (`lib/projectsStore.ts`).
+
 ## Tableau de bord admin
 
 Accessible sur `/admin` (mot de passe défini par `ADMIN_PASSWORD`, valeur par
@@ -210,6 +228,9 @@ production**). Permet de :
   (onglet **Machines**) ;
 - ajouter / publier / masquer / supprimer des pièces industrielles
   (onglet **Pièces**) ;
+- ajouter / publier / masquer / supprimer des réalisations, avec vidéo
+  (onglet **Réalisations**) ;
+- ajouter/retirer la vidéo de chaque page Service (onglet **Paramètres**) ;
 - consulter les fiches vendeurs et acheteurs avec leurs coordonnées
   privées (onglets **Vendeurs**, **Acheteurs**) ;
 - gérer le pipeline de deals et la commission de chaque mise en relation

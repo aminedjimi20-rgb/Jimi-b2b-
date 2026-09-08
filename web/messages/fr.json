@@ -54,6 +54,7 @@
     "learnMore": "En savoir plus",
     "backToMachines": "Retour aux machines",
     "backToBlog": "Retour aux articles",
+    "backToRealisations": "Retour aux réalisations",
     "callNow": "Appeler maintenant"
   },
   "hero": {
@@ -486,6 +487,9 @@
     }
   },
   "servicePages": {
+    "video": {
+      "title": "Voir en vidéo"
+    },
     "renovation": {
       "title": "Rénovation de machines d'injection plastique",
       "subtitle": "Retrofit électrique, PLC, HMI et remise en service complète de vos machines d'injection.",

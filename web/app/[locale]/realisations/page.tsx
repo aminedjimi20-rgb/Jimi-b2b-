@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
-import { getProjects } from "@/lib/data";
+import { getPublicProjects } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
 import { ClipboardList } from "lucide-react";
 
@@ -32,7 +32,7 @@ export default async function RealisationsPage({
   const t = await getTranslations("realisations");
   const tw = await getTranslations("whatsappMessages");
   const tc = await getTranslations("cta");
-  const projects = getProjects();
+  const projects = await getPublicProjects();
 
   return (
     <>

@@ -4,7 +4,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Button } from "@/components/ui/Button";
 import { ProjectCard } from "@/components/ProjectCard";
 import { EmptyState } from "@/components/EmptyState";
-import { getProjects } from "@/lib/data";
+import { getPublicProjects } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
 import { ClipboardList } from "lucide-react";
 
@@ -12,7 +12,7 @@ export async function RealisationsPreview() {
   const t = await getTranslations("home.realisations");
   const tw = await getTranslations("whatsappMessages");
   const tc = await getTranslations("cta");
-  const projects = getProjects().slice(0, 3);
+  const projects = (await getPublicProjects()).slice(0, 3);
 
   return (
     <section className="bg-[var(--color-surface-2)] py-20 md:py-28">

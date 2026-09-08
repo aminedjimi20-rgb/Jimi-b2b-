@@ -5,6 +5,7 @@ import partsData from "@/data/parts.json";
 import type { Machine, Project, Article, Part, PartCategory } from "@/lib/types";
 import { getRuntimeMachines } from "@/lib/machinesStore";
 import { getRuntimeParts } from "@/lib/partsStore";
+import { getRuntimeProjects } from "@/lib/projectsStore";
 
 export async function getMachines(): Promise<Machine[]> {
   const runtime = await getRuntimeMachines();
@@ -82,12 +83,24 @@ export async function getMachineBrands(): Promise<string[]> {
   return Array.from(new Set(machines.map((m) => m.brand))).sort();
 }
 
-export function getProjects(): Project[] {
-  return projectsData as Project[];
+export async function getProjects(): Promise<Project[]> {
+  const runtime = await getRuntimeProjects();
+  return [...runtime, ...(projectsData as Project[])];
 }
 
-export function getProjectBySlug(slug: string): Project | undefined {
-  return getProjects().find((p) => p.slug === slug);
+export async function getPublicProjects(): Promise<Project[]> {
+  const projects = await getProjects();
+  return projects.filter((p) => p.status === "published");
+}
+
+export async function getProjectBySlug(slug: string): Promise<Project | undefined> {
+  const projects = await getProjects();
+  return projects.find((p) => p.slug === slug);
+}
+
+export async function getPublicProjectBySlug(slug: string): Promise<Project | undefined> {
+  const projects = await getPublicProjects();
+  return projects.find((p) => p.slug === slug);
 }
 
 export function getArticles(): Article[] {

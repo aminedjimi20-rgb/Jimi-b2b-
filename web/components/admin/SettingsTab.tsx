@@ -1,7 +1,15 @@
 import { siteConfig } from "@/config/site.config";
+import { ServiceVideosSettings } from "./ServiceVideosSettings";
+import type { ServiceVideos } from "@/lib/serviceVideos";
 import { AlertTriangle, Settings2 } from "lucide-react";
 
-export function SettingsTab({ usingDefaultPassword }: { usingDefaultPassword: boolean }) {
+export function SettingsTab({
+  usingDefaultPassword,
+  initialServiceVideos,
+}: {
+  usingDefaultPassword: boolean;
+  initialServiceVideos: ServiceVideos;
+}) {
   const defaultPwd = usingDefaultPassword;
 
   const rows: [string, string][] = [
@@ -51,6 +59,8 @@ export function SettingsTab({ usingDefaultPassword }: { usingDefaultPassword: bo
           ))}
         </dl>
       </div>
+
+      <ServiceVideosSettings initialServiceVideos={initialServiceVideos} />
     </div>
   );
 }

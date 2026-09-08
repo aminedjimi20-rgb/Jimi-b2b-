@@ -77,6 +77,8 @@ export interface Part {
   isDemo: boolean;
 }
 
+export type ProjectStatus = "draft" | "published";
+
 export interface Project {
   id: string;
   slug: string;
@@ -86,7 +88,11 @@ export interface Project {
   problem: string;
   solution: string;
   result: string;
-  isDemo: true;
+  status: ProjectStatus;
+  videoUrl?: string | null;
+  videoThumbnail?: string | null;
+  videoTitle?: string | null;
+  isDemo: boolean;
 }
 
 export interface Article {

@@ -54,6 +54,7 @@
     "learnMore": "معرفة المزيد",
     "backToMachines": "العودة إلى الآلات",
     "backToBlog": "العودة إلى المقالات",
+    "backToRealisations": "العودة إلى الأعمال",
     "callNow": "اتصل الآن"
   },
   "hero": {
@@ -486,6 +487,9 @@
     }
   },
   "servicePages": {
+    "video": {
+      "title": "شاهد الفيديو"
+    },
     "renovation": {
       "title": "تجديد آلات حقن البلاستيك",
       "subtitle": "تحديث كهربائي، PLC، HMI وإعادة تشغيل كاملة لآلات الحقن الخاصة بك.",

@@ -54,6 +54,7 @@
     "learnMore": "Learn more",
     "backToMachines": "Back to machines",
     "backToBlog": "Back to articles",
+    "backToRealisations": "Back to projects",
     "callNow": "Call now"
   },
   "hero": {
@@ -486,6 +487,9 @@
     }
   },
   "servicePages": {
+    "video": {
+      "title": "Watch the video"
+    },
     "renovation": {
       "title": "Plastic injection machine renovation",
       "subtitle": "Electrical retrofit, PLC, HMI and full commissioning of your injection machines.",
