@@ -16,6 +16,7 @@ export type AdminProjectInput = {
   videoUrl?: string | null;
   videoThumbnail?: string | null;
   videoTitle?: string | null;
+  photos?: string[];
 };
 
 const COLLECTION = "projects";
@@ -52,6 +53,7 @@ function buildProject(id: string, slug: string, input: AdminProjectInput): Proje
     videoUrl: input.videoUrl || null,
     videoThumbnail: input.videoThumbnail || null,
     videoTitle: input.videoTitle || null,
+    photos: input.photos ?? [],
     isDemo: false,
   };
 }

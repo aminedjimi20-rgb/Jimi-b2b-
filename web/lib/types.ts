@@ -92,6 +92,9 @@ export interface Project {
   videoUrl?: string | null;
   videoThumbnail?: string | null;
   videoTitle?: string | null;
+  /** Uploaded photo URLs, in display order. photos[0] is the main photo
+   *  (used on the project card and detail page hero). */
+  photos?: string[];
   isDemo: boolean;
 }
 

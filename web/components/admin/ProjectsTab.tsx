@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, Fragment } from "react";
 import type { Project, ProjectStatus } from "@/lib/types";
-import { VideoUploader } from "@/components/forms/MediaUploader";
+import { PhotoUploader, VideoUploader } from "@/components/forms/MediaUploader";
 import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -23,6 +23,7 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [editingVideoUrl, setEditingVideoUrl] = useState<string | null>(null);
   const [savingVideo, setSavingVideo] = useState(false);
+  const [newPhotos, setNewPhotos] = useState<string[]>([]);
   const [newVideo, setNewVideo] = useState<string | null>(null);
 
   async function refresh() {
@@ -46,10 +47,11 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
       const res = await fetch("/api/admin/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, videoUrl: newVideo }),
+        body: JSON.stringify({ ...payload, photos: newPhotos, videoUrl: newVideo }),
       });
       if (res.ok) {
         e.currentTarget.reset();
+        setNewPhotos([]);
         setNewVideo(null);
         setShowForm(false);
         await refresh();
@@ -151,6 +153,13 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
             className="admin-input sm:col-span-3"
           />
           <textarea name="result" required placeholder="Résultat" rows={2} className="admin-input sm:col-span-3" />
+
+          <div className="sm:col-span-3">
+            <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+              Photos (optionnel)
+            </p>
+            <PhotoUploader value={newPhotos} onChange={setNewPhotos} />
+          </div>
 
           <div className="sm:col-span-3">
             <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">

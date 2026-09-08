@@ -58,6 +58,21 @@ export default async function ProjectDetailPage({
             <Badge tone="neutral">{project.tonnage} T</Badge>
           </div>
 
+          {project.photos && project.photos.length > 0 && (
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {project.photos.map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element -- photo lives on a user-configured Cloudinary domain, unknown at build time
+                <img
+                  key={url}
+                  src={url}
+                  alt={`${project.title} — photo ${i + 1}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  className="aspect-square rounded-lg border border-[var(--color-border)] object-cover"
+                />
+              ))}
+            </div>
+          )}
+
           {project.videoUrl && (
             <div className="mt-8">
               <MachineVideoPlayer

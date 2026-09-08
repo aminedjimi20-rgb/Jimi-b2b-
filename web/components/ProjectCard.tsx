@@ -12,7 +12,17 @@ export async function ProjectCard({ project, index = 0 }: { project: Project; in
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm">
       <Link href={`/realisations/${project.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-[var(--color-ink)]">
-        <MachineArt seed={index + 2} className="h-full w-full object-cover" />
+        {project.photos && project.photos.length > 0 ? (
+          // eslint-disable-next-line @next/next/no-img-element -- photo lives on a user-configured Cloudinary domain, unknown at build time
+          <img
+            src={project.photos[0]}
+            alt={project.title}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <MachineArt seed={index + 2} className="h-full w-full object-cover" />
+        )}
         {project.videoUrl && (
           <div className="absolute inset-x-3 top-3 flex">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">

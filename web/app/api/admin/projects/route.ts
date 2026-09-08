@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
     videoUrl: sanitizeUrl(body.videoUrl),
     videoThumbnail: sanitizeUrl(body.videoThumbnail),
     videoTitle: body.videoTitle ? String(body.videoTitle).slice(0, 200) : null,
+    photos: Array.isArray(body.photos)
+      ? body.photos.map((p) => sanitizeUrl(p)).filter((p): p is string => Boolean(p)).slice(0, 10)
+      : [],
   });
 
   return NextResponse.json({ ok: true, project });

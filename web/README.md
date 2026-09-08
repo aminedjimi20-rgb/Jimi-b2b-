@@ -210,11 +210,13 @@ lecteur que les fiches machines (`components/MachineVideoPlayer.tsx`,
   pages Services » (`lib/serviceVideos.ts`). Retirer le fichier puis
   enregistrer le supprime du site.
 - **Réalisations** (`/realisations`) : chaque réalisation a désormais sa
-  propre page de détail (`/realisations/[slug]`) où une vidéo peut être
-  ajoutée/modifiée depuis `/admin` → onglet **Réalisations** (icône crayon
-  sur chaque ligne), en plus du titre/problème/solution/résultat. Comme pour
-  les pièces, c'est un catalogue géré uniquement depuis l'admin (pas de
-  soumission publique), persistant dans Firestore (`lib/projectsStore.ts`).
+  propre page de détail (`/realisations/[slug]`) où des photos (galerie,
+  ajoutées à la création) et une vidéo (ajoutée/modifiée à tout moment) sont
+  gérées depuis `/admin` → onglet **Réalisations** (formulaire d'ajout pour
+  les photos, icône crayon sur chaque ligne pour la vidéo), en plus du
+  titre/problème/solution/résultat. Comme pour les pièces, c'est un
+  catalogue géré uniquement depuis l'admin (pas de soumission publique),
+  persistant dans Firestore (`lib/projectsStore.ts`).
 
 ## Témoignages clients
 
