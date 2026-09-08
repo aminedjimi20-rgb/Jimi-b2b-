@@ -618,7 +618,43 @@
     "contactTitle": "Contact",
     "legalTitle": "Information",
     "rights": "All rights reserved.",
-    "madeWith": "Professional website — Jimi Renovation & Installation"
+    "madeWith": "Professional website — Jimi Renovation & Installation",
+    "privacyLink": "Privacy Policy"
+  },
+  "privacyPage": {
+    "title": "Privacy Policy",
+    "subtitle": "How Jimi Renovation & Installation collects, uses and protects your personal data.",
+    "updated": "Last updated: September 2026",
+    "sections": [
+      {
+        "heading": "What data we collect",
+        "body": "We collect the information you voluntarily provide: through the site's forms (name, phone, email, company, request details), through WhatsApp (your number and the content of your messages, including photos you send us to identify a machine, a part, or a fault), or by phone/email."
+      },
+      {
+        "heading": "How we use your data",
+        "body": "Your data is used only to process your request: to contact you back, prepare a quote, arrange an intervention, or finalize the purchase or sale of a machine. We never use it for unsolicited advertising and never sell it to third parties."
+      },
+      {
+        "heading": "WhatsApp assistant and artificial intelligence",
+        "body": "Our WhatsApp button may be connected to an automated assistant that replies on our behalf when we are unavailable. This assistant relies on Anthropic's Claude API to understand and respond to your messages: the content of your conversation is sent to this provider to generate a reply, for that purpose only. A member of our team can take over the conversation at any time, and the assistant never provides a price, delay, or information that hasn't been confirmed by our team."
+      },
+      {
+        "heading": "Sharing with technical providers",
+        "body": "To run the site and our services, we use technical providers who may process your data on our behalf: Meta (WhatsApp Business Platform) for messaging, Google Firebase for secure storage of requests, Cloudinary for hosting photos and videos, and Anthropic for the AI assistant described above. None of these providers is authorized to use your data for any purpose other than the one we've engaged them for."
+      },
+      {
+        "heading": "Data retention",
+        "body": "We keep your data for as long as necessary to process your request and provide commercial follow-up (warranty, after-sales service). You may request deletion of your data at any time by contacting us."
+      },
+      {
+        "heading": "Your rights",
+        "body": "You may at any time request to access, correct, or delete the data we hold about you by writing to the address below."
+      },
+      {
+        "heading": "Contact",
+        "body": "For any question about this privacy policy or your personal data, contact us at aminedjimi20@gmail.com or via WhatsApp."
+      }
+    ]
   },
   "forms": {
     "fields": {

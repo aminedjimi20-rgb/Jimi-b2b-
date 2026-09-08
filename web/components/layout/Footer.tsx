@@ -116,7 +116,12 @@ export async function Footer() {
       <div className="border-t border-white/10">
         <div className="container-jimi flex flex-col items-center justify-between gap-2 py-5 text-xs text-slate-500 sm:flex-row">
           <p>© {year} {siteConfig.companyName} — {t("footer.rights")}</p>
-          <p>{t("footer.madeWith")}</p>
+          <div className="flex items-center gap-4">
+            <Link href="/politique-de-confidentialite" className="hover:text-white">
+              {t("footer.privacyLink")}
+            </Link>
+            <p>{t("footer.madeWith")}</p>
+          </div>
         </div>
       </div>
     </footer>

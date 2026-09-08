@@ -618,7 +618,43 @@
     "contactTitle": "Contact",
     "legalTitle": "Informations",
     "rights": "Tous droits réservés.",
-    "madeWith": "Site professionnel — Jimi Renovation & Installation"
+    "madeWith": "Site professionnel — Jimi Renovation & Installation",
+    "privacyLink": "Politique de confidentialité"
+  },
+  "privacyPage": {
+    "title": "Politique de confidentialité",
+    "subtitle": "Comment Jimi Renovation & Installation collecte, utilise et protège vos données personnelles.",
+    "updated": "Dernière mise à jour : septembre 2026",
+    "sections": [
+      {
+        "heading": "Quelles données nous collectons",
+        "body": "Nous collectons les informations que vous nous transmettez volontairement : via les formulaires du site (nom, téléphone, email, entreprise, détails de votre demande), via WhatsApp (votre numéro et le contenu de vos messages, y compris les photos que vous nous envoyez pour identifier une machine, une pièce ou une panne), ou par téléphone/email."
+      },
+      {
+        "heading": "Comment nous utilisons vos données",
+        "body": "Vos données servent uniquement à traiter votre demande : vous recontacter, préparer un devis, organiser une intervention, ou finaliser un achat ou une vente de machine. Nous ne les utilisons jamais à des fins publicitaires non sollicitées et ne les revendons jamais à des tiers."
+      },
+      {
+        "heading": "Assistant WhatsApp et intelligence artificielle",
+        "body": "Notre bouton WhatsApp peut être connecté à un assistant automatisé qui répond en votre nom lorsque nous sommes indisponibles. Cet assistant s'appuie sur l'API Claude d'Anthropic pour comprendre et répondre à vos messages : le contenu de vos échanges est transmis à ce prestataire pour générer une réponse, mais uniquement dans ce but. Un membre de notre équipe peut à tout moment reprendre la conversation, et l'assistant ne fournit jamais de prix, délai ou information qui ne serait pas confirmé par notre équipe."
+      },
+      {
+        "heading": "Partage avec des prestataires techniques",
+        "body": "Pour faire fonctionner le site et nos services, nous faisons appel à des prestataires techniques qui peuvent traiter vos données en notre nom : Meta (WhatsApp Business Platform) pour la messagerie, Google Firebase pour le stockage sécurisé des demandes, Cloudinary pour l'hébergement des photos et vidéos, et Anthropic pour l'assistant IA décrit ci-dessus. Aucun de ces prestataires n'est autorisé à utiliser vos données à d'autres fins que celles pour lesquelles nous les mandatons."
+      },
+      {
+        "heading": "Conservation des données",
+        "body": "Nous conservons vos données aussi longtemps que nécessaire pour traiter votre demande et assurer le suivi commercial (garantie, service après-vente). Vous pouvez demander la suppression de vos données à tout moment en nous contactant."
+      },
+      {
+        "heading": "Vos droits",
+        "body": "Vous pouvez à tout moment demander à consulter, corriger ou supprimer les données que nous détenons à votre sujet, en nous écrivant à l'adresse indiquée ci-dessous."
+      },
+      {
+        "heading": "Contact",
+        "body": "Pour toute question sur cette politique de confidentialité ou vos données personnelles, contactez-nous à aminedjimi20@gmail.com ou via WhatsApp."
+      }
+    ]
   },
   "forms": {
     "fields": {
