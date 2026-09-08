@@ -3,6 +3,10 @@ import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { createTestConversation, getConversationById, saveConversation } from "@/lib/conversationsStore";
 import { runAgentTurn } from "@/lib/ai/agent";
 
+// L'appel à Claude (avec réflexion adaptative) peut dépasser la limite par
+// défaut (10s) des fonctions serverless Vercel — on l'étend explicitement.
+export const maxDuration = 60;
+
 /** Endpoint réservé à l'admin : fait tourner l'agent IA sur une conversation
  *  de test (channel "test", jamais envoyée sur WhatsApp), pour valider son
  *  comportement avant de le connecter à la Cloud API. */

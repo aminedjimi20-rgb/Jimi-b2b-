@@ -21,6 +21,10 @@ import { runAgentTurn, shouldAiRespond } from "@/lib/ai/agent";
  * quel, sans autre changement de code.
  */
 
+// L'appel à Claude (avec réflexion adaptative) peut dépasser la limite par
+// défaut (10s) des fonctions serverless Vercel — on l'étend explicitement.
+export const maxDuration = 60;
+
 // ---- GET : handshake de vérification Meta -----------------------------
 
 export async function GET(request: NextRequest) {
