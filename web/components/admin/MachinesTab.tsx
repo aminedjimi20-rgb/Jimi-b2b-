@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, Fragment } from "react";
 import type { Machine, MachineDrive, MachineStatus } from "@/lib/types";
-import { PhotoUploader } from "@/components/forms/MediaUploader";
+import { PhotoUploader, VideoUploader } from "@/components/forms/MediaUploader";
 import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
 
 const STATUS_LABELS: Record<MachineStatus, string> = {
@@ -35,8 +35,10 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [editingVideoUrl, setEditingVideoUrl] = useState<string | null>(null);
   const [savingVideo, setSavingVideo] = useState(false);
   const [newPhotos, setNewPhotos] = useState<string[]>([]);
+  const [newVideo, setNewVideo] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -63,11 +65,13 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
           ...payload,
           priceOnRequest: formData.get("priceOnRequest") === "on",
           photos: newPhotos,
+          videoUrl: newVideo,
         }),
       });
       if (res.ok) {
         e.currentTarget.reset();
         setNewPhotos([]);
+        setNewVideo(null);
         setShowForm(false);
         await refresh();
       }
@@ -89,16 +93,13 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
     e.preventDefault();
     setSavingVideo(true);
     const formData = new FormData(e.currentTarget);
-    const videoUrl = String(formData.get("videoUrl") || "");
-    const videoThumbnail = String(formData.get("videoThumbnail") || "");
     const videoTitle = String(formData.get("videoTitle") || "");
     try {
       const res = await fetch(`/api/admin/machines/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          videoUrl: videoUrl || null,
-          videoThumbnail: videoThumbnail || null,
+          videoUrl: editingVideoUrl,
           videoTitle: videoTitle || null,
         }),
       });
@@ -189,18 +190,11 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
             <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
               Vidéo de la machine (optionnel)
             </p>
+            <VideoUploader value={newVideo} onChange={setNewVideo} />
           </div>
           <input
-            name="videoUrl"
-            type="url"
-            placeholder="Lien vidéo (MP4, YouTube ou Vimeo)"
-            className="admin-input sm:col-span-2"
-          />
-          <input name="videoTitle" placeholder="Titre de la vidéo (optionnel)" className="admin-input" />
-          <input
-            name="videoThumbnail"
-            type="url"
-            placeholder="Miniature/poster (URL image, optionnel — auto pour YouTube)"
+            name="videoTitle"
+            placeholder="Titre de la vidéo (optionnel)"
             className="admin-input sm:col-span-3"
           />
 
@@ -297,7 +291,14 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                           </button>
                         )}
                         <button
-                          onClick={() => setEditingVideoId(editingVideoId === m.id ? null : m.id)}
+                          onClick={() => {
+                            if (editingVideoId === m.id) {
+                              setEditingVideoId(null);
+                            } else {
+                              setEditingVideoId(m.id);
+                              setEditingVideoUrl(m.videoUrl ?? null);
+                            }
+                          }}
                           className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
                           aria-label="Modifier"
                         >
@@ -319,27 +320,14 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                     <td colSpan={7} className="px-4 py-4">
                       <form
                         onSubmit={(e) => saveVideo(m.id, e)}
-                        className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+                        className="flex flex-col gap-3 sm:max-w-md"
                       >
-                        <input
-                          name="videoUrl"
-                          type="url"
-                          defaultValue={m.videoUrl ?? ""}
-                          placeholder="Lien vidéo (MP4, YouTube ou Vimeo)"
-                          className="admin-input sm:col-span-2"
-                        />
+                        <VideoUploader value={editingVideoUrl} onChange={setEditingVideoUrl} />
                         <input
                           name="videoTitle"
                           defaultValue={m.videoTitle ?? ""}
                           placeholder="Titre de la vidéo"
                           className="admin-input"
-                        />
-                        <input
-                          name="videoThumbnail"
-                          type="url"
-                          defaultValue={m.videoThumbnail ?? ""}
-                          placeholder="Miniature/poster (URL image, optionnel)"
-                          className="admin-input sm:col-span-2"
                         />
                         <button
                           type="submit"

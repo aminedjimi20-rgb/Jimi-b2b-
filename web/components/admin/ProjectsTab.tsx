@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, Fragment } from "react";
 import type { Project, ProjectStatus } from "@/lib/types";
+import { VideoUploader } from "@/components/forms/MediaUploader";
 import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -20,7 +21,9 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [editingVideoUrl, setEditingVideoUrl] = useState<string | null>(null);
   const [savingVideo, setSavingVideo] = useState(false);
+  const [newVideo, setNewVideo] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -43,10 +46,11 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
       const res = await fetch("/api/admin/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, videoUrl: newVideo }),
       });
       if (res.ok) {
         e.currentTarget.reset();
+        setNewVideo(null);
         setShowForm(false);
         await refresh();
       }
@@ -68,16 +72,13 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
     e.preventDefault();
     setSavingVideo(true);
     const formData = new FormData(e.currentTarget);
-    const videoUrl = String(formData.get("videoUrl") || "");
-    const videoThumbnail = String(formData.get("videoThumbnail") || "");
     const videoTitle = String(formData.get("videoTitle") || "");
     try {
       const res = await fetch(`/api/admin/projects/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          videoUrl: videoUrl || null,
-          videoThumbnail: videoThumbnail || null,
+          videoUrl: editingVideoUrl,
           videoTitle: videoTitle || null,
         }),
       });
@@ -155,14 +156,13 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
             <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
               Vidéo (optionnel)
             </p>
+            <VideoUploader value={newVideo} onChange={setNewVideo} />
           </div>
           <input
-            name="videoUrl"
-            type="url"
-            placeholder="Lien vidéo (MP4, YouTube ou Vimeo)"
-            className="admin-input sm:col-span-2"
+            name="videoTitle"
+            placeholder="Titre de la vidéo (optionnel)"
+            className="admin-input sm:col-span-3"
           />
-          <input name="videoTitle" placeholder="Titre de la vidéo (optionnel)" className="admin-input" />
 
           <button
             type="submit"
@@ -255,7 +255,14 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
                           </button>
                         )}
                         <button
-                          onClick={() => setEditingVideoId(editingVideoId === p.id ? null : p.id)}
+                          onClick={() => {
+                            if (editingVideoId === p.id) {
+                              setEditingVideoId(null);
+                            } else {
+                              setEditingVideoId(p.id);
+                              setEditingVideoUrl(p.videoUrl ?? null);
+                            }
+                          }}
                           className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
                           aria-label="Modifier la vidéo"
                         >
@@ -277,27 +284,14 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
                     <td colSpan={6} className="px-4 py-4">
                       <form
                         onSubmit={(e) => saveVideo(p.id, e)}
-                        className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+                        className="flex flex-col gap-3 sm:max-w-md"
                       >
-                        <input
-                          name="videoUrl"
-                          type="url"
-                          defaultValue={p.videoUrl ?? ""}
-                          placeholder="Lien vidéo (MP4, YouTube ou Vimeo)"
-                          className="admin-input sm:col-span-2"
-                        />
+                        <VideoUploader value={editingVideoUrl} onChange={setEditingVideoUrl} />
                         <input
                           name="videoTitle"
                           defaultValue={p.videoTitle ?? ""}
                           placeholder="Titre de la vidéo"
                           className="admin-input"
-                        />
-                        <input
-                          name="videoThumbnail"
-                          type="url"
-                          defaultValue={p.videoThumbnail ?? ""}
-                          placeholder="Miniature/poster (URL image, optionnel)"
-                          className="admin-input sm:col-span-2"
                         />
                         <button
                           type="submit"
