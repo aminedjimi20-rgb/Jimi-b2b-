@@ -192,7 +192,7 @@ export function Navbar() {
             ))}
 
             <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--color-border)] pt-4">
-              <LanguageSwitcher />
+              <LanguageSwitcher align="start" dropUp />
               <Button href="/contact" size="sm" className="flex-1">
                 {t("getQuote")}
               </Button>

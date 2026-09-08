@@ -10,7 +10,23 @@ import clsx from "clsx";
 const LABELS: Record<string, string> = { fr: "Français", ar: "العربية", en: "English" };
 const SHORT: Record<string, string> = { fr: "FR", ar: "AR", en: "EN" };
 
-export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
+export function LanguageSwitcher({
+  compact = false,
+  align = "end",
+  dropUp = false,
+}: {
+  compact?: boolean;
+  /** Which side of the button the dropdown's own edge anchors to. Use "start"
+   *  when the button sits near the start of a row (e.g. the mobile menu
+   *  panel) — anchoring "end" there would open the dropdown toward the
+   *  viewport edge behind it and clip off-screen. */
+  align?: "start" | "end";
+  /** Open above the button instead of below. Use this when the button sits
+   *  at the bottom of a container with its own overflow/scroll (e.g. the
+   *  mobile menu panel) — opening downward there gets clipped by that
+   *  container instead of showing on top of it. */
+  dropUp?: boolean;
+}) {
   const locale = useLocale();
   const t = useTranslations("langSwitcher");
   const pathname = usePathname();
@@ -42,7 +58,13 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
         <ChevronDown size={14} className={clsx("transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute end-0 z-50 mt-2 w-40 overflow-hidden rounded-lg border border-[var(--color-border)] bg-white py-1 shadow-lg">
+        <div
+          className={clsx(
+            "absolute z-50 w-40 overflow-hidden rounded-lg border border-[var(--color-border)] bg-white py-1 shadow-lg",
+            align === "start" ? "start-0" : "end-0",
+            dropUp ? "bottom-full mb-2" : "top-full mt-2"
+          )}
+        >
           {routing.locales.map((loc) => (
             <button
               key={loc}
