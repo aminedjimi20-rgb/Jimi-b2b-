@@ -27,7 +27,8 @@
       "electronique": "الإلكترونيك والكهرباء",
       "moules": "القوالب",
       "hydraulique": "الهيدروليك",
-      "mecanique": "الميكانيك"
+      "mecanique": "الميكانيك",
+      "sell": "بيع قطعة غيار"
     },
     "servicesMenu": {
       "renovation": "تجديد آلات الحقن",

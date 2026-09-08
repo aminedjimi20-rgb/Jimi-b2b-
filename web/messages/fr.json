@@ -27,7 +27,8 @@
       "electronique": "Électronique & électricité",
       "moules": "Moules",
       "hydraulique": "Hydraulique",
-      "mecanique": "Mécanique"
+      "mecanique": "Mécanique",
+      "sell": "Vendre une pièce"
     },
     "servicesMenu": {
       "renovation": "Rénovation de machines d'injection",

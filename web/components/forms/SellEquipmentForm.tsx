@@ -21,9 +21,9 @@ const TYPE_ICONS: Record<EquipmentType, LucideIcon> = {
   moule: Box,
 };
 
-export function SellEquipmentForm() {
+export function SellEquipmentForm({ initialType = null }: { initialType?: EquipmentType | null }) {
   const t = useTranslations();
-  const [equipmentType, setEquipmentType] = useState<EquipmentType | null>(null);
+  const [equipmentType, setEquipmentType] = useState<EquipmentType | null>(initialType);
 
   if (equipmentType === null) {
     return (

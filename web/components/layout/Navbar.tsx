@@ -43,6 +43,7 @@ export function Navbar() {
     { href: "/pieces-industrielles/moules", label: t("piecesMenu.moules") },
     { href: "/pieces-industrielles/hydraulique", label: t("piecesMenu.hydraulique") },
     { href: "/pieces-industrielles/mecanique", label: t("piecesMenu.mecanique") },
+    { href: "/vendre-equipement?type=piece", label: t("piecesMenu.sell") },
   ];
 
   const servicesMenu = [
