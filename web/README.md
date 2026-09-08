@@ -204,10 +204,11 @@ direct) pour expliquer une prestation ou un projet, réutilisant le même
 lecteur que les fiches machines (`components/MachineVideoPlayer.tsx`,
 `lib/video.ts`) :
 
-- **Pages Services** (Rénovation, Automatisation, Maintenance) : une vidéo
-  optionnelle par page, gérée depuis `/admin` → onglet **Paramètres** →
-  section « Vidéos des pages Services » (`lib/serviceVideos.ts`). Laisser le
-  champ lien vide puis enregistrer retire la vidéo.
+- **Pages Services** (Rénovation, Automatisation, Maintenance) : une photo et
+  une vidéo optionnelles par page (indépendantes l'une de l'autre), gérées
+  depuis `/admin` → onglet **Paramètres** → section « Photos et vidéos des
+  pages Services » (`lib/serviceVideos.ts`). Retirer le fichier puis
+  enregistrer le supprime du site.
 - **Réalisations** (`/realisations`) : chaque réalisation a désormais sa
   propre page de détail (`/realisations/[slug]`) où une vidéo peut être
   ajoutée/modifiée depuis `/admin` → onglet **Réalisations** (icône crayon

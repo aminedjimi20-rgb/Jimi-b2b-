@@ -6,15 +6,21 @@ import { getFirestoreAdmin, isFirebaseConfigured } from "@/lib/firebaseAdmin";
 export type ServiceVideoKey = "renovation" | "automation" | "maintenance";
 
 export interface ServiceVideo {
-  videoUrl: string;
+  imageUrl: string | null;
+  videoUrl: string | null;
   videoTitle: string | null;
   videoThumbnail: string | null;
 }
 
-export type ServiceVideos = Record<ServiceVideoKey, ServiceVideo | null>;
+export type ServiceVideos = Record<ServiceVideoKey, ServiceVideo>;
 
 const KEYS: ServiceVideoKey[] = ["renovation", "automation", "maintenance"];
-const EMPTY: ServiceVideos = { renovation: null, automation: null, maintenance: null };
+const EMPTY_ENTRY: ServiceVideo = { imageUrl: null, videoUrl: null, videoTitle: null, videoThumbnail: null };
+const EMPTY: ServiceVideos = {
+  renovation: { ...EMPTY_ENTRY },
+  automation: { ...EMPTY_ENTRY },
+  maintenance: { ...EMPTY_ENTRY },
+};
 
 const DOC_PATH = ["settings", "serviceVideos"] as const;
 
@@ -22,12 +28,16 @@ const DOC_PATH = ["settings", "serviceVideos"] as const;
 
 async function dbGetServiceVideos(): Promise<ServiceVideos> {
   const snap = await getFirestoreAdmin().collection(DOC_PATH[0]).doc(DOC_PATH[1]).get();
-  if (!snap.exists) return { ...EMPTY };
-  const data = snap.data() as Partial<ServiceVideos>;
-  return { ...EMPTY, ...data };
+  if (!snap.exists) return { renovation: { ...EMPTY_ENTRY }, automation: { ...EMPTY_ENTRY }, maintenance: { ...EMPTY_ENTRY } };
+  const data = snap.data() as Partial<Record<ServiceVideoKey, Partial<ServiceVideo>>>;
+  const result = {} as ServiceVideos;
+  for (const key of KEYS) {
+    result[key] = { ...EMPTY_ENTRY, ...data[key] };
+  }
+  return result;
 }
 
-async function dbSetServiceVideo(key: ServiceVideoKey, value: ServiceVideo | null): Promise<void> {
+async function dbSetServiceVideo(key: ServiceVideoKey, value: ServiceVideo): Promise<void> {
   await getFirestoreAdmin()
     .collection(DOC_PATH[0])
     .doc(DOC_PATH[1])
@@ -53,13 +63,18 @@ async function fileGetServiceVideos(): Promise<ServiceVideos> {
   try {
     await ensureStore();
     const raw = await fs.readFile(FILE, "utf-8");
-    return { ...EMPTY, ...(JSON.parse(raw) as Partial<ServiceVideos>) };
+    const data = JSON.parse(raw) as Partial<Record<ServiceVideoKey, Partial<ServiceVideo>>>;
+    const result = {} as ServiceVideos;
+    for (const key of KEYS) {
+      result[key] = { ...EMPTY_ENTRY, ...data[key] };
+    }
+    return result;
   } catch {
-    return { ...EMPTY };
+    return { renovation: { ...EMPTY_ENTRY }, automation: { ...EMPTY_ENTRY }, maintenance: { ...EMPTY_ENTRY } };
   }
 }
 
-async function fileSetServiceVideo(key: ServiceVideoKey, value: ServiceVideo | null): Promise<void> {
+async function fileSetServiceVideo(key: ServiceVideoKey, value: ServiceVideo): Promise<void> {
   const current = await fileGetServiceVideos();
   current[key] = value;
   await ensureStore();
@@ -72,12 +87,12 @@ export async function getServiceVideos(): Promise<ServiceVideos> {
   return isFirebaseConfigured() ? dbGetServiceVideos() : fileGetServiceVideos();
 }
 
-export async function getServiceVideo(key: ServiceVideoKey): Promise<ServiceVideo | null> {
+export async function getServiceVideo(key: ServiceVideoKey): Promise<ServiceVideo> {
   const videos = await getServiceVideos();
   return videos[key];
 }
 
-export async function setServiceVideo(key: ServiceVideoKey, value: ServiceVideo | null): Promise<void> {
+export async function setServiceVideo(key: ServiceVideoKey, value: ServiceVideo): Promise<void> {
   if (!KEYS.includes(key)) throw new Error("invalid_service_key");
   return isFirebaseConfigured() ? dbSetServiceVideo(key, value) : fileSetServiceVideo(key, value);
 }

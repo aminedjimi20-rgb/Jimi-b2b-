@@ -20,6 +20,7 @@ export async function PATCH(request: NextRequest) {
 
   const body = (await request.json().catch(() => null)) as {
     key?: string;
+    imageUrl?: string | null;
     videoUrl?: string | null;
     videoTitle?: string | null;
     videoThumbnail?: string | null;
@@ -30,15 +31,11 @@ export async function PATCH(request: NextRequest) {
   }
 
   const videoUrl = sanitizeUrl(body.videoUrl);
-  if (!videoUrl) {
-    await setServiceVideo(body.key as ServiceVideoKey, null);
-    return NextResponse.json({ ok: true });
-  }
-
   await setServiceVideo(body.key as ServiceVideoKey, {
+    imageUrl: sanitizeUrl(body.imageUrl),
     videoUrl,
-    videoTitle: body.videoTitle ? String(body.videoTitle).slice(0, 200) : null,
-    videoThumbnail: sanitizeUrl(body.videoThumbnail),
+    videoTitle: videoUrl && body.videoTitle ? String(body.videoTitle).slice(0, 200) : null,
+    videoThumbnail: videoUrl ? sanitizeUrl(body.videoThumbnail) : null,
   });
   return NextResponse.json({ ok: true });
 }

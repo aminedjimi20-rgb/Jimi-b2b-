@@ -10,21 +10,28 @@ export async function ServiceDetailContent({ serviceKey }: { serviceKey: "renova
   const tCta = await getTranslations("services.cta");
   const tVideo = await getTranslations("servicePages.video");
   const items = t.raw("items") as string[];
-  const video = await getServiceVideo(serviceKey);
+  const media = await getServiceVideo(serviceKey);
 
   return (
     <section className="py-14 md:py-20">
       <Container>
         <div className="mx-auto max-w-3xl">
+          {media.imageUrl && (
+            <div className="mb-8 overflow-hidden rounded-xl bg-[var(--color-ink)]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- photo lives on a user-configured Cloudinary domain, unknown at build time */}
+              <img src={media.imageUrl} alt={t("title")} className="aspect-video w-full object-cover" />
+            </div>
+          )}
+
           <p className="text-base leading-relaxed text-[var(--color-text)]">{t("intro")}</p>
 
-          {video && (
+          {media.videoUrl && (
             <div className="mt-8">
               <h2 className="mb-4 text-xl font-bold text-[var(--color-ink)]">{tVideo("title")}</h2>
               <MachineVideoPlayer
-                videoUrl={video.videoUrl}
-                videoThumbnail={video.videoThumbnail}
-                videoTitle={video.videoTitle}
+                videoUrl={media.videoUrl}
+                videoThumbnail={media.videoThumbnail}
+                videoTitle={media.videoTitle}
               />
             </div>
           )}
