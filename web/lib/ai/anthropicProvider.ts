@@ -3,8 +3,11 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { AgentTurnSchema, type AgentTurnOutput } from "@/lib/ai/schema";
 import type { AiProvider, AgentHistoryTurn } from "@/lib/ai/provider";
 
-const MODEL = "claude-opus-5";
-const MAX_TOKENS = 8000;
+// Sonnet 5 plutôt qu'Opus 5 : ce endpoint tourne dans une fonction Vercel
+// avec un délai d'exécution limité (plan Hobby) — Sonnet répond assez vite
+// pour rester dans cette limite pour une conversation WhatsApp en temps réel.
+const MODEL = "claude-sonnet-5";
+const MAX_TOKENS = 4096;
 
 function toAnthropicMessages(history: AgentHistoryTurn[]): Anthropic.MessageParam[] {
   return history.map((turn) => {
@@ -47,7 +50,7 @@ export class AnthropicProvider implements AiProvider {
       model: MODEL,
       max_tokens: MAX_TOKENS,
       thinking: { type: "adaptive" },
-      output_config: { effort: "medium", format: zodOutputFormat(AgentTurnSchema) },
+      output_config: { effort: "low", format: zodOutputFormat(AgentTurnSchema) },
       system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
       messages: toAnthropicMessages(history),
     });
