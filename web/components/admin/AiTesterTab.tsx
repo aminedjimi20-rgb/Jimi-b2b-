@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from "react";
 import type { Conversation, ConversationMessage, LeadScoreLevel, QualificationData } from "@/lib/types";
+import { PhotoUploader } from "@/components/forms/MediaUploader";
 import { Bot, Send, RefreshCw, User, Flame, ImagePlus } from "lucide-react";
 
 const SCENARIOS: { label: string; message: string; imageUrl?: string }[] = [
@@ -52,7 +53,7 @@ const QUALIFICATION_LABELS: Record<keyof QualificationData, string> = {
 export function AiTesterTab() {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [input, setInput] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [showImageField, setShowImageField] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +84,7 @@ export function AiTesterTab() {
       }
       setConversation(json.conversation as Conversation);
       setInput("");
-      setImageUrl("");
+      setImageUrls([]);
     } catch {
       setError("Impossible de contacter le serveur.");
     } finally {
@@ -93,14 +94,14 @@ export function AiTesterTab() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    void sendMessage(input, imageUrl || undefined);
+    void sendMessage(input, imageUrls[0]);
   }
 
   function startScenario(scenario: (typeof SCENARIOS)[number]) {
     setConversation(null);
     setError(null);
     setInput("");
-    setImageUrl("");
+    setImageUrls([]);
     // Nouvelle conversation : conversationId sera null au premier envoi.
     void sendMessage(scenario.message, scenario.imageUrl);
   }
@@ -108,7 +109,7 @@ export function AiTesterTab() {
   function resetConversation() {
     setConversation(null);
     setInput("");
-    setImageUrl("");
+    setImageUrls([]);
     setError(null);
   }
 
@@ -202,12 +203,12 @@ export function AiTesterTab() {
 
           <form onSubmit={onSubmit} className="flex flex-col gap-2 border-t border-[var(--color-border)] p-3">
             {showImageField && (
-              <input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="URL publique d'une photo (test vision, optionnel)"
-                className="admin-input text-xs"
-              />
+              <div className="rounded-lg border border-[var(--color-border)] p-2.5">
+                <p className="mb-2 text-xs text-[var(--color-text-muted)]">
+                  Photo du client (test vision, optionnel) — envoyée depuis la galerie.
+                </p>
+                <PhotoUploader value={imageUrls} onChange={setImageUrls} max={1} />
+              </div>
             )}
             <div className="flex items-center gap-2">
               <button
