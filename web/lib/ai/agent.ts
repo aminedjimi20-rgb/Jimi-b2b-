@@ -130,13 +130,16 @@ export async function runAgentTurn(params: {
 }): Promise<{ reply: string; conversation: Conversation }> {
   const { conversation, userMessage, imageUrls } = params;
 
+  // Firestore rejette une valeur de champ explicitement `undefined` (à la
+  // différence d'une clé absente) — n'inclure "mediaUrls" que s'il y a de
+  // vraies URLs.
   const now = new Date().toISOString();
   const userTurn: ConversationMessage = {
     id: crypto.randomUUID(),
     role: "user",
     content: userMessage,
-    mediaUrls: imageUrls,
     createdAt: now,
+    ...(imageUrls && imageUrls.length > 0 ? { mediaUrls: imageUrls } : {}),
   };
 
   const knowledgeBase = await buildKnowledgeBaseText();
