@@ -12,6 +12,7 @@ import { ProjectsTab } from "./ProjectsTab";
 import { TestimonialsTab } from "./TestimonialsTab";
 import { SettingsTab } from "./SettingsTab";
 import { AiTesterTab } from "./AiTesterTab";
+import { ConversationsTab } from "./ConversationsTab";
 import type { Lead } from "@/lib/leads";
 import type { Machine, Part, Project, Testimonial } from "@/lib/types";
 import type { SellerProfile } from "@/lib/sellers";
@@ -31,6 +32,7 @@ import {
   ClipboardList,
   Quote,
   Bot,
+  MessageCircle,
 } from "lucide-react";
 
 type Tab =
@@ -43,6 +45,7 @@ type Tab =
   | "sellers"
   | "buyers"
   | "machineLeads"
+  | "conversations"
   | "aiTester"
   | "settings";
 
@@ -80,6 +83,7 @@ export function AdminDashboard({
     { key: "leads", label: "Demandes reçues", icon: Inbox, count: initialLeads.length },
     { key: "pending", label: "Annonces à valider", icon: ClipboardCheck, count: pendingMachines.length },
     { key: "machineLeads", label: "Leads", icon: Handshake, count: initialMachineLeads.length },
+    { key: "conversations", label: "Conversations", icon: MessageCircle },
     { key: "machines", label: "Machines", icon: Factory, count: initialMachines.length },
     { key: "parts", label: "Pièces", icon: Cog, count: initialParts.length },
     { key: "projects", label: "Réalisations", icon: ClipboardList, count: initialProjects.length },
@@ -135,6 +139,7 @@ export function AdminDashboard({
       {tab === "testimonials" && <TestimonialsTab initialTestimonials={initialTestimonials} />}
       {tab === "sellers" && <SellersTab initialSellers={initialSellers} machines={initialMachines} />}
       {tab === "buyers" && <BuyersTab initialBuyers={initialBuyers} leads={initialMachineLeads} />}
+      {tab === "conversations" && <ConversationsTab />}
       {tab === "aiTester" && <AiTesterTab />}
       {tab === "settings" && (
         <SettingsTab
