@@ -104,14 +104,30 @@
       "title": "Machines, pièces et services industriels",
       "subtitle": "JIMI Industrie vend, achète et met en relation autour du matériel industriel — et propose des services techniques associés.",
       "viewMore": "Voir plus",
-      "machines": { "label": "Machines industrielles" },
-      "pieces": { "label": "Pièces industrielles" },
-      "moules": { "label": "Moules" },
-      "electrique": { "label": "Électricité & électronique" },
-      "hydraulique": { "label": "Hydraulique" },
-      "automatisation": { "label": "Automatisation" },
-      "maintenance": { "label": "Maintenance" },
-      "retrofit": { "label": "Retrofit" }
+      "machines": {
+        "label": "Machines industrielles"
+      },
+      "pieces": {
+        "label": "Pièces industrielles"
+      },
+      "moules": {
+        "label": "Moules"
+      },
+      "electrique": {
+        "label": "Électricité & électronique"
+      },
+      "hydraulique": {
+        "label": "Hydraulique"
+      },
+      "automatisation": {
+        "label": "Automatisation"
+      },
+      "maintenance": {
+        "label": "Maintenance"
+      },
+      "retrofit": {
+        "label": "Retrofit"
+      }
     },
     "featuredMachines": {
       "title": "Machines à la une",
@@ -345,12 +361,32 @@
         "description": "Contacteurs, relais, disjoncteurs, sectionneurs, câblage industriel, alimentations et protections électriques pour machines et installations industrielles.",
         "seoTitle": "Pièces électriques industrielles Algérie",
         "seoDescription": "Contacteurs, relais, disjoncteurs, sectionneurs, câblage et alimentations électriques pour machines industrielles en Algérie.",
-        "examples": ["Contacteurs", "Relais électriques", "Disjoncteurs", "Sectionneurs", "Câblage industriel", "Alimentations", "Protections électriques"],
-        "applications": ["Armoires électriques industrielles", "Tableaux de distribution", "Circuits de puissance des machines d'injection", "Protection moteur", "Installations de production"],
+        "examples": [
+          "Contacteurs",
+          "Relais électriques",
+          "Disjoncteurs",
+          "Sectionneurs",
+          "Câblage industriel",
+          "Alimentations",
+          "Protections électriques"
+        ],
+        "applications": [
+          "Armoires électriques industrielles",
+          "Tableaux de distribution",
+          "Circuits de puissance des machines d'injection",
+          "Protection moteur",
+          "Installations de production"
+        ],
         "servicesNote": "Ces pièces sont souvent remplacées lors d'une rénovation ou d'un dépannage électrique. Notre équipe intervient sur le diagnostic et le remplacement dans le cadre de nos services de maintenance et de rénovation.",
         "faq": [
-          { "q": "Comment savoir si un contacteur ou un relais est défectueux ?", "a": "Les signes courants sont un moteur qui ne démarre plus, un bruit de claquement anormal, ou une machine qui se met en défaut électrique de façon répétée. Un diagnostic sur site permet de confirmer la panne avant remplacement." },
-          { "q": "Proposez-vous le remplacement de ces pièces sur site ?", "a": "Oui, via notre service de maintenance et dépannage, avec un diagnostic préalable pour identifier la cause réelle de la panne." }
+          {
+            "q": "Comment savoir si un contacteur ou un relais est défectueux ?",
+            "a": "Les signes courants sont un moteur qui ne démarre plus, un bruit de claquement anormal, ou une machine qui se met en défaut électrique de façon répétée. Un diagnostic sur site permet de confirmer la panne avant remplacement."
+          },
+          {
+            "q": "Proposez-vous le remplacement de ces pièces sur site ?",
+            "a": "Oui, via notre service de maintenance et dépannage, avec un diagnostic préalable pour identifier la cause réelle de la panne."
+          }
         ]
       },
       "electronique": {
@@ -358,12 +394,29 @@
         "description": "Cartes électroniques, capteurs, cartes de commande, modules et composants électroniques pour machines industrielles.",
         "seoTitle": "Pièces électroniques industrielles Algérie",
         "seoDescription": "Cartes électroniques, capteurs, cartes de commande et composants électroniques pour machines industrielles en Algérie.",
-        "examples": ["Cartes électroniques", "Capteurs", "Cartes de commande", "Modules électroniques", "Composants électroniques"],
-        "applications": ["Cartes de commande de machines d'injection", "Systèmes d'acquisition de capteurs", "Régulation de température", "Modules d'interface PLC"],
+        "examples": [
+          "Cartes électroniques",
+          "Capteurs",
+          "Cartes de commande",
+          "Modules électroniques",
+          "Composants électroniques"
+        ],
+        "applications": [
+          "Cartes de commande de machines d'injection",
+          "Systèmes d'acquisition de capteurs",
+          "Régulation de température",
+          "Modules d'interface PLC"
+        ],
         "servicesNote": "Une carte électronique défaillante est une cause fréquente d'arrêt de production. Nous diagnostiquons la panne avant de proposer un remplacement, dans le cadre de nos interventions de maintenance.",
         "faq": [
-          { "q": "Une carte électronique en panne peut-elle être réparée ?", "a": "Cela dépend du composant en cause. Un diagnostic précis permet de déterminer si une réparation ciblée est possible ou si un remplacement est nécessaire." },
-          { "q": "Comment identifier la référence exacte de ma carte ?", "a": "Envoyez-nous une photo de la carte (référence, marque) par WhatsApp : nous vous aidons à identifier la pièce correspondante." }
+          {
+            "q": "Une carte électronique en panne peut-elle être réparée ?",
+            "a": "Cela dépend du composant en cause. Un diagnostic précis permet de déterminer si une réparation ciblée est possible ou si un remplacement est nécessaire."
+          },
+          {
+            "q": "Comment identifier la référence exacte de ma carte ?",
+            "a": "Envoyez-nous une photo de la carte (référence, marque) par WhatsApp : nous vous aidons à identifier la pièce correspondante."
+          }
         ]
       },
       "hydraulique": {
@@ -371,12 +424,31 @@
         "description": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques.",
         "seoTitle": "Pièces hydrauliques industrielles Algérie",
         "seoDescription": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques pour machines industrielles en Algérie.",
-        "examples": ["Pompes hydrauliques", "Vérins", "Distributeurs", "Électrovannes", "Flexibles", "Raccords", "Composants hydrauliques"],
-        "applications": ["Circuits de serrage et d'injection des presses", "Systèmes de levage", "Vérins de fermeture moule", "Groupes hydrauliques industriels"],
+        "examples": [
+          "Pompes hydrauliques",
+          "Vérins",
+          "Distributeurs",
+          "Électrovannes",
+          "Flexibles",
+          "Raccords",
+          "Composants hydrauliques"
+        ],
+        "applications": [
+          "Circuits de serrage et d'injection des presses",
+          "Systèmes de levage",
+          "Vérins de fermeture moule",
+          "Groupes hydrauliques industriels"
+        ],
         "servicesNote": "Une fuite ou une perte de pression hydraulique impacte directement le cycle de production. Nous intervenons pour le diagnostic, la réparation et le remplacement des composants hydrauliques.",
         "faq": [
-          { "q": "Quels sont les signes d'une pompe hydraulique en fin de vie ?", "a": "Une baisse de pression, un bruit anormal, une surchauffe de l'huile ou un cycle ralenti sont des signes fréquents à faire vérifier rapidement." },
-          { "q": "Faut-il vidanger l'huile hydraulique lors d'un remplacement de pièce ?", "a": "Cela dépend de l'état de l'huile et de la pièce remplacée. Un contrôle est recommandé, notamment après une panne de pompe." }
+          {
+            "q": "Quels sont les signes d'une pompe hydraulique en fin de vie ?",
+            "a": "Une baisse de pression, un bruit anormal, une surchauffe de l'huile ou un cycle ralenti sont des signes fréquents à faire vérifier rapidement."
+          },
+          {
+            "q": "Faut-il vidanger l'huile hydraulique lors d'un remplacement de pièce ?",
+            "a": "Cela dépend de l'état de l'huile et de la pièce remplacée. Un contrôle est recommandé, notamment après une panne de pompe."
+          }
         ]
       },
       "mecanique": {
@@ -384,12 +456,31 @@
         "description": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles.",
         "seoTitle": "Pièces mécaniques industrielles Algérie",
         "seoDescription": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles disponibles en Algérie.",
-        "examples": ["Roulements", "Courroies", "Engrenages", "Pignons", "Arbres", "Accouplements", "Pièces mécaniques industrielles"],
-        "applications": ["Systèmes de transmission des machines industrielles", "Convoyeurs", "Mécanismes d'ouverture/fermeture des presses", "Équipements de production"],
+        "examples": [
+          "Roulements",
+          "Courroies",
+          "Engrenages",
+          "Pignons",
+          "Arbres",
+          "Accouplements",
+          "Pièces mécaniques industrielles"
+        ],
+        "applications": [
+          "Systèmes de transmission des machines industrielles",
+          "Convoyeurs",
+          "Mécanismes d'ouverture/fermeture des presses",
+          "Équipements de production"
+        ],
         "servicesNote": "L'usure mécanique est progressive : un roulement ou une courroie négligés peuvent provoquer une panne plus lourde. Un contrôle préventif limite les arrêts imprévus.",
         "faq": [
-          { "q": "À quelle fréquence remplacer les roulements d'une machine industrielle ?", "a": "Cela dépend de l'usage et des conditions de travail. Un contrôle régulier (bruit, vibration, jeu) permet d'anticiper le remplacement avant la panne." },
-          { "q": "Proposez-vous un contrôle mécanique préventif ?", "a": "Oui, dans le cadre de nos services de maintenance, avec un diagnostic sur site." }
+          {
+            "q": "À quelle fréquence remplacer les roulements d'une machine industrielle ?",
+            "a": "Cela dépend de l'usage et des conditions de travail. Un contrôle régulier (bruit, vibration, jeu) permet d'anticiper le remplacement avant la panne."
+          },
+          {
+            "q": "Proposez-vous un contrôle mécanique préventif ?",
+            "a": "Oui, dans le cadre de nos services de maintenance, avec un diagnostic sur site."
+          }
         ]
       },
       "automatisme": {
@@ -397,12 +488,29 @@
         "description": "Capteurs de position, détecteurs, actionneurs, boutons et éléments de commande pour lignes de production automatisées.",
         "seoTitle": "Pièces d'automatisme industriel Algérie",
         "seoDescription": "Capteurs de position, détecteurs, actionneurs et composants d'automatisme industriel pour machines et lignes de production en Algérie.",
-        "examples": ["Capteurs de position", "Détecteurs", "Actionneurs", "Boutons de commande", "Éléments d'automatisme"],
-        "applications": ["Détection de position sur lignes de production", "Sécurité machine", "Comptage et tri automatisé", "Boutons et pupitres de commande"],
+        "examples": [
+          "Capteurs de position",
+          "Détecteurs",
+          "Actionneurs",
+          "Boutons de commande",
+          "Éléments d'automatisme"
+        ],
+        "applications": [
+          "Détection de position sur lignes de production",
+          "Sécurité machine",
+          "Comptage et tri automatisé",
+          "Boutons et pupitres de commande"
+        ],
         "servicesNote": "Ces composants sont au cœur de l'automatisation de vos lignes. Nous intervenons sur l'installation, le remplacement et l'intégration de capteurs et d'éléments de commande.",
         "faq": [
-          { "q": "Un capteur de position défectueux peut-il bloquer toute une ligne ?", "a": "Oui, notamment sur les lignes automatisées où un défaut de détection déclenche un arrêt de sécurité. Un diagnostic rapide permet d'identifier le capteur en cause." },
-          { "q": "Intervenez-vous sur l'intégration de nouveaux capteurs ?", "a": "Oui, dans le cadre de nos services d'automatisation industrielle." }
+          {
+            "q": "Un capteur de position défectueux peut-il bloquer toute une ligne ?",
+            "a": "Oui, notamment sur les lignes automatisées où un défaut de détection déclenche un arrêt de sécurité. Un diagnostic rapide permet d'identifier le capteur en cause."
+          },
+          {
+            "q": "Intervenez-vous sur l'intégration de nouveaux capteurs ?",
+            "a": "Oui, dans le cadre de nos services d'automatisation industrielle."
+          }
         ]
       },
       "plc-hmi": {
@@ -410,12 +518,28 @@
         "description": "Automates programmables (PLC), écrans et pupitres de commande (HMI) pour le pilotage et la supervision de machines industrielles.",
         "seoTitle": "PLC HMI Algérie — automates et pupitres industriels",
         "seoDescription": "Automates programmables (PLC) et écrans de commande (HMI) pour machines industrielles, neufs ou d'occasion, disponibles en Algérie.",
-        "examples": ["Automates programmables", "Écrans HMI", "Pupitres de commande", "Modules d'entrées/sorties"],
-        "applications": ["Pilotage de presses à injection", "Supervision de lignes de production", "Interfaces opérateur (HMI)", "Automates de commande"],
+        "examples": [
+          "Automates programmables",
+          "Écrans HMI",
+          "Pupitres de commande",
+          "Modules d'entrées/sorties"
+        ],
+        "applications": [
+          "Pilotage de presses à injection",
+          "Supervision de lignes de production",
+          "Interfaces opérateur (HMI)",
+          "Automates de commande"
+        ],
         "servicesNote": "Le remplacement d'un PLC ou d'un écran HMI nécessite souvent une reprogrammation ou une adaptation du programme existant. Nous accompagnons cette étape dans le cadre de nos services d'automatisation.",
         "faq": [
-          { "q": "Peut-on remplacer un ancien PLC par un modèle plus récent ?", "a": "Oui, c'est une opération courante de retrofit. Elle nécessite généralement une reprise du programme existant, adaptée au nouveau matériel." },
-          { "q": "Que faire si l'écran HMI ne répond plus ?", "a": "Un diagnostic permet de déterminer si le problème vient de l'écran, du câblage ou du programme. Contactez-nous pour une évaluation." }
+          {
+            "q": "Peut-on remplacer un ancien PLC par un modèle plus récent ?",
+            "a": "Oui, c'est une opération courante de retrofit. Elle nécessite généralement une reprise du programme existant, adaptée au nouveau matériel."
+          },
+          {
+            "q": "Que faire si l'écran HMI ne répond plus ?",
+            "a": "Un diagnostic permet de déterminer si le problème vient de l'écran, du câblage ou du programme. Contactez-nous pour une évaluation."
+          }
         ]
       },
       "variateurs": {
@@ -423,12 +547,27 @@
         "description": "Variateurs de fréquence et de vitesse pour moteurs électriques industriels, adaptés à la rénovation et à la maintenance de machines.",
         "seoTitle": "Variateur industriel Algérie",
         "seoDescription": "Variateurs de fréquence et de vitesse pour moteurs industriels, neufs ou d'occasion, disponibles en Algérie.",
-        "examples": ["Variateurs de fréquence", "Variateurs de vitesse", "Accessoires de variateurs"],
-        "applications": ["Régulation de vitesse des moteurs de presses", "Pompes hydrauliques à débit variable", "Convoyeurs et systèmes d'entraînement", "Ventilation industrielle"],
+        "examples": [
+          "Variateurs de fréquence",
+          "Variateurs de vitesse",
+          "Accessoires de variateurs"
+        ],
+        "applications": [
+          "Régulation de vitesse des moteurs de presses",
+          "Pompes hydrauliques à débit variable",
+          "Convoyeurs et systèmes d'entraînement",
+          "Ventilation industrielle"
+        ],
         "servicesNote": "Un variateur mal réglé ou en défaut peut provoquer une surconsommation ou un arrêt machine. Nous intervenons sur le diagnostic, le paramétrage et le remplacement.",
         "faq": [
-          { "q": "Comment savoir si un variateur de fréquence est en cause dans une panne moteur ?", "a": "Un code défaut affiché sur le variateur, une surchauffe ou un moteur qui ne répond plus aux consignes sont des indices à vérifier en priorité." },
-          { "q": "Le remplacement d'un variateur nécessite-t-il un reparamétrage ?", "a": "Oui, les paramètres doivent être adaptés au moteur et à l'application. Nous nous en chargeons lors du remplacement." }
+          {
+            "q": "Comment savoir si un variateur de fréquence est en cause dans une panne moteur ?",
+            "a": "Un code défaut affiché sur le variateur, une surchauffe ou un moteur qui ne répond plus aux consignes sont des indices à vérifier en priorité."
+          },
+          {
+            "q": "Le remplacement d'un variateur nécessite-t-il un reparamétrage ?",
+            "a": "Oui, les paramètres doivent être adaptés au moteur et à l'application. Nous nous en chargeons lors du remplacement."
+          }
         ]
       },
       "servo-moteurs": {
@@ -436,12 +575,27 @@
         "description": "Servomoteurs, drivers et encodeurs pour machines industrielles nécessitant un positionnement précis et une automatisation avancée.",
         "seoTitle": "Servo moteur industriel Algérie",
         "seoDescription": "Servomoteurs, drivers et encodeurs pour machines industrielles en Algérie, neufs ou d'occasion.",
-        "examples": ["Servomoteurs", "Drivers servo", "Encodeurs"],
-        "applications": ["Axes de précision des presses à injection", "Robots de prélèvement (pick and place)", "Systèmes de dosage", "Machines nécessitant un positionnement précis"],
+        "examples": [
+          "Servomoteurs",
+          "Drivers servo",
+          "Encodeurs"
+        ],
+        "applications": [
+          "Axes de précision des presses à injection",
+          "Robots de prélèvement (pick and place)",
+          "Systèmes de dosage",
+          "Machines nécessitant un positionnement précis"
+        ],
         "servicesNote": "Un servomoteur ou son driver en défaut affecte directement la précision de production. Nous intervenons sur le diagnostic et le remplacement, avec reprise des paramètres si nécessaire.",
         "faq": [
-          { "q": "Quels signes indiquent un problème de servomoteur ?", "a": "Une perte de précision, un bruit anormal, une erreur de position ou un code défaut sur le driver sont les signes les plus fréquents." },
-          { "q": "Un servomoteur remplacé doit-il être reconfiguré ?", "a": "Oui, les paramètres du driver doivent être adaptés au nouveau moteur pour garantir la précision de fonctionnement." }
+          {
+            "q": "Quels signes indiquent un problème de servomoteur ?",
+            "a": "Une perte de précision, un bruit anormal, une erreur de position ou un code défaut sur le driver sont les signes les plus fréquents."
+          },
+          {
+            "q": "Un servomoteur remplacé doit-il être reconfiguré ?",
+            "a": "Oui, les paramètres du driver doivent être adaptés au nouveau moteur pour garantir la précision de fonctionnement."
+          }
         ]
       },
       "moules": {
@@ -449,12 +603,27 @@
         "description": "Moules d'injection plastique, moules industriels, pièces et accessoires de moules.",
         "seoTitle": "Moules injection plastique Algérie",
         "seoDescription": "Moules d'injection plastique, moules industriels et pièces/accessoires de moules disponibles en Algérie.",
-        "examples": ["Moules d'injection plastique", "Moules industriels", "Pièces et accessoires de moules"],
-        "applications": ["Production de pièces plastiques en série", "Moules multi-empreintes", "Outillages spécifiques (automobile, emballage, électroménager...)", "Moules de prototypage"],
+        "examples": [
+          "Moules d'injection plastique",
+          "Moules industriels",
+          "Pièces et accessoires de moules"
+        ],
+        "applications": [
+          "Production de pièces plastiques en série",
+          "Moules multi-empreintes",
+          "Outillages spécifiques (automobile, emballage, électroménager...)",
+          "Moules de prototypage"
+        ],
         "servicesNote": "Un moule mal entretenu perd en précision et en durée de vie. Nous accompagnons son diagnostic, sa réparation et sa remise en état lorsque c'est possible.",
         "faq": [
-          { "q": "Un moule endommagé peut-il être réparé plutôt que remplacé ?", "a": "Dans de nombreux cas oui, selon la nature du dommage (usure, fissure, empreinte abîmée). Un diagnostic technique permet d'évaluer la faisabilité." },
-          { "q": "Comment estimer la valeur d'un moule d'occasion ?", "a": "L'état général, le nombre d'empreintes, la matière usinée et l'historique d'utilisation sont les critères principaux pris en compte." }
+          {
+            "q": "Un moule endommagé peut-il être réparé plutôt que remplacé ?",
+            "a": "Dans de nombreux cas oui, selon la nature du dommage (usure, fissure, empreinte abîmée). Un diagnostic technique permet d'évaluer la faisabilité."
+          },
+          {
+            "q": "Comment estimer la valeur d'un moule d'occasion ?",
+            "a": "L'état général, le nombre d'empreintes, la matière usinée et l'historique d'utilisation sont les critères principaux pris en compte."
+          }
         ]
       }
     }
@@ -782,6 +951,14 @@
     {
       "q": "Quels types de machines prenez-vous en charge ?",
       "a": "Principalement les machines d'injection plastique, hydrauliques, servo ou hybrides, ainsi que les équipements d'automatisation associés."
+    },
+    {
+      "q": "Proposez-vous aussi des pièces détachées, pas seulement des machines ?",
+      "a": "Oui. Nous proposons des pièces électriques, électroniques, hydrauliques et mécaniques, ainsi que des composants d'automatisme (PLC, HMI, variateurs, servo moteurs) et des moules industriels."
+    },
+    {
+      "q": "Proposez-vous des services d'automatisation industrielle (PLC, variateurs, servo) ?",
+      "a": "Oui, l'automatisation fait partie de nos services : programmation et mise à niveau PLC/HMI, intégration de variateurs de fréquence et de servo moteurs, dans le cadre d'un retrofit ou d'un projet neuf."
     }
   ],
   "footer": {

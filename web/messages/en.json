@@ -104,14 +104,30 @@
       "title": "Machines, parts and industrial services",
       "subtitle": "JIMI Industrie sells, buys and connects buyers and sellers around industrial equipment — and offers related technical services.",
       "viewMore": "View more",
-      "machines": { "label": "Industrial machines" },
-      "pieces": { "label": "Industrial parts" },
-      "moules": { "label": "Molds" },
-      "electrique": { "label": "Electrical & electronics" },
-      "hydraulique": { "label": "Hydraulics" },
-      "automatisation": { "label": "Automation" },
-      "maintenance": { "label": "Maintenance" },
-      "retrofit": { "label": "Retrofit" }
+      "machines": {
+        "label": "Industrial machines"
+      },
+      "pieces": {
+        "label": "Industrial parts"
+      },
+      "moules": {
+        "label": "Molds"
+      },
+      "electrique": {
+        "label": "Electrical & electronics"
+      },
+      "hydraulique": {
+        "label": "Hydraulics"
+      },
+      "automatisation": {
+        "label": "Automation"
+      },
+      "maintenance": {
+        "label": "Maintenance"
+      },
+      "retrofit": {
+        "label": "Retrofit"
+      }
     },
     "featuredMachines": {
       "title": "Featured machines",
@@ -345,12 +361,32 @@
         "description": "Contactors, relays, circuit breakers, disconnect switches, industrial wiring, power supplies and electrical protection for industrial machines and installations.",
         "seoTitle": "Industrial electrical parts Algeria",
         "seoDescription": "Contactors, relays, circuit breakers, disconnect switches, wiring and electrical power supplies for industrial machines in Algeria.",
-        "examples": ["Contactors", "Electrical relays", "Circuit breakers", "Disconnect switches", "Industrial wiring", "Power supplies", "Electrical protection"],
-        "applications": ["Industrial electrical cabinets", "Distribution panels", "Power circuits of injection machines", "Motor protection", "Production installations"],
+        "examples": [
+          "Contactors",
+          "Electrical relays",
+          "Circuit breakers",
+          "Disconnect switches",
+          "Industrial wiring",
+          "Power supplies",
+          "Electrical protection"
+        ],
+        "applications": [
+          "Industrial electrical cabinets",
+          "Distribution panels",
+          "Power circuits of injection machines",
+          "Motor protection",
+          "Production installations"
+        ],
         "servicesNote": "These parts are often replaced during a renovation or an electrical repair. Our team handles diagnosis and replacement as part of our maintenance and renovation services.",
         "faq": [
-          { "q": "How do I know if a contactor or relay is faulty?", "a": "Common signs are a motor that no longer starts, an abnormal clicking noise, or a machine repeatedly tripping into an electrical fault. An on-site diagnosis confirms the fault before replacement." },
-          { "q": "Do you replace these parts on site?", "a": "Yes, through our maintenance and repair service, with a prior diagnosis to identify the actual cause of the fault." }
+          {
+            "q": "How do I know if a contactor or relay is faulty?",
+            "a": "Common signs are a motor that no longer starts, an abnormal clicking noise, or a machine repeatedly tripping into an electrical fault. An on-site diagnosis confirms the fault before replacement."
+          },
+          {
+            "q": "Do you replace these parts on site?",
+            "a": "Yes, through our maintenance and repair service, with a prior diagnosis to identify the actual cause of the fault."
+          }
         ]
       },
       "electronique": {
@@ -358,12 +394,29 @@
         "description": "Circuit boards, sensors, control boards, modules and electronic components for industrial machines.",
         "seoTitle": "Industrial electronic parts Algeria",
         "seoDescription": "Circuit boards, sensors, control boards and electronic components for industrial machines in Algeria.",
-        "examples": ["Circuit boards", "Sensors", "Control boards", "Electronic modules", "Electronic components"],
-        "applications": ["Control boards for injection machines", "Sensor acquisition systems", "Temperature regulation", "PLC interface modules"],
+        "examples": [
+          "Circuit boards",
+          "Sensors",
+          "Control boards",
+          "Electronic modules",
+          "Electronic components"
+        ],
+        "applications": [
+          "Control boards for injection machines",
+          "Sensor acquisition systems",
+          "Temperature regulation",
+          "PLC interface modules"
+        ],
         "servicesNote": "A faulty circuit board is a common cause of production downtime. We diagnose the fault before proposing a replacement, as part of our maintenance work.",
         "faq": [
-          { "q": "Can a faulty circuit board be repaired?", "a": "It depends on the component involved. A precise diagnosis determines whether a targeted repair is possible or a replacement is needed." },
-          { "q": "How do I identify the exact reference of my board?", "a": "Send us a photo of the board (reference, brand) on WhatsApp — we'll help you identify the matching part." }
+          {
+            "q": "Can a faulty circuit board be repaired?",
+            "a": "It depends on the component involved. A precise diagnosis determines whether a targeted repair is possible or a replacement is needed."
+          },
+          {
+            "q": "How do I identify the exact reference of my board?",
+            "a": "Send us a photo of the board (reference, brand) on WhatsApp — we'll help you identify the matching part."
+          }
         ]
       },
       "hydraulique": {
@@ -371,12 +424,31 @@
         "description": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components.",
         "seoTitle": "Industrial hydraulic parts Algeria",
         "seoDescription": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components for industrial machines in Algeria.",
-        "examples": ["Hydraulic pumps", "Cylinders", "Valves", "Solenoid valves", "Hoses", "Fittings", "Hydraulic components"],
-        "applications": ["Clamping and injection circuits of presses", "Lifting systems", "Mold-closing cylinders", "Industrial hydraulic power units"],
+        "examples": [
+          "Hydraulic pumps",
+          "Cylinders",
+          "Valves",
+          "Solenoid valves",
+          "Hoses",
+          "Fittings",
+          "Hydraulic components"
+        ],
+        "applications": [
+          "Clamping and injection circuits of presses",
+          "Lifting systems",
+          "Mold-closing cylinders",
+          "Industrial hydraulic power units"
+        ],
         "servicesNote": "A leak or a drop in hydraulic pressure directly affects the production cycle. We handle diagnosis, repair and replacement of hydraulic components.",
         "faq": [
-          { "q": "What are the signs of a hydraulic pump reaching end of life?", "a": "A pressure drop, an unusual noise, overheating oil, or a slower cycle are frequent signs to have checked quickly." },
-          { "q": "Does the hydraulic oil need to be drained when replacing a part?", "a": "It depends on the condition of the oil and the part being replaced. A check is recommended, especially after a pump failure." }
+          {
+            "q": "What are the signs of a hydraulic pump reaching end of life?",
+            "a": "A pressure drop, an unusual noise, overheating oil, or a slower cycle are frequent signs to have checked quickly."
+          },
+          {
+            "q": "Does the hydraulic oil need to be drained when replacing a part?",
+            "a": "It depends on the condition of the oil and the part being replaced. A check is recommended, especially after a pump failure."
+          }
         ]
       },
       "mecanique": {
@@ -384,12 +456,31 @@
         "description": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts.",
         "seoTitle": "Industrial mechanical parts Algeria",
         "seoDescription": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts available in Algeria.",
-        "examples": ["Bearings", "Belts", "Gears", "Sprockets", "Shafts", "Couplings", "Industrial mechanical parts"],
-        "applications": ["Transmission systems of industrial machines", "Conveyors", "Press opening/closing mechanisms", "Production equipment"],
+        "examples": [
+          "Bearings",
+          "Belts",
+          "Gears",
+          "Sprockets",
+          "Shafts",
+          "Couplings",
+          "Industrial mechanical parts"
+        ],
+        "applications": [
+          "Transmission systems of industrial machines",
+          "Conveyors",
+          "Press opening/closing mechanisms",
+          "Production equipment"
+        ],
         "servicesNote": "Mechanical wear is progressive: a neglected bearing or belt can cause a heavier failure. Preventive checks limit unplanned downtime.",
         "faq": [
-          { "q": "How often should bearings on an industrial machine be replaced?", "a": "It depends on usage and working conditions. Regular checks (noise, vibration, play) help anticipate replacement before failure." },
-          { "q": "Do you offer preventive mechanical inspection?", "a": "Yes, as part of our maintenance services, with an on-site diagnosis." }
+          {
+            "q": "How often should bearings on an industrial machine be replaced?",
+            "a": "It depends on usage and working conditions. Regular checks (noise, vibration, play) help anticipate replacement before failure."
+          },
+          {
+            "q": "Do you offer preventive mechanical inspection?",
+            "a": "Yes, as part of our maintenance services, with an on-site diagnosis."
+          }
         ]
       },
       "automatisme": {
@@ -397,12 +488,29 @@
         "description": "Position sensors, detectors, actuators, control buttons and automation components for automated production lines.",
         "seoTitle": "Industrial automation parts Algeria",
         "seoDescription": "Position sensors, detectors, actuators and industrial automation components for machines and production lines in Algeria.",
-        "examples": ["Position sensors", "Detectors", "Actuators", "Control buttons", "Automation components"],
-        "applications": ["Position detection on production lines", "Machine safety", "Automated counting and sorting", "Control buttons and panels"],
+        "examples": [
+          "Position sensors",
+          "Detectors",
+          "Actuators",
+          "Control buttons",
+          "Automation components"
+        ],
+        "applications": [
+          "Position detection on production lines",
+          "Machine safety",
+          "Automated counting and sorting",
+          "Control buttons and panels"
+        ],
         "servicesNote": "These components are at the heart of your line's automation. We handle installation, replacement and integration of sensors and control elements.",
         "faq": [
-          { "q": "Can a faulty position sensor stop an entire line?", "a": "Yes, especially on automated lines where a detection fault triggers a safety stop. A quick diagnosis identifies the sensor at fault." },
-          { "q": "Do you handle integrating new sensors?", "a": "Yes, as part of our industrial automation services." }
+          {
+            "q": "Can a faulty position sensor stop an entire line?",
+            "a": "Yes, especially on automated lines where a detection fault triggers a safety stop. A quick diagnosis identifies the sensor at fault."
+          },
+          {
+            "q": "Do you handle integrating new sensors?",
+            "a": "Yes, as part of our industrial automation services."
+          }
         ]
       },
       "plc-hmi": {
@@ -410,12 +518,28 @@
         "description": "Programmable logic controllers (PLC), control screens and panels (HMI) for driving and monitoring industrial machines.",
         "seoTitle": "PLC HMI Algeria — industrial controllers and panels",
         "seoDescription": "Programmable logic controllers (PLC) and control screens (HMI) for industrial machines, new or used, available in Algeria.",
-        "examples": ["Programmable controllers", "HMI screens", "Control panels", "I/O modules"],
-        "applications": ["Driving injection presses", "Production line supervision", "Operator interfaces (HMI)", "Control controllers"],
+        "examples": [
+          "Programmable controllers",
+          "HMI screens",
+          "Control panels",
+          "I/O modules"
+        ],
+        "applications": [
+          "Driving injection presses",
+          "Production line supervision",
+          "Operator interfaces (HMI)",
+          "Control controllers"
+        ],
         "servicesNote": "Replacing a PLC or an HMI screen often requires reprogramming or adapting the existing program. We support this step as part of our automation services.",
         "faq": [
-          { "q": "Can an old PLC be replaced with a newer model?", "a": "Yes, it's a common retrofit operation. It usually requires porting the existing program, adapted to the new hardware." },
-          { "q": "What should I do if the HMI screen stops responding?", "a": "A diagnosis determines whether the issue is the screen, the wiring or the program. Contact us for an assessment." }
+          {
+            "q": "Can an old PLC be replaced with a newer model?",
+            "a": "Yes, it's a common retrofit operation. It usually requires porting the existing program, adapted to the new hardware."
+          },
+          {
+            "q": "What should I do if the HMI screen stops responding?",
+            "a": "A diagnosis determines whether the issue is the screen, the wiring or the program. Contact us for an assessment."
+          }
         ]
       },
       "variateurs": {
@@ -423,12 +547,27 @@
         "description": "Frequency and speed drives for industrial electric motors, suited to machine retrofit and maintenance.",
         "seoTitle": "Industrial drive Algeria",
         "seoDescription": "Frequency and speed drives for industrial motors, new or used, available in Algeria.",
-        "examples": ["Frequency drives", "Speed drives", "Drive accessories"],
-        "applications": ["Speed control of press motors", "Variable-flow hydraulic pumps", "Conveyors and drive systems", "Industrial ventilation"],
+        "examples": [
+          "Frequency drives",
+          "Speed drives",
+          "Drive accessories"
+        ],
+        "applications": [
+          "Speed control of press motors",
+          "Variable-flow hydraulic pumps",
+          "Conveyors and drive systems",
+          "Industrial ventilation"
+        ],
         "servicesNote": "A poorly tuned or faulty drive can cause excess power consumption or a machine stop. We handle diagnosis, parameter setting and replacement.",
         "faq": [
-          { "q": "How do I know if a frequency drive is causing a motor fault?", "a": "A fault code shown on the drive, overheating, or a motor no longer responding to commands are the first things to check." },
-          { "q": "Does replacing a drive require reconfiguration?", "a": "Yes, parameters must be adapted to the motor and the application. We handle this during replacement." }
+          {
+            "q": "How do I know if a frequency drive is causing a motor fault?",
+            "a": "A fault code shown on the drive, overheating, or a motor no longer responding to commands are the first things to check."
+          },
+          {
+            "q": "Does replacing a drive require reconfiguration?",
+            "a": "Yes, parameters must be adapted to the motor and the application. We handle this during replacement."
+          }
         ]
       },
       "servo-moteurs": {
@@ -436,12 +575,27 @@
         "description": "Servo motors, drivers and encoders for industrial machines requiring precise positioning and advanced automation.",
         "seoTitle": "Industrial servo motor Algeria",
         "seoDescription": "Servo motors, drivers and encoders for industrial machines in Algeria, new or used.",
-        "examples": ["Servo motors", "Servo drivers", "Encoders"],
-        "applications": ["Precision axes on injection presses", "Pick-and-place robots", "Dosing systems", "Machines requiring precise positioning"],
+        "examples": [
+          "Servo motors",
+          "Servo drivers",
+          "Encoders"
+        ],
+        "applications": [
+          "Precision axes on injection presses",
+          "Pick-and-place robots",
+          "Dosing systems",
+          "Machines requiring precise positioning"
+        ],
         "servicesNote": "A faulty servo motor or driver directly affects production precision. We handle diagnosis and replacement, with parameter porting when needed.",
         "faq": [
-          { "q": "What signs indicate a servo motor issue?", "a": "Loss of precision, an unusual noise, a position error, or a fault code on the driver are the most common signs." },
-          { "q": "Does a replaced servo motor need reconfiguration?", "a": "Yes, the driver's parameters must be adapted to the new motor to guarantee operating precision." }
+          {
+            "q": "What signs indicate a servo motor issue?",
+            "a": "Loss of precision, an unusual noise, a position error, or a fault code on the driver are the most common signs."
+          },
+          {
+            "q": "Does a replaced servo motor need reconfiguration?",
+            "a": "Yes, the driver's parameters must be adapted to the new motor to guarantee operating precision."
+          }
         ]
       },
       "moules": {
@@ -449,12 +603,27 @@
         "description": "Plastic injection molds, industrial molds, mold parts and accessories.",
         "seoTitle": "Plastic injection molds Algeria",
         "seoDescription": "Plastic injection molds, industrial molds and mold parts/accessories available in Algeria.",
-        "examples": ["Plastic injection molds", "Industrial molds", "Mold parts and accessories"],
-        "applications": ["Series production of plastic parts", "Multi-cavity molds", "Sector-specific tooling (automotive, packaging, appliances...)", "Prototyping molds"],
+        "examples": [
+          "Plastic injection molds",
+          "Industrial molds",
+          "Mold parts and accessories"
+        ],
+        "applications": [
+          "Series production of plastic parts",
+          "Multi-cavity molds",
+          "Sector-specific tooling (automotive, packaging, appliances...)",
+          "Prototyping molds"
+        ],
         "servicesNote": "A poorly maintained mold loses precision and lifespan. We support its diagnosis, repair and refurbishment when feasible.",
         "faq": [
-          { "q": "Can a damaged mold be repaired instead of replaced?", "a": "In many cases, yes, depending on the type of damage (wear, crack, damaged cavity). A technical assessment evaluates feasibility." },
-          { "q": "How is the value of a used mold estimated?", "a": "Overall condition, number of cavities, machined material and usage history are the main criteria considered." }
+          {
+            "q": "Can a damaged mold be repaired instead of replaced?",
+            "a": "In many cases, yes, depending on the type of damage (wear, crack, damaged cavity). A technical assessment evaluates feasibility."
+          },
+          {
+            "q": "How is the value of a used mold estimated?",
+            "a": "Overall condition, number of cavities, machined material and usage history are the main criteria considered."
+          }
         ]
       }
     }
@@ -782,6 +951,14 @@
     {
       "q": "What types of machines do you handle?",
       "a": "Mainly hydraulic, servo or hybrid plastic injection machines, as well as related automation equipment."
+    },
+    {
+      "q": "Do you also offer spare parts, not just machines?",
+      "a": "Yes. We offer electrical, electronic, hydraulic and mechanical parts, as well as automation components (PLC, HMI, drives, servo motors) and industrial molds."
+    },
+    {
+      "q": "Do you offer industrial automation services (PLC, drives, servo)?",
+      "a": "Yes, automation is part of our services: PLC/HMI programming and upgrades, and integration of variable frequency drives and servo motors, as part of a retrofit or a new project."
     }
   ],
   "footer": {
