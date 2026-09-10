@@ -15,6 +15,72 @@
           "Le second point concerne le groupe hydraulique ou servo : recherchez des traces de fuites, écoutez le bruit de fonctionnement de la pompe, et si possible, faites tourner la machine à vide puis en cycle réel avant achat.",
           "Il est également essentiel de vérifier l'historique d'utilisation : nombre d'heures de fonctionnement si disponible, type de production réalisée (matières abrasives ou non), et les éventuels travaux de maintenance déjà effectués.",
           "Enfin, une inspection technique indépendante, réalisée par un professionnel qui n'est pas partie à la transaction, reste le meilleur moyen de sécuriser votre achat, en particulier pour les machines de tonnage important représentant un investissement conséquent."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "Demander une machine"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance et dépannage"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تختار آلة حقن مستعملة؟",
+        "excerpt": "المعايير التقنية الأساسية التي يجب التحقق منها قبل شراء آلة حقن بلاستيك مستعملة، لتجنب المفاجآت غير السارة.",
+        "category": "الشراء",
+        "content": [
+          "شراء آلة حقن مستعملة قد يمثل فرصة اقتصادية ممتازة، بشرط التحقق من بعض النقاط التقنية الأساسية قبل إتمام الصفقة.",
+          "المعيار الأول الذي يجب فحصه هو حالة نظام التحكم: PLC وHMI ووحدة التحكم. آلة سليمة ميكانيكياً لكن مزودة بوحدة تحكم متقادمة أو متوقفة عن الإنتاج قد تمثل خطراً كبيراً في حال حدوث عطل مستقبلي، بسبب عدم توفر القطع.",
+          "النقطة الثانية تتعلق بالمجموعة الهيدروليكية أو السيرفو: ابحث عن آثار التسرب، استمع لصوت تشغيل المضخة، وإن أمكن شغّل الآلة بدون حمولة ثم في دورة حقيقية قبل الشراء.",
+          "من الضروري أيضاً التحقق من تاريخ الاستخدام: عدد ساعات التشغيل إن توفرت، نوع الإنتاج المنجز (مواد كاشطة أم لا)، وأعمال الصيانة التي أُجريت سابقاً.",
+          "أخيراً، الفحص التقني المستقل الذي يجريه محترف غير طرف في الصفقة يبقى أفضل وسيلة لتأمين شرائك، خاصة بالنسبة لآلات ذات قوة شدّية كبيرة تمثل استثماراً معتبراً."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "طلب آلة"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "الصيانة والإصلاح"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Choose a Used Injection Machine?",
+        "excerpt": "The essential technical criteria to check before buying a used plastic injection machine, to avoid unpleasant surprises.",
+        "category": "Buying",
+        "content": [
+          "Buying a used injection machine can be an excellent economic opportunity, provided certain essential technical points are checked before finalizing the transaction.",
+          "The first criterion to examine is the condition of the control system: PLC, HMI and controller. A mechanically sound machine fitted with an obsolete or discontinued controller can be a significant risk in case of future failure, due to unavailable parts.",
+          "The second point concerns the hydraulic or servo unit: look for signs of leaks, listen to the pump's operating noise, and if possible, run the machine unloaded then through a real cycle before buying.",
+          "It's also essential to check the usage history: number of operating hours if available, type of production run (abrasive materials or not), and any maintenance work already carried out.",
+          "Finally, an independent technical inspection carried out by a professional who is not party to the transaction remains the best way to secure your purchase, especially for high-tonnage machines representing a significant investment."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "Request a machine"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance & repair"
+          }
         ]
       }
     }
@@ -35,6 +101,72 @@
           "Une machine servo utilise un moteur servo qui n'entraîne la pompe hydraulique que lorsque cela est nécessaire, ce qui permet des économies d'énergie significatives, souvent entre 30% et 60% selon le profil de production.",
           "En termes de précision, les machines servo offrent généralement un meilleur contrôle de la vitesse et de la pression d'injection, ce qui peut améliorer la répétabilité pour des pièces techniques exigeantes.",
           "Le choix entre les deux dépend de votre production : cadence, type de pièces, budget d'investissement et coût de l'énergie électrique dans votre région."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/pieces-industrielles/hydraulique",
+            "label": "Pièces hydrauliques"
+          },
+          {
+            "href": "/pieces-industrielles/servo-moteurs",
+            "label": "Servo moteurs"
+          }
+        ]
+      },
+      "ar": {
+        "title": "ما الفرق بين السيرفو والهيدروليك؟",
+        "excerpt": "فهم الفروقات التقنية بين آلة هيدروليكية تقليدية وآلة بمحرك سيرفو قبل اتخاذ قرار الشراء.",
+        "category": "تقني",
+        "content": [
+          "تتميز آلات حقن البلاستيك بشكل أساسي حسب نوع نظام الدفع: هيدروليكي تقليدي، سيرفو-هيدروليكي، أو كهربائي بالكامل. هذا الاختيار يؤثر مباشرة على استهلاك الطاقة والدقة وتكلفة الصيانة.",
+          "الآلة الهيدروليكية التقليدية تستخدم مضخة تعمل باستمرار، بغض النظر عن الحاجة الفعلية للدورة. هذه التقنية قوية ومعروفة جيداً لدى الفنيين، لكنها مستهلكة للطاقة.",
+          "الآلة ذات السيرفو تستخدم محرك سيرفو لا يشغّل المضخة الهيدروليكية إلا عند الحاجة، مما يسمح بتوفير كبير في الطاقة، غالباً بين 30% و60% حسب نمط الإنتاج.",
+          "من حيث الدقة، توفر آلات السيرفو عموماً تحكماً أفضل في سرعة وضغط الحقن، مما يحسّن ثبات الإنتاج بالنسبة للقطع التقنية الدقيقة.",
+          "الاختيار بين الاثنين يعتمد على إنتاجك: سرعة الإنتاج، نوع القطع، ميزانية الاستثمار، وتكلفة الطاقة الكهربائية في منطقتك."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/pieces-industrielles/hydraulique",
+            "label": "قطع هيدروليكية"
+          },
+          {
+            "href": "/pieces-industrielles/servo-moteurs",
+            "label": "محركات السيرفو"
+          }
+        ]
+      },
+      "en": {
+        "title": "What's the Difference Between Servo and Hydraulic?",
+        "excerpt": "Understanding the technical differences between a classic hydraulic machine and a servo-driven machine before making your choice.",
+        "category": "Technical",
+        "content": [
+          "Plastic injection machines are primarily distinguished by their drive type: classic hydraulic, servo-hydraulic, or fully electric. This choice has a direct impact on energy consumption, precision, and maintenance cost.",
+          "A classic hydraulic machine uses a pump that runs continuously, regardless of the cycle's actual needs. This technology is robust and well known to technicians, but energy-hungry.",
+          "A servo machine uses a servo motor that only drives the hydraulic pump when needed, allowing significant energy savings, often between 30% and 60% depending on the production profile.",
+          "In terms of precision, servo machines generally offer better control of injection speed and pressure, which can improve repeatability for demanding technical parts.",
+          "The choice between the two depends on your production: cycle rate, part type, investment budget, and the cost of electricity in your region."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/pieces-industrielles/hydraulique",
+            "label": "Hydraulic parts"
+          },
+          {
+            "href": "/pieces-industrielles/servo-moteurs",
+            "label": "Servo motors"
+          }
         ]
       }
     }
@@ -56,6 +188,74 @@
           "Vérifiez le système de sécurité : portes de sécurité, capteurs d'ouverture, arrêt d'urgence. Une machine ne respectant plus les normes de sécurité de base nécessitera une mise à niveau avant exploitation.",
           "Si possible, demandez un essai avec un moule et une matière représentative de votre production, afin de valider la stabilité du cycle sur plusieurs répétitions consécutives.",
           "Enfin, faites établir un rapport technique écrit, qui vous servira de référence en cas de litige ou pour orienter une éventuelle négociation du prix."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter-machine",
+            "label": "Demander une machine"
+          },
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance et dépannage"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تفحص آلة حقن قبل الشراء؟",
+        "excerpt": "قائمة التحقق التقنية التي يجب اتباعها لتقييم آلة حقن بجدية قبل الالتزام بالشراء.",
+        "category": "الشراء",
+        "content": [
+          "قبل شراء آلة حقن، يسمح الفحص المنهجي بتجنب تكاليف إصلاح غير متوقعة بعد الشراء.",
+          "ابدأ بفحص بصري عام: حالة الهيكل، وجود تسربات هيدروليكية، حالة الكابلات الكهربائية الظاهرة والنظافة العامة للآلة.",
+          "اختبر بعد ذلك التشغيل بدون حمولة: فتح وإغلاق القالب، حركة الحقن، الإخراج. استمع للأصوات غير الطبيعية وراقب سلاسة الحركات.",
+          "تحقق من نظام الأمان: أبواب الأمان، حساسات الفتح، زر التوقف الطارئ. آلة لا تحترم معايير الأمان الأساسية ستحتاج لتحديث قبل التشغيل.",
+          "إن أمكن، اطلب اختباراً بقالب ومادة تمثل إنتاجك الفعلي، للتحقق من ثبات الدورة على عدة تكرارات متتالية.",
+          "أخيراً، اطلب تقريراً تقنياً مكتوباً، سيكون مرجعاً لك في حال وجود نزاع أو للتفاوض على السعر."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter-machine",
+            "label": "طلب آلة"
+          },
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "الصيانة والإصلاح"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Check an Injection Machine Before Buying?",
+        "excerpt": "The technical checklist to follow to seriously evaluate an injection machine before committing.",
+        "category": "Buying",
+        "content": [
+          "Before buying an injection machine, a methodical check helps avoid unexpected refurbishment costs after purchase.",
+          "Start with a general visual inspection: condition of the frame, presence of hydraulic leaks, condition of visible electrical cabling, and overall cleanliness of the machine.",
+          "Then test unloaded operation: mold opening and closing, injection movement, ejection. Listen for abnormal noise and watch how smoothly the movements run.",
+          "Check the safety system: safety doors, opening sensors, emergency stop. A machine that no longer meets basic machine-safety standards will need an upgrade before operation.",
+          "If possible, ask for a trial run with a mold and material representative of your production, to validate cycle stability over several consecutive repetitions.",
+          "Finally, have a written technical report drawn up, which will serve as a reference in case of a dispute or to guide a possible price negotiation."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter-machine",
+            "label": "Request a machine"
+          },
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance & repair"
+          }
         ]
       }
     }
@@ -76,6 +276,72 @@
           "Le groupe d'injection doit également être vérifié : usure du fourreau et de la vis, en particulier si la machine a été utilisée avec des matières chargées en fibre de verre ou en charges minérales, plus abrasives.",
           "Sur ces tonnages, le contrôleur électronique est souvent le premier élément à nécessiter une modernisation, les modèles antérieurs à 2010 étant fréquemment équipés de systèmes propriétaires difficiles à maintenir.",
           "Un diagnostic technique ciblé permet de déterminer si une simple remise à niveau électrique suffit, ou si une rénovation plus complète est nécessaire avant remise en production."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "Rénovation de machine"
+          },
+          {
+            "href": "/pieces-industrielles/plc-hmi",
+            "label": "PLC / HMI"
+          }
+        ]
+      },
+      "ar": {
+        "title": "آلة 180 طن: ما الذي يجب فحصه؟",
+        "excerpt": "النقاط الخاصة الواجب فحصها في آلة ذات قوة شدّية متوسطة، وهي الأكثر طلباً في السوق الجزائرية.",
+        "category": "تقني",
+        "content": [
+          "آلات القوة الشدّية المتوسطة، بين 150 و200 طن، هي من بين الأكثر طلباً في سوق الآلات المستعملة الجزائري، نظراً لتعدد استخداماتها في أنواع كثيرة من الإنتاج.",
+          "في هذه الفئة، هناك نقطة انتباه خاصة تتعلق بتآكل أعمدة الإغلاق ومحاذاة اللوحة المتحركة، والتي قد تؤثر على دقة إغلاق القالب.",
+          "يجب أيضاً فحص مجموعة الحقن: تآكل الأسطوانة واللولب، خاصة إذا استُخدمت الآلة مع مواد مقواة بألياف الزجاج أو محملة بمعادن، وهي أكثر كشطاً.",
+          "في هذه القوى الشدّية، تكون وحدة التحكم الإلكترونية غالباً أول عنصر يحتاج للتحديث، حيث أن الموديلات السابقة لعام 2010 غالباً ما تكون مزودة بأنظمة خاصة يصعب صيانتها.",
+          "تشخيص تقني موجّه يسمح بتحديد ما إذا كان تحديث كهربائي بسيط كافياً، أو ما إذا كان تجديد أشمل ضرورياً قبل إعادة التشغيل."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "تجديد الآلات"
+          },
+          {
+            "href": "/pieces-industrielles/plc-hmi",
+            "label": "PLC / HMI"
+          }
+        ]
+      },
+      "en": {
+        "title": "180-Tonne Machine: What Should You Check?",
+        "excerpt": "The specific points to check on a mid-tonnage machine, highly sought after on the Algerian market.",
+        "category": "Technical",
+        "content": [
+          "Mid-tonnage machines, around 150 to 200 tonnes, are among the most sought-after on the Algerian used-equipment market, due to their versatility across many types of production.",
+          "On this segment, a particular point of attention concerns wear on the clamping tie bars and alignment of the moving platen, which can affect mold-closing precision.",
+          "The injection unit must also be checked: wear on the barrel and screw, especially if the machine has been used with glass-fiber-reinforced or mineral-filled materials, which are more abrasive.",
+          "At these tonnages, the electronic controller is often the first element needing modernization, as models built before 2010 are frequently fitted with proprietary systems that are hard to maintain.",
+          "A targeted technical diagnosis helps determine whether a simple electrical upgrade is enough, or whether a more complete renovation is needed before putting the machine back into production."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "Machine renovation"
+          },
+          {
+            "href": "/pieces-industrielles/plc-hmi",
+            "label": "PLC / HMI"
+          }
         ]
       }
     }
@@ -96,6 +362,72 @@
           "La rénovation se concentre alors sur ce qui devient réellement obsolète avec le temps : l'armoire électrique, le PLC, l'interface HMI, les variateurs et les capteurs de sécurité.",
           "Ce type d'intervention permet généralement de retrouver un niveau de contrôle et de sécurité proche d'une machine neuve, pour une fraction de son coût d'achat.",
           "Le remplacement complet reste préférable lorsque la structure mécanique présente une usure avancée, ou lorsque le besoin de production évolue vers un tonnage ou une technologie différente."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "Rénovation de machine"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Automatisation industrielle"
+          },
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          }
+        ]
+      },
+      "ar": {
+        "title": "متى تجدد آلة بدلاً من استبدالها؟",
+        "excerpt": "المعايير لاتخاذ القرار بين تجديد آلة حقن قديمة واستبدالها بالكامل.",
+        "category": "التجديد",
+        "content": [
+          "أمام آلة قديمة، يُطرح سؤال الاستبدال بشكل طبيعي. لكن في حالات كثيرة، يشكّل التجديد الموجّه بديلاً أكثر جدوى من الناحية الاقتصادية.",
+          "المعيار الحاسم هو حالة الجزء الميكانيكي والهيدروليكي: الهيكل، الأعمدة، المكابس، المجموعة الهيدروليكية. إذا كانت هذه العناصر سليمة، فإن جوهر قيمة الآلة محفوظ.",
+          "يركّز التجديد حينها على ما يتقادم فعلياً مع الوقت: الخزانة الكهربائية، PLC، واجهة HMI، المحولات وحساسات الأمان.",
+          "هذا النوع من التدخل يسمح عادة باستعادة مستوى تحكم وأمان قريب من آلة جديدة، بجزء بسيط من تكلفة شرائها.",
+          "يبقى الاستبدال الكامل أفضل عندما يُظهر الهيكل الميكانيكي تآكلاً متقدماً، أو عندما تتطور حاجة الإنتاج نحو قوة شدّية أو تقنية مختلفة."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "تجديد الآلات"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "الأتمتة الصناعية"
+          },
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          }
+        ]
+      },
+      "en": {
+        "title": "When to Renovate a Machine Instead of Replacing It?",
+        "excerpt": "The criteria for deciding between renovating and fully replacing an aging injection machine.",
+        "category": "Renovation",
+        "content": [
+          "Faced with an aging machine, the question of replacement naturally arises. Yet in many cases, a targeted renovation is a more economically attractive alternative.",
+          "The deciding factor is the condition of the mechanical and hydraulic parts: frame, tie bars, cylinders, hydraulic unit. If these elements are sound, most of the machine's value is preserved.",
+          "Renovation then focuses on what genuinely becomes obsolete over time: the electrical cabinet, the PLC, the HMI interface, drives, and safety sensors.",
+          "This type of work usually restores a level of control and safety close to a new machine, for a fraction of its purchase cost.",
+          "Full replacement remains preferable when the mechanical structure shows advanced wear, or when production needs shift toward a different tonnage or technology."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "Machine renovation"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Industrial automation"
+          },
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          }
         ]
       }
     }
@@ -118,6 +450,76 @@
           "Système de commande : ancienneté du PLC et du HMI, disponibilité des pièces détachées, possibilité de retrofit si nécessaire.",
           "Sécurité : conformité des portes, capteurs et arrêts d'urgence aux exigences minimales de sécurité machine.",
           "Un accompagnement technique lors de cette vérification reste le meilleur moyen d'acheter en toute confiance, particulièrement pour un premier achat de machine d'occasion."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter-machine",
+            "label": "Demander une machine"
+          },
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance et dépannage"
+          }
+        ]
+      },
+      "ar": {
+        "title": "النقاط الواجب فحصها قبل شراء آلة مستعملة",
+        "excerpt": "ملخص عملي للنقاط الأساسية الواجب التحقق منها قبل توقيع شراء آلة حقن مستعملة.",
+        "category": "الشراء",
+        "content": [
+          "لتلخيص النقاط الأساسية التي تناولناها في مقالاتنا السابقة، إليك قائمة عملية يجب مراعاتها قبل أي شراء لآلة حقن مستعملة.",
+          "التوثيق: سجل الصيانة، فواتير الصيانة، سنة الصنع، وإن أمكن، ساعات التشغيل الفعلية.",
+          "الحالة الميكانيكية: الهيكل، الأعمدة، محاذاة اللوحة المتحركة، عدم وجود فراغ زائد في الحركات.",
+          "الحالة الهيدروليكية: عدم وجود تسربات، صوت تشغيل طبيعي للمضخة، حالة الخراطيم.",
+          "نظام التحكم: قِدم PLC وHMI، توفر قطع الغيار، إمكانية التحديث إن لزم الأمر.",
+          "الأمان: مطابقة الأبواب والحساسات وأزرار التوقف الطارئ لمتطلبات السلامة الدنيا للآلة.",
+          "يبقى المرافقة التقنية أثناء هذا الفحص أفضل وسيلة للشراء بثقة تامة، خاصة عند أول شراء لآلة مستعملة."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter-machine",
+            "label": "طلب آلة"
+          },
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "الصيانة والإصلاح"
+          }
+        ]
+      },
+      "en": {
+        "title": "Points to Check Before Buying a Used Machine",
+        "excerpt": "A practical summary of the essential checkpoints before signing off on a used injection machine purchase.",
+        "category": "Buying",
+        "content": [
+          "To summarize the key points covered in our previous articles, here is a practical checklist to keep in mind before any used injection machine purchase.",
+          "Documentation: maintenance history, service invoices, year of manufacture and, if possible, actual operating hours.",
+          "Mechanical condition: frame, tie bars, moving platen alignment, no excessive play in the movements.",
+          "Hydraulic condition: no leaks, normal pump operating noise, condition of the hoses.",
+          "Control system: age of the PLC and HMI, spare-part availability, possibility of a retrofit if needed.",
+          "Safety: doors, sensors and emergency stops compliant with minimum machine-safety requirements.",
+          "Technical support during this inspection remains the best way to buy with full confidence, especially for a first used-machine purchase."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter-machine",
+            "label": "Request a machine"
+          },
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance & repair"
+          }
         ]
       }
     }
