@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { Lead, LeadType } from "@/lib/leads";
-import type { PartCategory, PartCondition } from "@/lib/types";
-import { wilayas } from "@/lib/wilayas";
-import { Trash2, RefreshCw, MessageCircle, Phone, Mail, PackagePlus, CheckCircle2, X } from "lucide-react";
+import type { PartCategory } from "@/lib/types";
+import { Trash2, RefreshCw, MessageCircle, Phone, Mail, Check, CheckCircle2 } from "lucide-react";
 
 const TYPE_LABELS: Record<LeadType, string> = {
   buy: "Recherche machine",
@@ -26,33 +25,15 @@ const STATUS_LABELS: Record<Lead["status"], string> = {
   closed: "Clôturé",
 };
 
-const CATEGORY_LABELS: Record<PartCategory, string> = {
-  electrique: "Électrique",
-  electronique: "Électronique",
-  hydraulique: "Hydraulique",
-  mecanique: "Mécanique",
-  automatisme: "Automatisme",
-  "plc-hmi": "PLC / HMI",
-  variateurs: "Variateurs",
-  "servo-moteurs": "Servo moteurs",
-  moules: "Moules",
-  autre: "Autre",
-};
-
-const CONDITION_LABELS: Record<PartCondition, string> = {
-  neuf: "Neuve",
-  occasion: "Occasion",
-  renove: "Rénovée",
-};
-
 /** Une demande "Vente équipement" pour une pièce/moule ne collecte pas de
  *  catégorie précise (equipmentType n'en a que 4 : machine/piece/moule/autre).
- *  On ne peut déduire la vraie catégorie (électrique, hydraulique...) que
- *  pour moule/autre — pour "piece" l'admin doit la choisir lui-même. */
-const EQUIPMENT_TYPE_DEFAULT_CATEGORY: Record<string, PartCategory | ""> = {
+ *  "autre" sert de catégorie de repli pour "piece" — l'admin la recatégorise
+ *  ensuite depuis l'onglet Pièces si besoin, plutôt que de bloquer sur un
+ *  choix au moment d'accepter la demande. */
+const EQUIPMENT_TYPE_TO_CATEGORY: Record<string, PartCategory> = {
   moule: "moules",
   autre: "autre",
-  piece: "",
+  piece: "autre",
 };
 
 /** The "Vendre un équipement" form (pièce/moule) stores its photos as a JSON
@@ -68,33 +49,10 @@ function parsePhotos(raw: string | undefined): string[] {
   }
 }
 
-interface ConvertForm {
-  category: PartCategory | "";
-  name: string;
-  reference: string;
-  condition: PartCondition;
-  price: string;
-  wilaya: string;
-  description: string;
-}
-
-function buildConvertForm(lead: Lead): ConvertForm {
-  const equipmentType = lead.data.equipmentType ?? "";
-  return {
-    category: EQUIPMENT_TYPE_DEFAULT_CATEGORY[equipmentType] ?? "",
-    name: lead.data.reference ?? "",
-    reference: lead.data.reference ?? "",
-    condition: "occasion",
-    price: lead.data.priceWanted ?? "",
-    wilaya: lead.data.wilaya ?? "",
-    description: lead.data.description ?? "",
-  };
-}
-
 /** Une demande de vente pièce/moule/autre (pas les machines, qui passent déjà
- *  par le flux "Annonces à valider" via /api/listings) peut être transformée
- *  en fiche Pièce (brouillon) sans tout retaper. */
-function isConvertibleSellLead(lead: Lead): boolean {
+ *  par le flux "Annonces à valider" via /api/listings) peut être acceptée
+ *  directement en fiche Pièce (brouillon), à compléter depuis l'onglet Pièces. */
+function isAcceptableSellLead(lead: Lead): boolean {
   return lead.type === "sell" && lead.data.equipmentType !== "machine";
 }
 
@@ -102,10 +60,8 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [filterType, setFilterType] = useState<LeadType | "all">("all");
   const [loading, setLoading] = useState(false);
-  const [convertingId, setConvertingId] = useState<string | null>(null);
-  const [convertForm, setConvertForm] = useState<ConvertForm | null>(null);
-  const [convertSaving, setConvertSaving] = useState(false);
-  const [convertedIds, setConvertedIds] = useState<Set<string>>(new Set());
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const [acceptedIds, setAcceptedIds] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(
     () => (filterType === "all" ? leads : leads.filter((l) => l.type === filterType)),
@@ -138,35 +94,23 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
     await fetch(`/api/admin/leads?id=${id}`, { method: "DELETE" });
   }
 
-  function startConvert(lead: Lead) {
-    setConvertingId(lead.id);
-    setConvertForm(buildConvertForm(lead));
-  }
-
-  function cancelConvert() {
-    setConvertingId(null);
-    setConvertForm(null);
-  }
-
-  async function submitConvert(lead: Lead) {
-    if (!convertForm || !convertForm.category || !convertForm.name.trim() || !convertForm.reference.trim()) {
-      alert("Catégorie, nom et référence sont obligatoires.");
-      return;
-    }
-    setConvertSaving(true);
+  async function accept(lead: Lead) {
+    setAcceptingId(lead.id);
     try {
+      const priceWanted = Number(lead.data.priceWanted);
+      const nameOrRef = lead.data.reference?.trim() || lead.data.description?.trim() || "Pièce à identifier";
       const res = await fetch("/api/admin/parts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          category: convertForm.category,
-          name: convertForm.name.trim(),
-          reference: convertForm.reference.trim(),
-          condition: convertForm.condition,
-          wilaya: convertForm.wilaya || undefined,
-          description: convertForm.description,
-          price: Number(convertForm.price) > 0 ? Number(convertForm.price) : null,
-          priceOnRequest: !(Number(convertForm.price) > 0),
+          category: EQUIPMENT_TYPE_TO_CATEGORY[lead.data.equipmentType ?? ""] ?? "autre",
+          name: nameOrRef,
+          reference: nameOrRef,
+          condition: "occasion",
+          wilaya: lead.data.wilaya || undefined,
+          description: lead.data.description ?? "",
+          price: priceWanted > 0 ? priceWanted : null,
+          priceOnRequest: !(priceWanted > 0),
           photos: parsePhotos(lead.data.photos),
           status: "draft",
         }),
@@ -175,11 +119,10 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
         alert("Erreur lors de la création de la fiche.");
         return;
       }
-      setConvertedIds((prev) => new Set(prev).add(lead.id));
+      setAcceptedIds((prev) => new Set(prev).add(lead.id));
       await setStatus(lead.id, "closed");
-      cancelConvert();
     } finally {
-      setConvertSaving(false);
+      setAcceptingId(null);
     }
   }
 
@@ -231,6 +174,16 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
+                  {isAcceptableSellLead(lead) && !acceptedIds.has(lead.id) && (
+                    <button
+                      onClick={() => accept(lead)}
+                      disabled={acceptingId === lead.id}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-ink)] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+                    >
+                      <Check size={14} />
+                      {acceptingId === lead.id ? "..." : "Accepter"}
+                    </button>
+                  )}
                   <select
                     value={lead.status}
                     onChange={(e) => setStatus(lead.id, e.target.value as Lead["status"])}
@@ -309,110 +262,12 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
                 </div>
               )}
 
-              {isConvertibleSellLead(lead) && (
+              {acceptedIds.has(lead.id) && (
                 <div className="mt-3 border-t border-[var(--color-border)] pt-3">
-                  {convertedIds.has(lead.id) ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-                      <CheckCircle2 size={14} /> Fiche créée en brouillon — à publier depuis l&apos;onglet Pièces
-                    </span>
-                  ) : convertingId === lead.id && convertForm ? (
-                    <div className="rounded-lg bg-[var(--color-surface-2)] p-4">
-                      <div className="mb-3 flex items-center justify-between">
-                        <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
-                          Créer une fiche pièce (brouillon)
-                        </p>
-                        <button
-                          onClick={cancelConvert}
-                          className="rounded-md p-1 text-[var(--color-text-muted)] hover:bg-white"
-                          aria-label="Annuler"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <select
-                          value={convertForm.category}
-                          onChange={(e) =>
-                            setConvertForm((f) => f && { ...f, category: e.target.value as PartCategory })
-                          }
-                          className="admin-input"
-                        >
-                          <option value="">Choisir une catégorie...</option>
-                          {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                            <option key={value} value={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                        <select
-                          value={convertForm.condition}
-                          onChange={(e) =>
-                            setConvertForm((f) => f && { ...f, condition: e.target.value as PartCondition })
-                          }
-                          className="admin-input"
-                        >
-                          {Object.entries(CONDITION_LABELS).map(([value, label]) => (
-                            <option key={value} value={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          value={convertForm.name}
-                          onChange={(e) => setConvertForm((f) => f && { ...f, name: e.target.value })}
-                          placeholder="Nom de la pièce"
-                          className="admin-input"
-                        />
-                        <input
-                          value={convertForm.reference}
-                          onChange={(e) => setConvertForm((f) => f && { ...f, reference: e.target.value })}
-                          placeholder="Référence"
-                          className="admin-input"
-                        />
-                        <input
-                          type="number"
-                          value={convertForm.price}
-                          onChange={(e) => setConvertForm((f) => f && { ...f, price: e.target.value })}
-                          placeholder="Prix (DA) — vide = sur demande"
-                          className="admin-input"
-                        />
-                        <select
-                          value={convertForm.wilaya}
-                          onChange={(e) => setConvertForm((f) => f && { ...f, wilaya: e.target.value })}
-                          className="admin-input"
-                        >
-                          <option value="">Wilaya —</option>
-                          {wilayas.map((w) => (
-                            <option key={w.code} value={w.fr}>
-                              {w.fr}
-                            </option>
-                          ))}
-                        </select>
-                        <textarea
-                          value={convertForm.description}
-                          onChange={(e) => setConvertForm((f) => f && { ...f, description: e.target.value })}
-                          placeholder="Description"
-                          rows={2}
-                          className="admin-input sm:col-span-2"
-                        />
-                      </div>
-                      <button
-                        onClick={() => submitConvert(lead)}
-                        disabled={convertSaving}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-ink)] px-3.5 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
-                      >
-                        <PackagePlus size={14} />
-                        {convertSaving ? "Création..." : "Créer la fiche (brouillon)"}
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => startConvert(lead)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-                    >
-                      <PackagePlus size={14} /> Créer la fiche pièce à partir de cette demande
-                    </button>
-                  )}
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                    <CheckCircle2 size={14} /> Fiche créée en brouillon — à compléter et publier depuis
+                    l&apos;onglet Pièces
+                  </span>
                 </div>
               )}
             </div>
