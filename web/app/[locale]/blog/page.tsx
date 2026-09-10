@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { buildAlternates } from "@/lib/seo";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { Link } from "@/i18n/navigation";
@@ -18,7 +19,7 @@ export async function generateMetadata({
   return {
     title: t("pageTitle"),
     description: t("pageSubtitle"),
-    alternates: { canonical: "/blog" },
+    alternates: buildAlternates("/blog", locale),
   };
 }
 

@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { buildAlternates } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
@@ -8,6 +9,7 @@ import { MachineArt } from "@/components/MachineArt";
 import { MachineVideoPlayer } from "@/components/MachineVideoPlayer";
 import { MachineInterestForm } from "@/components/MachineInterestForm";
 import { JsonLd } from "@/components/JsonLd";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { getPublicMachineBySlug } from "@/lib/data";
 import { getVideoProvider, getAutoVideoThumbnail, getVideoEmbedUrl } from "@/lib/video";
 import { Link } from "@/i18n/navigation";
@@ -31,7 +33,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: `/machines/${slug}` },
+    alternates: buildAlternates(`/machines/${slug}`, locale),
     openGraph: {
       title,
       description,
@@ -127,6 +129,15 @@ export default async function MachineDetailPage({
           }}
         />
       )}
+
+      <Breadcrumbs
+        locale={locale}
+        items={[
+          { label: t("nav.home"), href: "/" },
+          { label: t("nav.machinesShort"), href: "/machines" },
+          { label: `${machine.brand} ${machine.model}` },
+        ]}
+      />
 
       <section className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)] py-4">
         <Container>

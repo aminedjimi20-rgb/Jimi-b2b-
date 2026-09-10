@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { MachineArt } from "@/components/MachineArt";
 import { Badge } from "@/components/ui/Badge";
 import { JsonLd } from "@/components/JsonLd";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { buildAlternates } from "@/lib/seo";
 import { getArticleBySlug, getArticles } from "@/lib/data";
 import { routing } from "@/i18n/routing";
 import { ArrowLeft, Clock } from "lucide-react";
@@ -20,13 +22,13 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const article = getArticleBySlug(slug);
   if (!article) return {};
   return {
     title: article.title,
     description: article.excerpt,
-    alternates: { canonical: `/blog/${slug}` },
+    alternates: buildAlternates(`/blog/${slug}`, locale),
     openGraph: { title: article.title, description: article.excerpt, type: "article" },
   };
 }
@@ -57,6 +59,15 @@ export default async function ArticlePage({
           datePublished: article.publishedAt,
           articleSection: article.category,
         }}
+      />
+
+      <Breadcrumbs
+        locale={locale}
+        items={[
+          { label: t("nav.home"), href: "/" },
+          { label: t("nav.blogShort"), href: "/blog" },
+          { label: article.title },
+        ]}
       />
 
       <section className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)] py-4">

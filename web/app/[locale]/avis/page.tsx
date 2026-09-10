@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { buildAlternates } from "@/lib/seo";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { TestimonialForm } from "@/components/forms/TestimonialForm";
@@ -14,7 +15,7 @@ export async function generateMetadata({
   return {
     title: t("pageTitle"),
     description: t("pageSubtitle"),
-    alternates: { canonical: "/avis" },
+    alternates: buildAlternates("/avis", locale),
   };
 }
 

@@ -10,10 +10,15 @@ const staticPaths = [
   "/vendre-machine",
   "/vendre-equipement",
   "/pieces-industrielles",
+  "/pieces-industrielles/electrique",
   "/pieces-industrielles/electronique",
-  "/pieces-industrielles/moules",
   "/pieces-industrielles/hydraulique",
   "/pieces-industrielles/mecanique",
+  "/pieces-industrielles/automatisme",
+  "/pieces-industrielles/plc-hmi",
+  "/pieces-industrielles/variateurs",
+  "/pieces-industrielles/servo-moteurs",
+  "/pieces-industrielles/moules",
   "/services",
   "/services/renovation-machine-injection",
   "/services/automatisation-industrielle",
@@ -22,6 +27,7 @@ const staticPaths = [
   "/avis",
   "/blog",
   "/contact",
+  "/politique-de-confidentialite",
 ];
 
 function localizedPath(path: string, locale: string) {
@@ -30,6 +36,18 @@ function localizedPath(path: string, locale: string) {
     return `${base}${path || "/"}`;
   }
   return `${base}/${locale}${path}`;
+}
+
+/** hreflang alternates for every locale of a given path, embedded directly
+ *  in the sitemap entry — in addition to (not instead of) the per-page
+ *  <link rel="alternate" hreflang> tags from lib/seo.ts's buildAlternates. */
+function languageAlternates(path: string): Record<string, string> {
+  const languages: Record<string, string> = {};
+  for (const locale of routing.locales) {
+    languages[locale] = localizedPath(path, locale);
+  }
+  languages["x-default"] = localizedPath(path, routing.defaultLocale);
+  return languages;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -47,12 +65,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const entries: MetadataRoute.Sitemap = [];
   for (const path of allPaths) {
+    const alternates = { languages: languageAlternates(path) };
     for (const locale of routing.locales) {
       entries.push({
         url: localizedPath(path, locale),
         lastModified: new Date(),
         changeFrequency: path === "" ? "weekly" : "monthly",
         priority: path === "" ? 1 : 0.7,
+        alternates,
       });
     }
   }

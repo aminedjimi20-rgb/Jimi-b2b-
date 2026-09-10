@@ -10,6 +10,7 @@ import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { HtmlAttributes } from "@/components/HtmlAttributes";
 import { siteConfig } from "@/config/site.config";
+import { buildAlternates } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 
 const inter = Inter({
@@ -43,15 +44,7 @@ export async function generateMetadata({
       template: `%s | ${siteConfig.companyName}`,
     },
     description: t("defaultDescription"),
-    alternates: {
-      canonical: locale === routing.defaultLocale ? "/" : `/${locale}`,
-      languages: {
-        fr: "/",
-        ar: "/ar",
-        en: "/en",
-        "x-default": "/",
-      },
-    },
+    alternates: buildAlternates("", locale),
     openGraph: {
       title: t("defaultTitle"),
       description: t("defaultDescription"),
@@ -98,11 +91,14 @@ export default async function LocaleLayout({
         <JsonLd
           data={{
             "@context": "https://schema.org",
-            "@type": "Organization",
+            "@type": "LocalBusiness",
             name: siteConfig.companyName,
             url: siteConfig.seo.siteUrl,
             description:
               "Machines, pièces industrielles, moules et automatisation : vente, achat, maintenance et rénovation d'équipements industriels en Algérie.",
+            telephone: siteConfig.contact.phoneDisplay,
+            email: siteConfig.contact.email,
+            address: { "@type": "PostalAddress", addressCountry: "DZ" },
             areaServed: "DZ",
           }}
         />

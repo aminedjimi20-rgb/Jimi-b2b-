@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { buildAlternates } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { PartsGrid } from "@/components/PartsGrid";
 import { getPublicPartsByCategory } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
@@ -39,7 +41,7 @@ export async function generateMetadata({
   return {
     title: t(`categories.${category}.seoTitle`),
     description: t(`categories.${category}.seoDescription`),
-    alternates: { canonical: `/pieces-industrielles/${category}` },
+    alternates: buildAlternates(`/pieces-industrielles/${category}`, locale),
   };
 }
 
@@ -54,10 +56,19 @@ export default async function PieceCategoryPage({
   const t = await getTranslations("pieces");
   const tw = await getTranslations("whatsappMessages");
   const tc = await getTranslations("cta");
+  const tn = await getTranslations("nav");
   const parts = await getPublicPartsByCategory(category);
 
   return (
     <>
+      <Breadcrumbs
+        locale={locale}
+        items={[
+          { label: tn("home"), href: "/" },
+          { label: tn("piecesShort"), href: "/pieces-industrielles" },
+          { label: t(`categories.${category}.title`) },
+        ]}
+      />
       <PageHeader
         eyebrow={t("eyebrow")}
         title={t(`categories.${category}.title`)}
