@@ -96,6 +96,13 @@
       "emptyTitle": "Aucune machine en ligne pour le moment",
       "emptySubtitle": "Notre sélection est en cours de constitution. Décrivez-nous votre besoin : nous recherchons activement dans notre réseau."
     },
+    "newArrivals": {
+      "eyebrow": "Nouveautés",
+      "title": "Derniers ajouts",
+      "subtitle": "Les dernières machines et pièces ajoutées à notre catalogue.",
+      "machinesLabel": "Machines",
+      "partsLabel": "Pièces industrielles"
+    },
     "services": {
       "title": "Nos domaines d'expertise",
       "subtitle": "Une expertise technique complète autour de la machine d'injection plastique, de sa rénovation à sa remise en production."

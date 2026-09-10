@@ -1,7 +1,7 @@
 import { sendWhatsAppTextMessage } from "@/lib/whatsapp";
 import type { Conversation, ConversationStatus, LeadScoreLevel } from "@/lib/types";
 
-function getAdminAlertPhone(): string | null {
+export function getAdminAlertPhone(): string | null {
   const phone = process.env.ADMIN_ALERT_PHONE?.trim();
   return phone || null;
 }

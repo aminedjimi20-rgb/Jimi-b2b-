@@ -81,6 +81,15 @@ export async function getFeaturedMachines(limit = 6): Promise<PublicMachine[]> {
   return pool.slice(0, limit);
 }
 
+/** Most recently added machines: runtime (admin/seller-added) listings come
+ *  first in `getPublicMachines()`'s order — newest first — followed by the
+ *  static demo catalog, so slicing the front gives the latest real
+ *  additions without needing a separate "createdAt" field on PublicMachine. */
+export async function getLatestMachines(limit = 4): Promise<PublicMachine[]> {
+  const machines = await getPublicMachines();
+  return machines.slice(0, limit);
+}
+
 export async function getMachineBrands(): Promise<string[]> {
   const machines = await getPublicMachines();
   return Array.from(new Set(machines.map((m) => m.brand))).sort();
@@ -129,6 +138,13 @@ export async function getPublicParts(): Promise<Part[]> {
 export async function getPublicPartsByCategory(category: PartCategory): Promise<Part[]> {
   const parts = await getPublicParts();
   return parts.filter((p) => p.category === category);
+}
+
+/** Most recently added parts — same "runtime items come first" ordering as
+ *  `getLatestMachines`. */
+export async function getLatestParts(limit = 4): Promise<Part[]> {
+  const parts = await getPublicParts();
+  return parts.slice(0, limit);
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {

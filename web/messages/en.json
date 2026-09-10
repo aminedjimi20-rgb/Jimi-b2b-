@@ -96,6 +96,13 @@
       "emptyTitle": "No machines listed yet",
       "emptySubtitle": "Our selection is being put together. Tell us what you need — we actively search our network for it."
     },
+    "newArrivals": {
+      "eyebrow": "What's new",
+      "title": "Latest additions",
+      "subtitle": "The latest machines and parts added to our catalog.",
+      "machinesLabel": "Machines",
+      "partsLabel": "Industrial parts"
+    },
     "services": {
       "title": "Our areas of expertise",
       "subtitle": "Complete technical expertise around the injection machine, from renovation to back into production."
