@@ -7,7 +7,7 @@ import { Select, TextInput, FieldWrapper } from "@/components/forms/fields";
 import { Button } from "@/components/ui/Button";
 import type { MachineDrive, MachineStatus } from "@/lib/types";
 import type { PublicMachine } from "@/lib/data";
-import { RotateCcw, SearchX } from "lucide-react";
+import { RotateCcw, SearchX, LayoutGrid, List } from "lucide-react";
 
 interface Filters {
   brand: string;
@@ -28,6 +28,7 @@ const DRIVE_KEY: Record<MachineDrive, "hydraulic" | "servo" | "hybrid"> = {
 export function MachinesExplorer({ machines, brands }: { machines: PublicMachine[]; brands: string[] }) {
   const t = useTranslations();
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [view, setView] = useState<"grid" | "list">("grid");
 
   const filtered = useMemo(() => {
     return machines.filter((m) => {
@@ -127,16 +128,50 @@ export function MachinesExplorer({ machines, brands }: { machines: PublicMachine
         </div>
       </div>
 
-      <p className="mt-6 text-sm font-medium text-[var(--color-text-muted)]">
-        {t("machines.resultsCount", { count: filtered.length })}
-      </p>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-medium text-[var(--color-text-muted)]">
+          {t("machines.resultsCount", { count: filtered.length })}
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setView("grid")}
+            aria-pressed={view === "grid"}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              view === "grid"
+                ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white"
+                : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-accent)]"
+            }`}
+          >
+            <LayoutGrid size={15} /> {t("pieces.viewGrid")}
+          </button>
+          <button
+            onClick={() => setView("list")}
+            aria-pressed={view === "list"}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              view === "list"
+                ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white"
+                : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-accent)]"
+            }`}
+          >
+            <List size={15} /> {t("pieces.viewList")}
+          </button>
+        </div>
+      </div>
 
       {filtered.length > 0 ? (
-        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((machine, i) => (
-            <MachineCard key={machine.id} machine={machine} index={i} />
-          ))}
-        </div>
+        view === "grid" ? (
+          <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((machine, i) => (
+              <MachineCard key={machine.id} machine={machine} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 flex flex-col gap-4">
+            {filtered.map((machine, i) => (
+              <MachineCard key={machine.id} machine={machine} index={i} layout="list" />
+            ))}
+          </div>
+        )
       ) : (
         <div className="mt-6 flex flex-col items-center gap-4 rounded-xl border border-dashed border-[var(--color-border)] bg-white py-16 text-center">
           <SearchX size={32} className="text-slate-300" />

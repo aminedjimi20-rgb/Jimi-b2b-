@@ -52,24 +52,29 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
 
   if (layout === "list") {
     return (
-      <div className="flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm transition-shadow hover:shadow-lg sm:flex-row">
-        <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-2)] sm:aspect-auto sm:w-56 sm:shrink-0">
+      <div className="flex flex-row overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm transition-shadow hover:shadow-lg">
+        <div className="relative w-28 shrink-0 overflow-hidden bg-[var(--color-surface-2)] sm:w-56">
           {image}
-          {badges}
+          <div className="absolute inset-x-1.5 top-1.5 flex flex-wrap gap-1 sm:inset-x-3 sm:top-3 sm:gap-2 [&_span]:px-1.5 [&_span]:py-0.5 [&_span]:text-[10px] sm:[&_span]:px-2.5 sm:[&_span]:py-1 sm:[&_span]:text-xs">
+            <Badge tone={conditionTone[part.condition]}>{t(`pieces.condition.${part.condition}`)}</Badge>
+            {part.isPromo && <Badge tone="warning">{t("badges.promo")}</Badge>}
+          </div>
         </div>
 
-        <div className="flex flex-1 flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex flex-1 flex-col justify-between gap-2 p-3 sm:flex-row sm:items-center sm:gap-6 sm:p-5">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">
               {t("pieces.reference")} {part.reference}
             </p>
-            <h3 className="mt-0.5 text-lg font-bold text-[var(--color-ink)]">{part.name}</h3>
+            <h3 className="mt-0.5 text-base font-bold text-[var(--color-ink)] sm:text-lg">{part.name}</h3>
             {part.description && (
-              <p className="mt-1 line-clamp-2 text-sm text-[var(--color-text-muted)]">{part.description}</p>
+              <p className="mt-1 line-clamp-2 hidden text-sm text-[var(--color-text-muted)] sm:block">
+                {part.description}
+              </p>
             )}
           </div>
 
-          <div className="flex shrink-0 flex-col gap-3 border-t border-[var(--color-border)] pt-3 sm:w-64 sm:border-t-0 sm:border-s sm:ps-6 sm:pt-0">
+          <div className="flex shrink-0 flex-col gap-2 border-t border-[var(--color-border)] pt-2 sm:w-64 sm:gap-3 sm:border-t-0 sm:border-s sm:ps-6 sm:pt-0">
             <span className="font-bold text-[var(--color-ink)]">
               {part.priceOnRequest || !part.price
                 ? t("machines.priceOnRequest")

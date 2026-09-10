@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-const VALID_TYPES = ["machine", "piece", "moule"] as const;
+const VALID_TYPES = ["machine", "piece", "moule", "autre"] as const;
 type EquipmentType = (typeof VALID_TYPES)[number];
 
 function isValidType(value: string | undefined): value is EquipmentType {

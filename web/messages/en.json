@@ -422,6 +422,10 @@
       "moule": {
         "label": "Mold",
         "description": "Plastic injection mold or industrial mold"
+      },
+      "autre": {
+        "label": "Other",
+        "description": "Another type of industrial equipment"
       }
     }
   },

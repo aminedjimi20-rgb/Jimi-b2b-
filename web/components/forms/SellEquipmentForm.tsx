@@ -10,15 +10,16 @@ import { WhatsAppAlternative } from "./WhatsAppAlternative";
 import { PhotoUploader } from "./MediaUploader";
 import { Button } from "@/components/ui/Button";
 import { wilayas } from "@/lib/wilayas";
-import { Factory, Cog, Box, Send, ArrowLeft } from "lucide-react";
+import { Factory, Cog, Box, Send, ArrowLeft, MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-type EquipmentType = "machine" | "piece" | "moule";
+type EquipmentType = "machine" | "piece" | "moule" | "autre";
 
 const TYPE_ICONS: Record<EquipmentType, LucideIcon> = {
   machine: Factory,
   piece: Cog,
   moule: Box,
+  autre: MoreHorizontal,
 };
 
 export function SellEquipmentForm({ initialType = null }: { initialType?: EquipmentType | null }) {
@@ -31,8 +32,8 @@ export function SellEquipmentForm({ initialType = null }: { initialType?: Equipm
         <h2 className="mb-5 text-lg font-bold text-[var(--color-ink)]">
           {t("sellEquipment.typePrompt")}
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {(["machine", "piece", "moule"] as EquipmentType[]).map((type) => {
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {(["machine", "piece", "moule", "autre"] as EquipmentType[]).map((type) => {
             const Icon = TYPE_ICONS[type];
             return (
               <button
@@ -78,7 +79,7 @@ export function SellEquipmentForm({ initialType = null }: { initialType?: Equipm
   );
 }
 
-function PartOrMoldForm({ equipmentType }: { equipmentType: "piece" | "moule" }) {
+function PartOrMoldForm({ equipmentType }: { equipmentType: "piece" | "moule" | "autre" }) {
   const t = useTranslations();
   const { status, submit } = useLeadForm("sell");
   const [photos, setPhotos] = useState<string[]>([]);

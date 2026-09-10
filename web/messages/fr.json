@@ -422,6 +422,10 @@
       "moule": {
         "label": "Moule",
         "description": "Moule d'injection plastique ou moule industriel"
+      },
+      "autre": {
+        "label": "Autre",
+        "description": "Un autre type d'équipement industriel"
       }
     }
   },
