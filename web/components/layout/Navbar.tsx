@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { SearchBar } from "./SearchBar";
 import { Button } from "@/components/ui/Button";
-import { Menu, X, ChevronDown, Factory } from "lucide-react";
+import { Menu, X, ChevronDown, Factory, Search } from "lucide-react";
 import clsx from "clsx";
 
 type DropdownKey = "machines" | "pieces" | "services";
@@ -16,6 +17,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<DropdownKey | null>(null);
   const [mobileOpenSection, setMobileOpenSection] = useState<DropdownKey | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
 
@@ -30,6 +32,7 @@ export function Navbar() {
     setPrevPathname(pathname);
     setMobileOpen(false);
     setMobileOpenSection(null);
+    setSearchOpen(false);
   }
 
   const machinesMenu = [
@@ -148,6 +151,27 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <div className="relative hidden md:block">
+            <button
+              type="button"
+              aria-label={t("search")}
+              className="rounded-md p-2 text-[var(--color-ink)] hover:bg-[var(--color-surface-2)]"
+              onClick={() => setSearchOpen((v) => !v)}
+            >
+              <Search size={19} />
+            </button>
+            {searchOpen && (
+              <div className="absolute end-0 top-full w-80 pt-2">
+                <div className="rounded-lg border border-[var(--color-border)] bg-white p-3 shadow-lg">
+                  <SearchBar
+                    placeholder={t("searchPlaceholder")}
+                    autoFocus
+                    onSubmitted={() => setSearchOpen(false)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>
@@ -170,6 +194,10 @@ export function Navbar() {
       {mobileOpen && (
         <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-[var(--color-border)] bg-white min-[1700px]:hidden">
           <nav className="container-jimi flex flex-col gap-1 py-4">
+            <div className="pb-3">
+              <SearchBar placeholder={t("searchPlaceholder")} onSubmitted={() => setMobileOpen(false)} />
+            </div>
+
             <Link
               href="/"
               className="rounded-md px-3 py-3 text-base font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"

@@ -21,6 +21,8 @@
     "blog": "نصائح وأخبار",
     "blogShort": "نصائح",
     "contact": "اتصل بنا",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث عن آلة، قطعة، مرجع...",
     "machinesMenu": {
       "available": "الآلات المتوفرة",
       "sell": "بيع الآلات",
@@ -784,6 +786,22 @@
     },
     "notFound": "تبحث عن معدة محددة لا تجدها في الكتالوج؟",
     "notFoundCta": "صف احتياجك، سنبحث عنه من أجلك"
+  },
+  "search": {
+    "eyebrow": "بحث",
+    "pageTitle": "بحث",
+    "pageSubtitle": "ابحث عن آلة أو قطعة حسب الماركة، الموديل أو المرجع.",
+    "seoTitle": "البحث عن آلة أو قطعة | JIMI Industrie",
+    "seoDescription": "ابحث بين الآلات والقطع الصناعية المتوفرة لدى JIMI Industrie في الجزائر.",
+    "placeholder": "ماركة، موديل، مرجع...",
+    "resultsTitle": "نتائج البحث عن «{query}»",
+    "resultsCount": "{count} نتيجة",
+    "noQueryTitle": "ماذا تبحث عنه؟",
+    "noQuerySubtitle": "اكتب ماركة، موديل أو مرجعاً للبحث بين الآلات والقطع المتوفرة.",
+    "noResultsTitle": "لا نتائج لـ «{query}»",
+    "noResultsSubtitle": "جرّب كلمة أخرى، أو صف لنا ما تبحث عنه: نتحقق من مخزوننا وشبكة مورّدينا.",
+    "machinesSectionTitle": "الآلات ({count})",
+    "piecesSectionTitle": "قطع صناعية ({count})"
   },
   "acheterHub": {
     "eyebrow": "شراء",

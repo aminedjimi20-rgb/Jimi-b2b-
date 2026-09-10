@@ -21,6 +21,8 @@
     "blog": "Insights & News",
     "blogShort": "Insights",
     "contact": "Contact",
+    "search": "Search",
+    "searchPlaceholder": "Search a machine, a part, a reference...",
     "machinesMenu": {
       "available": "Available machines",
       "sell": "Sell machines",
@@ -784,6 +786,22 @@
     },
     "notFound": "Looking for something specific that isn't in the catalogue?",
     "notFoundCta": "Describe what you need, we'll look for it for you"
+  },
+  "search": {
+    "eyebrow": "Search",
+    "pageTitle": "Search",
+    "pageSubtitle": "Find a machine or a part by brand, model or reference.",
+    "seoTitle": "Search a machine or a part | JIMI Industrie",
+    "seoDescription": "Search among the machines and industrial parts available at JIMI Industrie in Algeria.",
+    "placeholder": "Brand, model, reference...",
+    "resultsTitle": "Results for \"{query}\"",
+    "resultsCount": "{count} result(s)",
+    "noQueryTitle": "What are you looking for?",
+    "noQuerySubtitle": "Type a brand, model or reference to search among available machines and parts.",
+    "noResultsTitle": "No results for \"{query}\"",
+    "noResultsSubtitle": "Try another keyword, or describe what you need: we'll check our stock and supplier network.",
+    "machinesSectionTitle": "Machines ({count})",
+    "piecesSectionTitle": "Industrial parts ({count})"
   },
   "acheterHub": {
     "eyebrow": "Buy",

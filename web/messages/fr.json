@@ -21,6 +21,8 @@
     "blog": "Conseils & Actualités",
     "blogShort": "Conseils",
     "contact": "Contact",
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher une machine, une pièce, une référence...",
     "machinesMenu": {
       "available": "Machines disponibles",
       "sell": "Vente de machines",
@@ -784,6 +786,22 @@
     },
     "notFound": "Vous cherchez un équipement précis que vous ne trouvez pas dans le catalogue ?",
     "notFoundCta": "Décrivez votre besoin, nous le recherchons pour vous"
+  },
+  "search": {
+    "eyebrow": "Recherche",
+    "pageTitle": "Rechercher",
+    "pageSubtitle": "Trouvez une machine ou une pièce par marque, modèle ou référence.",
+    "seoTitle": "Rechercher une machine ou une pièce | JIMI Industrie",
+    "seoDescription": "Recherchez parmi les machines et pièces industrielles disponibles chez JIMI Industrie en Algérie.",
+    "placeholder": "Marque, modèle, référence...",
+    "resultsTitle": "Résultats pour « {query} »",
+    "resultsCount": "{count} résultat(s)",
+    "noQueryTitle": "Que recherchez-vous ?",
+    "noQuerySubtitle": "Tapez une marque, un modèle ou une référence pour rechercher parmi les machines et pièces disponibles.",
+    "noResultsTitle": "Aucun résultat pour « {query} »",
+    "noResultsSubtitle": "Essayez un autre mot-clé, ou décrivez-nous ce que vous cherchez : nous vérifions notre stock et notre réseau de fournisseurs.",
+    "machinesSectionTitle": "Machines ({count})",
+    "piecesSectionTitle": "Pièces industrielles ({count})"
   },
   "acheterHub": {
     "eyebrow": "Acheter",
