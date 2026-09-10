@@ -134,7 +134,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
           Les machines <strong>« Démo »</strong> proviennent des données d&apos;exemple du site
           (non modifiables ici). Les machines ajoutées par les vendeurs sont soumises à
           validation : elles apparaissent sur le site public uniquement après approbation de
-          Jimi (onglet « Annonces à valider »). Une machine ajoutée directement ici par un admin
+          JIMI Industrie (onglet « Annonces à valider »). Une machine ajoutée directement ici par un admin
           est publiée immédiatement.
         </p>
         <div className="flex gap-2">

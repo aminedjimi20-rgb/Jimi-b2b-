@@ -1,7 +1,7 @@
 {
   "meta": {
-    "defaultTitle": "Jimi Renovation & Installation | Plastic Injection Machines & Industrial Automation",
-    "defaultDescription": "Specialist in the renovation, retrofit and maintenance of plastic injection machines in Algeria. Industrial automation, PLC/HMI, buying and selling used machines."
+    "defaultTitle": "JIMI Industrie | Industrial Machines, Parts & Equipment in Algeria",
+    "defaultDescription": "JIMI Industrie supports the purchase, sale, maintenance and automation of industrial machines and parts in Algeria: plastic injection machines, molds, electrical, hydraulic and mechanical parts, PLC/HMI and drives."
   },
   "nav": {
     "home": "Home",
@@ -14,6 +14,9 @@
     "services": "Services",
     "pieces": "Industrial parts",
     "piecesShort": "Parts",
+    "moulesShort": "Molds",
+    "acheter": "Buy",
+    "vendre": "Sell",
     "realisations": "Projects",
     "blog": "Insights & News",
     "blogShort": "Insights",
@@ -24,10 +27,14 @@
       "buy": "Buy machines"
     },
     "piecesMenu": {
-      "electronique": "Electronics & electrical",
-      "moules": "Molds",
-      "hydraulique": "Hydraulics",
-      "mecanique": "Mechanical",
+      "electrique": "Electrical parts",
+      "electronique": "Electronic parts",
+      "hydraulique": "Hydraulic parts",
+      "mecanique": "Mechanical parts",
+      "automatisme": "Automation",
+      "plc-hmi": "PLC / HMI",
+      "variateurs": "Drives",
+      "servo-moteurs": "Servo motors",
       "sell": "Sell a part"
     },
     "servicesMenu": {
@@ -50,6 +57,9 @@
     "proposeMachine": "Submit my machine",
     "sellEquipment": "Sell equipment",
     "searchPart": "Find a part",
+    "acheter": "Buy",
+    "vendre": "Sell",
+    "requestEquipment": "Request equipment",
     "sendMyRequest": "Send my request",
     "viewAll": "View all",
     "readMore": "Read article",
@@ -60,9 +70,9 @@
     "callNow": "Call now"
   },
   "hero": {
-    "badge": "Industrial Automatician — Plastic Injection",
-    "title": "Plastic injection machines & industrial automation solutions",
-    "subtitle": "Renovation, modernization, troubleshooting and brokerage for buying and selling injection machines in Algeria.",
+    "badge": "Industrial platform — Machines, parts & automation",
+    "title": "Industrial machines, parts and equipment in Algeria",
+    "subtitle": "Sale, purchase, maintenance, renovation and automation of industrial machines and equipment.",
     "stat1Value": "PLC / HMI",
     "stat1Label": "Retrofit & commissioning",
     "stat2Value": "100%",
@@ -89,9 +99,23 @@
     }
   },
   "home": {
+    "categories": {
+      "eyebrow": "What we do",
+      "title": "Machines, parts and industrial services",
+      "subtitle": "JIMI Industrie sells, buys and connects buyers and sellers around industrial equipment — and offers related technical services.",
+      "viewMore": "View more",
+      "machines": { "label": "Industrial machines" },
+      "pieces": { "label": "Industrial parts" },
+      "moules": { "label": "Molds" },
+      "electrique": { "label": "Electrical & electronics" },
+      "hydraulique": { "label": "Hydraulics" },
+      "automatisation": { "label": "Automation" },
+      "maintenance": { "label": "Maintenance" },
+      "retrofit": { "label": "Retrofit" }
+    },
     "featuredMachines": {
       "title": "Featured machines",
-      "subtitle": "A selection of injection machines currently tracked by Jimi Renovation & Installation.",
+      "subtitle": "A selection of injection machines currently tracked by JIMI Industrie.",
       "viewAll": "View all machines",
       "emptyTitle": "No machines listed yet",
       "emptySubtitle": "Our selection is being put together. Tell us what you need — we actively search our network for it."
@@ -108,7 +132,7 @@
       "subtitle": "Complete technical expertise around the injection machine, from renovation to back into production."
     },
     "whyUs": {
-      "title": "Why choose Jimi?",
+      "title": "Why choose JIMI Industrie?",
       "subtitle": "A single technical point of contact who genuinely understands the machine — not just the market.",
       "items": [
         {
@@ -173,7 +197,7 @@
           "Technical inspection when needed"
         ]
       },
-      "disclaimer": "Jimi Renovation & Installation acts as a technical intermediary. Each transaction remains the direct responsibility of the buyer and seller."
+      "disclaimer": "JIMI Industrie acts as a technical intermediary. Each transaction remains the direct responsibility of the buyer and seller."
     },
     "beforeAfter": {
       "title": "Before / After",
@@ -195,7 +219,7 @@
     },
     "realisations": {
       "title": "Our projects",
-      "subtitle": "A look at renovation and commissioning projects supported by Jimi.",
+      "subtitle": "A look at renovation and commissioning projects supported by JIMI.",
       "viewAll": "View all projects",
       "emptyTitle": "Our projects are coming soon",
       "emptySubtitle": "This space will showcase our renovation, troubleshooting and commissioning projects as they're completed. For a concrete example of our work, contact us directly."
@@ -254,10 +278,10 @@
     }
   },
   "machines": {
-    "seoTitle": "Industrial machines for sale Algeria | Jimi Renovation & Installation",
-    "seoDescription": "Industrial plastic injection machines for sale in Algeria: verified catalog, listed price or price on request, secure intermediation by Jimi Renovation & Installation.",
+    "seoTitle": "Industrial machines for sale Algeria | JIMI Industrie",
+    "seoDescription": "Industrial plastic injection machines for sale in Algeria: verified catalog, listed price or price on request, secure intermediation by JIMI Industrie.",
     "pageTitle": "Available injection machines",
-    "pageSubtitle": "Machines tracked by Jimi Renovation & Installation, with first-level technical verification.",
+    "pageSubtitle": "Machines tracked by JIMI Industrie, with first-level technical verification.",
     "emptyCatalog": {
       "title": "No machines available right now",
       "subtitle": "Our catalog is being put together. Tell us what you need and we'll get back to you with matching proposals."
@@ -289,15 +313,15 @@
   "pieces": {
     "eyebrow": "Industrial parts",
     "pageTitle": "Industrial parts",
-    "pageSubtitle": "A wide catalog of spare parts for industrial machines: electronics, molds, hydraulics and mechanical — new, used or refurbished.",
-    "seoTitle": "Industrial parts Algeria | Electronics, molds, hydraulics, mechanical",
-    "seoDescription": "Industrial parts catalog in Algeria: electrical and electronic parts, plastic injection molds, hydraulic and mechanical parts. New, used or refurbished.",
+    "pageSubtitle": "A wide catalog of spare parts for industrial machines: electrical, electronic, hydraulic, mechanical, automation, PLC/HMI, drives, servo motors and molds — new, used or refurbished.",
+    "seoTitle": "Industrial parts Algeria | Electrical, electronic, hydraulic, mechanical",
+    "seoDescription": "Industrial parts catalog in Algeria: electrical, electronic, hydraulic, mechanical parts, automation, PLC/HMI, drives and servo motors. New, used or refurbished.",
     "viewCategory": "View category",
     "viewGrid": "Grid",
     "viewList": "List",
     "reference": "Ref.",
     "requestPrice": "Request price",
-    "whatsappRequest": "Hello Jimi, I'd like the price for the part \"{name}\" (ref. {reference}).",
+    "whatsappRequest": "Hello JIMI, I'd like the price for the part \"{name}\" (ref. {reference}).",
     "condition": {
       "neuf": "New",
       "occasion": "Used",
@@ -308,12 +332,61 @@
       "subtitle": "Our parts catalog is being built up. Tell us the reference you're looking for and we'll get back to you quickly."
     },
     "categories": {
+      "electrique": {
+        "title": "Electrical parts",
+        "description": "Contactors, relays, circuit breakers, disconnect switches, industrial wiring, power supplies and electrical protection for industrial machines and installations.",
+        "seoTitle": "Industrial electrical parts Algeria",
+        "seoDescription": "Contactors, relays, circuit breakers, disconnect switches, wiring and electrical power supplies for industrial machines in Algeria.",
+        "examples": ["Contactors", "Electrical relays", "Circuit breakers", "Disconnect switches", "Industrial wiring", "Power supplies", "Electrical protection"]
+      },
       "electronique": {
-        "title": "Electronics & electrical",
-        "description": "Circuit boards, relays, contactors, sensors, drives, power supplies and electrical/electronic components for industrial machines.",
-        "seoTitle": "Electrical and electronic industrial parts Algeria",
-        "seoDescription": "Circuit boards, relays, contactors, sensors, drives, power supplies and electrical/electronic components for industrial machines in Algeria.",
-        "examples": ["Circuit boards", "Relays", "Contactors", "Sensors", "Drives", "Power supplies", "Electrical components", "Electronic components"]
+        "title": "Electronic parts",
+        "description": "Circuit boards, sensors, control boards, modules and electronic components for industrial machines.",
+        "seoTitle": "Industrial electronic parts Algeria",
+        "seoDescription": "Circuit boards, sensors, control boards and electronic components for industrial machines in Algeria.",
+        "examples": ["Circuit boards", "Sensors", "Control boards", "Electronic modules", "Electronic components"]
+      },
+      "hydraulique": {
+        "title": "Hydraulic parts",
+        "description": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components.",
+        "seoTitle": "Industrial hydraulic parts Algeria",
+        "seoDescription": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components for industrial machines in Algeria.",
+        "examples": ["Hydraulic pumps", "Cylinders", "Valves", "Solenoid valves", "Hoses", "Fittings", "Hydraulic components"]
+      },
+      "mecanique": {
+        "title": "Mechanical parts",
+        "description": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts.",
+        "seoTitle": "Industrial mechanical parts Algeria",
+        "seoDescription": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts available in Algeria.",
+        "examples": ["Bearings", "Belts", "Gears", "Sprockets", "Shafts", "Couplings", "Industrial mechanical parts"]
+      },
+      "automatisme": {
+        "title": "Industrial automation",
+        "description": "Position sensors, detectors, actuators, control buttons and automation components for automated production lines.",
+        "seoTitle": "Industrial automation parts Algeria",
+        "seoDescription": "Position sensors, detectors, actuators and industrial automation components for machines and production lines in Algeria.",
+        "examples": ["Position sensors", "Detectors", "Actuators", "Control buttons", "Automation components"]
+      },
+      "plc-hmi": {
+        "title": "PLC / HMI",
+        "description": "Programmable logic controllers (PLC), control screens and panels (HMI) for driving and monitoring industrial machines.",
+        "seoTitle": "PLC HMI Algeria — industrial controllers and panels",
+        "seoDescription": "Programmable logic controllers (PLC) and control screens (HMI) for industrial machines, new or used, available in Algeria.",
+        "examples": ["Programmable controllers", "HMI screens", "Control panels", "I/O modules"]
+      },
+      "variateurs": {
+        "title": "Drives",
+        "description": "Frequency and speed drives for industrial electric motors, suited to machine retrofit and maintenance.",
+        "seoTitle": "Industrial drive Algeria",
+        "seoDescription": "Frequency and speed drives for industrial motors, new or used, available in Algeria.",
+        "examples": ["Frequency drives", "Speed drives", "Drive accessories"]
+      },
+      "servo-moteurs": {
+        "title": "Servo motors",
+        "description": "Servo motors, drivers and encoders for industrial machines requiring precise positioning and advanced automation.",
+        "seoTitle": "Industrial servo motor Algeria",
+        "seoDescription": "Servo motors, drivers and encoders for industrial machines in Algeria, new or used.",
+        "examples": ["Servo motors", "Servo drivers", "Encoders"]
       },
       "moules": {
         "title": "Molds",
@@ -321,20 +394,6 @@
         "seoTitle": "Plastic injection molds Algeria",
         "seoDescription": "Plastic injection molds, industrial molds and mold parts/accessories available in Algeria.",
         "examples": ["Plastic injection molds", "Industrial molds", "Mold parts and accessories"]
-      },
-      "hydraulique": {
-        "title": "Hydraulics",
-        "description": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components.",
-        "seoTitle": "Industrial hydraulic parts Algeria",
-        "seoDescription": "Hydraulic pumps, cylinders, valves, solenoid valves, hoses, fittings and hydraulic components for industrial machines in Algeria.",
-        "examples": ["Hydraulic pumps", "Cylinders", "Valves", "Solenoid valves", "Hoses", "Fittings", "Hydraulic components"]
-      },
-      "mecanique": {
-        "title": "Mechanical",
-        "description": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts.",
-        "seoTitle": "Industrial mechanical parts Algeria",
-        "seoDescription": "Bearings, belts, gears, sprockets, shafts, couplings and industrial mechanical parts available in Algeria.",
-        "examples": ["Bearings", "Belts", "Gears", "Sprockets", "Shafts", "Couplings", "Industrial mechanical parts"]
       }
     }
   },
@@ -353,7 +412,7 @@
     "defectsTitle": "Points of attention / possible defects",
     "accessoriesTitle": "Included accessories",
     "interestedTitle": "Interested in this machine?",
-    "interestedSubtitle": "Leave us your details: Jimi puts you in touch with the seller, in full confidentiality.",
+    "interestedSubtitle": "Leave us your details: JIMI puts you in touch with the seller, in full confidentiality.",
     "interestDefaultMessage": "Hello, I'm interested in the machine {machine}. I'd like more information.",
     "interestSuccessTitle": "Your request has been received",
     "interestSuccessMessage": "Thank you. Your request has been received. Our team will contact you shortly.",
@@ -379,8 +438,8 @@
     }
   },
   "buyPage": {
-    "seoTitle": "Buy industrial machines Algeria | Jimi Renovation & Installation",
-    "seoDescription": "Buy industrial plastic injection machines in Algeria: describe your need, Jimi Renovation & Installation searches its network for the matching machine.",
+    "seoTitle": "Buy industrial machines Algeria | JIMI Industrie",
+    "seoDescription": "Buy industrial plastic injection machines in Algeria: describe your need, JIMI Industrie searches its network for the matching machine.",
     "title": "I'm looking for a machine",
     "subtitle": "Describe your need precisely: we actively search our network for a matching machine.",
     "successTitle": "Your request has been sent",
@@ -392,7 +451,7 @@
   },
   "sellPage": {
     "title": "Want to sell your machine?",
-    "intro": "Jimi reviews your machine and handles putting it in front of interested buyers. Your contact details are never shown publicly — Jimi acts as the go-between with interested buyers.",
+    "intro": "JIMI reviews your machine and handles putting it in front of interested buyers. Your contact details are never shown publicly — JIMI acts as the go-between with interested buyers.",
     "privacyNote": "Your contact details stay private and are only visible to our team — they never appear on the public listing.",
     "successTitle": "Your machine has been submitted",
     "successMessage": "Thank you, your listing has been sent to our team for review. Once approved, it will be published on the site — we'll reach out if we need more details.",
@@ -406,8 +465,8 @@
     "eyebrow": "Sell equipment",
     "pageTitle": "Sell equipment",
     "pageSubtitle": "Industrial machine, spare part, or mold: tell us what you'd like to sell, we'll get back to you quickly.",
-    "seoTitle": "Sell industrial equipment Algeria | Jimi Renovation & Installation",
-    "seoDescription": "Sell an industrial machine, a spare part, or a mold in Algeria: describe your equipment, Jimi Renovation & Installation gets back to you quickly.",
+    "seoTitle": "Sell industrial equipment Algeria | JIMI Industrie",
+    "seoDescription": "Sell an industrial machine, a spare part, or a mold in Algeria: describe your equipment, JIMI Industrie gets back to you quickly.",
     "typePrompt": "What would you like to sell?",
     "changeType": "Change equipment type",
     "successTitle": "Your submission has been sent",
@@ -442,7 +501,7 @@
     "pageSubtitle": "Your feedback helps us improve and helps other clients trust us.",
     "rating": "Your rating",
     "message": "Your testimonial",
-    "messagePlaceholder": "Describe your experience with Jimi Renovation & Installation...",
+    "messagePlaceholder": "Describe your experience with JIMI Industrie...",
     "moderationNote": "Your testimonial will be published on the site after review by our team.",
     "submit": "Send my review",
     "successTitle": "Thank you for your review!",
@@ -627,18 +686,19 @@
     }
   ],
   "footer": {
-    "description": "Specialist in the renovation, automation and maintenance of plastic injection machines. Buying, selling and brokering industrial machines in Algeria.",
+    "tagline": "Machines • Parts • Molds • Automation",
+    "description": "Buying, selling and brokering industrial machines, parts and equipment. Automation, maintenance and renovation of plastic injection machines in Algeria.",
     "navTitle": "Navigation",
     "servicesTitle": "Services",
     "contactTitle": "Contact",
     "legalTitle": "Information",
     "rights": "All rights reserved.",
-    "madeWith": "Professional website — Jimi Renovation & Installation",
+    "madeWith": "Professional website — JIMI Industrie",
     "privacyLink": "Privacy Policy"
   },
   "privacyPage": {
     "title": "Privacy Policy",
-    "subtitle": "How Jimi Renovation & Installation collects, uses and protects your personal data.",
+    "subtitle": "How JIMI Industrie collects, uses and protects your personal data.",
     "updated": "Last updated: September 2026",
     "sections": [
       {
@@ -745,11 +805,11 @@
     "whatsappAlternative": "You can also write to us directly on"
   },
   "whatsappMessages": {
-    "serviceQuote": "Hello Jimi, I'd like a quote for renovating my injection machine.",
-    "generalContact": "Hello Jimi, I'd like more information about your services.",
-    "buyRequest": "Hello Jimi, I'm looking for an injection machine. I'd like to send you my criteria.",
-    "sellRequest": "Hello Jimi, I'd like to offer an injection machine for sale.",
-    "sellEquipmentRequest": "Hello Jimi, I'd like to offer equipment for sale (machine, part or mold)."
+    "serviceQuote": "Hello JIMI, I'd like a quote for renovating my injection machine.",
+    "generalContact": "Hello JIMI, I'd like more information about your services.",
+    "buyRequest": "Hello JIMI, I'm looking for an injection machine. I'd like to send you my criteria.",
+    "sellRequest": "Hello JIMI, I'd like to offer an injection machine for sale.",
+    "sellEquipmentRequest": "Hello JIMI, I'd like to offer equipment for sale (machine, part or mold)."
   },
   "notFound": {
     "title": "Page not found",

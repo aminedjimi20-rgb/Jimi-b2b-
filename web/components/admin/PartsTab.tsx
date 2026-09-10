@@ -6,10 +6,15 @@ import { PhotoUploader } from "@/components/forms/MediaUploader";
 import { Plus, Trash2, Lock, RefreshCw, EyeOff, Eye, Tag } from "lucide-react";
 
 const CATEGORY_LABELS: Record<PartCategory, string> = {
-  electronique: "Électronique & électrique",
-  moules: "Moules",
+  electrique: "Électrique",
+  electronique: "Électronique",
   hydraulique: "Hydraulique",
   mecanique: "Mécanique",
+  automatisme: "Automatisme",
+  "plc-hmi": "PLC / HMI",
+  variateurs: "Variateurs",
+  "servo-moteurs": "Servo moteurs",
+  moules: "Moules",
 };
 
 const CONDITION_LABELS: Record<PartCondition, string> = {

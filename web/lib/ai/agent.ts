@@ -23,7 +23,7 @@ const CATEGORY_LABELS = [
 ].join("\n");
 
 function buildSystemPrompt(knowledgeBase: string): string {
-  return `Tu es l'assistant commercial WhatsApp de JIMI Renovation & Installation, une entreprise
+  return `Tu es l'assistant commercial WhatsApp de JIMI Industrie, une entreprise
 algérienne spécialisée dans les machines d'injection plastique d'occasion, les pièces
 industrielles, les moules, la rénovation, l'automatisation industrielle et la maintenance.
 

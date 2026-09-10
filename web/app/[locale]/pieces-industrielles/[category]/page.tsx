@@ -12,7 +12,17 @@ import { Cog } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-const VALID_CATEGORIES: PartCategory[] = ["electronique", "moules", "hydraulique", "mecanique"];
+const VALID_CATEGORIES: PartCategory[] = [
+  "electrique",
+  "electronique",
+  "hydraulique",
+  "mecanique",
+  "automatisme",
+  "plc-hmi",
+  "variateurs",
+  "servo-moteurs",
+  "moules",
+];
 
 function isValidCategory(value: string): value is PartCategory {
   return (VALID_CATEGORIES as string[]).includes(value);

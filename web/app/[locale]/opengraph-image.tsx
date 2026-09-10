@@ -38,24 +38,24 @@ export default async function OgImage() {
             J
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: 30, fontWeight: 800 }}>JIMI</span>
+            <span style={{ fontSize: 30, fontWeight: 800 }}>JIMI INDUSTRIE</span>
             <span style={{ fontSize: 16, opacity: 0.7, letterSpacing: 2 }}>
-              RENOVATION &amp; INSTALLATION
+              MACHINES · PIÈCES · MOULES · AUTOMATISATION
             </span>
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 980 }}>
           <div style={{ fontSize: 54, fontWeight: 800, lineHeight: 1.15 }}>
-            Machines d&apos;injection plastique &amp; Automatisation industrielle
+            Machines, pièces et équipements industriels en Algérie
           </div>
           <div style={{ fontSize: 26, opacity: 0.75 }}>
-            Rénovation · Retrofit · Maintenance · Achat &amp; vente de machines — Algérie
+            Vente · Achat · Maintenance · Rénovation · Automatisation — Algérie
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 12 }}>
-          {["Rénovation", "PLC / HMI", "Servo & Hydraulique", "Intermédiation"].map((tag) => (
+          {["Machines", "Pièces industrielles", "Moules", "Automatisation"].map((tag) => (
             <div
               key={tag}
               style={{

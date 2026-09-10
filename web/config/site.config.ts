@@ -9,12 +9,12 @@
  */
 
 export const siteConfig = {
-  companyName: "Jimi Renovation & Installation",
-  companyShortName: "Jimi",
+  companyName: "JIMI Industrie",
+  companyShortName: "JIMI",
   tagline: {
-    fr: "Machines d'injection plastique & solutions d'automatisation industrielle",
-    ar: "آلات حقن البلاستيك وحلول الأتمتة الصناعية",
-    en: "Plastic injection machines & industrial automation solutions",
+    fr: "Machines • Pièces • Moules • Automatisation",
+    ar: "آلات • قطع غيار • قوالب • أتمتة",
+    en: "Machines • Parts • Molds • Automation",
   },
 
   // --- Coordonnées ---

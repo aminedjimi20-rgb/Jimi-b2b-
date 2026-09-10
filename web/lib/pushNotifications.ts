@@ -22,19 +22,19 @@ const TEXT: Record<Locale, { newProductTitle: string; newProduct: (name: string)
   fr: {
     newProductTitle: "🆕 Nouveau chez JIMI",
     newProduct: (name) => `${name} vient d'être ajouté(e) — jetez un œil !`,
-    reminderTitle: "JIMI Renovation & Installation",
+    reminderTitle: "JIMI Industrie",
     reminderBody: "De nouveaux produits vous attendent peut-être — repassez faire un tour !",
   },
   ar: {
     newProductTitle: "🆕 جديد عند JIMI",
     newProduct: (name) => `${name} تزادت للتو — شوفوها!`,
-    reminderTitle: "JIMI Renovation & Installation",
+    reminderTitle: "JIMI Industrie",
     reminderBody: "ربما كاين منتجات جديدة تستناكم — عاودو زورونا!",
   },
   en: {
     newProductTitle: "🆕 New at JIMI",
     newProduct: (name) => `${name} was just added — take a look!`,
-    reminderTitle: "JIMI Renovation & Installation",
+    reminderTitle: "JIMI Industrie",
     reminderBody: "New items may be waiting for you — come take a look!",
   },
 };

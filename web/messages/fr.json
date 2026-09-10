@@ -1,7 +1,7 @@
 {
   "meta": {
-    "defaultTitle": "Jimi Renovation & Installation | Machines d'injection plastique & Automatisation industrielle",
-    "defaultDescription": "Spécialiste de la rénovation, du retrofit et de la maintenance des machines d'injection plastique en Algérie. Automatisation industrielle, PLC/HMI, vente et achat de machines d'occasion."
+    "defaultTitle": "JIMI Industrie | Machines, pièces et équipements industriels en Algérie",
+    "defaultDescription": "JIMI Industrie accompagne l'achat, la vente, la maintenance et l'automatisation de machines industrielles et de pièces détachées en Algérie : machines d'injection plastique, moules, pièces électriques, hydrauliques et mécaniques, PLC/HMI et variateurs."
   },
   "nav": {
     "home": "Accueil",
@@ -14,6 +14,9 @@
     "services": "Services",
     "pieces": "Pièces industrielles",
     "piecesShort": "Pièces",
+    "moulesShort": "Moules",
+    "acheter": "Acheter",
+    "vendre": "Vendre",
     "realisations": "Réalisations",
     "blog": "Conseils & Actualités",
     "blogShort": "Conseils",
@@ -24,10 +27,14 @@
       "buy": "Achat de machines"
     },
     "piecesMenu": {
-      "electronique": "Électronique & électricité",
-      "moules": "Moules",
-      "hydraulique": "Hydraulique",
-      "mecanique": "Mécanique",
+      "electrique": "Pièces électriques",
+      "electronique": "Pièces électroniques",
+      "hydraulique": "Pièces hydrauliques",
+      "mecanique": "Pièces mécaniques",
+      "automatisme": "Automatisme",
+      "plc-hmi": "PLC / HMI",
+      "variateurs": "Variateurs",
+      "servo-moteurs": "Servo moteurs",
       "sell": "Vendre une pièce"
     },
     "servicesMenu": {
@@ -50,6 +57,9 @@
     "proposeMachine": "Proposer ma machine",
     "sellEquipment": "Vendre un équipement",
     "searchPart": "Chercher une pièce",
+    "acheter": "Acheter",
+    "vendre": "Vendre",
+    "requestEquipment": "Demander un équipement",
     "sendMyRequest": "Envoyer ma demande",
     "viewAll": "Voir tout",
     "readMore": "Lire l'article",
@@ -60,9 +70,9 @@
     "callNow": "Appeler maintenant"
   },
   "hero": {
-    "badge": "Automaticien industriel — Injection plastique",
-    "title": "Machines d'injection plastique & Solutions d'automatisation industrielle",
-    "subtitle": "Rénovation, modernisation, dépannage et mise en relation pour l'achat et la vente de machines d'injection en Algérie.",
+    "badge": "Plateforme industrielle — Machines, pièces & automatisation",
+    "title": "Machines, pièces et équipements industriels en Algérie",
+    "subtitle": "Vente, achat, maintenance, rénovation et automatisation de machines et équipements industriels.",
     "stat1Value": "PLC / HMI",
     "stat1Label": "Retrofit & mise en service",
     "stat2Value": "100%",
@@ -89,9 +99,23 @@
     }
   },
   "home": {
+    "categories": {
+      "eyebrow": "Nos domaines",
+      "title": "Machines, pièces et services industriels",
+      "subtitle": "JIMI Industrie vend, achète et met en relation autour du matériel industriel — et propose des services techniques associés.",
+      "viewMore": "Voir plus",
+      "machines": { "label": "Machines industrielles" },
+      "pieces": { "label": "Pièces industrielles" },
+      "moules": { "label": "Moules" },
+      "electrique": { "label": "Électricité & électronique" },
+      "hydraulique": { "label": "Hydraulique" },
+      "automatisation": { "label": "Automatisation" },
+      "maintenance": { "label": "Maintenance" },
+      "retrofit": { "label": "Retrofit" }
+    },
     "featuredMachines": {
       "title": "Machines à la une",
-      "subtitle": "Une sélection de machines d'injection actuellement suivies par Jimi Renovation & Installation.",
+      "subtitle": "Une sélection de machines d'injection actuellement suivies par JIMI Industrie.",
       "viewAll": "Voir toutes les machines",
       "emptyTitle": "Aucune machine en ligne pour le moment",
       "emptySubtitle": "Notre sélection est en cours de constitution. Décrivez-nous votre besoin : nous recherchons activement dans notre réseau."
@@ -108,7 +132,7 @@
       "subtitle": "Une expertise technique complète autour de la machine d'injection plastique, de sa rénovation à sa remise en production."
     },
     "whyUs": {
-      "title": "Pourquoi choisir Jimi ?",
+      "title": "Pourquoi choisir JIMI Industrie ?",
       "subtitle": "Un interlocuteur technique unique, qui connaît réellement la machine — pas seulement le marché.",
       "items": [
         {
@@ -173,7 +197,7 @@
           "Inspection technique si nécessaire"
         ]
       },
-      "disclaimer": "Jimi Renovation & Installation agit en tant qu'intermédiaire technique. Chaque transaction reste sous la responsabilité directe de l'acheteur et du vendeur."
+      "disclaimer": "JIMI Industrie agit en tant qu'intermédiaire technique. Chaque transaction reste sous la responsabilité directe de l'acheteur et du vendeur."
     },
     "beforeAfter": {
       "title": "Avant / Après",
@@ -195,7 +219,7 @@
     },
     "realisations": {
       "title": "Nos réalisations",
-      "subtitle": "Un aperçu de projets de rénovation et de mise en service accompagnés par Jimi.",
+      "subtitle": "Un aperçu de projets de rénovation et de mise en service accompagnés par JIMI.",
       "viewAll": "Voir toutes les réalisations",
       "emptyTitle": "Nos réalisations arrivent bientôt",
       "emptySubtitle": "Cet espace présentera nos projets de rénovation, dépannage et mise en service au fur et à mesure. Pour un aperçu concret de notre travail, contactez-nous directement."
@@ -255,9 +279,9 @@
   },
   "machines": {
     "pageTitle": "Machines d'injection disponibles",
-    "pageSubtitle": "Machines suivies par Jimi Renovation & Installation, avec vérification technique de premier niveau.",
-    "seoTitle": "Vente de machines industrielles Algérie | Jimi Renovation & Installation",
-    "seoDescription": "Vente de machines d'injection plastique industrielles en Algérie : catalogue vérifié, prix ou prix sur demande, intermédiation sécurisée par Jimi Renovation & Installation.",
+    "pageSubtitle": "Machines suivies par JIMI Industrie, avec vérification technique de premier niveau.",
+    "seoTitle": "Vente de machines industrielles Algérie | JIMI Industrie",
+    "seoDescription": "Vente de machines d'injection plastique industrielles en Algérie : catalogue vérifié, prix ou prix sur demande, intermédiation sécurisée par JIMI Industrie.",
     "emptyCatalog": {
       "title": "Aucune machine disponible actuellement",
       "subtitle": "Notre catalogue est en cours de constitution. Décrivez-nous votre besoin et nous vous recontactons avec des propositions correspondantes."
@@ -289,15 +313,15 @@
   "pieces": {
     "eyebrow": "Pièces industrielles",
     "pageTitle": "Pièces industrielles",
-    "pageSubtitle": "Un large catalogue de pièces détachées pour machines industrielles : électronique, moules, hydraulique et mécanique — neuves, d'occasion ou rénovées.",
-    "seoTitle": "Pièces industrielles Algérie | Électronique, moules, hydraulique, mécanique",
-    "seoDescription": "Catalogue de pièces industrielles en Algérie : pièces électroniques et électriques, moules d'injection plastique, pièces hydrauliques et mécaniques. Neuves, d'occasion ou rénovées.",
+    "pageSubtitle": "Un large catalogue de pièces détachées pour machines industrielles : électriques, électroniques, hydrauliques, mécaniques, automatisme, PLC/HMI, variateurs, servo moteurs et moules — neuves, d'occasion ou rénovées.",
+    "seoTitle": "Pièces industrielles Algérie | Électrique, électronique, hydraulique, mécanique",
+    "seoDescription": "Catalogue de pièces industrielles en Algérie : pièces électriques, électroniques, hydrauliques, mécaniques, automatisme, PLC/HMI, variateurs et servo moteurs. Neuves, d'occasion ou rénovées.",
     "viewCategory": "Voir la catégorie",
     "viewGrid": "Grille",
     "viewList": "Liste",
     "reference": "Réf.",
     "requestPrice": "Demander le prix",
-    "whatsappRequest": "Bonjour Jimi, je souhaite avoir le prix de la pièce \"{name}\" (réf. {reference}).",
+    "whatsappRequest": "Bonjour JIMI, je souhaite avoir le prix de la pièce \"{name}\" (réf. {reference}).",
     "condition": {
       "neuf": "Neuve",
       "occasion": "Occasion",
@@ -308,12 +332,61 @@
       "subtitle": "Notre catalogue de pièces est en cours de constitution. Décrivez-nous la référence recherchée et nous vous recontactons rapidement."
     },
     "categories": {
+      "electrique": {
+        "title": "Pièces électriques",
+        "description": "Contacteurs, relais, disjoncteurs, sectionneurs, câblage industriel, alimentations et protections électriques pour machines et installations industrielles.",
+        "seoTitle": "Pièces électriques industrielles Algérie",
+        "seoDescription": "Contacteurs, relais, disjoncteurs, sectionneurs, câblage et alimentations électriques pour machines industrielles en Algérie.",
+        "examples": ["Contacteurs", "Relais électriques", "Disjoncteurs", "Sectionneurs", "Câblage industriel", "Alimentations", "Protections électriques"]
+      },
       "electronique": {
-        "title": "Électronique & électricité",
-        "description": "Cartes électroniques, relais, contacteurs, capteurs, variateurs, alimentations et composants électriques/électroniques pour machines industrielles.",
-        "seoTitle": "Pièces électriques et électroniques industrielles Algérie",
-        "seoDescription": "Cartes électroniques, relais, contacteurs, capteurs, variateurs, alimentations et composants électriques/électroniques pour machines industrielles en Algérie.",
-        "examples": ["Cartes électroniques", "Relais", "Contacteurs", "Capteurs", "Variateurs", "Alimentations", "Composants électriques", "Composants électroniques"]
+        "title": "Pièces électroniques",
+        "description": "Cartes électroniques, capteurs, cartes de commande, modules et composants électroniques pour machines industrielles.",
+        "seoTitle": "Pièces électroniques industrielles Algérie",
+        "seoDescription": "Cartes électroniques, capteurs, cartes de commande et composants électroniques pour machines industrielles en Algérie.",
+        "examples": ["Cartes électroniques", "Capteurs", "Cartes de commande", "Modules électroniques", "Composants électroniques"]
+      },
+      "hydraulique": {
+        "title": "Pièces hydrauliques",
+        "description": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques.",
+        "seoTitle": "Pièces hydrauliques industrielles Algérie",
+        "seoDescription": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques pour machines industrielles en Algérie.",
+        "examples": ["Pompes hydrauliques", "Vérins", "Distributeurs", "Électrovannes", "Flexibles", "Raccords", "Composants hydrauliques"]
+      },
+      "mecanique": {
+        "title": "Pièces mécaniques",
+        "description": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles.",
+        "seoTitle": "Pièces mécaniques industrielles Algérie",
+        "seoDescription": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles disponibles en Algérie.",
+        "examples": ["Roulements", "Courroies", "Engrenages", "Pignons", "Arbres", "Accouplements", "Pièces mécaniques industrielles"]
+      },
+      "automatisme": {
+        "title": "Automatisme industriel",
+        "description": "Capteurs de position, détecteurs, actionneurs, boutons et éléments de commande pour lignes de production automatisées.",
+        "seoTitle": "Pièces d'automatisme industriel Algérie",
+        "seoDescription": "Capteurs de position, détecteurs, actionneurs et composants d'automatisme industriel pour machines et lignes de production en Algérie.",
+        "examples": ["Capteurs de position", "Détecteurs", "Actionneurs", "Boutons de commande", "Éléments d'automatisme"]
+      },
+      "plc-hmi": {
+        "title": "PLC / HMI",
+        "description": "Automates programmables (PLC), écrans et pupitres de commande (HMI) pour le pilotage et la supervision de machines industrielles.",
+        "seoTitle": "PLC HMI Algérie — automates et pupitres industriels",
+        "seoDescription": "Automates programmables (PLC) et écrans de commande (HMI) pour machines industrielles, neufs ou d'occasion, disponibles en Algérie.",
+        "examples": ["Automates programmables", "Écrans HMI", "Pupitres de commande", "Modules d'entrées/sorties"]
+      },
+      "variateurs": {
+        "title": "Variateurs",
+        "description": "Variateurs de fréquence et de vitesse pour moteurs électriques industriels, adaptés à la rénovation et à la maintenance de machines.",
+        "seoTitle": "Variateur industriel Algérie",
+        "seoDescription": "Variateurs de fréquence et de vitesse pour moteurs industriels, neufs ou d'occasion, disponibles en Algérie.",
+        "examples": ["Variateurs de fréquence", "Variateurs de vitesse", "Accessoires de variateurs"]
+      },
+      "servo-moteurs": {
+        "title": "Servo moteurs",
+        "description": "Servomoteurs, drivers et encodeurs pour machines industrielles nécessitant un positionnement précis et une automatisation avancée.",
+        "seoTitle": "Servo moteur industriel Algérie",
+        "seoDescription": "Servomoteurs, drivers et encodeurs pour machines industrielles en Algérie, neufs ou d'occasion.",
+        "examples": ["Servomoteurs", "Drivers servo", "Encodeurs"]
       },
       "moules": {
         "title": "Moules",
@@ -321,20 +394,6 @@
         "seoTitle": "Moules injection plastique Algérie",
         "seoDescription": "Moules d'injection plastique, moules industriels et pièces/accessoires de moules disponibles en Algérie.",
         "examples": ["Moules d'injection plastique", "Moules industriels", "Pièces et accessoires de moules"]
-      },
-      "hydraulique": {
-        "title": "Hydraulique",
-        "description": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques.",
-        "seoTitle": "Pièces hydrauliques industrielles Algérie",
-        "seoDescription": "Pompes hydrauliques, vérins, distributeurs, électrovannes, flexibles, raccords et composants hydrauliques pour machines industrielles en Algérie.",
-        "examples": ["Pompes hydrauliques", "Vérins", "Distributeurs", "Électrovannes", "Flexibles", "Raccords", "Composants hydrauliques"]
-      },
-      "mecanique": {
-        "title": "Mécanique",
-        "description": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles.",
-        "seoTitle": "Pièces mécaniques industrielles Algérie",
-        "seoDescription": "Roulements, courroies, engrenages, pignons, arbres, accouplements et pièces mécaniques industrielles disponibles en Algérie.",
-        "examples": ["Roulements", "Courroies", "Engrenages", "Pignons", "Arbres", "Accouplements", "Pièces mécaniques industrielles"]
       }
     }
   },
@@ -353,7 +412,7 @@
     "defectsTitle": "Points d'attention / défauts éventuels",
     "accessoriesTitle": "Accessoires inclus",
     "interestedTitle": "Intéressé par cette machine ?",
-    "interestedSubtitle": "Laissez-nous vos coordonnées : Jimi vous met en relation avec le vendeur en toute confidentialité.",
+    "interestedSubtitle": "Laissez-nous vos coordonnées : JIMI vous met en relation avec le vendeur en toute confidentialité.",
     "interestDefaultMessage": "Bonjour, je suis intéressé(e) par la machine {machine}. Je souhaite avoir plus d'informations.",
     "interestSuccessTitle": "Votre demande a bien été reçue",
     "interestSuccessMessage": "Merci. Votre demande a bien été reçue. Notre équipe vous contactera prochainement.",
@@ -381,8 +440,8 @@
   "buyPage": {
     "title": "Je cherche une machine",
     "subtitle": "Décrivez précisément votre besoin : nous recherchons activement la machine correspondante dans notre réseau.",
-    "seoTitle": "Achat de machines industrielles Algérie | Jimi Renovation & Installation",
-    "seoDescription": "Achat de machines d'injection plastique industrielles en Algérie : décrivez votre besoin, Jimi Renovation & Installation recherche la machine correspondante dans son réseau.",
+    "seoTitle": "Achat de machines industrielles Algérie | JIMI Industrie",
+    "seoDescription": "Achat de machines d'injection plastique industrielles en Algérie : décrivez votre besoin, JIMI Industrie recherche la machine correspondante dans son réseau.",
     "successTitle": "Votre demande a bien été envoyée",
     "successMessage": "Merci, votre recherche a été enregistrée. Nous revenons vers vous rapidement avec des propositions correspondant à votre besoin.",
     "sections": {
@@ -392,7 +451,7 @@
   },
   "sellPage": {
     "title": "Vous souhaitez vendre votre machine ?",
-    "intro": "Jimi analyse votre machine et vous accompagne dans sa mise en relation avec des acheteurs potentiels. Vos coordonnées ne sont jamais affichées publiquement : c'est Jimi qui fait l'intermédiaire avec les acheteurs intéressés.",
+    "intro": "JIMI analyse votre machine et vous accompagne dans sa mise en relation avec des acheteurs potentiels. Vos coordonnées ne sont jamais affichées publiquement : c'est JIMI qui fait l'intermédiaire avec les acheteurs intéressés.",
     "privacyNote": "Vos coordonnées restent privées et ne sont visibles que par notre équipe — elles n'apparaissent jamais sur l'annonce publique.",
     "successTitle": "Votre machine a bien été soumise",
     "successMessage": "Merci, votre annonce a été transmise à notre équipe pour vérification. Une fois validée, elle sera publiée sur le site — nous vous recontactons si besoin de précisions.",
@@ -406,8 +465,8 @@
     "eyebrow": "Vendre un équipement",
     "pageTitle": "Vendre un équipement",
     "pageSubtitle": "Machine industrielle, pièce détachée ou moule : dites-nous ce que vous souhaitez vendre, nous vous recontactons rapidement.",
-    "seoTitle": "Vendre un équipement industriel Algérie | Jimi Renovation & Installation",
-    "seoDescription": "Vendez une machine industrielle, une pièce détachée ou un moule en Algérie : décrivez votre équipement, Jimi Renovation & Installation vous recontacte rapidement.",
+    "seoTitle": "Vendre un équipement industriel Algérie | JIMI Industrie",
+    "seoDescription": "Vendez une machine industrielle, une pièce détachée ou un moule en Algérie : décrivez votre équipement, JIMI Industrie vous recontacte rapidement.",
     "typePrompt": "Que souhaitez-vous vendre ?",
     "changeType": "Changer le type d'équipement",
     "successTitle": "Votre proposition a bien été envoyée",
@@ -442,7 +501,7 @@
     "pageSubtitle": "Votre retour nous aide à nous améliorer et aide d'autres clients à nous faire confiance.",
     "rating": "Votre note",
     "message": "Votre témoignage",
-    "messagePlaceholder": "Décrivez votre expérience avec Jimi Renovation & Installation...",
+    "messagePlaceholder": "Décrivez votre expérience avec JIMI Industrie...",
     "moderationNote": "Votre témoignage sera publié sur le site après vérification par notre équipe.",
     "submit": "Envoyer mon avis",
     "successTitle": "Merci pour votre avis !",
@@ -627,18 +686,19 @@
     }
   ],
   "footer": {
-    "description": "Spécialiste de la rénovation, de l'automatisation et de la maintenance des machines d'injection plastique. Achat, vente et mise en relation de machines industrielles en Algérie.",
+    "tagline": "Machines • Pièces • Moules • Automatisation",
+    "description": "Vente, achat et mise en relation de machines, pièces et équipements industriels. Automatisation, maintenance et rénovation de machines d'injection plastique en Algérie.",
     "navTitle": "Navigation",
     "servicesTitle": "Services",
     "contactTitle": "Contact",
     "legalTitle": "Informations",
     "rights": "Tous droits réservés.",
-    "madeWith": "Site professionnel — Jimi Renovation & Installation",
+    "madeWith": "Site professionnel — JIMI Industrie",
     "privacyLink": "Politique de confidentialité"
   },
   "privacyPage": {
     "title": "Politique de confidentialité",
-    "subtitle": "Comment Jimi Renovation & Installation collecte, utilise et protège vos données personnelles.",
+    "subtitle": "Comment JIMI Industrie collecte, utilise et protège vos données personnelles.",
     "updated": "Dernière mise à jour : septembre 2026",
     "sections": [
       {
@@ -745,11 +805,11 @@
     "whatsappAlternative": "Vous pouvez aussi nous écrire directement sur"
   },
   "whatsappMessages": {
-    "serviceQuote": "Bonjour Jimi, je souhaite avoir un devis pour la rénovation de ma machine d'injection.",
-    "generalContact": "Bonjour Jimi, j'aimerais avoir plus d'informations sur vos services.",
-    "buyRequest": "Bonjour Jimi, je recherche une machine d'injection. Je souhaite vous transmettre mes critères.",
-    "sellRequest": "Bonjour Jimi, je souhaite vous proposer une machine d'injection à la vente.",
-    "sellEquipmentRequest": "Bonjour Jimi, je souhaite vous proposer à la vente un équipement (machine, pièce ou moule)."
+    "serviceQuote": "Bonjour JIMI, je souhaite avoir un devis pour la rénovation de ma machine d'injection.",
+    "generalContact": "Bonjour JIMI, j'aimerais avoir plus d'informations sur vos services.",
+    "buyRequest": "Bonjour JIMI, je recherche une machine d'injection. Je souhaite vous transmettre mes critères.",
+    "sellRequest": "Bonjour JIMI, je souhaite vous proposer une machine d'injection à la vente.",
+    "sellEquipmentRequest": "Bonjour JIMI, je souhaite vous proposer à la vente un équipement (machine, pièce ou moule)."
   },
   "notFound": {
     "title": "Page introuvable",

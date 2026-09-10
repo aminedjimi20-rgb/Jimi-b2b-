@@ -39,10 +39,14 @@ export function Navbar() {
   ];
 
   const piecesMenu = [
+    { href: "/pieces-industrielles/electrique", label: t("piecesMenu.electrique") },
     { href: "/pieces-industrielles/electronique", label: t("piecesMenu.electronique") },
-    { href: "/pieces-industrielles/moules", label: t("piecesMenu.moules") },
     { href: "/pieces-industrielles/hydraulique", label: t("piecesMenu.hydraulique") },
     { href: "/pieces-industrielles/mecanique", label: t("piecesMenu.mecanique") },
+    { href: "/pieces-industrielles/automatisme", label: t("piecesMenu.automatisme") },
+    { href: "/pieces-industrielles/plc-hmi", label: t("piecesMenu.plc-hmi") },
+    { href: "/pieces-industrielles/variateurs", label: t("piecesMenu.variateurs") },
+    { href: "/pieces-industrielles/servo-moteurs", label: t("piecesMenu.servo-moteurs") },
     { href: "/vendre-equipement?type=piece", label: t("piecesMenu.sell") },
   ];
 
@@ -50,6 +54,13 @@ export function Navbar() {
     { href: "/services/renovation-machine-injection", label: t("servicesMenu.renovation") },
     { href: "/services/automatisation-industrielle", label: t("servicesMenu.automation") },
     { href: "/services/maintenance-depannage", label: t("servicesMenu.maintenance") },
+  ];
+
+  const moulesLink = { href: "/pieces-industrielles/moules", label: t("moulesShort") };
+
+  const buySellLinks = [
+    { href: "/acheter-machine", label: t("acheter") },
+    { href: "/vendre-equipement", label: t("vendre") },
   ];
 
   const trailingLinks = [
@@ -74,10 +85,10 @@ export function Navbar() {
           </span>
           <span className="flex flex-col leading-tight">
             <span className="text-lg font-extrabold tracking-tight text-[var(--color-ink)]">
-              JIMI
+              JIMI <span className="text-[var(--color-accent)]">INDUSTRIE</span>
             </span>
             <span className="hidden text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--color-text-muted)] sm:block">
-              Renovation & Installation
+              Machines · Pièces · Moules · Automatisation
             </span>
           </span>
         </Link>
@@ -108,6 +119,13 @@ export function Navbar() {
             setOpenDropdown={setOpenDropdown}
           />
 
+          <Link
+            href={moulesLink.href}
+            className="rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
+          >
+            {moulesLink.label}
+          </Link>
+
           <DesktopDropdown
             triggerHref="/services"
             triggerLabel={t("services")}
@@ -117,7 +135,7 @@ export function Navbar() {
             setOpenDropdown={setOpenDropdown}
           />
 
-          {trailingLinks.map((link) => (
+          {[...buySellLinks, ...trailingLinks].map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -174,6 +192,13 @@ export function Navbar() {
               setOpenSection={setMobileOpenSection}
             />
 
+            <Link
+              href={moulesLink.href}
+              className="rounded-md px-3 py-3 text-base font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+            >
+              {moulesLink.label}
+            </Link>
+
             <MobileAccordionSection
               sectionKey="services"
               label={t("services")}
@@ -182,7 +207,7 @@ export function Navbar() {
               setOpenSection={setMobileOpenSection}
             />
 
-            {trailingLinks.map((link) => (
+            {[...buySellLinks, ...trailingLinks].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

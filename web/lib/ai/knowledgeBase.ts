@@ -9,10 +9,15 @@ const MAX_MACHINES = 40;
 const MAX_PARTS_PER_CATEGORY = 20;
 
 const PART_CATEGORY_LABELS: Record<PartCategory, string> = {
+  electrique: "Pièces électriques",
   electronique: "Pièces électroniques",
-  moules: "Moules",
   hydraulique: "Pièces hydrauliques",
   mecanique: "Pièces mécaniques",
+  automatisme: "Automatisme industriel",
+  "plc-hmi": "PLC / HMI",
+  variateurs: "Variateurs",
+  "servo-moteurs": "Servo moteurs",
+  moules: "Moules",
 };
 
 function formatPrice(price: number | null, priceOnRequest: boolean): string {

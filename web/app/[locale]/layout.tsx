@@ -102,7 +102,7 @@ export default async function LocaleLayout({
             name: siteConfig.companyName,
             url: siteConfig.seo.siteUrl,
             description:
-              "Rénovation, automatisation industrielle, maintenance et intermédiation pour les machines d'injection plastique en Algérie.",
+              "Machines, pièces industrielles, moules et automatisation : vente, achat, maintenance et rénovation d'équipements industriels en Algérie.",
             areaServed: "DZ",
           }}
         />

@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/sections/Hero";
 import { QuickCta } from "@/components/sections/QuickCta";
+import { MainCategories } from "@/components/sections/MainCategories";
 import { FeaturedMachines } from "@/components/sections/FeaturedMachines";
 import { NewArrivals } from "@/components/sections/NewArrivals";
 import { ServicesOverview } from "@/components/sections/ServicesOverview";
@@ -28,6 +29,7 @@ export default async function HomePage({
     <>
       <Hero />
       <QuickCta />
+      <MainCategories />
       <FeaturedMachines />
       <NewArrivals />
       <ServicesOverview />

@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Jimi Renovation & Installation",
+  title: "JIMI Industrie",
   description:
     "Machines d'injection plastique & solutions d'automatisation industrielle en Algérie.",
 };

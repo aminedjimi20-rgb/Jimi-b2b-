@@ -6,7 +6,17 @@ import { sanitizeUrl } from "@/lib/sanitize";
 import { notifyNewProduct } from "@/lib/pushNotifications";
 import type { PartCategory, PartCondition, PartStatus } from "@/lib/types";
 
-const VALID_CATEGORIES: PartCategory[] = ["electronique", "moules", "hydraulique", "mecanique"];
+const VALID_CATEGORIES: PartCategory[] = [
+  "electrique",
+  "electronique",
+  "hydraulique",
+  "mecanique",
+  "automatisme",
+  "plc-hmi",
+  "variateurs",
+  "servo-moteurs",
+  "moules",
+];
 const VALID_CONDITIONS: PartCondition[] = ["neuf", "occasion", "renove"];
 
 export async function GET() {

@@ -61,7 +61,19 @@ export interface Machine {
 // Pièces industrielles : catalogue admin-only, séparé des machines (pas de
 // workflow de soumission vendeur ni de modération — Jimi ajoute directement
 // les références depuis l'admin, comme pour "Ajouter une machine").
-export type PartCategory = "electronique" | "moules" | "hydraulique" | "mecanique";
+// "moules" reste dans cette liste (mêmes stockage/CRUD que les autres
+// catégories) mais a son propre lien de menu top-level ("Moules"), séparé
+// du sous-menu "Pièces" — voir components/layout/Navbar.tsx.
+export type PartCategory =
+  | "electrique"
+  | "electronique"
+  | "hydraulique"
+  | "mecanique"
+  | "automatisme"
+  | "plc-hmi"
+  | "variateurs"
+  | "servo-moteurs"
+  | "moules";
 export type PartCondition = "neuf" | "occasion" | "renove";
 export type PartStatus = "draft" | "published";
 

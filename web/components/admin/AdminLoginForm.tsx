@@ -38,7 +38,7 @@ export function AdminLoginForm() {
             <Factory size={22} />
           </span>
           <h1 className="mt-4 text-lg font-bold text-[var(--color-ink)]">
-            Administration Jimi
+            Administration JIMI Industrie
           </h1>
           <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             Connectez-vous pour accéder au tableau de bord.

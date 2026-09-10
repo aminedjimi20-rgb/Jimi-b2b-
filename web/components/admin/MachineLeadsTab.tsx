@@ -239,7 +239,7 @@ export function MachineLeadsTab({
                       </>
                     ) : (
                       <p className="text-xs text-[var(--color-text-muted)]">
-                        Machine ajoutée directement par Jimi (pas de fiche vendeur)
+                        Machine ajoutée directement par JIMI Industrie (pas de fiche vendeur)
                       </p>
                     )}
                   </div>

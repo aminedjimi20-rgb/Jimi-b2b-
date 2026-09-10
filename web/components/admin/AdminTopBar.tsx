@@ -24,7 +24,7 @@ export function AdminTopBar() {
           </span>
           <div>
             <p className="text-sm font-bold leading-tight text-[var(--color-ink)]">
-              Administration Jimi
+              Administration JIMI Industrie
             </p>
             <p className="text-xs text-[var(--color-text-muted)]">Tableau de bord interne</p>
           </div>

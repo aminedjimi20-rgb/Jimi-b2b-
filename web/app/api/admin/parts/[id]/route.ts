@@ -6,7 +6,17 @@ import { notifyNewProduct } from "@/lib/pushNotifications";
 import { getParts } from "@/lib/data";
 import type { PartCategory, PartCondition, PartStatus } from "@/lib/types";
 
-const VALID_CATEGORIES: PartCategory[] = ["electronique", "moules", "hydraulique", "mecanique"];
+const VALID_CATEGORIES: PartCategory[] = [
+  "electrique",
+  "electronique",
+  "hydraulique",
+  "mecanique",
+  "automatisme",
+  "plc-hmi",
+  "variateurs",
+  "servo-moteurs",
+  "moules",
+];
 const VALID_CONDITIONS: PartCondition[] = ["neuf", "occasion", "renove"];
 const VALID_STATUSES: PartStatus[] = ["draft", "published"];
 

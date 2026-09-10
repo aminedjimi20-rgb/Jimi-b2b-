@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { buildWhatsAppLink } from "@/config/site.config";
-import { ArrowRight, MessageCircle, ShieldCheck, Tag, Search } from "lucide-react";
+import { ShoppingCart, MessageCircle, ShieldCheck, Tag, PackageSearch, FileText } from "lucide-react";
 
 export async function Hero() {
   const t = await getTranslations();
@@ -45,20 +45,8 @@ export async function Hero() {
             className="animate-fade-up mt-9 flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row"
             style={{ animationDelay: "220ms" }}
           >
-            <Button href="/machines" size="lg" icon={<ArrowRight size={18} />}>
-              {t("cta.viewMachines")}
-            </Button>
-            <Button href="/acheter-machine" size="lg" variant="outline" className="!bg-transparent !text-white !border-white/25 hover:!border-white">
-              {t("cta.requestMachine")}
-            </Button>
-            <Button
-              href="/pieces-industrielles"
-              size="lg"
-              variant="outline"
-              className="!bg-transparent !text-white !border-white/25 hover:!border-white"
-              icon={<Search size={18} />}
-            >
-              {t("cta.searchPart")}
+            <Button href="/machines" size="lg" icon={<ShoppingCart size={18} />}>
+              {t("cta.acheter")}
             </Button>
             <Button
               href="/vendre-equipement"
@@ -67,7 +55,25 @@ export async function Hero() {
               className="!bg-[var(--color-accent-2)] hover:!bg-[#00968a]"
               icon={<Tag size={18} />}
             >
-              {t("cta.sellEquipment")}
+              {t("cta.vendre")}
+            </Button>
+            <Button
+              href="/acheter-machine"
+              size="lg"
+              variant="outline"
+              className="!bg-transparent !text-white !border-white/25 hover:!border-white"
+              icon={<PackageSearch size={18} />}
+            >
+              {t("cta.requestEquipment")}
+            </Button>
+            <Button
+              href="/contact"
+              size="lg"
+              variant="outline"
+              className="!bg-transparent !text-white !border-white/25 hover:!border-white"
+              icon={<FileText size={18} />}
+            >
+              {t("cta.getQuote")}
             </Button>
             <Button href={waLink} external size="lg" variant="whatsapp" icon={<MessageCircle size={18} />}>
               {t("cta.whatsapp")}

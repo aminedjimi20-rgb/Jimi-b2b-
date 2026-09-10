@@ -3,16 +3,21 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { Link } from "@/i18n/navigation";
-import { Cpu, Box, Droplet, Cog, ArrowRight } from "lucide-react";
+import { Zap, Cpu, Box, Droplet, Cog, Settings2, MonitorCog, SlidersHorizontal, RotateCw, ArrowRight } from "lucide-react";
 import type { PartCategory } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 const CATEGORIES: { key: PartCategory; icon: typeof Cpu }[] = [
+  { key: "electrique", icon: Zap },
   { key: "electronique", icon: Cpu },
-  { key: "moules", icon: Box },
   { key: "hydraulique", icon: Droplet },
   { key: "mecanique", icon: Cog },
+  { key: "automatisme", icon: Settings2 },
+  { key: "plc-hmi", icon: MonitorCog },
+  { key: "variateurs", icon: SlidersHorizontal },
+  { key: "servo-moteurs", icon: RotateCw },
+  { key: "moules", icon: Box },
 ];
 
 export async function generateMetadata({
@@ -43,7 +48,7 @@ export default async function PiecesIndustriellesPage({
       <PageHeader eyebrow={t("eyebrow")} title={t("pageTitle")} subtitle={t("pageSubtitle")} />
       <section className="py-12 md:py-16">
         <Container>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {CATEGORIES.map(({ key, icon: Icon }) => {
               const examples = t.raw(`categories.${key}.examples`) as string[];
               return (

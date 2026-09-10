@@ -21,8 +21,13 @@ export async function Footer() {
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-white/10 text-white">
               <Factory size={20} />
             </span>
-            <span className="text-lg font-extrabold tracking-tight text-white">JIMI</span>
+            <span className="text-lg font-extrabold tracking-tight text-white">
+              JIMI <span className="text-[var(--color-accent)]">INDUSTRIE</span>
+            </span>
           </div>
+          <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+            {t("footer.tagline")}
+          </p>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
             {t("footer.description")}
           </p>
@@ -33,12 +38,15 @@ export async function Footer() {
             {t("footer.navTitle")}
           </h3>
           <ul className="mt-4 space-y-2.5 text-sm">
+            <li><Link href="/" className="hover:text-white">{t("nav.home")}</Link></li>
             <li><Link href="/machines" className="hover:text-white">{t("nav.machines")}</Link></li>
-            <li><Link href="/acheter-machine" className="hover:text-white">{t("nav.buy")}</Link></li>
-            <li><Link href="/vendre-machine" className="hover:text-white">{t("nav.sell")}</Link></li>
             <li><Link href="/pieces-industrielles" className="hover:text-white">{t("nav.pieces")}</Link></li>
+            <li><Link href="/pieces-industrielles/moules" className="hover:text-white">{t("nav.moulesShort")}</Link></li>
+            <li><Link href="/services" className="hover:text-white">{t("nav.services")}</Link></li>
+            <li><Link href="/acheter-machine" className="hover:text-white">{t("nav.acheter")}</Link></li>
+            <li><Link href="/vendre-equipement" className="hover:text-white">{t("nav.vendre")}</Link></li>
             <li><Link href="/realisations" className="hover:text-white">{t("nav.realisations")}</Link></li>
-            <li><Link href="/blog" className="hover:text-white">{t("nav.blog")}</Link></li>
+            <li><Link href="/blog" className="hover:text-white">{t("nav.blogShort")}</Link></li>
             <li><Link href="/contact" className="hover:text-white">{t("nav.contact")}</Link></li>
           </ul>
         </div>
