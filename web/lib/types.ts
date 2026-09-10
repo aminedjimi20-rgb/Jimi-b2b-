@@ -233,4 +233,7 @@ export interface Article {
   readTimeMinutes: number;
   publishedAt: string;
   category: string;
+  /** Maillage interne vers les catégories, machines, services ou pages
+   *  Acheter/Vendre pertinentes pour cet article. */
+  relatedLinks?: { href: string; label: string }[];
 }

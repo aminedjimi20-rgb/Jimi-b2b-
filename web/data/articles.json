@@ -2,100 +2,124 @@
   {
     "id": "a1",
     "slug": "comment-choisir-une-machine-injection-occasion",
-    "title": "Comment choisir une machine d'injection d'occasion ?",
-    "excerpt": "Les critères techniques essentiels à vérifier avant d'acheter une machine d'injection plastique d'occasion, pour éviter les mauvaises surprises.",
     "readTimeMinutes": 6,
     "publishedAt": "2026-02-10",
-    "category": "Achat",
-    "content": [
-      "Acheter une machine d'injection d'occasion peut représenter une excellente opportunité économique, à condition de vérifier certains points techniques essentiels avant de finaliser la transaction.",
-      "Le premier critère à examiner est l'état du système de commande : PLC, HMI et contrôleur. Une machine mécaniquement saine mais dotée d'un contrôleur obsolète ou en fin de vie constructeur peut représenter un risque important en cas de panne future, faute de pièces disponibles.",
-      "Le second point concerne le groupe hydraulique ou servo : recherchez des traces de fuites, écoutez le bruit de fonctionnement de la pompe, et si possible, faites tourner la machine à vide puis en cycle réel avant achat.",
-      "Il est également essentiel de vérifier l'historique d'utilisation : nombre d'heures de fonctionnement si disponible, type de production réalisée (matières abrasives ou non), et les éventuels travaux de maintenance déjà effectués.",
-      "Enfin, une inspection technique indépendante, réalisée par un professionnel qui n'est pas partie à la transaction, reste le meilleur moyen de sécuriser votre achat, en particulier pour les machines de tonnage important représentant un investissement conséquent."
-    ]
+    "translations": {
+      "fr": {
+        "title": "Comment choisir une machine d'injection d'occasion ?",
+        "excerpt": "Les critères techniques essentiels à vérifier avant d'acheter une machine d'injection plastique d'occasion, pour éviter les mauvaises surprises.",
+        "category": "Achat",
+        "content": [
+          "Acheter une machine d'injection d'occasion peut représenter une excellente opportunité économique, à condition de vérifier certains points techniques essentiels avant de finaliser la transaction.",
+          "Le premier critère à examiner est l'état du système de commande : PLC, HMI et contrôleur. Une machine mécaniquement saine mais dotée d'un contrôleur obsolète ou en fin de vie constructeur peut représenter un risque important en cas de panne future, faute de pièces disponibles.",
+          "Le second point concerne le groupe hydraulique ou servo : recherchez des traces de fuites, écoutez le bruit de fonctionnement de la pompe, et si possible, faites tourner la machine à vide puis en cycle réel avant achat.",
+          "Il est également essentiel de vérifier l'historique d'utilisation : nombre d'heures de fonctionnement si disponible, type de production réalisée (matières abrasives ou non), et les éventuels travaux de maintenance déjà effectués.",
+          "Enfin, une inspection technique indépendante, réalisée par un professionnel qui n'est pas partie à la transaction, reste le meilleur moyen de sécuriser votre achat, en particulier pour les machines de tonnage important représentant un investissement conséquent."
+        ]
+      }
+    }
   },
   {
     "id": "a2",
     "slug": "difference-entre-servo-et-hydraulique",
-    "title": "Quelle différence entre servo et hydraulique ?",
-    "excerpt": "Comprendre les différences techniques entre une machine hydraulique classique et une machine à entraînement servo avant de faire votre choix.",
     "readTimeMinutes": 5,
     "publishedAt": "2026-02-24",
-    "category": "Technique",
-    "content": [
-      "Les machines d'injection plastique se distinguent principalement par leur type d'entraînement : hydraulique classique, servo-hydraulique, ou full-électrique. Ce choix a un impact direct sur la consommation énergétique, la précision et le coût de maintenance.",
-      "Une machine hydraulique classique utilise une pompe qui fonctionne en continu, indépendamment du besoin réel du cycle. Cette technologie est robuste, bien connue des techniciens, mais énergivore.",
-      "Une machine servo utilise un moteur servo qui n'entraîne la pompe hydraulique que lorsque cela est nécessaire, ce qui permet des économies d'énergie significatives, souvent entre 30% et 60% selon le profil de production.",
-      "En termes de précision, les machines servo offrent généralement un meilleur contrôle de la vitesse et de la pression d'injection, ce qui peut améliorer la répétabilité pour des pièces techniques exigeantes.",
-      "Le choix entre les deux dépend de votre production : cadence, type de pièces, budget d'investissement et coût de l'énergie électrique dans votre région."
-    ]
+    "translations": {
+      "fr": {
+        "title": "Quelle différence entre servo et hydraulique ?",
+        "excerpt": "Comprendre les différences techniques entre une machine hydraulique classique et une machine à entraînement servo avant de faire votre choix.",
+        "category": "Technique",
+        "content": [
+          "Les machines d'injection plastique se distinguent principalement par leur type d'entraînement : hydraulique classique, servo-hydraulique, ou full-électrique. Ce choix a un impact direct sur la consommation énergétique, la précision et le coût de maintenance.",
+          "Une machine hydraulique classique utilise une pompe qui fonctionne en continu, indépendamment du besoin réel du cycle. Cette technologie est robuste, bien connue des techniciens, mais énergivore.",
+          "Une machine servo utilise un moteur servo qui n'entraîne la pompe hydraulique que lorsque cela est nécessaire, ce qui permet des économies d'énergie significatives, souvent entre 30% et 60% selon le profil de production.",
+          "En termes de précision, les machines servo offrent généralement un meilleur contrôle de la vitesse et de la pression d'injection, ce qui peut améliorer la répétabilité pour des pièces techniques exigeantes.",
+          "Le choix entre les deux dépend de votre production : cadence, type de pièces, budget d'investissement et coût de l'énergie électrique dans votre région."
+        ]
+      }
+    }
   },
   {
     "id": "a3",
     "slug": "verifier-machine-injection-avant-achat",
-    "title": "Comment vérifier une machine d'injection avant achat ?",
-    "excerpt": "La checklist technique à suivre pour évaluer sérieusement une machine d'injection avant de vous engager.",
     "readTimeMinutes": 7,
     "publishedAt": "2026-03-05",
-    "category": "Achat",
-    "content": [
-      "Avant d'acheter une machine d'injection, une vérification méthodique permet d'éviter des coûts de remise en état imprévus après l'achat.",
-      "Commencez par une inspection visuelle générale : état du bâti, présence de fuites hydrauliques, état des câbles électriques apparents et propreté générale de la machine.",
-      "Testez ensuite le fonctionnement à vide : ouverture et fermeture du moule, mouvement d'injection, éjection. Écoutez les bruits anormaux et observez la fluidité des mouvements.",
-      "Vérifiez le système de sécurité : portes de sécurité, capteurs d'ouverture, arrêt d'urgence. Une machine ne respectant plus les normes de sécurité de base nécessitera une mise à niveau avant exploitation.",
-      "Si possible, demandez un essai avec un moule et une matière représentative de votre production, afin de valider la stabilité du cycle sur plusieurs répétitions consécutives.",
-      "Enfin, faites établir un rapport technique écrit, qui vous servira de référence en cas de litige ou pour orienter une éventuelle négociation du prix."
-    ]
+    "translations": {
+      "fr": {
+        "title": "Comment vérifier une machine d'injection avant achat ?",
+        "excerpt": "La checklist technique à suivre pour évaluer sérieusement une machine d'injection avant de vous engager.",
+        "category": "Achat",
+        "content": [
+          "Avant d'acheter une machine d'injection, une vérification méthodique permet d'éviter des coûts de remise en état imprévus après l'achat.",
+          "Commencez par une inspection visuelle générale : état du bâti, présence de fuites hydrauliques, état des câbles électriques apparents et propreté générale de la machine.",
+          "Testez ensuite le fonctionnement à vide : ouverture et fermeture du moule, mouvement d'injection, éjection. Écoutez les bruits anormaux et observez la fluidité des mouvements.",
+          "Vérifiez le système de sécurité : portes de sécurité, capteurs d'ouverture, arrêt d'urgence. Une machine ne respectant plus les normes de sécurité de base nécessitera une mise à niveau avant exploitation.",
+          "Si possible, demandez un essai avec un moule et une matière représentative de votre production, afin de valider la stabilité du cycle sur plusieurs répétitions consécutives.",
+          "Enfin, faites établir un rapport technique écrit, qui vous servira de référence en cas de litige ou pour orienter une éventuelle négociation du prix."
+        ]
+      }
+    }
   },
   {
     "id": "a4",
     "slug": "machine-180-tonnes-que-verifier",
-    "title": "Machine 180 tonnes : que faut-il vérifier ?",
-    "excerpt": "Les points spécifiques à contrôler sur une machine de tonnage moyen, très recherchée sur le marché algérien.",
     "readTimeMinutes": 5,
     "publishedAt": "2026-03-18",
-    "category": "Technique",
-    "content": [
-      "Les machines de tonnage moyen, autour de 150 à 200 tonnes, sont parmi les plus recherchées sur le marché algérien de l'occasion, en raison de leur polyvalence pour de nombreux types de production.",
-      "Sur ce segment, un point de vigilance particulier concerne l'usure des colonnes de fermeture et l'alignement du plateau mobile, qui peuvent affecter la précision de fermeture du moule.",
-      "Le groupe d'injection doit également être vérifié : usure du fourreau et de la vis, en particulier si la machine a été utilisée avec des matières chargées en fibre de verre ou en charges minérales, plus abrasives.",
-      "Sur ces tonnages, le contrôleur électronique est souvent le premier élément à nécessiter une modernisation, les modèles antérieurs à 2010 étant fréquemment équipés de systèmes propriétaires difficiles à maintenir.",
-      "Un diagnostic technique ciblé permet de déterminer si une simple remise à niveau électrique suffit, ou si une rénovation plus complète est nécessaire avant remise en production."
-    ]
+    "translations": {
+      "fr": {
+        "title": "Machine 180 tonnes : que faut-il vérifier ?",
+        "excerpt": "Les points spécifiques à contrôler sur une machine de tonnage moyen, très recherchée sur le marché algérien.",
+        "category": "Technique",
+        "content": [
+          "Les machines de tonnage moyen, autour de 150 à 200 tonnes, sont parmi les plus recherchées sur le marché algérien de l'occasion, en raison de leur polyvalence pour de nombreux types de production.",
+          "Sur ce segment, un point de vigilance particulier concerne l'usure des colonnes de fermeture et l'alignement du plateau mobile, qui peuvent affecter la précision de fermeture du moule.",
+          "Le groupe d'injection doit également être vérifié : usure du fourreau et de la vis, en particulier si la machine a été utilisée avec des matières chargées en fibre de verre ou en charges minérales, plus abrasives.",
+          "Sur ces tonnages, le contrôleur électronique est souvent le premier élément à nécessiter une modernisation, les modèles antérieurs à 2010 étant fréquemment équipés de systèmes propriétaires difficiles à maintenir.",
+          "Un diagnostic technique ciblé permet de déterminer si une simple remise à niveau électrique suffit, ou si une rénovation plus complète est nécessaire avant remise en production."
+        ]
+      }
+    }
   },
   {
     "id": "a5",
     "slug": "quand-renover-plutot-que-remplacer",
-    "title": "Quand rénover une machine au lieu de la remplacer ?",
-    "excerpt": "Les critères pour décider entre rénovation et remplacement complet d'une machine d'injection vieillissante.",
     "readTimeMinutes": 6,
     "publishedAt": "2026-04-02",
-    "category": "Rénovation",
-    "content": [
-      "Face à une machine vieillissante, la question du remplacement se pose naturellement. Pourtant, dans de nombreux cas, une rénovation ciblée constitue une alternative économiquement plus intéressante.",
-      "Le critère décisif est l'état de la partie mécanique et hydraulique : bâti, colonnes, vérins, groupe hydraulique. Si ces éléments sont sains, l'essentiel de la valeur de la machine est préservé.",
-      "La rénovation se concentre alors sur ce qui devient réellement obsolète avec le temps : l'armoire électrique, le PLC, l'interface HMI, les variateurs et les capteurs de sécurité.",
-      "Ce type d'intervention permet généralement de retrouver un niveau de contrôle et de sécurité proche d'une machine neuve, pour une fraction de son coût d'achat.",
-      "Le remplacement complet reste préférable lorsque la structure mécanique présente une usure avancée, ou lorsque le besoin de production évolue vers un tonnage ou une technologie différente."
-    ]
+    "translations": {
+      "fr": {
+        "title": "Quand rénover une machine au lieu de la remplacer ?",
+        "excerpt": "Les critères pour décider entre rénovation et remplacement complet d'une machine d'injection vieillissante.",
+        "category": "Rénovation",
+        "content": [
+          "Face à une machine vieillissante, la question du remplacement se pose naturellement. Pourtant, dans de nombreux cas, une rénovation ciblée constitue une alternative économiquement plus intéressante.",
+          "Le critère décisif est l'état de la partie mécanique et hydraulique : bâti, colonnes, vérins, groupe hydraulique. Si ces éléments sont sains, l'essentiel de la valeur de la machine est préservé.",
+          "La rénovation se concentre alors sur ce qui devient réellement obsolète avec le temps : l'armoire électrique, le PLC, l'interface HMI, les variateurs et les capteurs de sécurité.",
+          "Ce type d'intervention permet généralement de retrouver un niveau de contrôle et de sécurité proche d'une machine neuve, pour une fraction de son coût d'achat.",
+          "Le remplacement complet reste préférable lorsque la structure mécanique présente une usure avancée, ou lorsque le besoin de production évolue vers un tonnage ou une technologie différente."
+        ]
+      }
+    }
   },
   {
     "id": "a6",
     "slug": "points-a-controler-avant-achat-occasion",
-    "title": "Les points à contrôler avant l'achat d'une machine d'occasion",
-    "excerpt": "Une synthèse pratique des points de contrôle indispensables avant de signer l'achat d'une machine d'injection d'occasion.",
     "readTimeMinutes": 5,
     "publishedAt": "2026-04-20",
-    "category": "Achat",
-    "content": [
-      "Pour synthétiser les points essentiels abordés dans nos précédents articles, voici une liste pratique à garder en tête avant tout achat de machine d'injection d'occasion.",
-      "Documentation : historique d'entretien, factures de maintenance, année de fabrication et, si possible, heures de fonctionnement réelles.",
-      "État mécanique : bâti, colonnes, alignement du plateau mobile, absence de jeu excessif dans les mouvements.",
-      "État hydraulique : absence de fuites, bruit de fonctionnement normal de la pompe, état des flexibles.",
-      "Système de commande : ancienneté du PLC et du HMI, disponibilité des pièces détachées, possibilité de retrofit si nécessaire.",
-      "Sécurité : conformité des portes, capteurs et arrêts d'urgence aux exigences minimales de sécurité machine.",
-      "Un accompagnement technique lors de cette vérification reste le meilleur moyen d'acheter en toute confiance, particulièrement pour un premier achat de machine d'occasion."
-    ]
+    "translations": {
+      "fr": {
+        "title": "Les points à contrôler avant l'achat d'une machine d'occasion",
+        "excerpt": "Une synthèse pratique des points de contrôle indispensables avant de signer l'achat d'une machine d'injection d'occasion.",
+        "category": "Achat",
+        "content": [
+          "Pour synthétiser les points essentiels abordés dans nos précédents articles, voici une liste pratique à garder en tête avant tout achat de machine d'injection d'occasion.",
+          "Documentation : historique d'entretien, factures de maintenance, année de fabrication et, si possible, heures de fonctionnement réelles.",
+          "État mécanique : bâti, colonnes, alignement du plateau mobile, absence de jeu excessif dans les mouvements.",
+          "État hydraulique : absence de fuites, bruit de fonctionnement normal de la pompe, état des flexibles.",
+          "Système de commande : ancienneté du PLC et du HMI, disponibilité des pièces détachées, possibilité de retrofit si nécessaire.",
+          "Sécurité : conformité des portes, capteurs et arrêts d'urgence aux exigences minimales de sécurité machine.",
+          "Un accompagnement technique lors de cette vérification reste le meilleur moyen d'acheter en toute confiance, particulièrement pour un premier achat de machine d'occasion."
+        ]
+      }
+    }
   }
 ]

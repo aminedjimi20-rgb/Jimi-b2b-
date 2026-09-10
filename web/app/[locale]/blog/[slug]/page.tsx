@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = getArticleBySlug(locale, slug);
   if (!article) return {};
   return {
     title: article.title,
@@ -40,11 +40,11 @@ export default async function ArticlePage({
 }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const article = getArticleBySlug(slug);
+  const article = getArticleBySlug(locale, slug);
   if (!article) notFound();
 
   const t = await getTranslations();
-  const related = getArticles()
+  const related = getArticles(locale)
     .filter((a) => a.slug !== article.slug)
     .slice(0, 3);
 
@@ -105,6 +105,20 @@ export default async function ArticlePage({
                 </p>
               ))}
             </div>
+
+            {article.relatedLinks && article.relatedLinks.length > 0 && (
+              <div className="mt-10 flex flex-wrap gap-2 border-t border-[var(--color-border)] pt-6">
+                {article.relatedLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-accent)] hover:border-[var(--color-accent)]"
+                  >
+                    {link.label} →
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {related.length > 0 && (

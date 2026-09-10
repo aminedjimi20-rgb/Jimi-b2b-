@@ -115,14 +115,50 @@ export async function getPublicProjectBySlug(slug: string): Promise<Project | un
   return projects.find((p) => p.slug === slug);
 }
 
-export function getArticles(): Article[] {
-  return [...(articlesData as Article[])].sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
+interface RawArticleTranslation {
+  title: string;
+  excerpt: string;
+  category: string;
+  content: string[];
+  relatedLinks?: { href: string; label: string }[];
 }
 
-export function getArticleBySlug(slug: string): Article | undefined {
-  return getArticles().find((a) => a.slug === slug);
+interface RawArticle {
+  id: string;
+  slug: string;
+  readTimeMinutes: number;
+  publishedAt: string;
+  translations: Partial<Record<"fr" | "ar" | "en", RawArticleTranslation>>;
+}
+
+/** Résout un article brut (multi-langue) vers la forme locale plate que le
+ *  reste du code attend — si la locale demandée n'a pas de traduction (cas
+ *  des anciens articles, jamais traduits), on retombe sur le français
+ *  plutôt que de casser l'affichage. */
+function localizeArticle(raw: RawArticle, locale: string): Article {
+  const translation =
+    raw.translations[locale as "fr" | "ar" | "en"] ?? raw.translations.fr ?? Object.values(raw.translations)[0];
+  return {
+    id: raw.id,
+    slug: raw.slug,
+    title: translation!.title,
+    excerpt: translation!.excerpt,
+    category: translation!.category,
+    content: translation!.content,
+    readTimeMinutes: raw.readTimeMinutes,
+    publishedAt: raw.publishedAt,
+    relatedLinks: translation!.relatedLinks ?? [],
+  };
+}
+
+export function getArticles(locale: string = "fr"): Article[] {
+  return (articlesData as RawArticle[])
+    .map((raw) => localizeArticle(raw, locale))
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+}
+
+export function getArticleBySlug(locale: string, slug: string): Article | undefined {
+  return getArticles(locale).find((a) => a.slug === slug);
 }
 
 export async function getParts(): Promise<Part[]> {
