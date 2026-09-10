@@ -1,5 +1,5 @@
 /**
- * CONFIGURATION CENTRALE DU SITE — JIMI RENOVATION & INSTALLATION
+ * CONFIGURATION CENTRALE DU SITE — JIMI INDUSTRIE
  * -----------------------------------------------------------------
  * Toutes les informations "réelles" (téléphone, WhatsApp, email, adresse,
  * réseaux sociaux) sont centralisées ICI et nulle part ailleurs dans le
@@ -47,7 +47,7 @@ export const siteConfig = {
   // Utilisé pour le JSON-LD et les métadonnées SEO
   // (l'image Open Graph est générée dynamiquement, voir app/[locale]/opengraph-image.tsx)
   seo: {
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://jimi-renovation.example.dz",
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://jimi-b2b.vercel.app",
     twitterHandle: "",
   },
 

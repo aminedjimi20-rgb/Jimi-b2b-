@@ -179,7 +179,7 @@
         {
           "icon": "map",
           "title": "Intervention en Algérie",
-          "desc": "Déplacement possible partout en Algérie selon les projets."
+          "desc": "Déplacement possible partout en Algérie (Alger, Oran, Sétif, Blida, Constantine, Annaba...) selon la nature et la localisation du projet."
         }
       ]
     },
@@ -917,7 +917,8 @@
     "infoTitle": "Nos coordonnées",
     "formTitle": "Envoyer un message",
     "successTitle": "Message envoyé",
-    "successMessage": "Merci pour votre message. Nous vous répondrons dans les plus brefs délais."
+    "successMessage": "Merci pour votre message. Nous vous répondrons dans les plus brefs délais.",
+    "seoDescription": "Contactez JIMI Industrie pour vos machines, pièces industrielles ou moules : intervention et déplacement possibles dans toute l'Algérie (Alger, Oran, Sétif, Blida, Constantine, Annaba et autres wilayas)."
   },
   "faqItems": [
     {

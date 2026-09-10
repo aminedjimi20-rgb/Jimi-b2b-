@@ -98,8 +98,20 @@ export default async function LocaleLayout({
               "Machines, pièces industrielles, moules et automatisation : vente, achat, maintenance et rénovation d'équipements industriels en Algérie.",
             telephone: siteConfig.contact.phoneDisplay,
             email: siteConfig.contact.email,
-            address: { "@type": "PostalAddress", addressCountry: "DZ" },
-            areaServed: "DZ",
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: siteConfig.contact.baseCity,
+              addressCountry: "DZ",
+            },
+            areaServed: [
+              { "@type": "Country", name: "Algérie" },
+              { "@type": "City", name: "Alger" },
+              { "@type": "City", name: "Oran" },
+              { "@type": "City", name: "Sétif" },
+              { "@type": "City", name: "Blida" },
+              { "@type": "City", name: "Constantine" },
+              { "@type": "City", name: "Annaba" },
+            ],
           }}
         />
         <Navbar />
