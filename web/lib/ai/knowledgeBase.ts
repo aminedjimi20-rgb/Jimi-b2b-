@@ -62,10 +62,16 @@ export async function buildKnowledgeBaseText(): Promise<string> {
     sections.push(
       `${PART_CATEGORY_LABELS[category].toUpperCase()} DISPONIBLES :\n` +
         items
-          .map(
-            (p) =>
-              `- ${p.name} (réf. ${p.reference}), état ${p.condition}, ${formatPrice(p.price, p.priceOnRequest)}`
-          )
+          .map((p) => {
+            const brandModel = [p.brand, p.model].filter(Boolean).join(" ");
+            const details = [
+              brandModel && `marque/modèle ${brandModel}`,
+              `état ${p.condition}`,
+              p.wilaya && `wilaya ${p.wilaya}`,
+              formatPrice(p.price, p.priceOnRequest),
+            ].filter(Boolean);
+            return `- ${p.name} (réf. ${p.reference}), ${details.join(", ")}`;
+          })
           .join("\n")
     );
   }

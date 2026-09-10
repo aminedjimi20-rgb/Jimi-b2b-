@@ -1132,5 +1132,11 @@
       "wilaya": "Localisation",
       "price": "Prix"
     }
+  },
+  "errorBoundary": {
+    "title": "Une erreur est survenue",
+    "subtitle": "Quelque chose s'est mal passé de notre côté. Vous pouvez réessayer ou revenir à l'accueil.",
+    "retry": "Réessayer",
+    "home": "Retour à l'accueil"
   }
 }

@@ -1132,5 +1132,11 @@
       "wilaya": "Location",
       "price": "Price"
     }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "subtitle": "Something went wrong on our end. You can try again or go back home.",
+    "retry": "Try again",
+    "home": "Back to home"
   }
 }
