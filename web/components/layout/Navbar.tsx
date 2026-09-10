@@ -59,7 +59,7 @@ export function Navbar() {
   const moulesLink = { href: "/pieces-industrielles/moules", label: t("moulesShort") };
 
   const buySellLinks = [
-    { href: "/acheter-machine", label: t("acheter") },
+    { href: "/acheter", label: t("acheter") },
     { href: "/vendre-equipement", label: t("vendre") },
   ];
 

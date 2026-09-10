@@ -6,6 +6,7 @@ import { getPublicMachines, getArticles, getPublicProjects } from "@/lib/data";
 const staticPaths = [
   "",
   "/machines",
+  "/acheter",
   "/acheter-machine",
   "/vendre-machine",
   "/vendre-equipement",

@@ -557,6 +557,43 @@
       }
     }
   },
+  "acheterHub": {
+    "eyebrow": "Acheter",
+    "pageTitle": "Acheter un équipement industriel",
+    "pageSubtitle": "Machine, pièce, moule ou équipement : dites-nous ce que vous recherchez, nous vous mettons en relation avec l'offre correspondante.",
+    "seoTitle": "Acheter une machine, une pièce ou un moule en Algérie | JIMI Industrie",
+    "seoDescription": "Achetez une machine industrielle, une pièce détachée, un moule ou tout autre équipement en Algérie : décrivez votre besoin, JIMI Industrie recherche pour vous dans son réseau.",
+    "typePrompt": "Que souhaitez-vous acheter ?",
+    "changeType": "Changer le type d'équipement",
+    "successTitle": "Votre demande a bien été envoyée",
+    "successMessage": "Merci, nous avons bien reçu votre demande. Notre équipe vous recontacte rapidement avec les offres correspondantes.",
+    "sections": {
+      "need": "Votre besoin",
+      "contact": "Vos coordonnées"
+    },
+    "types": {
+      "machine": {
+        "label": "Machine industrielle",
+        "description": "Presse à injection, ligne de production, équipement complet"
+      },
+      "piece": {
+        "label": "Pièce détachée",
+        "description": "Électrique, électronique, hydraulique, mécanique..."
+      },
+      "moule": {
+        "label": "Moule",
+        "description": "Moule d'injection plastique ou moule industriel"
+      },
+      "equipement": {
+        "label": "Autre équipement",
+        "description": "Automatisme, PLC/HMI, variateur, servo moteur..."
+      },
+      "service": {
+        "label": "Un service",
+        "description": "Maintenance, rénovation, automatisation — demander un devis"
+      }
+    }
+  },
   "testimonialForm": {
     "eyebrow": "Avis client",
     "pageTitle": "Laisser un avis",
@@ -818,6 +855,7 @@
       "driveType": "Servo / Hydraulique",
       "specificNeed": "Besoin particulier",
       "priceWanted": "Prix souhaité (DA)",
+      "budget": "Budget (DA)",
       "description": "Description",
       "availability": "Disponibilité",
       "photos": "Photos",

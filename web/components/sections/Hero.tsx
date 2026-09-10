@@ -58,7 +58,7 @@ export async function Hero() {
               {t("cta.vendre")}
             </Button>
             <Button
-              href="/acheter-machine"
+              href="/acheter"
               size="lg"
               variant="outline"
               className="!bg-transparent !text-white !border-white/25 hover:!border-white"

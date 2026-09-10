@@ -43,7 +43,7 @@ export async function Footer() {
             <li><Link href="/pieces-industrielles" className="hover:text-white">{t("nav.pieces")}</Link></li>
             <li><Link href="/pieces-industrielles/moules" className="hover:text-white">{t("nav.moulesShort")}</Link></li>
             <li><Link href="/services" className="hover:text-white">{t("nav.services")}</Link></li>
-            <li><Link href="/acheter-machine" className="hover:text-white">{t("nav.acheter")}</Link></li>
+            <li><Link href="/acheter" className="hover:text-white">{t("nav.acheter")}</Link></li>
             <li><Link href="/vendre-equipement" className="hover:text-white">{t("nav.vendre")}</Link></li>
             <li><Link href="/realisations" className="hover:text-white">{t("nav.realisations")}</Link></li>
             <li><Link href="/blog" className="hover:text-white">{t("nav.blogShort")}</Link></li>

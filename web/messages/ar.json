@@ -557,6 +557,43 @@
       }
     }
   },
+  "acheterHub": {
+    "eyebrow": "شراء",
+    "pageTitle": "شراء معدة صناعية",
+    "pageSubtitle": "آلة، قطعة، قالب أو معدة: أخبرنا بما تبحث عنه، نربطك بالعرض المناسب.",
+    "seoTitle": "شراء آلة أو قطعة أو قالب في الجزائر | JIMI Industrie",
+    "seoDescription": "اشترِ آلة صناعية، قطعة غيار، قالب أو أي معدة أخرى في الجزائر: صف احتياجك، وتبحث لك JIMI Industrie في شبكتها.",
+    "typePrompt": "ماذا تريد أن تشتري؟",
+    "changeType": "تغيير نوع المعدة",
+    "successTitle": "تم إرسال طلبك بنجاح",
+    "successMessage": "شكرًا لك، وصلنا طلبك. سيتواصل معك فريقنا بسرعة بالعروض المناسبة.",
+    "sections": {
+      "need": "احتياجك",
+      "contact": "معلومات التواصل"
+    },
+    "types": {
+      "machine": {
+        "label": "آلة صناعية",
+        "description": "آلة حقن، خط إنتاج، معدة كاملة"
+      },
+      "piece": {
+        "label": "قطعة غيار",
+        "description": "كهربائية، إلكترونية، هيدروليكية، ميكانيكية..."
+      },
+      "moule": {
+        "label": "قالب",
+        "description": "قالب حقن بلاستيك أو قالب صناعي"
+      },
+      "equipement": {
+        "label": "معدة أخرى",
+        "description": "أتمتة، PLC/HMI، محول تردد، محرك سيرفو..."
+      },
+      "service": {
+        "label": "خدمة",
+        "description": "صيانة، تجديد، أتمتة — طلب عرض سعر"
+      }
+    }
+  },
   "testimonialForm": {
     "eyebrow": "رأي عميل",
     "pageTitle": "أضف رأيك",
@@ -818,6 +855,7 @@
       "driveType": "سيرفو / هيدروليكي",
       "specificNeed": "حاجة خاصة",
       "priceWanted": "السعر المطلوب (دج)",
+      "budget": "الميزانية (دج)",
       "description": "الوصف",
       "availability": "التوفر",
       "photos": "الصور",
