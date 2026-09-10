@@ -257,4 +257,8 @@ export interface Article {
   /** Maillage interne vers les catégories, machines, services ou pages
    *  Acheter/Vendre pertinentes pour cet article. */
   relatedLinks?: { href: string; label: string }[];
+  /** Questions/réponses affichées sur la page (et reprises dans le
+   *  FAQPage JSON-LD) — uniquement quand elles apportent une vraie valeur,
+   *  jamais ajoutées juste pour le schema. */
+  faq?: { q: string; a: string }[];
 }

@@ -29,6 +29,16 @@
             "href": "/services/maintenance-depannage",
             "label": "Maintenance et dépannage"
           }
+        ],
+        "faq": [
+          {
+            "q": "Combien d'heures de fonctionnement sont acceptables pour une machine d'occasion ?",
+            "a": "Il n'y a pas de seuil universel : une machine bien entretenue avec 40 000 heures peut être plus fiable qu'une machine à 15 000 heures négligée. L'historique de maintenance compte plus que le compteur seul."
+          },
+          {
+            "q": "Faut-il se méfier d'un prix anormalement bas ?",
+            "a": "Oui, un prix très inférieur au marché cache souvent un problème non déclaré (contrôleur en panne, fuite majeure). Une inspection avant achat reste le meilleur moyen de vérifier."
+          }
         ]
       },
       "ar": {
@@ -55,6 +65,16 @@
             "href": "/services/maintenance-depannage",
             "label": "الصيانة والإصلاح"
           }
+        ],
+        "faq": [
+          {
+            "q": "كم عدد ساعات التشغيل المقبولة لآلة مستعملة؟",
+            "a": "لا يوجد حد عام: آلة جيدة الصيانة بـ40,000 ساعة قد تكون أكثر موثوقية من آلة بـ15,000 ساعة مهملة. سجل الصيانة أهم من عداد الساعات وحده."
+          },
+          {
+            "q": "هل يجب الحذر من سعر منخفض بشكل غير طبيعي؟",
+            "a": "نعم، سعر أقل بكثير من السوق يخفي غالباً مشكلة غير معلنة (وحدة تحكم معطلة، تسرب كبير). الفحص قبل الشراء يبقى أفضل وسيلة للتحقق."
+          }
         ]
       },
       "en": {
@@ -80,6 +100,16 @@
           {
             "href": "/services/maintenance-depannage",
             "label": "Maintenance & repair"
+          }
+        ],
+        "faq": [
+          {
+            "q": "How many operating hours are acceptable for a used machine?",
+            "a": "There's no universal threshold: a well-maintained machine with 40,000 hours can be more reliable than a neglected one with 15,000. Maintenance history matters more than the hour counter alone."
+          },
+          {
+            "q": "Should I be wary of an unusually low price?",
+            "a": "Yes, a price well below market often hides an undisclosed problem (failed controller, major leak). A pre-purchase inspection remains the best way to verify."
           }
         ]
       }
@@ -115,6 +145,16 @@
             "href": "/pieces-industrielles/servo-moteurs",
             "label": "Servo moteurs"
           }
+        ],
+        "faq": [
+          {
+            "q": "Une machine hydraulique classique peut-elle être convertie en servo ?",
+            "a": "Oui, un retrofit servo-hydraulique est possible sur de nombreuses machines existantes en remplaçant le groupe motopompe, avec un gain énergétique immédiat."
+          },
+          {
+            "q": "Le tout-électrique est-il toujours le meilleur choix ?",
+            "a": "Pas systématiquement : il excelle en précision et rapidité mais coûte plus cher à l'achat. Pour une production standard, une machine servo-hydraulique reste souvent plus rentable."
+          }
         ]
       },
       "ar": {
@@ -141,6 +181,16 @@
             "href": "/pieces-industrielles/servo-moteurs",
             "label": "محركات السيرفو"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يمكن تحويل آلة هيدروليكية تقليدية إلى سيرفو؟",
+            "a": "نعم، تحديث سيرفو-هيدروليكي ممكن على العديد من الآلات الموجودة باستبدال مجموعة المضخة، مع توفير فوري في الطاقة."
+          },
+          {
+            "q": "هل الكهربائي بالكامل هو الخيار الأفضل دائماً؟",
+            "a": "ليس دائماً: يتميز بالدقة والسرعة لكنه أغلى ثمناً. للإنتاج القياسي، تبقى الآلة السيرفو-هيدروليكية غالباً أكثر جدوى."
+          }
         ]
       },
       "en": {
@@ -166,6 +216,16 @@
           {
             "href": "/pieces-industrielles/servo-moteurs",
             "label": "Servo motors"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Can a classic hydraulic machine be converted to servo?",
+            "a": "Yes, a servo-hydraulic retrofit is possible on many existing machines by replacing the pump unit, with immediate energy savings."
+          },
+          {
+            "q": "Is fully electric always the best choice?",
+            "a": "Not always: it excels in precision and speed but costs more upfront. For standard production, a servo-hydraulic machine often remains more cost-effective."
           }
         ]
       }
@@ -202,6 +262,16 @@
             "href": "/services/maintenance-depannage",
             "label": "Maintenance et dépannage"
           }
+        ],
+        "faq": [
+          {
+            "q": "Peut-on vérifier une machine sans la faire fonctionner ?",
+            "a": "Une inspection visuelle donne des indices utiles mais reste insuffisante : le test en fonctionnement est indispensable pour détecter des bruits anormaux ou dérives invisibles à l'arrêt."
+          },
+          {
+            "q": "Qui peut réaliser une inspection technique indépendante ?",
+            "a": "Un technicien ou automaticien expérimenté, non impliqué dans la transaction, capable d'évaluer la partie mécanique, hydraulique et le système de commande."
+          }
         ]
       },
       "ar": {
@@ -229,6 +299,16 @@
             "href": "/services/maintenance-depannage",
             "label": "الصيانة والإصلاح"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يمكن فحص آلة دون تشغيلها؟",
+            "a": "الفحص البصري يعطي مؤشرات مفيدة لكنه غير كافٍ: اختبار التشغيل ضروري لاكتشاف أصوات غير طبيعية أو انحرافات لا تظهر أثناء التوقف."
+          },
+          {
+            "q": "من يمكنه إجراء فحص تقني مستقل؟",
+            "a": "فني أو مهندس أتمتة ذو خبرة، غير طرف في الصفقة، قادر على تقييم الجزء الميكانيكي والهيدروليكي ونظام التحكم."
+          }
         ]
       },
       "en": {
@@ -255,6 +335,16 @@
           {
             "href": "/services/maintenance-depannage",
             "label": "Maintenance & repair"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Can a machine be checked without running it?",
+            "a": "A visual inspection gives useful clues but isn't enough: a functional test is essential to detect abnormal noise or drift that's invisible at standstill."
+          },
+          {
+            "q": "Who can perform an independent technical inspection?",
+            "a": "An experienced technician or automation engineer not involved in the deal, able to assess the mechanical, hydraulic, and control system."
           }
         ]
       }
@@ -290,6 +380,16 @@
             "href": "/pieces-industrielles/plc-hmi",
             "label": "PLC / HMI"
           }
+        ],
+        "faq": [
+          {
+            "q": "Pourquoi ce tonnage est-il si demandé en Algérie ?",
+            "a": "Autour de 150-200 tonnes, une machine couvre un large éventail de pièces, ce qui en fait un bon compromis pour une PME qui démarre ou diversifie sa production."
+          },
+          {
+            "q": "Un contrôleur antérieur à 2010 est-il forcément à remplacer ?",
+            "a": "Pas nécessairement s'il fonctionne bien et que des pièces sont disponibles, mais ces systèmes propriétaires deviennent progressivement plus difficiles à dépanner."
+          }
         ]
       },
       "ar": {
@@ -316,6 +416,16 @@
             "href": "/pieces-industrielles/plc-hmi",
             "label": "PLC / HMI"
           }
+        ],
+        "faq": [
+          {
+            "q": "لماذا هذه القوة الشدّية مطلوبة بكثرة في الجزائر؟",
+            "a": "حول 150-200 طن، تغطي الآلة مجموعة واسعة من القطع، مما يجعلها خياراً جيداً لمؤسسة صغيرة تبدأ أو تنوّع إنتاجها."
+          },
+          {
+            "q": "هل وحدة تحكم أقدم من 2010 يجب استبدالها حتماً؟",
+            "a": "ليس بالضرورة إن كانت تعمل جيداً وتتوفر قطعها، لكن هذه الأنظمة الخاصة تصبح تدريجياً أصعب في الصيانة."
+          }
         ]
       },
       "en": {
@@ -341,6 +451,16 @@
           {
             "href": "/pieces-industrielles/plc-hmi",
             "label": "PLC / HMI"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Why is this tonnage so sought after in Algeria?",
+            "a": "Around 150-200 tonnes, a machine covers a wide range of parts, making it a good fit for an SME starting up or diversifying production."
+          },
+          {
+            "q": "Does a controller older than 2010 always need replacing?",
+            "a": "Not necessarily if it still works well and parts are available, but these proprietary systems gradually become harder to service."
           }
         ]
       }
@@ -376,6 +496,16 @@
             "href": "/machines",
             "label": "Voir les machines disponibles"
           }
+        ],
+        "faq": [
+          {
+            "q": "Combien coûte une rénovation par rapport à une machine neuve ?",
+            "a": "Cela varie selon l'étendue des travaux, mais une rénovation électrique/automatisme complète représente généralement une fraction du prix d'une machine neuve équivalente."
+          },
+          {
+            "q": "Combien de temps dure un projet de rénovation ?",
+            "a": "Cela dépend du périmètre (simple mise à niveau PLC ou refonte complète), mais un diagnostic précis permet d'estimer un délai réaliste avant de lancer les travaux."
+          }
         ]
       },
       "ar": {
@@ -402,6 +532,16 @@
             "href": "/machines",
             "label": "عرض الآلات المتوفرة"
           }
+        ],
+        "faq": [
+          {
+            "q": "كم تكلف عملية التجديد مقارنة بآلة جديدة؟",
+            "a": "يختلف الأمر حسب حجم الأعمال، لكن تجديداً كهربائياً/أتمتة كاملاً يمثل عادة جزءاً بسيطاً من سعر آلة جديدة مماثلة."
+          },
+          {
+            "q": "كم يستغرق مشروع التجديد من الوقت؟",
+            "a": "يعتمد على النطاق (تحديث بسيط لـPLC أو إعادة تصميم كاملة)، لكن تشخيصاً دقيقاً يسمح بتقدير مدة واقعية قبل بدء الأعمال."
+          }
         ]
       },
       "en": {
@@ -427,6 +567,16 @@
           {
             "href": "/machines",
             "label": "Browse available machines"
+          }
+        ],
+        "faq": [
+          {
+            "q": "How much does a renovation cost compared to a new machine?",
+            "a": "It varies with the scope of work, but a full electrical/automation renovation is typically a fraction of an equivalent new machine's price."
+          },
+          {
+            "q": "How long does a renovation project take?",
+            "a": "It depends on the scope (a simple PLC upgrade or a full overhaul), but a precise diagnosis allows a realistic timeline before starting the work."
           }
         ]
       }
@@ -464,6 +614,16 @@
             "href": "/services/maintenance-depannage",
             "label": "Maintenance et dépannage"
           }
+        ],
+        "faq": [
+          {
+            "q": "Cette checklist s'applique-t-elle à tous les tonnages ?",
+            "a": "Oui, les grands principes (mécanique, hydraulique, commande, sécurité) restent les mêmes ; seuls les points de vigilance spécifiques diffèrent selon le tonnage et l'entraînement."
+          },
+          {
+            "q": "Faut-il exiger un essai en production avant d'acheter ?",
+            "a": "C'est fortement recommandé, en particulier pour un premier achat : un essai avec votre propre moule et matière valide la stabilité réelle du cycle."
+          }
         ]
       },
       "ar": {
@@ -492,6 +652,16 @@
             "href": "/services/maintenance-depannage",
             "label": "الصيانة والإصلاح"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل تنطبق هذه القائمة على جميع القوى الشدّية؟",
+            "a": "نعم، المبادئ الأساسية (الميكانيك، الهيدروليك، التحكم، الأمان) تبقى نفسها؛ فقط نقاط الانتباه الخاصة تختلف حسب القوة ونوع الدفع."
+          },
+          {
+            "q": "هل يجب طلب اختبار إنتاج فعلي قبل الشراء؟",
+            "a": "يُنصح بشدة، خاصة عند أول شراء: اختبار بقالبك ومادتك الخاصة يتحقق من ثبات الدورة الفعلي."
+          }
         ]
       },
       "en": {
@@ -519,6 +689,16 @@
           {
             "href": "/services/maintenance-depannage",
             "label": "Maintenance & repair"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Does this checklist apply to all tonnages?",
+            "a": "Yes, the core principles (mechanical, hydraulic, control, safety) stay the same; only the specific watch-points differ by tonnage and drive type."
+          },
+          {
+            "q": "Should I require a production trial before buying?",
+            "a": "Strongly recommended, especially for a first purchase: a trial with your own mold and material validates real cycle stability."
           }
         ]
       }
@@ -554,6 +734,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "Automatisation industrielle"
           }
+        ],
+        "faq": [
+          {
+            "q": "Quelle est la première question à se poser avant de choisir une machine ?",
+            "a": "Le type de pièce et la matière à transformer, car ces deux éléments déterminent la pression d'injection nécessaire et donc l'essentiel des caractéristiques requises."
+          },
+          {
+            "q": "Faut-il toujours prévoir une marge de tonnage ?",
+            "a": "Oui, une marge raisonnable évite un remplacement prématuré si votre production évolue vers des pièces plus grandes ou plus techniques."
+          }
         ]
       },
       "ar": {
@@ -580,6 +770,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "الأتمتة الصناعية"
           }
+        ],
+        "faq": [
+          {
+            "q": "ما هو أول سؤال يجب طرحه قبل اختيار آلة؟",
+            "a": "نوع القطعة والمادة المراد معالجتها، لأن هذين العنصرين يحددان ضغط الحقن اللازم وبالتالي معظم المواصفات المطلوبة."
+          },
+          {
+            "q": "هل يجب دائماً ترك هامش في القوة الشدّية؟",
+            "a": "نعم، هامش معقول يتجنب استبدالاً مبكراً إذا تطور إنتاجك نحو قطع أكبر أو أكثر تعقيداً."
+          }
         ]
       },
       "en": {
@@ -605,6 +805,16 @@
           {
             "href": "/services/automatisation-industrielle",
             "label": "Industrial automation"
+          }
+        ],
+        "faq": [
+          {
+            "q": "What's the first question to ask before choosing a machine?",
+            "a": "The part type and material to process, since these two factors determine the required injection pressure and therefore most of the needed specs."
+          },
+          {
+            "q": "Should I always leave a tonnage margin?",
+            "a": "Yes, a reasonable margin avoids an early replacement if your production shifts toward larger or more technical parts."
           }
         ]
       }
@@ -640,6 +850,16 @@
             "href": "/vendre-machine",
             "label": "Vendre une machine"
           }
+        ],
+        "faq": [
+          {
+            "q": "Une machine neuve est-elle toujours plus fiable qu'une occasion ?",
+            "a": "Pas automatiquement : une occasion bien entretenue avec un contrôleur à jour peut être plus fiable qu'une neuve mal entretenue par la suite. Cela dépend surtout de l'entretien."
+          },
+          {
+            "q": "Quel est le principal risque financier de l'achat neuf ?",
+            "a": "Le délai de fabrication, souvent plusieurs mois, qui immobilise votre projet, pour un capital engagé plus important."
+          }
         ]
       },
       "ar": {
@@ -666,6 +886,16 @@
             "href": "/vendre-machine",
             "label": "بيع آلة"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل الآلة الجديدة دائماً أكثر موثوقية من المستعملة؟",
+            "a": "ليس تلقائياً: آلة مستعملة جيدة الصيانة بوحدة تحكم محدّثة قد تكون أكثر موثوقية من جديدة تُهمل صيانتها لاحقاً. الأمر يعتمد أساساً على الصيانة."
+          },
+          {
+            "q": "ما هو الخطر المالي الرئيسي لشراء آلة جديدة؟",
+            "a": "مدة التصنيع، التي قد تصل لعدة أشهر وتُعطّل مشروعك، مقابل رأس مال أكبر يُستثمر."
+          }
         ]
       },
       "en": {
@@ -691,6 +921,16 @@
           {
             "href": "/vendre-machine",
             "label": "Sell a machine"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Is a new machine always more reliable than a used one?",
+            "a": "Not automatically: a well-maintained used machine with an updated controller can be more reliable than a new one poorly maintained afterward. It mainly comes down to upkeep."
+          },
+          {
+            "q": "What's the main financial risk of buying new?",
+            "a": "The manufacturing lead time, often several months, which stalls your project, for a larger capital commitment."
           }
         ]
       }
@@ -726,6 +966,16 @@
             "href": "/services/maintenance-depannage",
             "label": "Maintenance et dépannage"
           }
+        ],
+        "faq": [
+          {
+            "q": "Cette checklist s'applique-t-elle aussi aux pièces et moules ?",
+            "a": "Oui, les principes de traçabilité, d'inspection visuelle et de test fonctionnel s'appliquent à tout équipement industriel d'occasion."
+          },
+          {
+            "q": "Que faire si le vendeur refuse un test fonctionnel ?",
+            "a": "C'est un signal d'alerte à prendre au sérieux : un vendeur de bonne foi accepte généralement une démonstration, surtout pour un investissement important."
+          }
         ]
       },
       "ar": {
@@ -752,6 +1002,16 @@
             "href": "/services/maintenance-depannage",
             "label": "الصيانة والإصلاح"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل تنطبق هذه القائمة أيضاً على القطع والقوالب؟",
+            "a": "نعم، مبادئ التتبع والفحص البصري والاختبار الوظيفي تنطبق على أي معدة صناعية مستعملة."
+          },
+          {
+            "q": "ماذا أفعل إن رفض البائع اختباراً وظيفياً؟",
+            "a": "هذه إشارة تحذير يجب أخذها بجدية: البائع الجاد يقبل عادة عرضاً تجريبياً، خاصة لاستثمار كبير."
+          }
         ]
       },
       "en": {
@@ -777,6 +1037,16 @@
           {
             "href": "/services/maintenance-depannage",
             "label": "Maintenance & repair"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Does this checklist also apply to parts and molds?",
+            "a": "Yes, the principles of traceability, visual inspection, and functional testing apply to any used industrial equipment."
+          },
+          {
+            "q": "What if the seller refuses a functional test?",
+            "a": "That's a warning sign worth taking seriously: a genuine seller usually agrees to a demonstration, especially for a significant investment."
           }
         ]
       }
@@ -808,6 +1078,16 @@
             "href": "/acheter-machine",
             "label": "Demander une machine"
           }
+        ],
+        "faq": [
+          {
+            "q": "Peut-on utiliser une machine avec un tonnage plus élevé que nécessaire ?",
+            "a": "Techniquement oui, mais cela augmente inutilement la consommation électrique et le coût du cycle sans bénéfice qualité."
+          },
+          {
+            "q": "Le nombre d'empreintes du moule change-t-il le calcul du tonnage ?",
+            "a": "Oui, directement : un moule à plusieurs empreintes multiplie la surface projetée totale, donc le tonnage nécessaire, même si chaque pièce est petite."
+          }
         ]
       },
       "ar": {
@@ -830,6 +1110,16 @@
             "href": "/acheter-machine",
             "label": "طلب آلة"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يمكن استخدام آلة بقوة شدّية أعلى من اللازم؟",
+            "a": "تقنياً نعم، لكن ذلك يرفع استهلاك الكهرباء وتكلفة الدورة دون فائدة في الجودة."
+          },
+          {
+            "q": "هل عدد تجاويف القالب يغيّر حساب القوة الشدّية؟",
+            "a": "نعم، مباشرة: قالب متعدد التجاويف يضاعف المساحة المسقطة الإجمالية، وبالتالي القوة المطلوبة، حتى لو كانت كل قطعة صغيرة."
+          }
         ]
       },
       "en": {
@@ -851,6 +1141,16 @@
           {
             "href": "/acheter-machine",
             "label": "Request a machine"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Can I use a machine with more tonnage than needed?",
+            "a": "Technically yes, but it needlessly increases power consumption and cycle cost with no quality benefit."
+          },
+          {
+            "q": "Does the number of mold cavities change the tonnage calculation?",
+            "a": "Yes, directly: a multi-cavity mold multiplies the total projected area, and therefore the required tonnage, even if each part is small."
           }
         ]
       }
@@ -886,6 +1186,16 @@
             "href": "/pieces-industrielles/electrique",
             "label": "Pièces électriques"
           }
+        ],
+        "faq": [
+          {
+            "q": "Comment savoir si une panne vient de la machine ou du moule ?",
+            "a": "Un défaut sur pièce peut venir de la machine, du moule ou de la matière première — un diagnostic méthodique doit isoler chaque facteur avant de conclure."
+          },
+          {
+            "q": "Faut-il un contrat de maintenance préventive ?",
+            "a": "C'est recommandé pour les productions continues : un contrôle régulier de l'hydraulique et des paramètres du PLC évite la majorité des pannes coûteuses."
+          }
         ]
       },
       "ar": {
@@ -912,6 +1222,16 @@
             "href": "/pieces-industrielles/electrique",
             "label": "قطع كهربائية"
           }
+        ],
+        "faq": [
+          {
+            "q": "كيف أعرف إن كان العطل من الآلة أم من القالب؟",
+            "a": "عيب في القطعة قد ينتج عن الآلة أو القالب أو المادة الخام — التشخيص المنهجي يجب أن يعزل كل عامل قبل الاستنتاج."
+          },
+          {
+            "q": "هل يلزم عقد صيانة وقائية؟",
+            "a": "يُنصح به للإنتاج المستمر: الفحص المنتظم للهيدروليك ومعاملات PLC يتجنب معظم الأعطال المكلفة."
+          }
         ]
       },
       "en": {
@@ -937,6 +1257,16 @@
           {
             "href": "/pieces-industrielles/electrique",
             "label": "Electrical parts"
+          }
+        ],
+        "faq": [
+          {
+            "q": "How do I know if a fault comes from the machine or the mold?",
+            "a": "A part defect can come from the machine, the mold, or the raw material — a methodical diagnosis has to isolate each factor before concluding."
+          },
+          {
+            "q": "Do I need a preventive maintenance contract?",
+            "a": "Recommended for continuous production: regularly checking hydraulics and PLC parameters avoids most costly failures."
           }
         ]
       }
@@ -972,6 +1302,16 @@
             "href": "/machines",
             "label": "Voir les machines disponibles"
           }
+        ],
+        "faq": [
+          {
+            "q": "Faut-il arrêter la production pendant un retrofit ?",
+            "a": "Cela dépend du périmètre : une mise à niveau du PLC nécessite un arrêt limité, tandis qu'un retrofit hydraulique complet demande une immobilisation plus longue."
+          },
+          {
+            "q": "Le retrofit est-il possible sur toutes les marques de machines ?",
+            "a": "Dans la grande majorité des cas oui, tant que le châssis mécanique est sain — la compatibilité se vérifie au cas par cas lors du diagnostic."
+          }
         ]
       },
       "ar": {
@@ -998,6 +1338,16 @@
             "href": "/machines",
             "label": "عرض الآلات المتوفرة"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يجب إيقاف الإنتاج أثناء التحديث؟",
+            "a": "يعتمد على النطاق: تحديث PLC يتطلب توقفاً محدوداً، بينما تحديث هيدروليكي كامل يتطلب توقفاً أطول يُخطط له مسبقاً."
+          },
+          {
+            "q": "هل التحديث ممكن على جميع العلامات التجارية للآلات؟",
+            "a": "في الغالبية العظمى من الحالات نعم، طالما أن الهيكل الميكانيكي سليم — يتم التحقق من التوافق حالة بحالة أثناء التشخيص."
+          }
         ]
       },
       "en": {
@@ -1023,6 +1373,16 @@
           {
             "href": "/machines",
             "label": "Browse available machines"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Does production need to stop during a retrofit?",
+            "a": "It depends on the scope: a PLC upgrade needs limited downtime, while a full hydraulic retrofit requires longer downtime planned in advance."
+          },
+          {
+            "q": "Is retrofit possible on all machine brands?",
+            "a": "In the vast majority of cases yes, as long as the mechanical frame is sound — compatibility is checked case by case during diagnosis."
           }
         ]
       }
@@ -1054,6 +1414,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "Automatisation industrielle"
           }
+        ],
+        "faq": [
+          {
+            "q": "Un variateur générique convient-il à toutes les applications ?",
+            "a": "Non, le dimensionnement doit correspondre au moteur et au type de charge — un variateur mal adapté réduit sa durée de vie et ses performances."
+          },
+          {
+            "q": "Peut-on remplacer un variateur en panne par une autre marque ?",
+            "a": "C'est possible si les paramètres électriques et le protocole de communication sont compatibles avec l'automate existant, mais cela demande souvent une reconfiguration."
+          }
         ]
       },
       "ar": {
@@ -1076,6 +1446,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "الأتمتة الصناعية"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يناسب محول التردد العام جميع التطبيقات؟",
+            "a": "لا، يجب أن يتوافق التصميم مع المحرك ونوع الحمولة — محول غير مناسب يقلل عمره وأداءه."
+          },
+          {
+            "q": "هل يمكن استبدال محول معطل بعلامة أخرى؟",
+            "a": "ممكن إذا كانت المعاملات الكهربائية وبروتوكول الاتصال متوافقين مع وحدة التحكم الموجودة، لكن ذلك يتطلب غالباً إعادة ضبط."
+          }
         ]
       },
       "en": {
@@ -1097,6 +1477,16 @@
           {
             "href": "/services/automatisation-industrielle",
             "label": "Industrial automation"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Does a generic drive suit every application?",
+            "a": "No, sizing must match the motor and load type — a poorly matched drive reduces both lifespan and performance."
+          },
+          {
+            "q": "Can a failed drive be replaced with a different brand?",
+            "a": "Possible if electrical parameters and the communication protocol are compatible with the existing PLC, but it often requires reconfiguration."
           }
         ]
       }
@@ -1132,6 +1522,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "Automatisation industrielle"
           }
+        ],
+        "faq": [
+          {
+            "q": "Qu'est-ce que le rapport d'inertie et pourquoi est-il important ?",
+            "a": "C'est le rapport entre l'inertie de la charge et celle du rotor du servo-moteur ; un rapport trop élevé cause des oscillations et une perte de précision."
+          },
+          {
+            "q": "Un servo-moteur peut-il remplacer un moteur asynchrone classique ?",
+            "a": "Oui, dans le cadre d'un retrofit visant plus de précision, mais cela nécessite aussi un variateur et un système de commande adaptés."
+          }
         ]
       },
       "ar": {
@@ -1158,6 +1558,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "الأتمتة الصناعية"
           }
+        ],
+        "faq": [
+          {
+            "q": "ما هي نسبة القصور الذاتي ولماذا هي مهمة؟",
+            "a": "هي النسبة بين قصور الحمولة وقصور دوار محرك السيرفو؛ نسبة مرتفعة جداً تسبب اهتزازات وفقدان دقة التموضع."
+          },
+          {
+            "q": "هل يمكن لمحرك السيرفو أن يحل محل محرك لا متزامن تقليدي؟",
+            "a": "نعم، ضمن تحديث يهدف لمزيد من الدقة، لكن ذلك يتطلب أيضاً محولاً ونظام تحكم مناسبين."
+          }
         ]
       },
       "en": {
@@ -1183,6 +1593,16 @@
           {
             "href": "/services/automatisation-industrielle",
             "label": "Industrial automation"
+          }
+        ],
+        "faq": [
+          {
+            "q": "What is the inertia ratio and why does it matter?",
+            "a": "It's the ratio between the load's inertia and the servo motor's rotor inertia; too high a ratio causes oscillation and loss of positioning accuracy."
+          },
+          {
+            "q": "Can a servo motor replace a classic asynchronous motor?",
+            "a": "Yes, as part of a retrofit aiming for more precision, but it also requires a matching drive and control system."
           }
         ]
       }
@@ -1218,6 +1638,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "Automatisation industrielle"
           }
+        ],
+        "faq": [
+          {
+            "q": "Peut-on mélanger relais et PLC sur une même installation ?",
+            "a": "Oui, c'est courant : les fonctions de sécurité critiques restent parfois en logique câblée dédiée, tandis que la logique de production passe par le PLC."
+          },
+          {
+            "q": "Un PLC est-il rentable pour une petite installation ?",
+            "a": "Dès qu'il y a plusieurs modes de fonctionnement ou une perspective d'évolution, oui : le gain en temps de modification compense rapidement le surcoût initial."
+          }
         ]
       },
       "ar": {
@@ -1244,6 +1674,16 @@
             "href": "/services/automatisation-industrielle",
             "label": "الأتمتة الصناعية"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يمكن الجمع بين المرحلات وPLC في نفس التركيب؟",
+            "a": "نعم، أمر شائع: وظائف الأمان الحرجة تبقى أحياناً بمنطق سلكي مخصص، بينما يمر منطق الإنتاج عبر PLC."
+          },
+          {
+            "q": "هل PLC مربح لتركيب صغير؟",
+            "a": "بمجرد وجود عدة أوضاع تشغيل أو احتمال تطور، نعم: الكسب في وقت التعديل يعوّض بسرعة التكلفة الأولية الإضافية."
+          }
         ]
       },
       "en": {
@@ -1269,6 +1709,16 @@
           {
             "href": "/services/automatisation-industrielle",
             "label": "Industrial automation"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Can relays and a PLC be mixed on the same installation?",
+            "a": "Yes, it's common: critical safety functions sometimes stay on dedicated wired logic while production logic runs through the PLC."
+          },
+          {
+            "q": "Is a PLC worthwhile for a small installation?",
+            "a": "As soon as there are several operating modes or a prospect of change, yes: the time saved on modifications quickly offsets the extra upfront cost."
           }
         ]
       }
@@ -1304,6 +1754,16 @@
             "href": "/contact",
             "label": "Contacter un technicien"
           }
+        ],
+        "faq": [
+          {
+            "q": "Faut-il toujours commencer par remplacer le composant le plus suspect ?",
+            "a": "Non, c'est une erreur fréquente : mieux vaut isoler la cause réelle par un test ciblé, sous peine de remplacer une pièce saine et de voir la panne réapparaître."
+          },
+          {
+            "q": "Le PLC garde-t-il un historique utile en cas de panne intermittente ?",
+            "a": "Oui, la plupart des automates modernes conservent un historique d'alarmes qui aide à identifier un défaut difficile à reproduire manuellement."
+          }
         ]
       },
       "ar": {
@@ -1330,6 +1790,16 @@
             "href": "/contact",
             "label": "التواصل مع فني"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يجب البدء دائماً باستبدال المكوّن الأكثر اشتباهاً؟",
+            "a": "لا، هذا خطأ شائع: الأفضل عزل السبب الحقيقي باختبار موجّه، وإلا خطر استبدال قطعة سليمة وعودة العطل لاحقاً."
+          },
+          {
+            "q": "هل يحتفظ PLC بسجل مفيد في حالة عطل متقطع؟",
+            "a": "نعم، معظم وحدات التحكم الحديثة تحتفظ بسجل إنذارات يساعد على تحديد عطل يصعب إعادة إنتاجه يدوياً."
+          }
         ]
       },
       "en": {
@@ -1355,6 +1825,16 @@
           {
             "href": "/contact",
             "label": "Contact a technician"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Should you always start by replacing the most suspect component?",
+            "a": "No, that's a common mistake: it's better to isolate the real cause with a targeted test, or risk replacing a healthy part while the fault returns."
+          },
+          {
+            "q": "Does the PLC keep a useful log for an intermittent fault?",
+            "a": "Yes, most modern controllers keep an alarm history that helps identify a fault that's hard to reproduce manually."
           }
         ]
       }
@@ -1390,6 +1870,16 @@
             "href": "/acheter",
             "label": "Demander un équipement"
           }
+        ],
+        "faq": [
+          {
+            "q": "Peut-on adapter un moule existant à une nouvelle machine ?",
+            "a": "Cela dépend de la compatibilité du système d'alimentation et de la course d'ouverture — une vérification technique préalable est nécessaire."
+          },
+          {
+            "q": "Un moule mono-empreinte suffit-il pour démarrer une production ?",
+            "a": "Oui, c'est souvent le choix le plus économique pour tester une nouvelle pièce ou une petite série avant d'investir dans un moule multi-empreintes."
+          }
         ]
       },
       "ar": {
@@ -1416,6 +1906,16 @@
             "href": "/acheter",
             "label": "طلب معدة"
           }
+        ],
+        "faq": [
+          {
+            "q": "هل يمكن تكييف قالب موجود مع آلة جديدة؟",
+            "a": "يعتمد ذلك على توافق نظام التغذية ومشوار الفتح — يلزم فحص تقني مسبق قبل إعادة التشغيل على آلة أخرى."
+          },
+          {
+            "q": "هل يكفي قالب بتجويف واحد لبدء الإنتاج؟",
+            "a": "نعم، غالباً ما يكون الخيار الأكثر اقتصاداً لاختبار قطعة جديدة أو سلسلة صغيرة قبل الاستثمار في قالب متعدد التجاويف."
+          }
         ]
       },
       "en": {
@@ -1441,6 +1941,16 @@
           {
             "href": "/acheter",
             "label": "Request equipment"
+          }
+        ],
+        "faq": [
+          {
+            "q": "Can an existing mold be adapted to a new machine?",
+            "a": "It depends on the compatibility of the feed system and opening stroke — a prior technical check is necessary."
+          },
+          {
+            "q": "Is a single-cavity mold enough to start production?",
+            "a": "Yes, it's often the most economical choice to test a new part or a small run before investing in a multi-cavity mold."
           }
         ]
       }

@@ -62,6 +62,19 @@ export default async function ArticlePage({
           articleSection: article.category,
         }}
       />
+      {article.faq && article.faq.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: article.faq.map((item) => ({
+              "@type": "Question",
+              name: item.q,
+              acceptedAnswer: { "@type": "Answer", text: item.a },
+            })),
+          }}
+        />
+      )}
 
       <Breadcrumbs
         locale={locale}
@@ -107,6 +120,27 @@ export default async function ArticlePage({
                 </p>
               ))}
             </div>
+
+            {article.faq && article.faq.length > 0 && (
+              <div className="mt-10 border-t border-[var(--color-border)] pt-8">
+                <h2 className="mb-4 text-lg font-bold text-[var(--color-ink)]">
+                  {t("blog.faqTitle")}
+                </h2>
+                <div className="flex flex-col gap-3">
+                  {article.faq.map((item) => (
+                    <details
+                      key={item.q}
+                      className="group rounded-lg border border-[var(--color-border)] bg-white p-4 open:shadow-sm"
+                    >
+                      <summary className="cursor-pointer list-none text-sm font-semibold text-[var(--color-ink)]">
+                        {item.q}
+                      </summary>
+                      <p className="mt-2.5 text-sm leading-relaxed text-[var(--color-text-muted)]">{item.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {article.relatedLinks && article.relatedLinks.length > 0 && (
               <div className="mt-10 flex flex-wrap gap-2 border-t border-[var(--color-border)] pt-6">

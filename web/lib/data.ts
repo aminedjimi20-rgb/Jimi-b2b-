@@ -121,6 +121,7 @@ interface RawArticleTranslation {
   category: string;
   content: string[];
   relatedLinks?: { href: string; label: string }[];
+  faq?: { q: string; a: string }[];
 }
 
 interface RawArticle {
@@ -148,6 +149,7 @@ function localizeArticle(raw: RawArticle, locale: string): Article {
     readTimeMinutes: raw.readTimeMinutes,
     publishedAt: raw.publishedAt,
     relatedLinks: translation!.relatedLinks ?? [],
+    faq: translation!.faq ?? [],
   };
 }
 
