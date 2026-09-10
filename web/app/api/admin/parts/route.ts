@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
     category: body.category as PartCategory,
     name: String(body.name).slice(0, 200),
     reference: String(body.reference).slice(0, 100),
+    brand: body.brand ? String(body.brand).slice(0, 100) : undefined,
+    model: body.model ? String(body.model).slice(0, 100) : undefined,
+    wilaya: body.wilaya ? String(body.wilaya).slice(0, 100) : undefined,
     description: body.description ? String(body.description).slice(0, 2000) : "",
     condition: VALID_CONDITIONS.includes(body.condition as PartCondition)
       ? (body.condition as PartCondition)

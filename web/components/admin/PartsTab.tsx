@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import type { Part, PartCategory, PartCondition, PartStatus } from "@/lib/types";
 import { PhotoUploader } from "@/components/forms/MediaUploader";
+import { wilayas } from "@/lib/wilayas";
 import { Plus, Trash2, Lock, RefreshCw, EyeOff, Eye, Tag } from "lucide-react";
 
 const CATEGORY_LABELS: Record<PartCategory, string> = {
@@ -139,6 +140,16 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
             {Object.entries(CONDITION_LABELS).map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
+              </option>
+            ))}
+          </select>
+          <input name="brand" placeholder="Marque (optionnel)" className="admin-input" />
+          <input name="model" placeholder="Modèle (optionnel)" className="admin-input" />
+          <select name="wilaya" defaultValue="" className="admin-input">
+            <option value="">Wilaya (optionnel)</option>
+            {wilayas.map((w) => (
+              <option key={w.code} value={w.fr}>
+                {w.fr}
               </option>
             ))}
           </select>

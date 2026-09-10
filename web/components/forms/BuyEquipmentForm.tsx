@@ -91,7 +91,15 @@ export function BuyEquipmentForm({ initialType = null }: { initialType?: Selecta
   );
 }
 
-function GenericBuyRequestForm({ buyType }: { buyType: "piece" | "moule" | "equipement" }) {
+export function GenericBuyRequestForm({
+  buyType,
+  defaultReference,
+}: {
+  buyType: "piece" | "moule" | "equipement";
+  /** Préremplit le champ référence — utilisé sur une fiche produit pour
+   *  identifier la pièce demandée sans que le client ait à la retaper. */
+  defaultReference?: string;
+}) {
   const t = useTranslations();
   const { status, submit } = useLeadForm("buy");
 
@@ -112,7 +120,11 @@ function GenericBuyRequestForm({ buyType }: { buyType: "piece" | "moule" | "equi
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FieldWrapper label={t("forms.fields.reference")}>
-            <TextInput name="reference" placeholder="Siemens, SKF, moule 4 empreintes..." />
+            <TextInput
+              name="reference"
+              defaultValue={defaultReference}
+              placeholder="Siemens, SKF, moule 4 empreintes..."
+            />
           </FieldWrapper>
           <FieldWrapper label={t("forms.fields.budget")}>
             <TextInput name="budget" type="number" min={0} placeholder="50 000" />

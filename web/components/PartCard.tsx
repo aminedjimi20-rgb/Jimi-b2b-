@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Link } from "@/i18n/navigation";
 import { buildWhatsAppLink, siteConfig } from "@/config/site.config";
 import type { Part, PartCondition } from "@/lib/types";
 import { Cog, MessageCircle, Phone } from "lucide-react";
@@ -14,6 +15,7 @@ const conditionTone: Record<PartCondition, "success" | "accent" | "warning"> = {
 export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid" | "list" }) {
   const t = useTranslations();
   const waMessage = t("pieces.whatsappRequest", { name: part.name, reference: part.reference });
+  const detailHref = `/pieces-industrielles/${part.category}/${part.slug}`;
 
   const badges = (
     <div className="absolute inset-x-3 top-3 flex flex-wrap gap-2">
@@ -59,26 +61,28 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
   if (layout === "list") {
     return (
       <div className="flex flex-row overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm transition-shadow hover:shadow-lg">
-        <div className="relative w-28 shrink-0 overflow-hidden bg-[var(--color-surface-2)] sm:w-56">
+        <Link href={detailHref} className="relative w-28 shrink-0 overflow-hidden bg-[var(--color-surface-2)] sm:w-56">
           {image}
           <div className="absolute inset-x-1.5 top-1.5 flex flex-wrap gap-1 sm:inset-x-3 sm:top-3 sm:gap-2 [&_span]:px-1.5 [&_span]:py-0.5 [&_span]:text-[10px] sm:[&_span]:px-2.5 sm:[&_span]:py-1 sm:[&_span]:text-xs">
             <Badge tone={conditionTone[part.condition]}>{t(`pieces.condition.${part.condition}`)}</Badge>
             {part.isPromo && <Badge tone="warning">{t("badges.promo")}</Badge>}
           </div>
-        </div>
+        </Link>
 
         <div className="flex flex-1 flex-col justify-between gap-2 p-3 sm:flex-row sm:items-center sm:gap-6 sm:p-5">
-          <div className="min-w-0 flex-1">
+          <Link href={detailHref} className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">
               {t("pieces.reference")} {part.reference}
             </p>
-            <h3 className="mt-0.5 text-base font-bold text-[var(--color-ink)] sm:text-lg">{part.name}</h3>
+            <h3 className="mt-0.5 text-base font-bold text-[var(--color-ink)] hover:text-[var(--color-accent)] sm:text-lg">
+              {part.name}
+            </h3>
             {part.description && (
               <p className="mt-1 line-clamp-2 hidden text-sm text-[var(--color-text-muted)] sm:block">
                 {part.description}
               </p>
             )}
-          </div>
+          </Link>
 
           <div className="flex shrink-0 flex-col gap-2 border-t border-[var(--color-border)] pt-2 sm:w-64 sm:gap-3 sm:border-t-0 sm:border-s sm:ps-6 sm:pt-0">
             <span className="font-bold text-[var(--color-ink)]">
@@ -95,18 +99,20 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm transition-shadow hover:shadow-lg">
-      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-2)]">
+      <Link href={detailHref} className="relative aspect-[4/3] overflow-hidden bg-[var(--color-surface-2)]">
         {image}
         {badges}
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <div>
+        <Link href={detailHref}>
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">
             {t("pieces.reference")} {part.reference}
           </p>
-          <h3 className="mt-0.5 text-lg font-bold text-[var(--color-ink)]">{part.name}</h3>
-        </div>
+          <h3 className="mt-0.5 text-lg font-bold text-[var(--color-ink)] hover:text-[var(--color-accent)]">
+            {part.name}
+          </h3>
+        </Link>
 
         {part.description && (
           <p className="line-clamp-3 text-sm text-[var(--color-text-muted)]">{part.description}</p>

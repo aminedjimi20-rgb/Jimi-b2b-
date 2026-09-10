@@ -1101,5 +1101,21 @@
   "push": {
     "manageEnabled": "🔔 Notifications on",
     "manageDisabled": "🔕 Enable notifications"
+  },
+  "partDetail": {
+    "galleryTitle": "Photos",
+    "specsTitle": "Specifications",
+    "descriptionTitle": "Description",
+    "interestedTitle": "Interested in this part?",
+    "interestedSubtitle": "Send us your request and we'll get back to you quickly with availability and price.",
+    "backToCategory": "Back to category",
+    "specs": {
+      "brand": "Brand",
+      "model": "Model",
+      "reference": "Reference",
+      "condition": "Condition",
+      "wilaya": "Location",
+      "price": "Price"
+    }
   }
 }

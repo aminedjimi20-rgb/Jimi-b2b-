@@ -10,7 +10,7 @@ import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
 import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { HtmlAttributes } from "@/components/HtmlAttributes";
 import { siteConfig } from "@/config/site.config";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, absoluteUrl } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 
 const inter = Inter({
@@ -62,6 +62,13 @@ export async function generateMetadata({
       index: true,
       follow: true,
     },
+    // Rempli uniquement si la variable d'environnement est définie (token
+    // réel fourni via Google Search Console → Paramètres → Propriété →
+    // Vérification par balise HTML). Jamais de valeur inventée : sans la
+    // variable, cette clé est absente et aucune balise n'est générée.
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+      : {}),
   };
 }
 
@@ -91,9 +98,12 @@ export default async function LocaleLayout({
         <JsonLd
           data={{
             "@context": "https://schema.org",
-            "@type": "LocalBusiness",
+            "@type": ["Organization", "LocalBusiness"],
+            "@id": `${siteConfig.seo.siteUrl}/#organization`,
             name: siteConfig.companyName,
+            alternateName: siteConfig.companyShortName,
             url: siteConfig.seo.siteUrl,
+            image: absoluteUrl("/opengraph-image", locale),
             description:
               "Machines, pièces industrielles, moules et automatisation : vente, achat, maintenance et rénovation d'équipements industriels en Algérie.",
             telephone: siteConfig.contact.phoneDisplay,

@@ -1101,5 +1101,21 @@
   "push": {
     "manageEnabled": "🔔 Notifications activées",
     "manageDisabled": "🔕 Activer les notifications"
+  },
+  "partDetail": {
+    "galleryTitle": "Photos",
+    "specsTitle": "Caractéristiques",
+    "descriptionTitle": "Description",
+    "interestedTitle": "Cette pièce vous intéresse ?",
+    "interestedSubtitle": "Envoyez-nous votre demande, nous revenons vers vous rapidement avec la disponibilité et le prix.",
+    "backToCategory": "Retour à la catégorie",
+    "specs": {
+      "brand": "Marque",
+      "model": "Modèle",
+      "reference": "Référence",
+      "condition": "État",
+      "wilaya": "Localisation",
+      "price": "Prix"
+    }
   }
 }

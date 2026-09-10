@@ -1101,5 +1101,21 @@
   "push": {
     "manageEnabled": "🔔 الإشعارات مفعّلة",
     "manageDisabled": "🔕 تفعيل الإشعارات"
+  },
+  "partDetail": {
+    "galleryTitle": "الصور",
+    "specsTitle": "المواصفات",
+    "descriptionTitle": "الوصف",
+    "interestedTitle": "مهتم بهذه القطعة؟",
+    "interestedSubtitle": "أرسل لنا طلبك، سنعاود الاتصال بك بسرعة لتأكيد التوفر والسعر.",
+    "backToCategory": "العودة إلى الفئة",
+    "specs": {
+      "brand": "العلامة التجارية",
+      "model": "الموديل",
+      "reference": "المرجع",
+      "condition": "الحالة",
+      "wilaya": "الموقع",
+      "price": "السعر"
+    }
   }
 }

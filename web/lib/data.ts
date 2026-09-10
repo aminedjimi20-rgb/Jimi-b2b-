@@ -176,6 +176,11 @@ export async function getPublicPartsByCategory(category: PartCategory): Promise<
   return parts.filter((p) => p.category === category);
 }
 
+export async function getPublicPartBySlug(slug: string): Promise<Part | undefined> {
+  const parts = await getPublicParts();
+  return parts.find((p) => p.slug === slug);
+}
+
 /** Most recently added parts — same "runtime items come first" ordering as
  *  `getLatestMachines`. */
 export async function getLatestParts(limit = 4): Promise<Part[]> {

@@ -83,6 +83,14 @@ export interface Part {
   category: PartCategory;
   name: string;
   reference: string;
+  /** Marque du fabricant (ex: "Siemens", "SKF") — optionnel, toutes les
+   *  pièces n'ont pas une marque identifiée. */
+  brand?: string;
+  /** Modèle / référence constructeur — optionnel. */
+  model?: string;
+  /** Wilaya où se trouve la pièce — optionnel, distinct de la zone de
+   *  service (voir siteConfig.contact) qui couvre tout le pays. */
+  wilaya?: string;
   description: string;
   condition: PartCondition;
   price: number | null;

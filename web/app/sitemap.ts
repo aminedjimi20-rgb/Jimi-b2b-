@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site.config";
 import { routing } from "@/i18n/routing";
-import { getPublicMachines, getArticles, getPublicProjects } from "@/lib/data";
+import { getPublicMachines, getArticles, getPublicProjects, getPublicParts } from "@/lib/data";
 
 const staticPaths = [
   "",
@@ -55,11 +55,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const machines = await getPublicMachines();
   const articles = getArticles();
   const projects = await getPublicProjects();
+  const parts = await getPublicParts();
 
   const dynamicPaths = [
     ...machines.map((m) => `/machines/${m.slug}`),
     ...articles.map((a) => `/blog/${a.slug}`),
     ...projects.map((p) => `/realisations/${p.slug}`),
+    ...parts.map((p) => `/pieces-industrielles/${p.category}/${p.slug}`),
   ];
 
   const allPaths = [...staticPaths, ...dynamicPaths];
