@@ -56,6 +56,17 @@ function isAcceptableSellLead(lead: Lead): boolean {
   return lead.type === "sell" && lead.data.equipmentType !== "machine";
 }
 
+/** Une demande "Recherche machine" (achat) peut être acceptée pour
+ *  enregistrer l'acheteur dans l'onglet Acheteurs, plutôt que de laisser
+ *  son contact perdu dans le texte brut de la demande. */
+function isAcceptableBuyLead(lead: Lead): boolean {
+  return lead.type === "buy";
+}
+
+function isAcceptableLead(lead: Lead): boolean {
+  return isAcceptableSellLead(lead) || isAcceptableBuyLead(lead);
+}
+
 export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [filterType, setFilterType] = useState<LeadType | "all">("all");
@@ -94,30 +105,64 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
     await fetch(`/api/admin/leads?id=${id}`, { method: "DELETE" });
   }
 
+/** Enregistre le contact de la demande (nom/téléphone obligatoires) dans
+   *  Vendeurs ou Acheteurs selon le type, pour qu'il ne reste pas perdu dans
+   *  le texte brut de la demande. findOrCreateSeller/Buyer dédoublonne par
+   *  téléphone côté serveur, donc accepter la même personne deux fois ne
+   *  crée pas deux fiches. */
+  async function registerContact(lead: Lead, endpoint: "sellers" | "buyers"): Promise<boolean> {
+    if (!lead.data.name || !lead.data.phone) return true; // rien à enregistrer, pas bloquant
+    const res = await fetch(`/api/admin/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: lead.data.name,
+        phone: lead.data.phone,
+        whatsapp: lead.data.whatsapp || undefined,
+        wilaya: lead.data.wilaya || undefined,
+      }),
+    });
+    return res.ok;
+  }
+
   async function accept(lead: Lead) {
     setAcceptingId(lead.id);
     try {
-      const priceWanted = Number(lead.data.priceWanted);
-      const nameOrRef = lead.data.reference?.trim() || lead.data.description?.trim() || "Pièce à identifier";
-      const res = await fetch("/api/admin/parts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: EQUIPMENT_TYPE_TO_CATEGORY[lead.data.equipmentType ?? ""] ?? "autre",
-          name: nameOrRef,
-          reference: nameOrRef,
-          condition: "occasion",
-          wilaya: lead.data.wilaya || undefined,
-          description: lead.data.description ?? "",
-          price: priceWanted > 0 ? priceWanted : null,
-          priceOnRequest: !(priceWanted > 0),
-          photos: parsePhotos(lead.data.photos),
-          status: "draft",
-        }),
-      });
-      if (!res.ok) {
-        alert("Erreur lors de la création de la fiche.");
-        return;
+      if (isAcceptableSellLead(lead)) {
+        const priceWanted = Number(lead.data.priceWanted);
+        const nameOrRef = lead.data.reference?.trim() || lead.data.description?.trim() || "Pièce à identifier";
+        const [partRes, sellerOk] = await Promise.all([
+          fetch("/api/admin/parts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              category: EQUIPMENT_TYPE_TO_CATEGORY[lead.data.equipmentType ?? ""] ?? "autre",
+              name: nameOrRef,
+              reference: nameOrRef,
+              condition: "occasion",
+              wilaya: lead.data.wilaya || undefined,
+              description: lead.data.description ?? "",
+              price: priceWanted > 0 ? priceWanted : null,
+              priceOnRequest: !(priceWanted > 0),
+              photos: parsePhotos(lead.data.photos),
+              status: "draft",
+            }),
+          }),
+          registerContact(lead, "sellers"),
+        ]);
+        if (!partRes.ok) {
+          alert("Erreur lors de la création de la fiche.");
+          return;
+        }
+        if (!sellerOk) {
+          alert("Fiche créée, mais l'enregistrement du vendeur a échoué — à ajouter manuellement dans Vendeurs.");
+        }
+      } else if (isAcceptableBuyLead(lead)) {
+        const buyerOk = await registerContact(lead, "buyers");
+        if (!buyerOk) {
+          alert("Erreur lors de l'enregistrement de l'acheteur.");
+          return;
+        }
       }
       setAcceptedIds((prev) => new Set(prev).add(lead.id));
       await setStatus(lead.id, "closed");
@@ -174,7 +219,7 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isAcceptableSellLead(lead) && !acceptedIds.has(lead.id) && (
+                  {isAcceptableLead(lead) && !acceptedIds.has(lead.id) && (
                     <button
                       onClick={() => accept(lead)}
                       disabled={acceptingId === lead.id}
@@ -265,8 +310,10 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
               {acceptedIds.has(lead.id) && (
                 <div className="mt-3 border-t border-[var(--color-border)] pt-3">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-                    <CheckCircle2 size={14} /> Fiche créée en brouillon — à compléter et publier depuis
-                    l&apos;onglet Pièces
+                    <CheckCircle2 size={14} />
+                    {isAcceptableSellLead(lead)
+                      ? "Fiche créée en brouillon (à publier depuis l'onglet Pièces) et vendeur enregistré dans Vendeurs"
+                      : "Acheteur enregistré dans l'onglet Acheteurs"}
                   </span>
                 </div>
               )}
