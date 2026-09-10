@@ -903,13 +903,27 @@
       "problem": "Initial problem",
       "solution": "Solution provided",
       "result": "Result"
+    },
+    "interventionTypes": {
+      "renovation": "Renovation",
+      "automatisation": "Automation",
+      "reparation": "Repair",
+      "retrofit": "Retrofit",
+      "installation": "Installation",
+      "mise-en-service": "Commissioning"
     }
   },
   "blog": {
     "pageTitle": "Insights & News",
     "pageSubtitle": "Technical advice for choosing, maintaining and upgrading your injection machines.",
     "readTime": "min read",
-    "relatedTitle": "Also worth reading"
+    "relatedTitle": "Also worth reading",
+    "cta": {
+      "title": "Have a question about this?",
+      "subtitle": "Our team can advise you on your specific case, free of charge.",
+      "quote": "Request a quote",
+      "whatsapp": "Chat on WhatsApp"
+    }
   },
   "contactPage": {
     "title": "Contact us",

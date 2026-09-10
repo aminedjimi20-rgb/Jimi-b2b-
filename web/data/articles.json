@@ -129,7 +129,7 @@
     "publishedAt": "2026-03-01",
     "translations": {
       "fr": {
-        "title": "Comment choisir une machine d'injection plastique adaptée à votre production",
+        "title": "Choisir une machine d'injection plastique adaptée",
         "excerpt": "Tonnage, type de commande, cadence, matière transformée : les critères qui déterminent la machine d'injection réellement adaptée à votre activité.",
         "category": "Machines",
         "content": [
@@ -181,7 +181,7 @@
         ]
       },
       "en": {
-        "title": "How to Choose the Right Plastic Injection Machine for Your Production",
+        "title": "How to Choose the Right Plastic Injection Machine",
         "excerpt": "Clamping force, drive type, cycle speed, material: the criteria that determine which injection machine actually fits your operation.",
         "category": "Machines",
         "content": [
@@ -301,7 +301,7 @@
     "publishedAt": "2026-03-10",
     "translations": {
       "fr": {
-        "title": "Checklist complète avant d'acheter un équipement industriel d'occasion",
+        "title": "Checklist avant d'acheter un équipement industriel d'occasion",
         "excerpt": "Une méthode en 5 points pour inspecter machine, pièce ou moule d'occasion avant achat, au-delà du seul aspect visuel.",
         "category": "Achat",
         "content": [
@@ -353,7 +353,7 @@
         ]
       },
       "en": {
-        "title": "A Complete Checklist Before Buying Used Industrial Equipment",
+        "title": "Checklist Before Buying Used Industrial Equipment",
         "excerpt": "A 5-point method to inspect a used machine, part, or mold before purchase, beyond just how it looks.",
         "category": "Buying",
         "content": [
@@ -387,7 +387,7 @@
     "publishedAt": "2026-03-15",
     "translations": {
       "fr": {
-        "title": "Comment choisir le bon tonnage pour votre machine d'injection plastique",
+        "title": "Comment choisir le bon tonnage d'une machine d'injection",
         "excerpt": "La méthode de calcul du tonnage nécessaire selon la surface projetée de la pièce, et pourquoi se tromper coûte cher.",
         "category": "Machines",
         "content": [
@@ -431,7 +431,7 @@
         ]
       },
       "en": {
-        "title": "How to Choose the Right Tonnage for Your Injection Machine",
+        "title": "How to Choose the Right Injection Machine Tonnage",
         "excerpt": "How to calculate the clamping force needed from a part's projected area, and why getting it wrong is costly.",
         "category": "Machines",
         "content": [
@@ -461,7 +461,7 @@
     "publishedAt": "2026-03-20",
     "translations": {
       "fr": {
-        "title": "Pannes fréquentes sur machine d'injection plastique : causes et solutions",
+        "title": "Pannes fréquentes en injection plastique : causes et solutions",
         "excerpt": "Les pannes hydrauliques, électriques et mécaniques les plus courantes sur presse à injecter, et comment les diagnostiquer rapidement.",
         "category": "Maintenance",
         "content": [
@@ -513,7 +513,7 @@
         ]
       },
       "en": {
-        "title": "Common Failures on Plastic Injection Machines: Causes and Fixes",
+        "title": "Common Injection Machine Failures: Causes and Fixes",
         "excerpt": "The most common hydraulic, electrical, and mechanical failures on injection presses, and how to diagnose them quickly.",
         "category": "Maintenance",
         "content": [
@@ -707,7 +707,7 @@
     "publishedAt": "2026-04-03",
     "translations": {
       "fr": {
-        "title": "Comment choisir un servo-moteur pour votre application industrielle",
+        "title": "Comment choisir un servo-moteur industriel",
         "excerpt": "Couple, inertie, précision de positionnement : comment sélectionner le servo-moteur adapté à votre axe et éviter le sous ou sur-dimensionnement.",
         "category": "Automatisation",
         "content": [
@@ -759,7 +759,7 @@
         ]
       },
       "en": {
-        "title": "How to Choose a Servo Motor for Your Industrial Application",
+        "title": "How to Choose an Industrial Servo Motor",
         "excerpt": "Torque, inertia, positioning accuracy: how to select the right servo motor for your axis and avoid under- or oversizing.",
         "category": "Automation",
         "content": [
@@ -965,7 +965,7 @@
     "publishedAt": "2026-04-18",
     "translations": {
       "fr": {
-        "title": "Comment choisir un moule d'injection plastique adapté à votre projet",
+        "title": "Comment choisir un moule d'injection plastique adapté",
         "excerpt": "Nombre d'empreintes, type d'acier, système de refroidissement : les critères techniques pour bien choisir ou faire fabriquer son moule.",
         "category": "Moules",
         "content": [
@@ -1017,7 +1017,7 @@
         ]
       },
       "en": {
-        "title": "How to Choose a Plastic Injection Mold for Your Project",
+        "title": "How to Choose the Right Plastic Injection Mold",
         "excerpt": "Cavity count, steel type, cooling system: the technical criteria for choosing or having the right mold made.",
         "category": "Molds",
         "content": [

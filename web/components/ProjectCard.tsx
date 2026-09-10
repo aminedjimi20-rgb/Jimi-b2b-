@@ -7,6 +7,7 @@ import { Video } from "lucide-react";
 
 export async function ProjectCard({ project, index = 0 }: { project: Project; index?: number }) {
   const t = await getTranslations("realisations.labels");
+  const tTypes = await getTranslations("realisations.interventionTypes");
   const tMachines = await getTranslations("machines");
 
   return (
@@ -39,6 +40,9 @@ export async function ProjectCard({ project, index = 0 }: { project: Project; in
         <div className="flex flex-wrap gap-2">
           <Badge tone="accent">{project.brand}</Badge>
           <Badge tone="neutral">{project.tonnage} T</Badge>
+          {project.interventionType && (
+            <Badge tone="neutral">{tTypes(project.interventionType)}</Badge>
+          )}
         </div>
         <dl className="mt-1 space-y-2.5 text-sm">
           <div>

@@ -903,13 +903,27 @@
       "problem": "المشكلة الأولية",
       "solution": "الحل المقدم",
       "result": "النتيجة"
+    },
+    "interventionTypes": {
+      "renovation": "تجديد",
+      "automatisation": "أتمتة",
+      "reparation": "إصلاح",
+      "retrofit": "تحديث",
+      "installation": "تركيب",
+      "mise-en-service": "تشغيل"
     }
   },
   "blog": {
     "pageTitle": "نصائح وأخبار",
     "pageSubtitle": "نصائحنا التقنية لاختيار وصيانة وتطوير آلات الحقن الخاصة بك.",
     "readTime": "دقيقة قراءة",
-    "relatedTitle": "اقرأ أيضًا"
+    "relatedTitle": "اقرأ أيضًا",
+    "cta": {
+      "title": "لديك سؤال حول هذا الموضوع؟",
+      "subtitle": "يمكن لفريقنا تقديم النصح لحالتك بالتحديد، مجاناً.",
+      "quote": "طلب عرض سعر",
+      "whatsapp": "تواصل عبر واتساب"
+    }
   },
   "contactPage": {
     "title": "اتصل بنا",

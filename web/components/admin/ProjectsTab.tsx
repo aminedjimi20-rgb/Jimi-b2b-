@@ -1,13 +1,22 @@
 "use client";
 
 import { useState, FormEvent, Fragment } from "react";
-import type { Project, ProjectStatus } from "@/lib/types";
+import type { Project, ProjectStatus, ProjectInterventionType } from "@/lib/types";
 import { PhotoUploader, VideoUploader } from "@/components/forms/MediaUploader";
 import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
   draft: "Brouillon (masquée)",
   published: "Publiée",
+};
+
+const INTERVENTION_TYPE_LABELS: Record<ProjectInterventionType, string> = {
+  renovation: "Rénovation",
+  automatisation: "Automatisation",
+  reparation: "Réparation",
+  retrofit: "Retrofit",
+  installation: "Installation",
+  "mise-en-service": "Mise en service",
 };
 
 const STATUS_TONE: Record<ProjectStatus, string> = {
@@ -137,7 +146,15 @@ export function ProjectsTab({ initialProjects }: { initialProjects: Project[] })
             ))}
           </select>
           <input name="brand" required placeholder="Marque" className="admin-input" />
-          <input name="tonnage" type="number" required placeholder="Tonnage" className="admin-input sm:col-span-2" />
+          <input name="tonnage" type="number" required placeholder="Tonnage" className="admin-input" />
+          <select name="interventionType" defaultValue="" className="admin-input">
+            <option value="">Type d&apos;intervention (optionnel)</option>
+            {Object.entries(INTERVENTION_TYPE_LABELS).map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </select>
           <textarea
             name="problem"
             required

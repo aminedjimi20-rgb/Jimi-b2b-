@@ -903,13 +903,27 @@
       "problem": "Problème initial",
       "solution": "Solution apportée",
       "result": "Résultat"
+    },
+    "interventionTypes": {
+      "renovation": "Rénovation",
+      "automatisation": "Automatisation",
+      "reparation": "Réparation",
+      "retrofit": "Retrofit",
+      "installation": "Installation",
+      "mise-en-service": "Mise en service"
     }
   },
   "blog": {
     "pageTitle": "Conseils & Actualités",
     "pageSubtitle": "Nos conseils techniques pour bien choisir, entretenir et faire évoluer vos machines d'injection.",
     "readTime": "min de lecture",
-    "relatedTitle": "À lire aussi"
+    "relatedTitle": "À lire aussi",
+    "cta": {
+      "title": "Une question sur ce sujet ?",
+      "subtitle": "Notre équipe peut vous conseiller sur votre cas précis, gratuitement.",
+      "quote": "Demander un devis",
+      "whatsapp": "Discuter sur WhatsApp"
+    }
   },
   "contactPage": {
     "title": "Contactez-nous",

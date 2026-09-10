@@ -105,12 +105,25 @@ export interface Part {
 
 export type ProjectStatus = "draft" | "published";
 
+export const PROJECT_INTERVENTION_TYPES = [
+  "renovation",
+  "automatisation",
+  "reparation",
+  "retrofit",
+  "installation",
+  "mise-en-service",
+] as const;
+export type ProjectInterventionType = (typeof PROJECT_INTERVENTION_TYPES)[number];
+
 export interface Project {
   id: string;
   slug: string;
   title: string;
   brand: string;
   tonnage: number;
+  /** Type d'intervention (rénovation, automatisation, réparation...) —
+   *  optionnel, les réalisations existantes n'en ont pas forcément une. */
+  interventionType?: ProjectInterventionType;
   problem: string;
   solution: string;
   result: string;

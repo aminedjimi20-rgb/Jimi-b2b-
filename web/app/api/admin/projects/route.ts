@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { getProjects } from "@/lib/data";
 import { addRuntimeProject, type AdminProjectInput } from "@/lib/projectsStore";
 import { sanitizeUrl } from "@/lib/sanitize";
+import { PROJECT_INTERVENTION_TYPES, type ProjectInterventionType } from "@/lib/types";
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) {
@@ -26,6 +27,11 @@ export async function POST(request: NextRequest) {
     title: String(body.title).slice(0, 200),
     brand: String(body.brand).slice(0, 100),
     tonnage: Number(body.tonnage),
+    interventionType: PROJECT_INTERVENTION_TYPES.includes(
+      body.interventionType as ProjectInterventionType
+    )
+      ? (body.interventionType as ProjectInterventionType)
+      : undefined,
     problem: String(body.problem).slice(0, 2000),
     solution: String(body.solution).slice(0, 2000),
     result: String(body.result).slice(0, 2000),

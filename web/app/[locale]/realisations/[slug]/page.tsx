@@ -38,6 +38,7 @@ export default async function ProjectDetailPage({
   if (!project) notFound();
 
   const t = await getTranslations("realisations.labels");
+  const tTypes = await getTranslations("realisations.interventionTypes");
   const tCta = await getTranslations("cta");
   const tn = await getTranslations("nav");
 
@@ -68,6 +69,9 @@ export default async function ProjectDetailPage({
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge tone="accent">{project.brand}</Badge>
               <Badge tone="neutral">{project.tonnage} T</Badge>
+              {project.interventionType && (
+                <Badge tone="neutral">{tTypes(project.interventionType)}</Badge>
+              )}
             </div>
 
             {project.photos && project.photos.length > 0 && (

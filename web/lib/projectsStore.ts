@@ -9,6 +9,7 @@ export type AdminProjectInput = {
   title: string;
   brand: string;
   tonnage: number;
+  interventionType?: Project["interventionType"];
   problem: string;
   solution: string;
   result: string;
@@ -46,6 +47,7 @@ function buildProject(id: string, slug: string, input: AdminProjectInput): Proje
     title: input.title,
     brand: input.brand,
     tonnage: input.tonnage,
+    interventionType: input.interventionType || undefined,
     problem: input.problem,
     solution: input.solution,
     result: input.result,

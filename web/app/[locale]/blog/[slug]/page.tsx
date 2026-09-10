@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/Container";
+import { Button } from "@/components/ui/Button";
 import { Link } from "@/i18n/navigation";
 import { MachineArt } from "@/components/MachineArt";
 import { Badge } from "@/components/ui/Badge";
@@ -9,8 +10,9 @@ import { JsonLd } from "@/components/JsonLd";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { buildAlternates } from "@/lib/seo";
 import { getArticleBySlug, getArticles } from "@/lib/data";
+import { buildWhatsAppLink } from "@/config/site.config";
 import { routing } from "@/i18n/routing";
-import { ArrowLeft, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, MessageCircle } from "lucide-react";
 
 export function generateStaticParams() {
   const articles = getArticles();
@@ -119,6 +121,26 @@ export default async function ArticlePage({
                 ))}
               </div>
             )}
+
+            <div className="mt-10 flex flex-col items-start gap-4 rounded-xl bg-[var(--color-surface-2)] p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold text-[var(--color-ink)]">{t("blog.cta.title")}</p>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{t("blog.cta.subtitle")}</p>
+              </div>
+              <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:shrink-0">
+                <Button href="/contact" icon={<ArrowRight size={16} className="rtl:rotate-180" />}>
+                  {t("blog.cta.quote")}
+                </Button>
+                <Button
+                  href={buildWhatsAppLink(t("whatsappMessages.generalContact"))}
+                  external
+                  variant="whatsapp"
+                  icon={<MessageCircle size={16} />}
+                >
+                  {t("blog.cta.whatsapp")}
+                </Button>
+              </div>
+            </div>
           </div>
 
           {related.length > 0 && (
