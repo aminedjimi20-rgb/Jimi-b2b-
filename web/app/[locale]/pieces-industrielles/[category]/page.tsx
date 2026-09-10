@@ -175,7 +175,7 @@ export default async function PieceCategoryPage({
               <p className="text-sm font-bold text-[var(--color-ink)]">{t("notFoundBanner.title")}</p>
               <p className="mt-1 text-sm text-[var(--color-text-muted)]">{t("notFoundBanner.subtitle")}</p>
             </div>
-            <div className="flex shrink-0 gap-2">
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:shrink-0">
               <Button
                 href={`/acheter?type=${category === "moules" ? "moule" : "piece"}`}
                 icon={<ArrowRight size={16} />}
