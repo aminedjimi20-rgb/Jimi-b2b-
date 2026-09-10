@@ -49,6 +49,7 @@
     "scheduleInspection": "حجز موعد للمعاينة",
     "proposeMachine": "اقتراح آلتي للبيع",
     "sellEquipment": "بيع معدة",
+    "searchPart": "البحث عن قطعة",
     "sendMyRequest": "إرسال طلبي",
     "viewAll": "عرض الكل",
     "readMore": "قراءة المقال",
@@ -285,6 +286,8 @@
     "seoTitle": "قطع غيار صناعية الجزائر | إلكترونيك، قوالب، هيدروليك، ميكانيك",
     "seoDescription": "كتالوج قطع الغيار الصناعية في الجزائر: قطع إلكترونية وكهربائية، قوالب حقن البلاستيك، قطع هيدروليكية وميكانيكية. جديدة، مستعملة أو مجددة.",
     "viewCategory": "عرض الفئة",
+    "viewGrid": "شبكة",
+    "viewList": "قائمة",
     "reference": "المرجع",
     "requestPrice": "طلب السعر",
     "whatsappRequest": "مرحباً جيمي، أريد معرفة سعر القطعة \"{name}\" (المرجع {reference}).",
@@ -331,7 +334,8 @@
   "badges": {
     "published": "متوفرة",
     "sold": "مباعة",
-    "reserved": "محجوزة"
+    "reserved": "محجوزة",
+    "promo": "عرض"
   },
   "machineDetail": {
     "galleryTitle": "معرض الصور",

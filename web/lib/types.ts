@@ -46,6 +46,9 @@ export interface Machine {
   defects: string[];
   accessories: string[];
   isDemo: boolean;
+  /** Mise en avant commerciale (badge "Promo" sur le site) — bascule admin,
+   *  n'affecte pas le prix affiché. */
+  isPromo?: boolean;
   /** Reference to the private SellerProfile record (lib/sellers.ts) — never
    *  the seller's contact details themselves. Admin-only, stripped from every
    *  public data path (see lib/data.ts `toPublicMachine`). */
@@ -75,6 +78,9 @@ export interface Part {
   photos: string[];
   status: PartStatus;
   isDemo: boolean;
+  /** Mise en avant commerciale (badge "Promo" sur le site) — bascule admin,
+   *  n'affecte pas le prix affiché. */
+  isPromo?: boolean;
 }
 
 export type ProjectStatus = "draft" | "published";

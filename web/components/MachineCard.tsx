@@ -36,6 +36,7 @@ export function MachineCard({ machine, index = 0 }: { machine: PublicMachine; in
         )}
         <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-2">
           <Badge tone={statusTone[machine.status]}>{t(`badges.${machine.status}`)}</Badge>
+          {machine.isPromo && <Badge tone="warning">{t("badges.promo")}</Badge>}
           {machine.isDemo && (
             <Badge tone="neutral" className="bg-white/90 text-slate-700 ring-white/50">
               {t("demoDataBadge")}

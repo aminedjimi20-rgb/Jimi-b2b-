@@ -15,6 +15,7 @@ export type AdminPartInput = {
   price: number | null;
   priceOnRequest: boolean;
   photos?: string[];
+  isPromo?: boolean;
 };
 
 const COLLECTION = "parts";
@@ -51,6 +52,7 @@ function buildPart(id: string, slug: string, input: AdminPartInput): Part {
     photos: input.photos ?? [],
     status: input.status,
     isDemo: false,
+    isPromo: input.isPromo ?? false,
   };
 }
 

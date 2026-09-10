@@ -3,7 +3,7 @@
 import { useState, FormEvent, Fragment } from "react";
 import type { Machine, MachineDrive, MachineStatus } from "@/lib/types";
 import { PhotoUploader, VideoUploader } from "@/components/forms/MediaUploader";
-import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye } from "lucide-react";
+import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye, Tag } from "lucide-react";
 
 const STATUS_LABELS: Record<MachineStatus, string> = {
   draft: "Brouillon (masquée)",
@@ -86,6 +86,15 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
+    });
+  }
+
+  async function setPromo(id: string, isPromo: boolean) {
+    setMachines((prev) => prev.map((m) => (m.id === id ? { ...m, isPromo } : m)));
+    await fetch(`/api/admin/machines/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isPromo }),
     });
   }
 
@@ -216,6 +225,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
               <th className="px-4 py-3 text-start">Tonnage</th>
               <th className="px-4 py-3 text-start">Wilaya</th>
               <th className="px-4 py-3 text-start">Statut</th>
+              <th className="px-4 py-3 text-start">Promo</th>
               <th className="px-4 py-3 text-start">Vidéo</th>
               <th className="px-4 py-3 text-start">Source</th>
               <th className="px-4 py-3 text-start"></th>
@@ -247,6 +257,28 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                           </option>
                         ))}
                       </select>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {m.isDemo ? (
+                      m.isPromo ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600">
+                          <Tag size={13} /> Promo
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">—</span>
+                      )
+                    ) : (
+                      <button
+                        onClick={() => setPromo(m.id, !m.isPromo)}
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          m.isPromo
+                            ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                        }`}
+                      >
+                        <Tag size={12} /> {m.isPromo ? "Promo" : "—"}
+                      </button>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -317,7 +349,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                 </tr>
                 {editingVideoId === m.id && (
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-2)]">
-                    <td colSpan={7} className="px-4 py-4">
+                    <td colSpan={8} className="px-4 py-4">
                       <form
                         onSubmit={(e) => saveVideo(m.id, e)}
                         className="flex flex-col gap-3 sm:max-w-md"

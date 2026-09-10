@@ -49,6 +49,7 @@
     "scheduleInspection": "Schedule an inspection",
     "proposeMachine": "Submit my machine",
     "sellEquipment": "Sell equipment",
+    "searchPart": "Find a part",
     "sendMyRequest": "Send my request",
     "viewAll": "View all",
     "readMore": "Read article",
@@ -285,6 +286,8 @@
     "seoTitle": "Industrial parts Algeria | Electronics, molds, hydraulics, mechanical",
     "seoDescription": "Industrial parts catalog in Algeria: electrical and electronic parts, plastic injection molds, hydraulic and mechanical parts. New, used or refurbished.",
     "viewCategory": "View category",
+    "viewGrid": "Grid",
+    "viewList": "List",
     "reference": "Ref.",
     "requestPrice": "Request price",
     "whatsappRequest": "Hello Jimi, I'd like the price for the part \"{name}\" (ref. {reference}).",
@@ -331,7 +334,8 @@
   "badges": {
     "published": "Available",
     "sold": "Sold",
-    "reserved": "Reserved"
+    "reserved": "Reserved",
+    "promo": "Promo"
   },
   "machineDetail": {
     "galleryTitle": "Photo gallery",

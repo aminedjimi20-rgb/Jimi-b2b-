@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { EmptyState } from "@/components/EmptyState";
-import { PartCard } from "@/components/PartCard";
+import { PartsGrid } from "@/components/PartsGrid";
 import { getPublicPartsByCategory } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
 import type { PartCategory } from "@/lib/types";
@@ -64,11 +64,7 @@ export default async function PieceCategoryPage({
               whatsappLabel={tc("whatsapp")}
             />
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {parts.map((part) => (
-                <PartCard key={part.id} part={part} />
-              ))}
-            </div>
+            <PartsGrid parts={parts} />
           )}
         </Container>
       </section>

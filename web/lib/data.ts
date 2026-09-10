@@ -55,6 +55,7 @@ function toPublicMachine(m: Machine): PublicMachine {
     defects: m.defects,
     accessories: m.accessories,
     isDemo: m.isDemo,
+    isPromo: m.isPromo,
   };
 }
 

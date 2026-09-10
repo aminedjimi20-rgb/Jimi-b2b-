@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import type { Part, PartCategory, PartCondition, PartStatus } from "@/lib/types";
 import { PhotoUploader } from "@/components/forms/MediaUploader";
-import { Plus, Trash2, Lock, RefreshCw, EyeOff, Eye } from "lucide-react";
+import { Plus, Trash2, Lock, RefreshCw, EyeOff, Eye, Tag } from "lucide-react";
 
 const CATEGORY_LABELS: Record<PartCategory, string> = {
   electronique: "Électronique & électrique",
@@ -74,6 +74,15 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
+    });
+  }
+
+  async function setPromo(id: string, isPromo: boolean) {
+    setParts((prev) => prev.map((p) => (p.id === id ? { ...p, isPromo } : p)));
+    await fetch(`/api/admin/parts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isPromo }),
     });
   }
 
@@ -172,6 +181,7 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
               <th className="px-4 py-3 text-start">Catégorie</th>
               <th className="px-4 py-3 text-start">État</th>
               <th className="px-4 py-3 text-start">Statut</th>
+              <th className="px-4 py-3 text-start">Promo</th>
               <th className="px-4 py-3 text-start"></th>
             </tr>
           </thead>
@@ -199,6 +209,28 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
                         </option>
                       ))}
                     </select>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {p.isDemo ? (
+                    p.isPromo ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600">
+                        <Tag size={13} /> Promo
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )
+                  ) : (
+                    <button
+                      onClick={() => setPromo(p.id, !p.isPromo)}
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        p.isPromo
+                          ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                      }`}
+                    >
+                      <Tag size={12} /> {p.isPromo ? "Promo" : "—"}
+                    </button>
                   )}
                 </td>
                 <td className="px-4 py-3 text-end">

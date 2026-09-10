@@ -20,6 +20,7 @@ export type AdminMachineInput = {
   videoThumbnail?: string | null;
   videoTitle?: string | null;
   photos?: string[];
+  isPromo?: boolean;
   sellerId?: string | null;
   adminNote?: string | null;
   reviewedAt?: string | null;
@@ -102,6 +103,7 @@ async function dbAddRuntimeMachine(input: AdminMachineInput): Promise<Machine> {
     defects: [],
     accessories: [],
     isDemo: false,
+    isPromo: input.isPromo ?? false,
     sellerId: null,
     adminNote: null,
     submittedAt: now,
@@ -146,6 +148,7 @@ async function dbSubmitMachineForReview(input: SellerListingInput): Promise<Mach
     defects: [],
     accessories: [],
     isDemo: false,
+    isPromo: false,
     sellerId: input.sellerId,
     adminNote: null,
     submittedAt: now,
@@ -232,6 +235,7 @@ async function fileAddRuntimeMachine(input: AdminMachineInput): Promise<Machine>
     defects: [],
     accessories: [],
     isDemo: false,
+    isPromo: input.isPromo ?? false,
     sellerId: null,
     adminNote: null,
     submittedAt: new Date().toISOString(),
@@ -272,6 +276,7 @@ async function fileSubmitMachineForReview(input: SellerListingInput): Promise<Ma
     defects: [],
     accessories: [],
     isDemo: false,
+    isPromo: false,
     sellerId: input.sellerId,
     adminNote: null,
     submittedAt: new Date().toISOString(),

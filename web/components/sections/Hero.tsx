@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { buildWhatsAppLink } from "@/config/site.config";
-import { ArrowRight, MessageCircle, ShieldCheck, Tag } from "lucide-react";
+import { ArrowRight, MessageCircle, ShieldCheck, Tag, Search } from "lucide-react";
 
 export async function Hero() {
   const t = await getTranslations();
@@ -51,8 +51,14 @@ export async function Hero() {
             <Button href="/acheter-machine" size="lg" variant="outline" className="!bg-transparent !text-white !border-white/25 hover:!border-white">
               {t("cta.requestMachine")}
             </Button>
-            <Button href={waLink} external size="lg" variant="whatsapp" icon={<MessageCircle size={18} />}>
-              {t("cta.whatsapp")}
+            <Button
+              href="/pieces-industrielles"
+              size="lg"
+              variant="outline"
+              className="!bg-transparent !text-white !border-white/25 hover:!border-white"
+              icon={<Search size={18} />}
+            >
+              {t("cta.searchPart")}
             </Button>
             <Button
               href="/vendre-equipement"
@@ -62,6 +68,9 @@ export async function Hero() {
               icon={<Tag size={18} />}
             >
               {t("cta.sellEquipment")}
+            </Button>
+            <Button href={waLink} external size="lg" variant="whatsapp" icon={<MessageCircle size={18} />}>
+              {t("cta.whatsapp")}
             </Button>
           </div>
 

@@ -49,6 +49,7 @@
     "scheduleInspection": "Prendre rendez-vous pour inspection",
     "proposeMachine": "Proposer ma machine",
     "sellEquipment": "Vendre un équipement",
+    "searchPart": "Chercher une pièce",
     "sendMyRequest": "Envoyer ma demande",
     "viewAll": "Voir tout",
     "readMore": "Lire l'article",
@@ -285,6 +286,8 @@
     "seoTitle": "Pièces industrielles Algérie | Électronique, moules, hydraulique, mécanique",
     "seoDescription": "Catalogue de pièces industrielles en Algérie : pièces électroniques et électriques, moules d'injection plastique, pièces hydrauliques et mécaniques. Neuves, d'occasion ou rénovées.",
     "viewCategory": "Voir la catégorie",
+    "viewGrid": "Grille",
+    "viewList": "Liste",
     "reference": "Réf.",
     "requestPrice": "Demander le prix",
     "whatsappRequest": "Bonjour Jimi, je souhaite avoir le prix de la pièce \"{name}\" (réf. {reference}).",
@@ -331,7 +334,8 @@
   "badges": {
     "published": "Disponible",
     "sold": "Vendue",
-    "reserved": "Réservée"
+    "reserved": "Réservée",
+    "promo": "Promo"
   },
   "machineDetail": {
     "galleryTitle": "Galerie photos",
