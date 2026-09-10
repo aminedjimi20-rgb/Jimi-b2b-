@@ -35,6 +35,7 @@
       "plc-hmi": "PLC / HMI",
       "variateurs": "Drives",
       "servo-moteurs": "Servo motors",
+      "autre": "Other parts",
       "sell": "Sell a part"
     },
     "servicesMenu": {
@@ -623,6 +624,37 @@
           {
             "q": "How is the value of a used mold estimated?",
             "a": "Overall condition, number of cavities, machined material and usage history are the main criteria considered."
+          }
+        ]
+      },
+      "autre": {
+        "title": "Other industrial parts",
+        "description": "Various industrial parts and components that don't fit the categories above — describe what you need, we'll check our stock and supplier network.",
+        "seoTitle": "Other industrial parts Algeria",
+        "seoDescription": "Various industrial parts and components for machines and equipment, outside the electrical, hydraulic, mechanical, automation and mold categories — Algeria.",
+        "examples": [
+          "Industrial fasteners",
+          "Seals and gaskets",
+          "Bearings",
+          "Belts and pulleys",
+          "Sensors",
+          "Miscellaneous accessories"
+        ],
+        "applications": [
+          "General machine maintenance",
+          "One-off repairs",
+          "Common wear parts",
+          "Production accessories"
+        ],
+        "servicesNote": "If the part you're looking for doesn't fit a specific category, describe it to us: we'll check our stock and supplier network before proposing a solution.",
+        "faq": [
+          {
+            "q": "I can't find the part I'm looking for, what should I do?",
+            "a": "Contact us with a description of the part (photo, reference if available, machine concerned): we'll search our stock and supplier network to offer you a solution quickly."
+          },
+          {
+            "q": "Do you source custom or brand-specific parts?",
+            "a": "We can search for parts specific to your machine's brand and model. Contact us with the technical details for a targeted search."
           }
         ]
       }

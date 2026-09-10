@@ -16,6 +16,7 @@ const VALID_CATEGORIES: PartCategory[] = [
   "variateurs",
   "servo-moteurs",
   "moules",
+  "autre",
 ];
 const VALID_CONDITIONS: PartCondition[] = ["neuf", "occasion", "renove"];
 const VALID_STATUSES: PartStatus[] = ["draft", "published"];

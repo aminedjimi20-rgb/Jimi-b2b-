@@ -35,6 +35,7 @@
       "plc-hmi": "PLC / HMI",
       "variateurs": "Variateurs",
       "servo-moteurs": "Servo moteurs",
+      "autre": "Autres pièces",
       "sell": "Vendre une pièce"
     },
     "servicesMenu": {
@@ -623,6 +624,37 @@
           {
             "q": "Comment estimer la valeur d'un moule d'occasion ?",
             "a": "L'état général, le nombre d'empreintes, la matière usinée et l'historique d'utilisation sont les critères principaux pris en compte."
+          }
+        ]
+      },
+      "autre": {
+        "title": "Autres pièces industrielles",
+        "description": "Pièces et composants industriels divers ne correspondant à aucune catégorie ci-dessus — décrivez-nous votre besoin, nous vérifions notre stock et notre réseau de fournisseurs.",
+        "seoTitle": "Autres pièces industrielles Algérie",
+        "seoDescription": "Pièces et composants industriels divers pour machines et équipements, en dehors des catégories électrique, hydraulique, mécanique, automatisme et moules — Algérie.",
+        "examples": [
+          "Visserie industrielle",
+          "Joints et étanchéité",
+          "Roulements",
+          "Courroies et poulies",
+          "Capteurs",
+          "Accessoires divers"
+        ],
+        "applications": [
+          "Maintenance générale des machines",
+          "Réparations ponctuelles",
+          "Pièces d'usure courantes",
+          "Accessoires de production"
+        ],
+        "servicesNote": "Si la pièce que vous cherchez ne correspond à aucune catégorie précise, décrivez-la nous : nous vérifions notre stock et notre réseau de fournisseurs avant de vous proposer une solution.",
+        "faq": [
+          {
+            "q": "Je ne trouve pas la pièce que je cherche, que faire ?",
+            "a": "Contactez-nous en décrivant la pièce (photo, référence si disponible, machine concernée) : nous recherchons dans notre stock et notre réseau de fournisseurs pour vous proposer une solution rapidement."
+          },
+          {
+            "q": "Proposez-vous des pièces sur mesure ou spécifiques à une marque ?",
+            "a": "Nous pouvons rechercher des pièces spécifiques selon la marque et le modèle de votre machine. Contactez-nous avec les détails techniques pour une recherche ciblée."
           }
         ]
       }

@@ -18,6 +18,7 @@ const PART_CATEGORY_LABELS: Record<PartCategory, string> = {
   variateurs: "Variateurs",
   "servo-moteurs": "Servo moteurs",
   moules: "Moules",
+  autre: "Autres pièces",
 };
 
 function formatPrice(price: number | null, priceOnRequest: boolean): string {

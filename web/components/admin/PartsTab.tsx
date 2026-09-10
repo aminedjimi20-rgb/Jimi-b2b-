@@ -16,6 +16,7 @@ const CATEGORY_LABELS: Record<PartCategory, string> = {
   variateurs: "Variateurs",
   "servo-moteurs": "Servo moteurs",
   moules: "Moules",
+  autre: "Autre",
 };
 
 const CONDITION_LABELS: Record<PartCondition, string> = {

@@ -47,6 +47,7 @@ export function Navbar() {
     { href: "/pieces-industrielles/plc-hmi", label: t("piecesMenu.plc-hmi") },
     { href: "/pieces-industrielles/variateurs", label: t("piecesMenu.variateurs") },
     { href: "/pieces-industrielles/servo-moteurs", label: t("piecesMenu.servo-moteurs") },
+    { href: "/pieces-industrielles/autre", label: t("piecesMenu.autre") },
     { href: "/vendre-equipement?type=piece", label: t("piecesMenu.sell") },
   ];
 

@@ -27,6 +27,7 @@ const staticPaths = [
   "/pieces-industrielles/variateurs",
   "/pieces-industrielles/servo-moteurs",
   "/pieces-industrielles/moules",
+  "/pieces-industrielles/autre",
   "/services",
   "/services/renovation-machine-injection",
   "/services/automatisation-industrielle",

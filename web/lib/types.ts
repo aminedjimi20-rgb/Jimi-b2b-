@@ -81,7 +81,8 @@ export type PartCategory =
   | "plc-hmi"
   | "variateurs"
   | "servo-moteurs"
-  | "moules";
+  | "moules"
+  | "autre";
 export type PartCondition = "neuf" | "occasion" | "renove";
 export type PartStatus = "draft" | "published";
 

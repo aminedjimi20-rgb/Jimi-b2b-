@@ -27,6 +27,7 @@ const VALID_CATEGORIES: PartCategory[] = [
   "variateurs",
   "servo-moteurs",
   "moules",
+  "autre",
 ];
 
 /** Page de service la plus pertinente pour chaque catégorie — utilisée pour
@@ -37,6 +38,7 @@ const SERVICE_LINK: Record<PartCategory, string> = {
   hydraulique: "/services/maintenance-depannage",
   mecanique: "/services/maintenance-depannage",
   moules: "/services/maintenance-depannage",
+  autre: "/services/maintenance-depannage",
   automatisme: "/services/automatisation-industrielle",
   "plc-hmi": "/services/automatisation-industrielle",
   variateurs: "/services/automatisation-industrielle",
@@ -55,6 +57,7 @@ const RELATED_CATEGORIES: Record<PartCategory, PartCategory[]> = {
   variateurs: ["servo-moteurs", "plc-hmi"],
   "servo-moteurs": ["variateurs", "plc-hmi"],
   moules: ["mecanique", "hydraulique"],
+  autre: ["mecanique", "electrique"],
 };
 
 function isValidCategory(value: string): value is PartCategory {

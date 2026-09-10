@@ -4,7 +4,7 @@ import { buildAlternates } from "@/lib/seo";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { Link } from "@/i18n/navigation";
-import { Zap, Cpu, Box, Droplet, Cog, Settings2, MonitorCog, SlidersHorizontal, RotateCw, ArrowRight } from "lucide-react";
+import { Zap, Cpu, Box, Droplet, Cog, Settings2, MonitorCog, SlidersHorizontal, RotateCw, ArrowRight, Package } from "lucide-react";
 import type { PartCategory } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +19,7 @@ const CATEGORIES: { key: PartCategory; icon: typeof Cpu }[] = [
   { key: "variateurs", icon: SlidersHorizontal },
   { key: "servo-moteurs", icon: RotateCw },
   { key: "moules", icon: Box },
+  { key: "autre", icon: Package },
 ];
 
 export async function generateMetadata({

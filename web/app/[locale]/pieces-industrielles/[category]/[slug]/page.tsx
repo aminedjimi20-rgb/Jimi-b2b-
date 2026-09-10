@@ -31,6 +31,7 @@ const VALID_CATEGORIES: PartCategory[] = [
   "variateurs",
   "servo-moteurs",
   "moules",
+  "autre",
 ];
 
 function isValidCategory(value: string): value is PartCategory {
