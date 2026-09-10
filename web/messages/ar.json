@@ -761,10 +761,6 @@
   },
   "demoDataBadge": "تجريبي",
   "push": {
-    "promptTitle": "تفعيل الإشعارات؟",
-    "promptBody": "كونوا على اطلاع فور توفر منتج جديد عند JIMI.",
-    "accept": "تفعيل",
-    "decline": "لاحقًا",
     "manageEnabled": "🔔 الإشعارات مفعّلة",
     "manageDisabled": "🔕 تفعيل الإشعارات"
   }
