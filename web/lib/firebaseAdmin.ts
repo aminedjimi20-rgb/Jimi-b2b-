@@ -51,6 +51,12 @@ export function getFirestoreAdmin(): Firestore {
       app = getApps()[0];
     }
     db = getFirestore(app);
+    // Every store writes optional fields as `undefined` (brand, model,
+    // wilaya...) to mean "omit this field" — Firestore's Admin SDK rejects
+    // `undefined` values by default and throws instead of dropping them,
+    // which silently breaks any create/update where an optional field is
+    // left blank. This makes it behave as every store already assumes.
+    db.settings({ ignoreUndefinedProperties: true });
   }
   return db;
 }
