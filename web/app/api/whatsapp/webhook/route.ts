@@ -8,6 +8,7 @@ import {
 } from "@/lib/whatsapp";
 import { getOrCreateConversationByPhone, appendMessage, saveConversation } from "@/lib/conversationsStore";
 import { runAgentTurn, shouldAiRespond } from "@/lib/ai/agent";
+import { notifyAdminIfNeeded } from "@/lib/adminAlerts";
 
 /**
  * Webhook WhatsApp Business Platform (Meta Cloud API).
@@ -104,11 +105,17 @@ export async function POST(request: NextRequest) {
 
         try {
           const conversation = await getOrCreateConversationByPhone(from, contactName);
+          const isNewConversation = conversation.messages.length === 0;
+          const previousStatus = conversation.status;
+          const previousScore = conversation.score;
 
           if (!shouldAiRespond(conversation)) {
             // Un admin a la main ou la conversation est fermée : on
             // enregistre le message entrant sans faire répondre l'IA.
-            await appendMessage(conversation.id, { role: "user", content: text });
+            const updated = await appendMessage(conversation.id, { role: "user", content: text });
+            if (updated) {
+              await notifyAdminIfNeeded({ conversation: updated, isNewConversation, previousStatus, previousScore });
+            }
             continue;
           }
 
@@ -118,6 +125,7 @@ export async function POST(request: NextRequest) {
           });
           await saveConversation(updated);
           await sendWhatsAppTextMessage(from, reply);
+          await notifyAdminIfNeeded({ conversation: updated, isNewConversation, previousStatus, previousScore });
         } catch (error) {
           // On ne fait jamais échouer la requête webhook (Meta désactive un
           // webhook qui échoue trop souvent) : on journalise et on continue.
