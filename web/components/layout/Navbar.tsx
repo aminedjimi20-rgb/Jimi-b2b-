@@ -93,7 +93,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 xl:flex">
+        <nav className="hidden items-center gap-1 min-[1700px]:flex">
           <Link
             href="/"
             className="rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
@@ -150,7 +150,7 @@ export function Navbar() {
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>
-          <div className="hidden xl:block">
+          <div className="hidden min-[1700px]:block">
             <Button href="/contact" size="sm">
               {t("getQuote")}
             </Button>
@@ -158,7 +158,7 @@ export function Navbar() {
           <button
             type="button"
             aria-label="Menu"
-            className="rounded-md p-2 text-[var(--color-ink)] hover:bg-[var(--color-surface-2)] xl:hidden"
+            className="rounded-md p-2 text-[var(--color-ink)] hover:bg-[var(--color-surface-2)] min-[1700px]:hidden"
             onClick={() => setMobileOpen((v) => !v)}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -167,7 +167,7 @@ export function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-[var(--color-border)] bg-white xl:hidden">
+        <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-[var(--color-border)] bg-white min-[1700px]:hidden">
           <nav className="container-jimi flex flex-col gap-1 py-4">
             <Link
               href="/"
