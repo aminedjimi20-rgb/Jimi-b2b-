@@ -3,6 +3,12 @@ import { siteConfig } from "@/config/site.config";
 import { routing } from "@/i18n/routing";
 import { getPublicMachines, getArticles, getPublicProjects, getPublicParts } from "@/lib/data";
 
+// Next.js caches route handlers like sitemap.ts by default. Machines,
+// pieces, projects and articles are all admin-editable at runtime (Firestore),
+// so a cached sitemap would keep missing new listings until the next deploy —
+// force it to regenerate on every request instead.
+export const dynamic = "force-dynamic";
+
 const staticPaths = [
   "",
   "/machines",
@@ -53,7 +59,7 @@ function languageAlternates(path: string): Record<string, string> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const machines = await getPublicMachines();
-  const articles = getArticles();
+  const articles = await getArticles();
   const projects = await getPublicProjects();
   const parts = await getPublicParts();
 

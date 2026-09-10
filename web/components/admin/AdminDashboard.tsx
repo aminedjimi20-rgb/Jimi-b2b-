@@ -10,11 +10,13 @@ import { MachineLeadsTab } from "./MachineLeadsTab";
 import { PartsTab } from "./PartsTab";
 import { ProjectsTab } from "./ProjectsTab";
 import { TestimonialsTab } from "./TestimonialsTab";
+import { ArticlesTab } from "./ArticlesTab";
 import { SettingsTab } from "./SettingsTab";
 import { AiTesterTab } from "./AiTesterTab";
 import { ConversationsTab } from "./ConversationsTab";
 import type { Lead } from "@/lib/leads";
 import type { Machine, Part, Project, Testimonial } from "@/lib/types";
+import type { RawArticle } from "@/lib/data";
 import type { SellerProfile } from "@/lib/sellers";
 import type { BuyerProfile } from "@/lib/buyers";
 import type { MachineLead } from "@/lib/machineLeads";
@@ -33,6 +35,7 @@ import {
   Quote,
   Bot,
   MessageCircle,
+  Newspaper,
 } from "lucide-react";
 
 type Tab =
@@ -41,6 +44,7 @@ type Tab =
   | "machines"
   | "parts"
   | "projects"
+  | "articles"
   | "testimonials"
   | "sellers"
   | "buyers"
@@ -57,6 +61,7 @@ export function AdminDashboard({
   initialMachineLeads,
   initialParts,
   initialProjects,
+  initialArticles,
   initialTestimonials,
   initialServiceVideos,
   initialBusinessInfo,
@@ -69,6 +74,7 @@ export function AdminDashboard({
   initialMachineLeads: MachineLead[];
   initialParts: Part[];
   initialProjects: Project[];
+  initialArticles: RawArticle[];
   initialTestimonials: Testimonial[];
   initialServiceVideos: ServiceVideos;
   initialBusinessInfo: BusinessInfo;
@@ -87,6 +93,7 @@ export function AdminDashboard({
     { key: "machines", label: "Machines", icon: Factory, count: initialMachines.length },
     { key: "parts", label: "Pièces", icon: Cog, count: initialParts.length },
     { key: "projects", label: "Réalisations", icon: ClipboardList, count: initialProjects.length },
+    { key: "articles", label: "Articles / Conseils", icon: Newspaper, count: initialArticles.length },
     { key: "testimonials", label: "Témoignages", icon: Quote, count: pendingTestimonials.length },
     { key: "sellers", label: "Vendeurs", icon: UserSquare2, count: initialSellers.length },
     { key: "buyers", label: "Acheteurs", icon: Users, count: initialBuyers.length },
@@ -136,6 +143,7 @@ export function AdminDashboard({
       {tab === "machines" && <MachinesTab initialMachines={initialMachines} />}
       {tab === "parts" && <PartsTab initialParts={initialParts} />}
       {tab === "projects" && <ProjectsTab initialProjects={initialProjects} />}
+      {tab === "articles" && <ArticlesTab initialArticles={initialArticles} />}
       {tab === "testimonials" && <TestimonialsTab initialTestimonials={initialTestimonials} />}
       {tab === "sellers" && <SellersTab initialSellers={initialSellers} machines={initialMachines} />}
       {tab === "buyers" && <BuyersTab initialBuyers={initialBuyers} leads={initialMachineLeads} />}

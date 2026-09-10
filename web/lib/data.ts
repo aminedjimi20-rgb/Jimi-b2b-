@@ -8,6 +8,7 @@ import { getRuntimeMachines } from "@/lib/machinesStore";
 import { getRuntimeParts } from "@/lib/partsStore";
 import { getRuntimeProjects } from "@/lib/projectsStore";
 import { getRuntimeTestimonials } from "@/lib/testimonialsStore";
+import { getRuntimeArticles, type RuntimeRawArticle } from "@/lib/articlesStore";
 
 export async function getMachines(): Promise<Machine[]> {
   const runtime = await getRuntimeMachines();
@@ -36,10 +37,12 @@ function toPublicMachine(m: Machine): PublicMachine {
     slug: m.slug,
     brand: m.brand,
     model: m.model,
+    reference: m.reference,
     year: m.year,
     tonnage: m.tonnage,
     drive: m.drive,
     category: m.category,
+    condition: m.condition,
     status: m.status,
     featured: m.featured,
     wilaya: m.wilaya,
@@ -124,12 +127,16 @@ interface RawArticleTranslation {
   faq?: { q: string; a: string }[];
 }
 
-interface RawArticle {
+export interface RawArticle {
   id: string;
   slug: string;
   readTimeMinutes: number;
   publishedAt: string;
   translations: Partial<Record<"fr" | "ar" | "en", RawArticleTranslation>>;
+  /** Absent sur les 17 articles historiques du fichier statique (toujours
+   *  publiés) — présent sur les articles créés depuis l'admin. */
+  status?: "draft" | "published";
+  isDemo?: boolean;
 }
 
 /** Résout un article brut (multi-langue) vers la forme locale plate que le
@@ -150,17 +157,30 @@ function localizeArticle(raw: RawArticle, locale: string): Article {
     publishedAt: raw.publishedAt,
     relatedLinks: translation!.relatedLinks ?? [],
     faq: translation!.faq ?? [],
+    status: raw.status ?? "published",
+    isDemo: raw.isDemo ?? true,
   };
 }
 
-export function getArticles(locale: string = "fr"): Article[] {
-  return (articlesData as RawArticle[])
+/** Tous les articles (17 historiques du fichier statique + ceux créés
+ *  depuis l'admin), triés par date. Réservé à l'admin : inclut les
+ *  brouillons — le site public passe toujours par getArticles(). */
+export async function getAllArticlesRaw(): Promise<RawArticle[]> {
+  const runtime = await getRuntimeArticles();
+  return [...(runtime as RuntimeRawArticle[] as RawArticle[]), ...(articlesData as RawArticle[])];
+}
+
+export async function getArticles(locale: string = "fr"): Promise<Article[]> {
+  const all = await getAllArticlesRaw();
+  return all
+    .filter((raw) => (raw.status ?? "published") === "published")
     .map((raw) => localizeArticle(raw, locale))
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 }
 
-export function getArticleBySlug(locale: string, slug: string): Article | undefined {
-  return getArticles(locale).find((a) => a.slug === slug);
+export async function getArticleBySlug(locale: string, slug: string): Promise<Article | undefined> {
+  const articles = await getArticles(locale);
+  return articles.find((a) => a.slug === slug);
 }
 
 export async function getParts(): Promise<Part[]> {

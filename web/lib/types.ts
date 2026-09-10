@@ -16,19 +16,27 @@ export interface MachineSpecs {
   plc?: string;
   hmi?: string;
   pumpType?: string;
-  condition?: string;
   hours?: string;
 }
+
+// Réutilise PartCondition (neuf/occasion/renove) — même échelle d'état que
+// les pièces, pas besoin d'un type dupliqué. "Reconditionné" côté UI = "renove".
+export type MachineCondition = PartCondition;
 
 export interface Machine {
   id: string;
   slug: string;
   brand: string;
   model: string;
+  /** Référence constructeur — distincte du slug (identifiant interne) et du
+   *  modèle (nom commercial). Optionnelle : toutes les machines n'ont pas
+   *  une référence connue. */
+  reference?: string;
   year: number;
   tonnage: number;
   drive: MachineDrive;
   category: MachineCategory;
+  condition: MachineCondition;
   status: MachineStatus;
   featured: boolean;
   wilaya: string;
@@ -91,6 +99,9 @@ export interface Part {
   /** Wilaya où se trouve la pièce — optionnel, distinct de la zone de
    *  service (voir siteConfig.contact) qui couvre tout le pays. */
   wilaya?: string;
+  /** Machines/modèles compatibles (texte libre, ex: "Arburg Allrounder
+   *  série 370-570, Engel Victory") — optionnel. */
+  compatibility?: string;
   description: string;
   condition: PartCondition;
   price: number | null;
@@ -245,6 +256,8 @@ export interface Conversation {
   updatedAt: string;
 }
 
+export type ArticleStatus = "draft" | "published";
+
 export interface Article {
   id: string;
   slug: string;
@@ -261,4 +274,8 @@ export interface Article {
    *  FAQPage JSON-LD) — uniquement quand elles apportent une vraie valeur,
    *  jamais ajoutées juste pour le schema. */
   faq?: { q: string; a: string }[];
+  /** Absent sur les 17 articles historiques (fichier statique, toujours
+   *  publiés) — présent uniquement sur les articles créés depuis l'admin. */
+  status?: ArticleStatus;
+  isDemo?: boolean;
 }

@@ -11,13 +11,9 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { buildAlternates } from "@/lib/seo";
 import { getArticleBySlug, getArticles } from "@/lib/data";
 import { buildWhatsAppLink } from "@/config/site.config";
-import { routing } from "@/i18n/routing";
 import { ArrowLeft, ArrowRight, Clock, MessageCircle } from "lucide-react";
 
-export function generateStaticParams() {
-  const articles = getArticles();
-  return routing.locales.flatMap((locale) => articles.map((a) => ({ locale, slug: a.slug })));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -25,7 +21,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const article = getArticleBySlug(locale, slug);
+  const article = await getArticleBySlug(locale, slug);
   if (!article) return {};
   return {
     title: article.title,
@@ -42,13 +38,11 @@ export default async function ArticlePage({
 }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const article = getArticleBySlug(locale, slug);
+  const article = await getArticleBySlug(locale, slug);
   if (!article) notFound();
 
   const t = await getTranslations();
-  const related = getArticles(locale)
-    .filter((a) => a.slug !== article.slug)
-    .slice(0, 3);
+  const related = (await getArticles(locale)).filter((a) => a.slug !== article.slug).slice(0, 3);
 
   return (
     <>

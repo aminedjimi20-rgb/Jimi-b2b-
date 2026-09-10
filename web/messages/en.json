@@ -650,6 +650,7 @@
     "specs": {
       "brand": "Brand",
       "model": "Model",
+      "reference": "Reference",
       "year": "Year",
       "tonnage": "Tonnage",
       "clampingForce": "Clamping force",
@@ -1130,7 +1131,8 @@
       "reference": "Reference",
       "condition": "Condition",
       "wilaya": "Location",
-      "price": "Price"
+      "price": "Price",
+      "compatibility": "Compatibility"
     }
   },
   "errorBoundary": {

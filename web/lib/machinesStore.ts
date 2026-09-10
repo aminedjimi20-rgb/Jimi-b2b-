@@ -2,20 +2,26 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import type { Machine } from "@/lib/types";
+import type { Machine, MachineSpecs } from "@/lib/types";
 import { getFirestoreAdmin, isFirebaseConfigured } from "@/lib/firebaseAdmin";
 
 export type AdminMachineInput = {
   brand: string;
   model: string;
+  reference?: string;
   year: number;
   tonnage: number;
   drive: Machine["drive"];
+  condition: Machine["condition"];
   status: Machine["status"];
   wilaya: string;
   price: number | null;
   priceOnRequest: boolean;
   description: string;
+  specs?: MachineSpecs;
+  worksPerformed?: string[];
+  defects?: string[];
+  accessories?: string[];
   videoUrl?: string | null;
   videoThumbnail?: string | null;
   videoTitle?: string | null;
@@ -61,33 +67,21 @@ async function uniqueSlug(base: string, existingSlugs: string[]): Promise<string
   return slug;
 }
 
-// ---- Firestore-backed implementation (production) --------------------------
-
-async function dbGetRuntimeMachines(): Promise<Machine[]> {
-  const snap = await getFirestoreAdmin().collection(COLLECTION).orderBy("createdAt", "desc").get();
-  return snap.docs.map((d) => d.data() as Machine);
-}
-
-async function dbAddRuntimeMachine(input: AdminMachineInput): Promise<Machine> {
-  const db = getFirestoreAdmin();
-  const existing = await db.collection(COLLECTION).select("slug").get();
-  const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year}`);
-  const slug = await uniqueSlug(
-    baseSlug,
-    existing.docs.map((d) => d.get("slug") as string)
-  );
-
-  const ref = db.collection(COLLECTION).doc();
-  const now = new Date().toISOString();
-  const machine: Machine = {
-    id: ref.id,
+/** Construit l'objet Machine complet à partir d'une saisie admin — centralise
+ *  les valeurs par défaut pour que les deux backends (Firestore / fichier)
+ *  restent strictement identiques. */
+function buildMachine(id: string, slug: string, input: AdminMachineInput, now: string): Machine {
+  return {
+    id,
     slug,
     brand: input.brand,
     model: input.model,
+    reference: input.reference || undefined,
     year: input.year,
     tonnage: input.tonnage,
     drive: input.drive,
     category: "injection",
+    condition: input.condition,
     status: input.status,
     featured: false,
     wilaya: input.wilaya,
@@ -97,11 +91,11 @@ async function dbAddRuntimeMachine(input: AdminMachineInput): Promise<Machine> {
     videoThumbnail: input.videoThumbnail || null,
     videoTitle: input.videoTitle || null,
     photos: input.photos ?? [],
-    specs: {},
+    specs: input.specs ?? {},
     description: input.description,
-    worksPerformed: [],
-    defects: [],
-    accessories: [],
+    worksPerformed: input.worksPerformed ?? [],
+    defects: input.defects ?? [],
+    accessories: input.accessories ?? [],
     isDemo: false,
     isPromo: input.isPromo ?? false,
     sellerId: null,
@@ -109,23 +103,11 @@ async function dbAddRuntimeMachine(input: AdminMachineInput): Promise<Machine> {
     submittedAt: now,
     reviewedAt: now,
   };
-  await ref.set({ ...machine, createdAt: now });
-  return machine;
 }
 
-async function dbSubmitMachineForReview(input: SellerListingInput): Promise<Machine> {
-  const db = getFirestoreAdmin();
-  const existing = await db.collection(COLLECTION).select("slug").get();
-  const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year ?? "na"}`);
-  const slug = await uniqueSlug(
-    baseSlug,
-    existing.docs.map((d) => d.get("slug") as string)
-  );
-
-  const ref = db.collection(COLLECTION).doc();
-  const now = new Date().toISOString();
-  const machine: Machine = {
-    id: ref.id,
+function buildSellerMachine(id: string, slug: string, input: SellerListingInput, now: string): Machine {
+  return {
+    id,
     slug,
     brand: input.brand,
     model: input.model,
@@ -133,6 +115,9 @@ async function dbSubmitMachineForReview(input: SellerListingInput): Promise<Mach
     tonnage: input.tonnage,
     drive: input.drive,
     category: "injection",
+    // Un vendeur particulier soumet quasi toujours une machine déjà
+    // utilisée — l'admin peut corriger l'état exact à la validation.
+    condition: "occasion",
     status: "pending",
     featured: false,
     wilaya: input.wilaya,
@@ -154,6 +139,43 @@ async function dbSubmitMachineForReview(input: SellerListingInput): Promise<Mach
     submittedAt: now,
     reviewedAt: null,
   };
+}
+
+// ---- Firestore-backed implementation (production) --------------------------
+
+async function dbGetRuntimeMachines(): Promise<Machine[]> {
+  const snap = await getFirestoreAdmin().collection(COLLECTION).orderBy("createdAt", "desc").get();
+  return snap.docs.map((d) => d.data() as Machine);
+}
+
+async function dbAddRuntimeMachine(input: AdminMachineInput): Promise<Machine> {
+  const db = getFirestoreAdmin();
+  const existing = await db.collection(COLLECTION).select("slug").get();
+  const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year}`);
+  const slug = await uniqueSlug(
+    baseSlug,
+    existing.docs.map((d) => d.get("slug") as string)
+  );
+
+  const ref = db.collection(COLLECTION).doc();
+  const now = new Date().toISOString();
+  const machine = buildMachine(ref.id, slug, input, now);
+  await ref.set({ ...machine, createdAt: now });
+  return machine;
+}
+
+async function dbSubmitMachineForReview(input: SellerListingInput): Promise<Machine> {
+  const db = getFirestoreAdmin();
+  const existing = await db.collection(COLLECTION).select("slug").get();
+  const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year ?? "na"}`);
+  const slug = await uniqueSlug(
+    baseSlug,
+    existing.docs.map((d) => d.get("slug") as string)
+  );
+
+  const ref = db.collection(COLLECTION).doc();
+  const now = new Date().toISOString();
+  const machine = buildSellerMachine(ref.id, slug, input, now);
   await ref.set({ ...machine, createdAt: now });
   return machine;
 }
@@ -210,37 +232,8 @@ async function fileAddRuntimeMachine(input: AdminMachineInput): Promise<Machine>
   const machines = await fileGetRuntimeMachines();
   const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year}`);
   const slug = await uniqueSlug(baseSlug, machines.map((m) => m.slug));
-
-  const machine: Machine = {
-    id: randomUUID(),
-    slug,
-    brand: input.brand,
-    model: input.model,
-    year: input.year,
-    tonnage: input.tonnage,
-    drive: input.drive,
-    category: "injection",
-    status: input.status,
-    featured: false,
-    wilaya: input.wilaya,
-    price: input.price,
-    priceOnRequest: input.priceOnRequest,
-    videoUrl: input.videoUrl || null,
-    videoThumbnail: input.videoThumbnail || null,
-    videoTitle: input.videoTitle || null,
-    photos: input.photos ?? [],
-    specs: {},
-    description: input.description,
-    worksPerformed: [],
-    defects: [],
-    accessories: [],
-    isDemo: false,
-    isPromo: input.isPromo ?? false,
-    sellerId: null,
-    adminNote: null,
-    submittedAt: new Date().toISOString(),
-    reviewedAt: new Date().toISOString(),
-  };
+  const now = new Date().toISOString();
+  const machine = buildMachine(randomUUID(), slug, input, now);
 
   machines.unshift(machine);
   await fileSaveRuntimeMachines(machines);
@@ -251,37 +244,8 @@ async function fileSubmitMachineForReview(input: SellerListingInput): Promise<Ma
   const machines = await fileGetRuntimeMachines();
   const baseSlug = slugify(`${input.brand}-${input.model}-${input.tonnage}t-${input.year ?? "na"}`);
   const slug = await uniqueSlug(baseSlug, machines.map((m) => m.slug));
-
-  const machine: Machine = {
-    id: randomUUID(),
-    slug,
-    brand: input.brand,
-    model: input.model,
-    year: input.year ?? new Date().getFullYear(),
-    tonnage: input.tonnage,
-    drive: input.drive,
-    category: "injection",
-    status: "pending",
-    featured: false,
-    wilaya: input.wilaya,
-    price: input.price,
-    priceOnRequest: input.priceOnRequest,
-    videoUrl: input.videoUrl || null,
-    videoThumbnail: null,
-    videoTitle: null,
-    photos: input.photos ?? [],
-    specs: {},
-    description: input.description,
-    worksPerformed: [],
-    defects: [],
-    accessories: [],
-    isDemo: false,
-    isPromo: false,
-    sellerId: input.sellerId,
-    adminNote: null,
-    submittedAt: new Date().toISOString(),
-    reviewedAt: null,
-  };
+  const now = new Date().toISOString();
+  const machine = buildSellerMachine(randomUUID(), slug, input, now);
 
   machines.unshift(machine);
   await fileSaveRuntimeMachines(machines);

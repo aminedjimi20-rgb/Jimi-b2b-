@@ -1,9 +1,22 @@
 "use client";
 
-import { useState, FormEvent, Fragment } from "react";
-import type { Machine, MachineDrive, MachineStatus } from "@/lib/types";
+import { useMemo, useState, FormEvent, Fragment } from "react";
+import type { Machine, MachineDrive, MachineStatus, MachineCondition, MachineSpecs } from "@/lib/types";
 import { PhotoUploader, VideoUploader } from "@/components/forms/MediaUploader";
-import { Plus, Trash2, Lock, RefreshCw, Video, Pencil, X, Check, EyeOff, Eye, Tag } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Lock,
+  RefreshCw,
+  Video,
+  Pencil,
+  X,
+  Check,
+  EyeOff,
+  Eye,
+  Tag,
+  Search,
+} from "lucide-react";
 
 const STATUS_LABELS: Record<MachineStatus, string> = {
   draft: "Brouillon (masquée)",
@@ -29,9 +42,29 @@ const DRIVE_LABELS: Record<MachineDrive, string> = {
   hybride: "Hybride",
 };
 
+const CONDITION_LABELS: Record<MachineCondition, string> = {
+  neuf: "Neuve",
+  occasion: "Occasion",
+  renove: "Reconditionnée",
+};
+
+const SPEC_FIELDS: { key: keyof MachineSpecs; label: string }[] = [
+  { key: "clampingForce", label: "Force de fermeture" },
+  { key: "screwDiameter", label: "Diamètre vis" },
+  { key: "injectionVolume", label: "Volume d'injection" },
+  { key: "injectionPressure", label: "Pression d'injection" },
+  { key: "motor", label: "Moteur" },
+  { key: "control", label: "Commande" },
+  { key: "plc", label: "PLC" },
+  { key: "hmi", label: "HMI" },
+  { key: "pumpType", label: "Type de pompe" },
+  { key: "hours", label: "Heures de fonctionnement" },
+];
+
 export function MachinesTab({ initialMachines }: { initialMachines: Machine[] }) {
   const [machines, setMachines] = useState(initialMachines);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
@@ -39,6 +72,27 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
   const [savingVideo, setSavingVideo] = useState(false);
   const [newPhotos, setNewPhotos] = useState<string[]>([]);
   const [newVideo, setNewVideo] = useState<string | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<MachineStatus | "all">("all");
+  const [filterDrive, setFilterDrive] = useState<MachineDrive | "all">("all");
+
+  const editingMachine = editingId ? machines.find((m) => m.id === editingId) ?? null : null;
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return machines.filter((m) => {
+      if (filterStatus !== "all" && m.status !== filterStatus) return false;
+      if (filterDrive !== "all" && m.drive !== filterDrive) return false;
+      if (!q) return true;
+      return (
+        m.brand.toLowerCase().includes(q) ||
+        m.model.toLowerCase().includes(q) ||
+        (m.reference ?? "").toLowerCase().includes(q) ||
+        m.wilaya.toLowerCase().includes(q)
+      );
+    });
+  }, [machines, search, filterStatus, filterDrive]);
 
   async function refresh() {
     setLoading(true);
@@ -51,28 +105,64 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
     }
   }
 
+  function startAdd() {
+    setEditingId(null);
+    setNewPhotos([]);
+    setNewVideo(null);
+    setShowForm(true);
+  }
+
+  function startEdit(m: Machine) {
+    setEditingId(m.id);
+    setNewPhotos(m.photos ?? []);
+    setNewVideo(m.videoUrl ?? null);
+    setShowForm(true);
+  }
+
+  function cancelForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setNewPhotos([]);
+    setNewVideo(null);
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const payload = Object.fromEntries(formData.entries());
 
+    const specs: MachineSpecs = {};
+    for (const { key } of SPEC_FIELDS) {
+      const value = formData.get(`spec_${key}`);
+      if (typeof value === "string" && value.trim()) specs[key] = value.trim();
+    }
+    for (const { key } of SPEC_FIELDS) {
+      delete (payload as Record<string, unknown>)[`spec_${key}`];
+    }
+
+    const body = {
+      ...payload,
+      priceOnRequest: formData.get("priceOnRequest") === "on",
+      photos: newPhotos,
+      videoUrl: newVideo,
+      specs,
+      worksPerformed: String(formData.get("worksPerformed") || "").split("\n"),
+      defects: String(formData.get("defects") || "").split("\n"),
+      accessories: String(formData.get("accessories") || "").split("\n"),
+    };
+
     try {
-      const res = await fetch("/api/admin/machines", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          priceOnRequest: formData.get("priceOnRequest") === "on",
-          photos: newPhotos,
-          videoUrl: newVideo,
-        }),
-      });
+      const res = await fetch(
+        editingId ? `/api/admin/machines/${editingId}` : "/api/admin/machines",
+        {
+          method: editingId ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
       if (res.ok) {
-        e.currentTarget.reset();
-        setNewPhotos([]);
-        setNewVideo(null);
-        setShowForm(false);
+        cancelForm();
         await refresh();
       }
     } finally {
@@ -145,7 +235,7 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Actualiser
           </button>
           <button
-            onClick={() => setShowForm((v) => !v)}
+            onClick={() => (showForm && !editingId ? cancelForm() : startAdd())}
             className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0b58ad]"
           >
             <Plus size={14} /> Ajouter une machine
@@ -155,67 +245,243 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
 
       {showForm && (
         <form
+          key={editingId ?? "new"}
           onSubmit={onSubmit}
-          className="mb-6 grid grid-cols-1 gap-3 rounded-xl border border-[var(--color-border)] bg-white p-5 sm:grid-cols-3"
+          className="mb-6 flex flex-col gap-5 rounded-xl border border-[var(--color-border)] bg-white p-5"
         >
-          <input name="brand" required placeholder="Marque" className="admin-input" />
-          <input name="model" required placeholder="Modèle" className="admin-input" />
-          <input name="tonnage" type="number" required placeholder="Tonnage" className="admin-input" />
-          <input name="year" type="number" required placeholder="Année" className="admin-input" />
-          <select name="drive" defaultValue="hydraulique" className="admin-input">
-            {Object.entries(DRIVE_LABELS).map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-          <select name="status" defaultValue="published" className="admin-input">
-            {(["published", "draft", "reserved", "sold"] as MachineStatus[]).map((v) => (
-              <option key={v} value={v}>
-                {STATUS_LABELS[v]}
-              </option>
-            ))}
-          </select>
-          <input name="wilaya" placeholder="Wilaya" className="admin-input" />
-          <input name="price" type="number" placeholder="Prix (DA)" className="admin-input" />
-          <label className="flex items-center gap-2 text-sm text-[var(--color-text)]">
-            <input type="checkbox" name="priceOnRequest" /> Prix sur demande
-          </label>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-[var(--color-ink)]">
+              {editingMachine
+                ? `Modifier : ${editingMachine.brand} ${editingMachine.model}`
+                : "Nouvelle machine"}
+            </p>
+            <button
+              type="button"
+              onClick={cancelForm}
+              className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+              aria-label="Fermer"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <input
+              name="brand"
+              required
+              defaultValue={editingMachine?.brand}
+              placeholder="Marque"
+              className="admin-input"
+            />
+            <input
+              name="model"
+              required
+              defaultValue={editingMachine?.model}
+              placeholder="Modèle"
+              className="admin-input"
+            />
+            <input
+              name="reference"
+              defaultValue={editingMachine?.reference ?? ""}
+              placeholder="Référence constructeur (optionnel)"
+              className="admin-input"
+            />
+            <input
+              name="tonnage"
+              type="number"
+              required
+              defaultValue={editingMachine?.tonnage}
+              placeholder="Tonnage"
+              className="admin-input"
+            />
+            <input
+              name="year"
+              type="number"
+              required
+              defaultValue={editingMachine?.year}
+              placeholder="Année"
+              className="admin-input"
+            />
+            <select name="drive" defaultValue={editingMachine?.drive ?? "hydraulique"} className="admin-input">
+              {Object.entries(DRIVE_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+            <select name="condition" defaultValue={editingMachine?.condition ?? "occasion"} className="admin-input">
+              {Object.entries(CONDITION_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+            <select name="status" defaultValue={editingMachine?.status ?? "published"} className="admin-input">
+              {(["published", "draft", "reserved", "sold"] as MachineStatus[]).map((v) => (
+                <option key={v} value={v}>
+                  {STATUS_LABELS[v]}
+                </option>
+              ))}
+            </select>
+            <input
+              name="wilaya"
+              defaultValue={editingMachine?.wilaya}
+              placeholder="Wilaya"
+              className="admin-input"
+            />
+            <input
+              name="price"
+              type="number"
+              defaultValue={editingMachine?.price ?? ""}
+              placeholder="Prix (DA)"
+              className="admin-input"
+            />
+            <label className="flex items-center gap-2 text-sm text-[var(--color-text)]">
+              <input
+                type="checkbox"
+                name="priceOnRequest"
+                defaultChecked={editingMachine?.priceOnRequest}
+              />{" "}
+              Prix sur demande
+            </label>
+          </div>
+
           <textarea
             name="description"
+            defaultValue={editingMachine?.description}
             placeholder="Description technique"
             rows={3}
-            className="admin-input sm:col-span-3"
+            className="admin-input"
           />
 
-          <div className="sm:col-span-3">
-            <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+              Caractéristiques techniques (optionnel)
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {SPEC_FIELDS.map(({ key, label }) => (
+                <input
+                  key={key}
+                  name={`spec_${key}`}
+                  defaultValue={editingMachine?.specs?.[key] ?? ""}
+                  placeholder={label}
+                  className="admin-input"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+                Travaux effectués
+              </p>
+              <textarea
+                name="worksPerformed"
+                defaultValue={editingMachine?.worksPerformed?.join("\n")}
+                placeholder={"Un élément par ligne"}
+                rows={3}
+                className="admin-input w-full"
+              />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+                Défauts connus
+              </p>
+              <textarea
+                name="defects"
+                defaultValue={editingMachine?.defects?.join("\n")}
+                placeholder={"Un élément par ligne"}
+                rows={3}
+                className="admin-input w-full"
+              />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+                Accessoires inclus
+              </p>
+              <textarea
+                name="accessories"
+                defaultValue={editingMachine?.accessories?.join("\n")}
+                placeholder={"Un élément par ligne"}
+                rows={3}
+                className="admin-input w-full"
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
               Photos (optionnel)
             </p>
             <PhotoUploader value={newPhotos} onChange={setNewPhotos} />
           </div>
 
-          <div className="sm:col-span-3">
-            <p className="mb-2 mt-1 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
               Vidéo de la machine (optionnel)
             </p>
             <VideoUploader value={newVideo} onChange={setNewVideo} />
           </div>
           <input
             name="videoTitle"
+            defaultValue={editingMachine?.videoTitle ?? ""}
             placeholder="Titre de la vidéo (optionnel)"
-            className="admin-input sm:col-span-3"
+            className="admin-input"
           />
 
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1b262f] sm:col-span-3"
+            className="rounded-lg bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1b262f]"
           >
-            {submitting ? "Ajout en cours..." : "Ajouter la machine"}
+            {submitting
+              ? "Enregistrement..."
+              : editingMachine
+                ? "Enregistrer les modifications"
+                : "Ajouter la machine"}
           </button>
         </form>
       )}
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher : marque, modèle, référence, wilaya..."
+            className="admin-input w-full pl-8"
+          />
+        </div>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value as MachineStatus | "all")}
+          className="admin-input"
+        >
+          <option value="all">Tous les statuts</option>
+          {Object.entries(STATUS_LABELS).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterDrive}
+          onChange={(e) => setFilterDrive(e.target.value as MachineDrive | "all")}
+          className="admin-input"
+        >
+          <option value="all">Tous les entraînements</option>
+          {Object.entries(DRIVE_LABELS).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs text-[var(--color-text-muted)]">
+          {filtered.length} / {machines.length}
+        </span>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-white">
         <table className="w-full min-w-[780px] text-sm">
@@ -232,11 +498,16 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
             </tr>
           </thead>
           <tbody>
-            {machines.map((m) => (
+            {filtered.map((m) => (
               <Fragment key={m.id}>
                 <tr className="border-b border-[var(--color-border)] last:border-0">
                   <td className="px-4 py-3 font-medium text-[var(--color-ink)]">
                     {m.brand} {m.model}
+                    {m.reference && (
+                      <p className="mt-0.5 text-xs font-normal text-[var(--color-text-muted)]">
+                        Réf. {m.reference}
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-3">{m.tonnage} T</td>
                   <td className="px-4 py-3">{m.wilaya}</td>
@@ -323,6 +594,14 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                           </button>
                         )}
                         <button
+                          onClick={() => startEdit(m)}
+                          className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
+                          aria-label="Modifier"
+                          title="Modifier"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
                           onClick={() => {
                             if (editingVideoId === m.id) {
                               setEditingVideoId(null);
@@ -332,9 +611,10 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                             }
                           }}
                           className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
-                          aria-label="Modifier"
+                          aria-label="Modifier la vidéo"
+                          title="Modifier la vidéo"
                         >
-                          {editingVideoId === m.id ? <X size={15} /> : <Pencil size={15} />}
+                          {editingVideoId === m.id ? <X size={15} /> : <Video size={15} />}
                         </button>
                         <button
                           onClick={() => remove(m.id)}
@@ -375,6 +655,13 @@ export function MachinesTab({ initialMachines }: { initialMachines: Machine[] })
                 )}
               </Fragment>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-sm text-[var(--color-text-muted)]">
+                  Aucune machine ne correspond à la recherche.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { updateRuntimeMachine, deleteRuntimeMachine, type AdminMachineInput } from "@/lib/machinesStore";
-import { sanitizeUrl } from "@/lib/sanitize";
+import { sanitizeUrl, sanitizeStringList } from "@/lib/sanitize";
 import { notifyNewProduct } from "@/lib/pushNotifications";
 import { getMachines } from "@/lib/data";
-import type { MachineStatus } from "@/lib/types";
+import type { MachineStatus, MachineCondition } from "@/lib/types";
 
 const VALID_STATUSES: MachineStatus[] = ["draft", "pending", "published", "rejected", "reserved", "sold"];
+const VALID_CONDITIONS: MachineCondition[] = ["neuf", "occasion", "renove"];
+const SPEC_KEYS = [
+  "clampingForce",
+  "screwDiameter",
+  "injectionVolume",
+  "injectionPressure",
+  "motor",
+  "control",
+  "plc",
+  "hmi",
+  "pumpType",
+  "hours",
+] as const;
 
 export async function PATCH(
   request: NextRequest,
@@ -33,6 +46,31 @@ export async function PATCH(
   if ("adminNote" in body) {
     body.adminNote = body.adminNote ? String(body.adminNote).slice(0, 1000) : null;
   }
+  if ("reference" in body) {
+    body.reference = body.reference ? String(body.reference).slice(0, 100) : undefined;
+  }
+  if ("brand" in body && body.brand) body.brand = String(body.brand).slice(0, 100);
+  if ("model" in body && body.model) body.model = String(body.model).slice(0, 100);
+  if ("description" in body && body.description !== undefined) {
+    body.description = String(body.description).slice(0, 3000);
+  }
+  if ("condition" in body) {
+    if (!VALID_CONDITIONS.includes(body.condition as MachineCondition)) {
+      return NextResponse.json({ error: "invalid_condition" }, { status: 400 });
+    }
+  }
+  if ("specs" in body && body.specs && typeof body.specs === "object") {
+    const clean: AdminMachineInput["specs"] = {};
+    for (const key of SPEC_KEYS) {
+      const raw = (body.specs as Record<string, unknown>)[key];
+      if (typeof raw === "string" && raw.trim()) clean[key] = raw.trim().slice(0, 200);
+    }
+    body.specs = clean;
+  }
+  if ("worksPerformed" in body) body.worksPerformed = sanitizeStringList(body.worksPerformed);
+  if ("defects" in body) body.defects = sanitizeStringList(body.defects);
+  if ("accessories" in body) body.accessories = sanitizeStringList(body.accessories);
+
   let wasPublished = false;
   if ("status" in body) {
     if (!VALID_STATUSES.includes(body.status as MachineStatus)) {

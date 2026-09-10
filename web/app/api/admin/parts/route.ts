@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
     brand: body.brand ? String(body.brand).slice(0, 100) : undefined,
     model: body.model ? String(body.model).slice(0, 100) : undefined,
     wilaya: body.wilaya ? String(body.wilaya).slice(0, 100) : undefined,
+    compatibility: body.compatibility ? String(body.compatibility).slice(0, 300) : undefined,
     description: body.description ? String(body.description).slice(0, 2000) : "",
     condition: VALID_CONDITIONS.includes(body.condition as PartCondition)
       ? (body.condition as PartCondition)

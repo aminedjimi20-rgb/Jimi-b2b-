@@ -650,6 +650,7 @@
     "specs": {
       "brand": "Marque",
       "model": "Modèle",
+      "reference": "Référence",
       "year": "Année",
       "tonnage": "Tonnage",
       "clampingForce": "Force de fermeture",
@@ -1130,7 +1131,8 @@
       "reference": "Référence",
       "condition": "État",
       "wilaya": "Localisation",
-      "price": "Prix"
+      "price": "Prix",
+      "compatibility": "Compatibilité"
     }
   },
   "errorBoundary": {

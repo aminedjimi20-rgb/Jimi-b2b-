@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/Badge";
 import { getArticles } from "@/lib/data";
 import { Clock, ArrowRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
@@ -31,7 +33,7 @@ export default async function BlogPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("blog");
-  const articles = getArticles(locale);
+  const articles = await getArticles(locale);
 
   return (
     <>

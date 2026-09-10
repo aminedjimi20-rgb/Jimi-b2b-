@@ -10,10 +10,16 @@ import { GenericBuyRequestForm } from "@/components/forms/BuyEquipmentForm";
 import { getPublicPartBySlug } from "@/lib/data";
 import { buildAlternates, absoluteUrl } from "@/lib/seo";
 import { buildWhatsAppLink, siteConfig } from "@/config/site.config";
-import type { PartCategory } from "@/lib/types";
+import type { PartCategory, PartCondition } from "@/lib/types";
 import { MessageCircle, Phone, Cog } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const ITEM_CONDITION: Record<PartCondition, string> = {
+  neuf: "NewCondition",
+  occasion: "UsedCondition",
+  renove: "RefurbishedCondition",
+};
 
 const VALID_CATEGORIES: PartCategory[] = [
   "electrique",
@@ -80,6 +86,7 @@ export default async function PartDetailPage({
     [t("partDetail.specs.model"), part.model],
     [t("partDetail.specs.reference"), part.reference],
     [t("partDetail.specs.condition"), t(`pieces.condition.${part.condition}`)],
+    [t("partDetail.specs.compatibility"), part.compatibility],
     [t("partDetail.specs.wilaya"), part.wilaya],
     [
       t("partDetail.specs.price"),
@@ -109,6 +116,7 @@ export default async function PartDetailPage({
               part.status === "published"
                 ? "https://schema.org/InStock"
                 : "https://schema.org/OutOfStock",
+            itemCondition: `https://schema.org/${ITEM_CONDITION[part.condition]}`,
             url: absoluteUrl(`/pieces-industrielles/${category}/${slug}`, locale),
           },
         }}

@@ -650,6 +650,7 @@
     "specs": {
       "brand": "العلامة",
       "model": "الطراز",
+      "reference": "المرجع",
       "year": "السنة",
       "tonnage": "التونّاج",
       "clampingForce": "قوة الإغلاق",
@@ -1130,7 +1131,8 @@
       "reference": "المرجع",
       "condition": "الحالة",
       "wilaya": "الموقع",
-      "price": "السعر"
+      "price": "السعر",
+      "compatibility": "التوافق"
     }
   },
   "errorBoundary": {

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useMemo, useState, FormEvent } from "react";
 import type { Part, PartCategory, PartCondition, PartStatus } from "@/lib/types";
 import { PhotoUploader } from "@/components/forms/MediaUploader";
 import { wilayas } from "@/lib/wilayas";
-import { Plus, Trash2, Lock, RefreshCw, EyeOff, Eye, Tag } from "lucide-react";
+import { Plus, Trash2, Lock, RefreshCw, EyeOff, Eye, Tag, Pencil, X, Search } from "lucide-react";
 
 const CATEGORY_LABELS: Record<PartCategory, string> = {
   electrique: "Électrique",
@@ -32,9 +32,32 @@ const STATUS_LABELS: Record<PartStatus, string> = {
 export function PartsTab({ initialParts }: { initialParts: Part[] }) {
   const [parts, setParts] = useState(initialParts);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [newPhotos, setNewPhotos] = useState<string[]>([]);
+
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState<PartCategory | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<PartStatus | "all">("all");
+
+  const editingPart = editingId ? parts.find((p) => p.id === editingId) ?? null : null;
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return parts.filter((p) => {
+      if (filterCategory !== "all" && p.category !== filterCategory) return false;
+      if (filterStatus !== "all" && p.status !== filterStatus) return false;
+      if (!q) return true;
+      return (
+        p.name.toLowerCase().includes(q) ||
+        p.reference.toLowerCase().includes(q) ||
+        (p.brand ?? "").toLowerCase().includes(q) ||
+        (p.model ?? "").toLowerCase().includes(q) ||
+        (p.wilaya ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [parts, search, filterCategory, filterStatus]);
 
   async function refresh() {
     setLoading(true);
@@ -47,6 +70,24 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
     }
   }
 
+  function startAdd() {
+    setEditingId(null);
+    setNewPhotos([]);
+    setShowForm(true);
+  }
+
+  function startEdit(p: Part) {
+    setEditingId(p.id);
+    setNewPhotos(p.photos ?? []);
+    setShowForm(true);
+  }
+
+  function cancelForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setNewPhotos([]);
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
@@ -54,8 +95,8 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
     const payload = Object.fromEntries(formData.entries());
 
     try {
-      const res = await fetch("/api/admin/parts", {
-        method: "POST",
+      const res = await fetch(editingId ? `/api/admin/parts/${editingId}` : "/api/admin/parts", {
+        method: editingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...payload,
@@ -64,9 +105,7 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
         }),
       });
       if (res.ok) {
-        e.currentTarget.reset();
-        setNewPhotos([]);
-        setShowForm(false);
+        cancelForm();
         await refresh();
       }
     } finally {
@@ -102,9 +141,10 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-[var(--color-text-muted)]">
-          Catalogue des pièces industrielles affichées sur <strong>/pieces-industrielles</strong>.
-          Une pièce ajoutée ici avec le statut <strong>Publiée</strong> apparaît immédiatement dans
-          sa catégorie sur le site public.
+          Catalogue des pièces, moules et équipements affichés sur <strong>/pieces-industrielles</strong>
+          (« Moules » est l&apos;une des catégories ci-dessous). Une pièce ajoutée ici avec le statut{" "}
+          <strong>Publiée</strong> apparaît immédiatement dans sa catégorie sur le site public, avec sa
+          propre fiche SEO (Product/Offer).
         </p>
         <div className="flex gap-2">
           <button
@@ -114,7 +154,7 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Actualiser
           </button>
           <button
-            onClick={() => setShowForm((v) => !v)}
+            onClick={() => (showForm && !editingId ? cancelForm() : startAdd())}
             className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0b58ad]"
           >
             <Plus size={14} /> Ajouter une pièce
@@ -124,28 +164,65 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
 
       {showForm && (
         <form
+          key={editingId ?? "new"}
           onSubmit={onSubmit}
           className="mb-6 grid grid-cols-1 gap-3 rounded-xl border border-[var(--color-border)] bg-white p-5 sm:grid-cols-3"
         >
-          <select name="category" defaultValue="electronique" className="admin-input">
+          <div className="flex items-center justify-between sm:col-span-3">
+            <p className="text-sm font-bold text-[var(--color-ink)]">
+              {editingPart ? `Modifier : ${editingPart.name}` : "Nouvelle pièce"}
+            </p>
+            <button
+              type="button"
+              onClick={cancelForm}
+              className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+              aria-label="Fermer"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <select name="category" defaultValue={editingPart?.category ?? "electronique"} className="admin-input">
             {Object.entries(CATEGORY_LABELS).map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
               </option>
             ))}
           </select>
-          <input name="name" required placeholder="Nom de la pièce" className="admin-input" />
-          <input name="reference" required placeholder="Référence" className="admin-input" />
-          <select name="condition" defaultValue="occasion" className="admin-input">
+          <input
+            name="name"
+            required
+            defaultValue={editingPart?.name}
+            placeholder="Nom de la pièce"
+            className="admin-input"
+          />
+          <input
+            name="reference"
+            required
+            defaultValue={editingPart?.reference}
+            placeholder="Référence"
+            className="admin-input"
+          />
+          <select name="condition" defaultValue={editingPart?.condition ?? "occasion"} className="admin-input">
             {Object.entries(CONDITION_LABELS).map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
               </option>
             ))}
           </select>
-          <input name="brand" placeholder="Marque (optionnel)" className="admin-input" />
-          <input name="model" placeholder="Modèle (optionnel)" className="admin-input" />
-          <select name="wilaya" defaultValue="" className="admin-input">
+          <input
+            name="brand"
+            defaultValue={editingPart?.brand ?? ""}
+            placeholder="Marque (optionnel)"
+            className="admin-input"
+          />
+          <input
+            name="model"
+            defaultValue={editingPart?.model ?? ""}
+            placeholder="Modèle (optionnel)"
+            className="admin-input"
+          />
+          <select name="wilaya" defaultValue={editingPart?.wilaya ?? ""} className="admin-input">
             <option value="">Wilaya (optionnel)</option>
             {wilayas.map((w) => (
               <option key={w.code} value={w.fr}>
@@ -153,19 +230,33 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
               </option>
             ))}
           </select>
-          <select name="status" defaultValue="published" className="admin-input">
+          <select name="status" defaultValue={editingPart?.status ?? "published"} className="admin-input">
             {Object.entries(STATUS_LABELS).map(([v, l]) => (
               <option key={v} value={v}>
                 {l}
               </option>
             ))}
           </select>
-          <input name="price" type="number" placeholder="Prix (DA)" className="admin-input" />
+          <input
+            name="price"
+            type="number"
+            defaultValue={editingPart?.price ?? ""}
+            placeholder="Prix (DA)"
+            className="admin-input"
+          />
           <label className="flex items-center gap-2 text-sm text-[var(--color-text)]">
-            <input type="checkbox" name="priceOnRequest" /> Prix sur demande
+            <input type="checkbox" name="priceOnRequest" defaultChecked={editingPart?.priceOnRequest} /> Prix
+            sur demande
           </label>
+          <input
+            name="compatibility"
+            defaultValue={editingPart?.compatibility ?? ""}
+            placeholder="Compatibilité (ex: Arburg Allrounder 370-570)"
+            className="admin-input sm:col-span-3"
+          />
           <textarea
             name="description"
+            defaultValue={editingPart?.description}
             placeholder="Description"
             rows={3}
             className="admin-input sm:col-span-3"
@@ -183,10 +274,53 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
             disabled={submitting}
             className="rounded-lg bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1b262f] sm:col-span-3"
           >
-            {submitting ? "Ajout en cours..." : "Ajouter la pièce"}
+            {submitting
+              ? "Enregistrement..."
+              : editingPart
+                ? "Enregistrer les modifications"
+                : "Ajouter la pièce"}
           </button>
         </form>
       )}
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] flex-1">
+          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher : nom, référence, marque, modèle, wilaya..."
+            className="admin-input w-full pl-8"
+          />
+        </div>
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value as PartCategory | "all")}
+          className="admin-input"
+        >
+          <option value="all">Toutes les catégories</option>
+          {Object.entries(CATEGORY_LABELS).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value as PartStatus | "all")}
+          className="admin-input"
+        >
+          <option value="all">Tous les statuts</option>
+          {Object.entries(STATUS_LABELS).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs text-[var(--color-text-muted)]">
+          {filtered.length} / {parts.length}
+        </span>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-white">
         <table className="w-full min-w-[720px] text-sm">
@@ -202,7 +336,7 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
             </tr>
           </thead>
           <tbody>
-            {parts.map((p) => (
+            {filtered.map((p) => (
               <tr key={p.id} className="border-b border-[var(--color-border)] last:border-0">
                 <td className="px-4 py-3 font-medium text-[var(--color-ink)]">
                   {p.name}
@@ -280,6 +414,14 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
                         </button>
                       )}
                       <button
+                        onClick={() => startEdit(p)}
+                        className="rounded-md p-1.5 text-[var(--color-accent)] hover:bg-blue-50"
+                        aria-label="Modifier"
+                        title="Modifier"
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
                         onClick={() => remove(p.id)}
                         className="rounded-md p-1.5 text-red-500 hover:bg-red-50"
                         aria-label="Supprimer"
@@ -296,6 +438,13 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
                 </td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-[var(--color-text-muted)]">
+                  Aucune pièce ne correspond à la recherche.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

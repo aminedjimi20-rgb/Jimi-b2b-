@@ -12,6 +12,7 @@ export type AdminPartInput = {
   brand?: string;
   model?: string;
   wilaya?: string;
+  compatibility?: string;
   description: string;
   condition: Part["condition"];
   status: Part["status"];
@@ -51,6 +52,7 @@ function buildPart(id: string, slug: string, input: AdminPartInput): Part {
     brand: input.brand || undefined,
     model: input.model || undefined,
     wilaya: input.wilaya || undefined,
+    compatibility: input.compatibility || undefined,
     description: input.description,
     condition: input.condition,
     price: input.price,

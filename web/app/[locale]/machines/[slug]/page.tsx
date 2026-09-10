@@ -14,8 +14,15 @@ import { getPublicMachineBySlug } from "@/lib/data";
 import { getVideoProvider, getAutoVideoThumbnail, getVideoEmbedUrl } from "@/lib/video";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, MapPin, Calendar, Gauge, Mail, CalendarClock } from "lucide-react";
+import type { MachineCondition } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+const ITEM_CONDITION: Record<MachineCondition, string> = {
+  neuf: "NewCondition",
+  occasion: "UsedCondition",
+  renove: "RefurbishedCondition",
+};
 
 export async function generateMetadata({
   params,
@@ -72,6 +79,7 @@ export default async function MachineDetailPage({
   const specRows: [string, string | undefined][] = [
     [t("machineDetail.specs.brand"), machine.brand],
     [t("machineDetail.specs.model"), machine.model],
+    [t("machineDetail.specs.reference"), machine.reference],
     [t("machineDetail.specs.year"), String(machine.year)],
     [t("machineDetail.specs.tonnage"), `${machine.tonnage} T`],
     [t("machineDetail.specs.clampingForce"), machine.specs.clampingForce],
@@ -83,7 +91,7 @@ export default async function MachineDetailPage({
     [t("machineDetail.specs.plc"), machine.specs.plc],
     [t("machineDetail.specs.hmi"), machine.specs.hmi],
     [t("machineDetail.specs.pumpType"), machine.specs.pumpType],
-    [t("machineDetail.specs.condition"), machine.specs.condition],
+    [t("machineDetail.specs.condition"), t(`pieces.condition.${machine.condition}`)],
     [t("machineDetail.specs.hours"), machine.specs.hours],
     [t("machineDetail.specs.location"), machine.wilaya],
     [
@@ -102,7 +110,10 @@ export default async function MachineDetailPage({
           "@type": "Product",
           name: `${machine.brand} ${machine.model}`,
           brand: machine.brand,
+          model: machine.model,
+          ...(machine.reference ? { sku: machine.reference } : {}),
           description: machine.description,
+          ...(machine.photos && machine.photos.length > 0 ? { image: machine.photos } : {}),
           offers: {
             "@type": "Offer",
             priceCurrency: "DZD",
@@ -111,6 +122,7 @@ export default async function MachineDetailPage({
               machine.status === "published"
                 ? "https://schema.org/InStock"
                 : "https://schema.org/OutOfStock",
+            itemCondition: `https://schema.org/${ITEM_CONDITION[machine.condition]}`,
           },
         }}
       />
