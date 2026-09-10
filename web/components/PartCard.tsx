@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { buildWhatsAppLink } from "@/config/site.config";
+import { buildWhatsAppLink, siteConfig } from "@/config/site.config";
 import type { Part, PartCondition } from "@/lib/types";
-import { Cog, MessageCircle, Mail } from "lucide-react";
+import { Cog, MessageCircle, Phone } from "lucide-react";
 
 const conditionTone: Record<PartCondition, "success" | "accent" | "warning"> = {
   neuf: "success",
@@ -44,8 +44,14 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
       >
         {t("pieces.requestPrice")}
       </Button>
-      <Button href="/contact" variant="outline" size="sm" icon={<Mail size={15} />}>
-        {t("nav.contact")}
+      <Button
+        href={`tel:${siteConfig.contact.phoneHref}`}
+        external
+        variant="outline"
+        size="sm"
+        icon={<Phone size={15} />}
+      >
+        {t("cta.callNow")}
       </Button>
     </div>
   );
