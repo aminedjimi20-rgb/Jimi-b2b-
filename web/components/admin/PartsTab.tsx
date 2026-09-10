@@ -204,7 +204,14 @@ export function PartsTab({ initialParts }: { initialParts: Part[] }) {
           <tbody>
             {parts.map((p) => (
               <tr key={p.id} className="border-b border-[var(--color-border)] last:border-0">
-                <td className="px-4 py-3 font-medium text-[var(--color-ink)]">{p.name}</td>
+                <td className="px-4 py-3 font-medium text-[var(--color-ink)]">
+                  {p.name}
+                  {(p.brand || p.model || p.wilaya) && (
+                    <p className="mt-0.5 text-xs font-normal text-[var(--color-text-muted)]">
+                      {[p.brand, p.model, p.wilaya].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </td>
                 <td className="px-4 py-3">{p.reference}</td>
                 <td className="px-4 py-3">{CATEGORY_LABELS[p.category]}</td>
                 <td className="px-4 py-3">{CONDITION_LABELS[p.condition]}</td>

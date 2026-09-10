@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Link } from "@/i18n/navigation";
 import { buildWhatsAppLink, siteConfig } from "@/config/site.config";
 import type { Part, PartCondition } from "@/lib/types";
-import { Cog, MessageCircle, Phone } from "lucide-react";
+import { Cog, MessageCircle, Phone, MapPin } from "lucide-react";
 
 const conditionTone: Record<PartCondition, "success" | "accent" | "warning"> = {
   neuf: "success",
@@ -16,6 +16,7 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
   const t = useTranslations();
   const waMessage = t("pieces.whatsappRequest", { name: part.name, reference: part.reference });
   const detailHref = `/pieces-industrielles/${part.category}/${part.slug}`;
+  const brandModel = [part.brand, part.model].filter(Boolean).join(" ");
 
   const badges = (
     <div className="absolute inset-x-3 top-3 flex flex-wrap gap-2">
@@ -77,6 +78,16 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
             <h3 className="mt-0.5 text-base font-bold text-[var(--color-ink)] hover:text-[var(--color-accent)] sm:text-lg">
               {part.name}
             </h3>
+            {(brandModel || part.wilaya) && (
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--color-text-muted)]">
+                {brandModel && <span>{brandModel}</span>}
+                {part.wilaya && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin size={11} /> {part.wilaya}
+                  </span>
+                )}
+              </p>
+            )}
             {part.description && (
               <p className="mt-1 line-clamp-2 hidden text-sm text-[var(--color-text-muted)] sm:block">
                 {part.description}
@@ -112,6 +123,16 @@ export function PartCard({ part, layout = "grid" }: { part: Part; layout?: "grid
           <h3 className="mt-0.5 text-lg font-bold text-[var(--color-ink)] hover:text-[var(--color-accent)]">
             {part.name}
           </h3>
+          {(brandModel || part.wilaya) && (
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--color-text-muted)]">
+              {brandModel && <span>{brandModel}</span>}
+              {part.wilaya && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={11} /> {part.wilaya}
+                </span>
+              )}
+            </p>
+          )}
         </Link>
 
         {part.description && (
