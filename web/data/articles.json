@@ -121,5 +121,927 @@
         ]
       }
     }
+  },
+  {
+    "id": "a7",
+    "slug": "choisir-machine-injection-plastique-adaptee",
+    "readTimeMinutes": 6,
+    "publishedAt": "2026-03-01",
+    "translations": {
+      "fr": {
+        "title": "Comment choisir une machine d'injection plastique adaptée à votre production",
+        "excerpt": "Tonnage, type de commande, cadence, matière transformée : les critères qui déterminent la machine d'injection réellement adaptée à votre activité.",
+        "category": "Machines",
+        "content": [
+          "Choisir une machine d'injection plastique ne se résume pas à comparer des prix : la machine doit correspondre à votre production réelle, pas à une moyenne du marché. La première question à trancher est le type de pièce à produire et la matière utilisée, car chaque matière (PP, ABS, PA chargé fibre de verre, PC...) impose des contraintes de pression d'injection et de température différentes.",
+          "Le tonnage (force de fermeture) se calcule à partir de la surface projetée de la pièce et de la pression matière dans l'empreinte, pas au hasard. Une machine sous-dimensionnée génère des bavures et une usure prématurée du moule ; une machine surdimensionnée augmente inutilement la consommation électrique et le coût du cycle.",
+          "Le choix entre commande hydraulique, servo-hydraulique ou tout-électrique dépend de votre cadence cible et de votre budget énergie. Une machine servo réduit sensiblement la consommation et le bruit par rapport à une hydraulique classique, avec un surcoût à l'achat qui se rentabilise sur la durée pour une production en 2 ou 3 équipes.",
+          "Il faut aussi anticiper l'évolution de votre production : une machine achetée pour une seule référence aujourd'hui devra peut-être produire des pièces plus grandes ou plus techniques demain. Prévoir une marge de tonnage raisonnable évite un remplacement prématuré.",
+          "Enfin, la disponibilité de pièces détachées et d'un service de maintenance pour la marque choisie est un critère aussi important que la fiche technique elle-même : une machine performante mais orpheline de support devient vite un handicap de production."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "Demander une machine"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Automatisation industrielle"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تختار آلة حقن بلاستيك مناسبة لإنتاجك",
+        "excerpt": "القوة الشدّية، نوع التحكم، سرعة الإنتاج، نوع المادة: المعايير التي تحدد آلة الحقن المناسبة فعلاً لنشاطك.",
+        "category": "الآلات",
+        "content": [
+          "اختيار آلة حقن بلاستيك لا يقتصر على مقارنة الأسعار، بل يجب أن تتوافق الآلة مع إنتاجك الفعلي. أول سؤال يجب طرحه هو نوع القطعة والمادة المستخدمة (PP، ABS، PA مقوى بألياف الزجاج، PC...)، لأن كل مادة تفرض ضغط حقن ودرجة حرارة مختلفين.",
+          "قوة الإغلاق (Tonnage) تُحسب بناءً على المساحة المسقطة للقطعة وضغط المادة داخل القالب، وليس عشوائياً. آلة ذات قوة غير كافية تُنتج زوائد بلاستيكية وتآكلاً سريعاً للقالب، بينما آلة أكبر من اللازم تزيد استهلاك الكهرباء وتكلفة الدورة دون فائدة.",
+          "الاختيار بين التحكم الهيدروليكي أو السيرفو-هيدروليكي أو الكهربائي بالكامل يعتمد على سرعة الإنتاج المستهدفة وميزانية الطاقة لديك. الآلة ذات السيرفو تقلل الاستهلاك والضجيج مقارنة بالهيدروليكية التقليدية.",
+          "يجب أيضاً توقع تطور إنتاجك مستقبلاً: آلة اشتُريت لمرجع واحد اليوم قد تحتاج لإنتاج قطع أكبر أو أكثر تعقيداً غداً. ترك هامش معقول في القوة يتجنب استبدالاً مبكراً للآلة.",
+          "أخيراً، توفر قطع الغيار وخدمة الصيانة للعلامة المختارة معيار بنفس أهمية المواصفات التقنية: آلة قوية لكن بدون دعم فني تصبح سريعاً عائقاً للإنتاج."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "طلب آلة"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "الأتمتة الصناعية"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Choose the Right Plastic Injection Machine for Your Production",
+        "excerpt": "Clamping force, drive type, cycle speed, material: the criteria that determine which injection machine actually fits your operation.",
+        "category": "Machines",
+        "content": [
+          "Choosing a plastic injection machine is not just about comparing prices — the machine has to match your actual production, not a market average. The first question is the part and material you're producing, since each material (PP, ABS, glass-fiber PA, PC...) requires different injection pressure and temperature.",
+          "Clamping force (tonnage) should be calculated from the part's projected area and cavity pressure, not guessed. An undersized machine causes flash and premature mold wear; an oversized one wastes power and increases cycle cost with no benefit.",
+          "The choice between hydraulic, servo-hydraulic, or fully electric drive depends on your target cycle speed and energy budget. A servo machine cuts power consumption and noise noticeably compared to a classic hydraulic one, with the extra upfront cost paying off over multi-shift production.",
+          "You should also plan for how your production may evolve: a machine bought for one part today may need to run larger or more technical parts tomorrow. Leaving a reasonable tonnage margin avoids an early replacement.",
+          "Finally, spare-part availability and maintenance support for the chosen brand matter as much as the spec sheet itself — a powerful machine with no support becomes a production risk."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "Request a machine"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Industrial automation"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a8",
+    "slug": "machine-neuve-ou-occasion-que-choisir",
+    "readTimeMinutes": 5,
+    "publishedAt": "2026-03-05",
+    "translations": {
+      "fr": {
+        "title": "Machine industrielle neuve ou occasion : comment choisir ?",
+        "excerpt": "Investissement, délai de mise en production, garantie, évolutivité : les vrais critères pour trancher entre machine neuve et machine d'occasion.",
+        "category": "Achat",
+        "content": [
+          "La question neuf ou occasion dépend d'abord de votre horizon d'investissement. Une machine neuve immobilise davantage de capital mais offre une garantie constructeur, une durée de vie résiduelle maximale et un support technique direct pendant plusieurs années.",
+          "Une machine d'occasion bien entretenue permet de démarrer une production ou d'augmenter une capacité rapidement, avec un budget nettement inférieur et souvent un délai de disponibilité plus court qu'une commande neuve dont le délai de fabrication peut atteindre plusieurs mois.",
+          "Le risque principal de l'occasion n'est pas l'âge de la machine mais son historique : une machine de 10 ans bien entretenue, avec un contrôleur à jour, peut être plus fiable qu'une machine de 3 ans négligée. C'est pourquoi l'inspection technique avant achat reste indispensable.",
+          "Sur le plan financier, une machine neuve se justifie surtout pour une production critique en continu, où le coût d'un arrêt imprévu dépasse largement l'écart de prix avec l'occasion. Pour une activité en croissance ou une nouvelle ligne, l'occasion reste souvent le choix le plus rationnel.",
+          "Dans les deux cas, le vrai critère de décision est le coût total de possession sur 5 à 10 ans : prix d'achat, consommation énergétique, disponibilité des pièces détachées et fréquence de maintenance attendue."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/acheter",
+            "label": "Demander un équipement"
+          },
+          {
+            "href": "/vendre-machine",
+            "label": "Vendre une machine"
+          }
+        ]
+      },
+      "ar": {
+        "title": "آلة صناعية جديدة أم مستعملة: كيف تختار؟",
+        "excerpt": "الاستثمار، مدة بدء الإنتاج، الضمان، قابلية التطور: المعايير الحقيقية للاختيار بين آلة جديدة وأخرى مستعملة.",
+        "category": "الشراء",
+        "content": [
+          "سؤال الجديد أو المستعمل يعتمد أولاً على أفق استثمارك. الآلة الجديدة تتطلب رأس مال أكبر لكنها تقدم ضمان الصانع وأقصى عمر افتراضي ودعماً فنياً مباشراً لعدة سنوات.",
+          "الآلة المستعملة الجيدة الصيانة تسمح ببدء إنتاج أو زيادة طاقة إنتاجية بسرعة وبميزانية أقل بكثير، وغالباً بمدة توفر أقصر من طلبية جديدة قد تستغرق تصنيعها عدة أشهر.",
+          "الخطر الأساسي في الشراء المستعمل ليس عمر الآلة بل تاريخها: آلة عمرها 10 سنوات لكن جيدة الصيانة ومزودة بوحدة تحكم محدّثة قد تكون أكثر موثوقية من آلة عمرها 3 سنوات مهملة. لهذا يبقى الفحص التقني قبل الشراء أمراً ضرورياً.",
+          "من الناحية المالية، الآلة الجديدة تُبرر نفسها خاصة في إنتاج حساس ومستمر، حيث تكلفة توقف غير متوقع تفوق بكثير فارق السعر مع المستعملة. أما لنشاط في طور النمو أو خط إنتاج جديد، فالمستعملة غالباً هي الخيار الأكثر منطقية.",
+          "في الحالتين، المعيار الحقيقي للقرار هو التكلفة الإجمالية للامتلاك على مدى 5 إلى 10 سنوات: سعر الشراء، استهلاك الطاقة، توفر قطع الغيار، وتكرار الصيانة المتوقع."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/acheter",
+            "label": "طلب معدة"
+          },
+          {
+            "href": "/vendre-machine",
+            "label": "بيع آلة"
+          }
+        ]
+      },
+      "en": {
+        "title": "New or Used Industrial Machine: How to Decide",
+        "excerpt": "Capital, time to production, warranty, scalability: the real criteria for choosing between a new and a used machine.",
+        "category": "Buying",
+        "content": [
+          "New versus used first depends on your investment horizon. A new machine ties up more capital but comes with a manufacturer warranty, maximum remaining service life, and direct technical support for several years.",
+          "A well-maintained used machine lets you start production or scale up quickly, at a noticeably lower budget and often shorter lead time than a new order, which can take months to manufacture.",
+          "The main risk with used equipment isn't age but history: a well-maintained 10-year-old machine with an updated controller can be more reliable than a neglected 3-year-old one. That's why a technical inspection before purchase is essential.",
+          "Financially, a new machine makes sense mainly for critical, continuous production, where the cost of unplanned downtime far exceeds the price gap with used equipment. For a growing business or a new line, used equipment is often the more rational choice.",
+          "Either way, the real decision criterion is total cost of ownership over 5 to 10 years: purchase price, energy consumption, spare-part availability, and expected maintenance frequency."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/acheter",
+            "label": "Request equipment"
+          },
+          {
+            "href": "/vendre-machine",
+            "label": "Sell a machine"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a9",
+    "slug": "checklist-achat-equipement-industriel-occasion",
+    "readTimeMinutes": 6,
+    "publishedAt": "2026-03-10",
+    "translations": {
+      "fr": {
+        "title": "Checklist complète avant d'acheter un équipement industriel d'occasion",
+        "excerpt": "Une méthode en 5 points pour inspecter machine, pièce ou moule d'occasion avant achat, au-delà du seul aspect visuel.",
+        "category": "Achat",
+        "content": [
+          "Avant tout achat d'équipement industriel d'occasion, commencez par documenter la traçabilité : depuis quand la machine tourne, dans quel secteur, sur quel type de matière ou de pièce, et si un carnet de maintenance existe. L'absence totale d'historique est en soi une information à prendre en compte dans la négociation.",
+          "L'inspection visuelle doit dépasser la simple propreté de la machine : vérifiez les traces de fuite hydraulique au niveau des vérins et flexibles, l'état des câbles électriques, la présence de jeu mécanique sur les colonnes et les glissières, et l'usure des composants d'usure connus (buses, clapets anti-retour, joints).",
+          "Le test fonctionnel est l'étape la plus importante et ne doit jamais être sauté : faites tourner l'équipement à vide, puis en charge si possible, sur plusieurs cycles complets. Écoutez les bruits anormaux, observez la stabilité des paramètres affichés et la répétabilité du cycle.",
+          "Vérifiez ensuite la compatibilité électrique et de commande avec votre installation : tension, protocole de communication du PLC, disponibilité des pièces de rechange pour la marque et le modèle concernés, en particulier pour les composants électroniques dont certains modèles sont retirés du marché.",
+          "Enfin, chiffrez le budget de remise en état probable (pièces d'usure, mise à niveau électrique, transport, installation) avant de comparer le prix affiché à une machine neuve équivalente : c'est ce coût total qui détermine si l'affaire est réellement avantageuse."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter",
+            "label": "Faire une demande d'achat"
+          },
+          {
+            "href": "/pieces-industrielles",
+            "label": "Pièces industrielles"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance et dépannage"
+          }
+        ]
+      },
+      "ar": {
+        "title": "قائمة تحقق كاملة قبل شراء معدات صناعية مستعملة",
+        "excerpt": "منهجية من 5 نقاط لفحص آلة أو قطعة أو قالب مستعمل قبل الشراء، تتجاوز المظهر الخارجي فقط.",
+        "category": "الشراء",
+        "content": [
+          "قبل أي شراء لمعدات صناعية مستعملة، ابدأ بتوثيق تاريخ الاستخدام: منذ متى تعمل الآلة، في أي قطاع، على أي نوع من المواد أو القطع، وهل يوجد سجل صيانة. غياب أي تاريخ يُعتبر بحد ذاته معلومة يجب أخذها بعين الاعتبار عند التفاوض.",
+          "الفحص البصري يجب أن يتجاوز نظافة الآلة فقط: تحقق من آثار تسرب هيدروليكي عند المكابس والخراطيم، حالة الكابلات الكهربائية، وجود فراغ ميكانيكي في الأعمدة والسكك، وتآكل القطع المعروفة (الفوهات، الصمامات، الحلقات المانعة للتسرب).",
+          "الاختبار الوظيفي هو أهم خطوة ولا يجب تخطيه أبداً: شغّل المعدة بدون حمولة ثم بحمولة إن أمكن، على عدة دورات كاملة. استمع للأصوات غير الطبيعية وراقب استقرار المعاملات المعروضة.",
+          "تحقق بعد ذلك من التوافق الكهربائي ونظام التحكم مع منشأتك: الجهد، بروتوكول اتصال وحدة التحكم PLC، وتوفر قطع الغيار للعلامة والموديل، خاصة للمكونات الإلكترونية التي قد تكون بعض موديلاتها متوقفة عن الإنتاج.",
+          "أخيراً، قدّر ميزانية إعادة التأهيل المحتملة (قطع التآكل، تحديث كهربائي، نقل، تركيب) قبل مقارنة السعر المعروض بآلة جديدة مماثلة: هذه التكلفة الإجمالية هي ما يحدد إن كانت الصفقة مفيدة فعلاً."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter",
+            "label": "تقديم طلب شراء"
+          },
+          {
+            "href": "/pieces-industrielles",
+            "label": "قطع الغيار الصناعية"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "الصيانة والإصلاح"
+          }
+        ]
+      },
+      "en": {
+        "title": "A Complete Checklist Before Buying Used Industrial Equipment",
+        "excerpt": "A 5-point method to inspect a used machine, part, or mold before purchase, beyond just how it looks.",
+        "category": "Buying",
+        "content": [
+          "Before buying any used industrial equipment, start by documenting its history: how long the machine has run, in what industry, on what material or part, and whether a maintenance log exists. No history at all is itself information worth factoring into negotiation.",
+          "Visual inspection needs to go beyond cleanliness: check for hydraulic leaks around cylinders and hoses, the condition of electrical cabling, mechanical play in columns and slides, and wear on known consumable parts (nozzles, check valves, seals).",
+          "The functional test is the most important step and should never be skipped: run the equipment unloaded, then loaded if possible, over several full cycles. Listen for abnormal noise and watch whether displayed parameters stay stable and repeatable.",
+          "Then check electrical and control compatibility with your setup: voltage, the PLC's communication protocol, and spare-part availability for that brand and model — especially for electronic components, since some older models are discontinued.",
+          "Finally, estimate the likely refurbishment budget (wear parts, electrical upgrades, transport, installation) before comparing the asking price to an equivalent new machine — that total cost is what determines whether the deal is actually worthwhile."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/acheter",
+            "label": "Submit a buying request"
+          },
+          {
+            "href": "/pieces-industrielles",
+            "label": "Industrial parts"
+          },
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance & repair"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a10",
+    "slug": "comment-choisir-tonnage-machine-injection",
+    "readTimeMinutes": 5,
+    "publishedAt": "2026-03-15",
+    "translations": {
+      "fr": {
+        "title": "Comment choisir le bon tonnage pour votre machine d'injection plastique",
+        "excerpt": "La méthode de calcul du tonnage nécessaire selon la surface projetée de la pièce, et pourquoi se tromper coûte cher.",
+        "category": "Machines",
+        "content": [
+          "Le tonnage, ou force de fermeture, doit compenser la pression exercée par la matière fondue dans l'empreinte pendant l'injection, afin d'éviter que le moule ne s'ouvre et ne génère des bavures. Il se calcule à partir de la surface projetée de la pièce (dans le plan de joint) multipliée par la pression spécifique de la matière utilisée.",
+          "Chaque matière a sa propre pression spécifique de référence : les matières chargées fibre de verre ou les techniques comme le PC nécessitent généralement une pression plus élevée que les matières standards comme le PP ou le PEHD, ce qui augmente le tonnage requis à surface égale.",
+          "Il faut aussi intégrer le nombre d'empreintes du moule : un moule 4 empreintes multiplie la surface projetée totale et donc le tonnage nécessaire, même si chaque pièce individuellement est petite. Sous-estimer ce facteur est une erreur fréquente lors du passage d'un prototype à une production en série.",
+          "Un sous-dimensionnement provoque des bavures, une usure prématurée du moule et des dérives dimensionnelles sur la pièce ; un surdimensionnement excessif augmente inutilement la consommation électrique et le coût d'achat sans bénéfice qualité.",
+          "En pratique, il est recommandé de prévoir une marge de sécurité raisonnable (généralement 10 à 20 %) par rapport au calcul théorique, pour absorber les variations de process et anticiper une évolution future de la pièce ou du moule."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "Demander une machine"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تختار القوة الشدّية المناسبة لآلة حقن البلاستيك",
+        "excerpt": "طريقة حساب القوة الشدّية المطلوبة حسب المساحة المسقطة للقطعة، ولماذا يكلف الخطأ فيها ثمناً باهظاً.",
+        "category": "الآلات",
+        "content": [
+          "القوة الشدّية (Tonnage) يجب أن تعوّض الضغط الذي تمارسه المادة المنصهرة داخل القالب أثناء الحقن، لمنع فتح القالب وظهور الزوائد البلاستيكية. تُحسب بناءً على المساحة المسقطة للقطعة مضروبة في الضغط النوعي للمادة المستخدمة.",
+          "لكل مادة ضغط نوعي مرجعي خاص بها: المواد المقواة بألياف الزجاج أو المواد التقنية مثل PC تتطلب عادة ضغطاً أعلى من المواد القياسية مثل PP أو PEHD، مما يرفع القوة المطلوبة عند نفس المساحة.",
+          "يجب أيضاً احتساب عدد تجاويف القالب: قالب بـ4 تجاويف يضاعف المساحة المسقطة الإجمالية وبالتالي القوة المطلوبة، حتى لو كانت كل قطعة صغيرة بمفردها. تجاهل هذا العامل خطأ شائع عند الانتقال من نموذج أولي إلى إنتاج بسلسلة.",
+          "نقص القوة يسبب زوائد بلاستيكية وتآكلاً مبكراً للقالب وانحرافات في أبعاد القطعة؛ أما القوة الزائدة فترفع استهلاك الكهرباء وتكلفة الشراء دون فائدة في الجودة.",
+          "عملياً، يُنصح بترك هامش أمان معقول (عادة 10 إلى 20٪) فوق الحساب النظري، لامتصاص تغيرات العملية والتحضير لتطور مستقبلي في القطعة أو القالب."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "طلب آلة"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Choose the Right Tonnage for Your Injection Machine",
+        "excerpt": "How to calculate the clamping force needed from a part's projected area, and why getting it wrong is costly.",
+        "category": "Machines",
+        "content": [
+          "Tonnage, or clamping force, has to offset the pressure the molten material exerts inside the mold during injection, so the mold doesn't crack open and cause flash. It's calculated from the part's projected area (at the parting line) multiplied by the material's specific pressure.",
+          "Every material has its own reference specific pressure: glass-fiber-reinforced or engineering materials like PC generally need higher pressure than standard materials like PP or HDPE, which raises the required tonnage for the same area.",
+          "You also need to factor in the number of mold cavities: a 4-cavity mold multiplies the total projected area, and therefore the required tonnage, even if each individual part is small. Underestimating this is a common mistake when moving from a prototype to series production.",
+          "Undersizing causes flash, premature mold wear, and dimensional drift in the part; excessive oversizing needlessly increases power consumption and purchase cost with no quality benefit.",
+          "In practice, it's recommended to leave a reasonable safety margin (typically 10 to 20%) above the theoretical calculation, to absorb process variation and allow for future changes to the part or mold."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/acheter-machine",
+            "label": "Request a machine"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a11",
+    "slug": "pannes-frequentes-machine-injection-plastique",
+    "readTimeMinutes": 6,
+    "publishedAt": "2026-03-20",
+    "translations": {
+      "fr": {
+        "title": "Pannes fréquentes sur machine d'injection plastique : causes et solutions",
+        "excerpt": "Les pannes hydrauliques, électriques et mécaniques les plus courantes sur presse à injecter, et comment les diagnostiquer rapidement.",
+        "category": "Maintenance",
+        "content": [
+          "Les pannes hydrauliques figurent parmi les plus fréquentes sur presse à injecter : perte de pression progressive (pompe usée, clapet défectueux), surchauffe de l'huile (échangeur encrassé, niveau bas) ou fuite externe au niveau des flexibles et raccords. Un contrôle régulier de la propreté et du niveau d'huile évite une grande partie de ces incidents.",
+          "Côté électrique, les résistances de chauffe du fourreau et leurs thermocouples sont des points de défaillance classiques : une zone de chauffe qui ne monte plus en température, ou qui oscille de façon anormale, indique généralement une résistance grillée ou un thermocouple déréglé, facilement identifiable par un contrôle de continuité.",
+          "Sur le plan mécanique, l'usure du système de fermeture (colonnes, genouillère, glissières) se traduit souvent par un bruit anormal au moment de la fermeture du moule ou par un défaut d'alignement visible sur la pièce produite. Un graissage régulier selon le plan constructeur limite fortement ce type d'usure.",
+          "Les défauts sur pièce produite (bavures, manques de matière, retassures) ne sont pas toujours liés à la machine elle-même : ils peuvent aussi provenir du moule, du réglage des paramètres process, ou de la matière première (humidité, contamination). Un diagnostic méthodique doit donc croiser machine, moule et matière avant de conclure.",
+          "Enfin, un contrôleur ou PLC qui affiche des erreurs de communication ou perd ses paramètres nécessite souvent une vérification des connexions et de l'alimentation avant d'envisager un remplacement de carte, qui reste l'intervention la plus coûteuse à éviter par une maintenance préventive régulière."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance et dépannage"
+          },
+          {
+            "href": "/pieces-industrielles/hydraulique",
+            "label": "Pièces hydrauliques"
+          },
+          {
+            "href": "/pieces-industrielles/electrique",
+            "label": "Pièces électriques"
+          }
+        ]
+      },
+      "ar": {
+        "title": "الأعطال الشائعة في آلات حقن البلاستيك: الأسباب والحلول",
+        "excerpt": "أكثر الأعطال الهيدروليكية والكهربائية والميكانيكية شيوعاً في آلات الحقن، وكيفية تشخيصها بسرعة.",
+        "category": "الصيانة",
+        "content": [
+          "تُعد الأعطال الهيدروليكية من أكثر الأعطال شيوعاً في آلات الحقن: فقدان تدريجي للضغط (مضخة متآكلة، صمام معيب)، ارتفاع درجة حرارة الزيت (مبادل حراري متسخ، مستوى منخفض)، أو تسرب خارجي عند الخراطيم والوصلات. الفحص الدوري لنظافة ومستوى الزيت يتجنب جزءاً كبيراً من هذه الأعطال.",
+          "على الجانب الكهربائي، تُعتبر مقاومات التسخين في الأسطوانة وأزواجها الحرارية نقاط عطل كلاسيكية: منطقة تسخين لا ترتفع درجة حرارتها أو تتذبذب بشكل غير طبيعي تشير عادة إلى مقاومة محترقة أو زوج حراري غير مضبوط، يمكن تحديده بسهولة بفحص الاستمرارية.",
+          "على المستوى الميكانيكي، تآكل نظام الإغلاق (الأعمدة، مفصل الركبة، السكك) يظهر غالباً كصوت غير طبيعي عند إغلاق القالب أو خلل في محاذاة القطعة المنتجة. التشحيم المنتظم حسب خطة الصانع يقلل بشدة من هذا النوع من التآكل.",
+          "عيوب القطعة المنتجة (زوائد، نقص مادة، تجاويف انكماش) لا ترتبط دائماً بالآلة نفسها: قد تنتج عن القالب أو ضبط معاملات العملية أو المادة الخام (رطوبة، تلوث). لذا يجب أن يشمل التشخيص المنهجي الآلة والقالب والمادة معاً.",
+          "أخيراً، وحدة تحكم PLC تعرض أخطاء اتصال أو تفقد معاملاتها تتطلب غالباً فحص التوصيلات والتغذية الكهربائية قبل التفكير في استبدال البطاقة الإلكترونية، وهو التدخل الأكثر تكلفة والذي يمكن تجنبه بصيانة وقائية منتظمة."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "الصيانة والإصلاح"
+          },
+          {
+            "href": "/pieces-industrielles/hydraulique",
+            "label": "قطع هيدروليكية"
+          },
+          {
+            "href": "/pieces-industrielles/electrique",
+            "label": "قطع كهربائية"
+          }
+        ]
+      },
+      "en": {
+        "title": "Common Failures on Plastic Injection Machines: Causes and Fixes",
+        "excerpt": "The most common hydraulic, electrical, and mechanical failures on injection presses, and how to diagnose them quickly.",
+        "category": "Maintenance",
+        "content": [
+          "Hydraulic failures are among the most common on injection presses: gradual pressure loss (worn pump, faulty valve), oil overheating (clogged heat exchanger, low level), or external leaks at hoses and fittings. Regular checks of oil cleanliness and level prevent a large share of these incidents.",
+          "On the electrical side, barrel heater bands and their thermocouples are classic failure points: a heating zone that won't reach temperature, or that swings erratically, usually points to a burnt-out heater or a faulty thermocouple, easily identified with a continuity check.",
+          "Mechanically, wear in the clamping system (tie bars, toggle, slides) often shows up as abnormal noise when the mold closes, or as visible misalignment on the produced part. Regular greasing per the manufacturer's schedule greatly limits this kind of wear.",
+          "Defects on the produced part (flash, short shots, sink marks) aren't always caused by the machine itself — they can also come from the mold, process parameter settings, or the raw material (moisture, contamination). A methodical diagnosis has to check machine, mold, and material together before concluding.",
+          "Finally, a controller or PLC showing communication errors or losing its parameters usually calls for checking connections and power supply before considering a board replacement — the costliest fix, and one that regular preventive maintenance helps avoid."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance & repair"
+          },
+          {
+            "href": "/pieces-industrielles/hydraulique",
+            "label": "Hydraulic parts"
+          },
+          {
+            "href": "/pieces-industrielles/electrique",
+            "label": "Electrical parts"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a12",
+    "slug": "retrofit-industriel-par-ou-commencer",
+    "readTimeMinutes": 6,
+    "publishedAt": "2026-03-25",
+    "translations": {
+      "fr": {
+        "title": "Retrofit industriel : par où commencer et quand investir ?",
+        "excerpt": "Automatisation, commande, hydraulique : comment prioriser un projet de retrofit et estimer son retour sur investissement.",
+        "category": "Rénovation",
+        "content": [
+          "Le retrofit industriel consiste à moderniser une machine existante (commande, automatisation, partie hydraulique ou électrique) plutôt que la remplacer entièrement, en s'appuyant sur un châssis mécanique encore sain. C'est souvent la solution la plus rapide et la plus économique pour retrouver fiabilité et précision.",
+          "Le point de départ d'un projet de retrofit est toujours un diagnostic complet de la machine : état mécanique du bâti et des organes de mouvement, état du groupe hydraulique, et surtout obsolescence du système de commande. Un PLC ou un variateur dont le constructeur ne fournit plus de pièces est souvent le déclencheur du projet.",
+          "La priorité va généralement à la partie commande et automatisation : remplacer un PLC obsolète par un modèle actuel, moderniser l'interface HMI et sécuriser les entrées/sorties apporte un gain immédiat en fiabilité et en facilité de maintenance, pour un coût nettement inférieur à un remplacement de machine.",
+          "Le retrofit hydraulique (pompe, distributeurs, groupe) ou l'ajout de variation de fréquence sur les moteurs existants permet ensuite de réduire la consommation énergétique et d'améliorer la répétabilité du cycle, avec un retour sur investissement généralement mesurable sur 12 à 24 mois selon l'usage.",
+          "Le retrofit devient moins pertinent que le remplacement lorsque le bâti mécanique lui-même montre des signes de fatigue structurelle, ou lorsque le coût cumulé des interventions nécessaires approche celui d'une machine d'occasion récente en bon état : c'est ce comparatif chiffré qui doit trancher, pas une préférence a priori."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "Rénovation de machine"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Automatisation industrielle"
+          },
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          }
+        ]
+      },
+      "ar": {
+        "title": "التحديث الصناعي (Retrofit): من أين تبدأ ومتى تستثمر؟",
+        "excerpt": "الأتمتة، التحكم، الهيدروليك: كيف ترتب أولويات مشروع تحديث وتقدّر عائده على الاستثمار.",
+        "category": "التجديد",
+        "content": [
+          "التحديث الصناعي (Retrofit) يعني تحديث آلة موجودة (نظام التحكم، الأتمتة، الجزء الهيدروليكي أو الكهربائي) بدلاً من استبدالها بالكامل، بالاعتماد على هيكل ميكانيكي لا يزال سليماً. غالباً ما يكون هذا الحل الأسرع والأكثر اقتصاداً لاستعادة الموثوقية والدقة.",
+          "نقطة انطلاق أي مشروع تحديث هي دائماً تشخيص شامل للآلة: حالة الهيكل الميكانيكي وأعضاء الحركة، حالة المجموعة الهيدروليكية، وخاصة تقادم نظام التحكم. وحدة PLC أو محول تردد لم يعد الصانع يوفر قطعه غالباً ما يكون سبب انطلاق المشروع.",
+          "الأولوية عموماً تكون للتحكم والأتمتة: استبدال PLC متقادم بموديل حديث، تحديث واجهة HMI وتأمين المداخل والمخارج يمنح تحسناً فورياً في الموثوقية وسهولة الصيانة، بتكلفة أقل بكثير من استبدال الآلة.",
+          "التحديث الهيدروليكي (المضخة، الموزعات، المجموعة) أو إضافة محول تردد على المحركات الموجودة يسمح بعدها بتقليل استهلاك الطاقة وتحسين ثبات الدورة، مع عائد استثمار يُقاس عادة خلال 12 إلى 24 شهراً حسب الاستخدام.",
+          "يصبح التحديث أقل جدوى من الاستبدال عندما يُظهر الهيكل الميكانيكي نفسه علامات إجهاد بنيوي، أو عندما تقترب التكلفة التراكمية للتدخلات اللازمة من تكلفة آلة مستعملة حديثة بحالة جيدة: هذه المقارنة الرقمية هي التي يجب أن تحسم القرار، وليس تفضيلاً مسبقاً."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "تجديد الآلات"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "الأتمتة الصناعية"
+          },
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          }
+        ]
+      },
+      "en": {
+        "title": "Industrial Retrofit: Where to Start and When It's Worth It",
+        "excerpt": "Automation, controls, hydraulics: how to prioritize a retrofit project and estimate its return on investment.",
+        "category": "Renovation",
+        "content": [
+          "Industrial retrofit means modernizing an existing machine (controls, automation, hydraulic or electrical parts) instead of fully replacing it, relying on a mechanical frame that's still sound. It's often the fastest and most economical way to restore reliability and precision.",
+          "The starting point of any retrofit project is always a full machine diagnosis: mechanical condition of the frame and moving parts, condition of the hydraulic unit, and above all obsolescence of the control system. A PLC or drive whose manufacturer no longer supplies parts is often what triggers the project.",
+          "Priority usually goes to controls and automation: replacing an obsolete PLC with a current model, modernizing the HMI, and securing inputs/outputs brings an immediate gain in reliability and ease of maintenance, at a much lower cost than replacing the machine.",
+          "Hydraulic retrofit (pump, valves, unit) or adding variable frequency drives to existing motors then reduces energy consumption and improves cycle repeatability, typically with a return on investment measurable within 12 to 24 months depending on usage.",
+          "Retrofit becomes less relevant than replacement once the mechanical frame itself shows structural fatigue, or when the cumulative cost of needed work approaches that of a recent used machine in good condition — that numeric comparison should decide it, not a default preference."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/renovation-machine-injection",
+            "label": "Machine renovation"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Industrial automation"
+          },
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a13",
+    "slug": "comment-choisir-variateur-frequence-industriel",
+    "readTimeMinutes": 5,
+    "publishedAt": "2026-03-30",
+    "translations": {
+      "fr": {
+        "title": "Comment choisir un variateur de fréquence industriel",
+        "excerpt": "Puissance moteur, type de charge, protocole de communication : les critères pour choisir le bon variateur de fréquence.",
+        "category": "Automatisation",
+        "content": [
+          "Le premier critère de choix d'un variateur de fréquence est le dimensionnement en puissance et en courant par rapport au moteur qu'il pilote, avec une marge de sécurité pour absorber les pics de démarrage, en particulier sur les applications à fort couple de démarrage comme le pompage ou le broyage.",
+          "Le type de charge entraînée conditionne le profil de variateur : une charge à couple constant (convoyeur, extrudeuse) et une charge à couple variable (pompe centrifuge, ventilateur) n'exigent pas les mêmes réglages ni le même dimensionnement thermique du variateur.",
+          "La compatibilité de communication avec votre système existant est essentielle : Modbus, Profibus, Profinet ou Ethernet/IP selon l'automate déjà en place, pour permettre un pilotage centralisé et une remontée d'informations (courant, température, défauts) sans intégration complexe.",
+          "L'environnement d'installation compte également : un variateur installé dans une ambiance poussiéreuse ou humide nécessite un indice de protection (IP) adapté, tandis qu'une armoire ventilée ou climatisée permet d'utiliser un modèle standard à moindre coût.",
+          "Enfin, privilégiez une marque dont les pièces détachées et le support technique sont disponibles localement : un variateur en panne sans pièce de rechange rapide immobilise toute une ligne de production, un coût souvent bien supérieur à l'écart de prix entre marques."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/variateurs",
+            "label": "Variateurs de fréquence"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Automatisation industrielle"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تختار محول التردد الصناعي المناسب",
+        "excerpt": "قدرة المحرك، نوع الحمولة، بروتوكول الاتصال: المعايير لاختيار محول التردد المناسب.",
+        "category": "الأتمتة",
+        "content": [
+          "المعيار الأول لاختيار محول التردد هو مطابقته من حيث القدرة والتيار مع المحرك الذي سيقوده، مع هامش أمان لامتصاص ذروة الانطلاق، خاصة في التطبيقات ذات عزم انطلاق عالٍ مثل الضخ أو الطحن.",
+          "نوع الحمولة المُدارة يحدد نوع المحول المطلوب: حمولة ذات عزم ثابت (ناقل، بثق) وحمولة ذات عزم متغير (مضخة طاردة مركزية، مروحة) لا تتطلبان نفس الإعدادات أو نفس التصميم الحراري للمحول.",
+          "توافق الاتصال مع نظامك الحالي أمر أساسي: Modbus أو Profibus أو Profinet أو Ethernet/IP حسب وحدة التحكم الموجودة، للسماح بتحكم مركزي ونقل المعلومات (التيار، الحرارة، الأعطال) دون تكامل معقد.",
+          "بيئة التركيب مهمة أيضاً: محول مثبت في بيئة مغبرة أو رطبة يتطلب درجة حماية (IP) مناسبة، بينما خزانة مهوّاة أو مكيّفة تسمح باستخدام موديل قياسي بتكلفة أقل.",
+          "أخيراً، فضّل علامة تجارية تتوفر قطع غيارها ودعمها الفني محلياً: محول معطل بدون قطعة غيار سريعة يوقف خط إنتاج كامل، وهي تكلفة غالباً أعلى بكثير من فارق السعر بين العلامات."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/variateurs",
+            "label": "محولات التردد"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "الأتمتة الصناعية"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Choose an Industrial Variable Frequency Drive",
+        "excerpt": "Motor power, load type, communication protocol: the criteria for picking the right VFD.",
+        "category": "Automation",
+        "content": [
+          "The first criterion for choosing a variable frequency drive is sizing it in power and current against the motor it will drive, with a safety margin to absorb starting peaks — especially for applications with high starting torque like pumping or grinding.",
+          "The type of driven load determines the drive profile: a constant-torque load (conveyor, extruder) and a variable-torque load (centrifugal pump, fan) don't need the same settings or the same thermal sizing of the drive.",
+          "Communication compatibility with your existing system is essential: Modbus, Profibus, Profinet, or Ethernet/IP depending on the PLC already in place, to allow centralized control and data feedback (current, temperature, faults) without complex integration.",
+          "The installation environment matters too: a drive installed in a dusty or humid setting needs a suitable protection rating (IP), while a ventilated or air-conditioned cabinet allows a standard, lower-cost model.",
+          "Finally, favor a brand whose spare parts and technical support are available locally: a failed drive with no fast replacement part stops an entire production line — a cost usually far higher than the price gap between brands."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/variateurs",
+            "label": "Frequency drives"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Industrial automation"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a14",
+    "slug": "comment-choisir-servo-moteur-industriel",
+    "readTimeMinutes": 5,
+    "publishedAt": "2026-04-03",
+    "translations": {
+      "fr": {
+        "title": "Comment choisir un servo-moteur pour votre application industrielle",
+        "excerpt": "Couple, inertie, précision de positionnement : comment sélectionner le servo-moteur adapté à votre axe et éviter le sous ou sur-dimensionnement.",
+        "category": "Automatisation",
+        "content": [
+          "Le choix d'un servo-moteur commence par le calcul du couple requis sur l'axe concerné, en tenant compte du couple statique (charge, frottements) et du couple dynamique nécessaire pour accélérer la charge dans le temps de cycle imposé.",
+          "L'adéquation entre l'inertie de la charge et l'inertie du rotor du servo-moteur est un critère technique souvent négligé : un rapport d'inertie trop élevé entraîne des oscillations et une perte de précision de positionnement, en particulier sur les applications de découpe ou d'assemblage de précision.",
+          "La précision de positionnement requise détermine le type de codeur (résolution, absolu ou incrémental) : une application de simple mise en mouvement n'a pas les mêmes exigences qu'un axe de dosage ou de positionnement millimétrique nécessitant un retour de position en temps réel.",
+          "Le protocole de communication entre le servo-moteur, son variateur et l'automate doit être cohérent avec l'architecture existante (EtherCAT, CANopen, Profinet...) pour garantir un temps de cycle de communication compatible avec la dynamique demandée à l'axe.",
+          "Enfin, dans un contexte de remplacement ou de retrofit, privilégier autant que possible la compatibilité mécanique et électrique avec l'installation existante limite le coût et la complexité de l'intervention, sans pour autant sacrifier les performances réellement nécessaires à l'application."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/servo-moteurs",
+            "label": "Servo moteurs"
+          },
+          {
+            "href": "/pieces-industrielles/variateurs",
+            "label": "Variateurs de fréquence"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Automatisation industrielle"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تختار محرك سيرفو لتطبيقك الصناعي",
+        "excerpt": "العزم، القصور الذاتي، دقة التموضع: كيف تختار محرك السيرفو المناسب لمحورك وتتجنب نقص أو زيادة الحجم.",
+        "category": "الأتمتة",
+        "content": [
+          "اختيار محرك السيرفو يبدأ بحساب العزم المطلوب على المحور المعني، مع مراعاة العزم الساكن (الحمولة، الاحتكاك) والعزم الديناميكي اللازم لتسريع الحمولة ضمن زمن الدورة المفروض.",
+          "التوافق بين قصور الحمولة الذاتي وقصور دوار محرك السيرفو معيار تقني غالباً ما يُهمل: نسبة قصور ذاتي مرتفعة جداً تؤدي إلى اهتزازات وفقدان دقة التموضع، خاصة في تطبيقات القص أو التجميع الدقيق.",
+          "دقة التموضع المطلوبة تحدد نوع المشفّر (الدقة، مطلق أو تزايدي): تطبيق حركة بسيطة لا يتطلب نفس متطلبات محور جرعات أو تموضع بدقة مليمترية يحتاج تغذية راجعة للموضع في الزمن الحقيقي.",
+          "بروتوكول الاتصال بين محرك السيرفو ومحوله ووحدة التحكم يجب أن يتوافق مع البنية الموجودة (EtherCAT، CANopen، Profinet...) لضمان زمن دورة اتصال متوافق مع الديناميكية المطلوبة من المحور.",
+          "أخيراً، في سياق استبدال أو تحديث، تفضيل التوافق الميكانيكي والكهربائي مع المنشأة الموجودة قدر الإمكان يقلل تكلفة وتعقيد التدخل، دون التضحية بالأداء الضروري فعلاً للتطبيق."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/servo-moteurs",
+            "label": "محركات السيرفو"
+          },
+          {
+            "href": "/pieces-industrielles/variateurs",
+            "label": "محولات التردد"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "الأتمتة الصناعية"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Choose a Servo Motor for Your Industrial Application",
+        "excerpt": "Torque, inertia, positioning accuracy: how to select the right servo motor for your axis and avoid under- or oversizing.",
+        "category": "Automation",
+        "content": [
+          "Choosing a servo motor starts with calculating the required torque on the axis in question, accounting for static torque (load, friction) and the dynamic torque needed to accelerate the load within the imposed cycle time.",
+          "Matching the load's inertia to the servo motor's rotor inertia is a technical criterion often overlooked: too high an inertia ratio causes oscillation and loss of positioning accuracy, especially in precision cutting or assembly applications.",
+          "The required positioning accuracy determines the encoder type (resolution, absolute or incremental): a simple motion application doesn't have the same requirements as a dosing or millimeter-level positioning axis needing real-time position feedback.",
+          "The communication protocol between the servo motor, its drive, and the PLC must match the existing architecture (EtherCAT, CANopen, Profinet...) to guarantee a communication cycle time compatible with the dynamics required of the axis.",
+          "Finally, in a replacement or retrofit context, favoring mechanical and electrical compatibility with the existing setup as much as possible limits cost and complexity, without sacrificing the performance the application actually needs."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/servo-moteurs",
+            "label": "Servo motors"
+          },
+          {
+            "href": "/pieces-industrielles/variateurs",
+            "label": "Frequency drives"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Industrial automation"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a15",
+    "slug": "plc-ou-relais-que-choisir-automatisme",
+    "readTimeMinutes": 5,
+    "publishedAt": "2026-04-08",
+    "translations": {
+      "fr": {
+        "title": "PLC ou relais : que choisir pour votre automatisme industriel ?",
+        "excerpt": "Complexité de la logique, évolutivité, coût de maintenance : quand la logique câblée suffit encore et quand un PLC devient indispensable.",
+        "category": "Automatisation",
+        "content": [
+          "Pour un automatisme simple, avec un nombre limité d'entrées/sorties et une logique fixe qui n'évoluera pas, une solution à base de relais et de logique câblée reste parfois pertinente : coût initial faible, aucune programmation nécessaire, et une maintenance compréhensible par un électricien sans compétence en automatisme.",
+          "Dès que la logique devient plus complexe (temporisations multiples, comptages, séquences conditionnelles, plusieurs modes de fonctionnement), un PLC devient largement plus fiable et plus simple à maintenir qu'un enchevêtrement de relais, en plus d'offrir un diagnostic de panne bien plus rapide via son logiciel de programmation.",
+          "L'évolutivité est un argument décisif en faveur du PLC : ajouter une fonction ou modifier une séquence se fait par simple modification du programme, sans recâblage physique, ce qui réduit considérablement le temps et le coût d'une modification future de la machine.",
+          "Le PLC permet également une supervision et une traçabilité impossibles avec une logique câblée pure : historique de défauts, comptage de production, communication avec un poste de supervision ou un système de gestion de production (MES), un besoin de plus en plus fréquent même pour des installations de taille modeste.",
+          "En résumé, le relais garde sa place pour des fonctions de sécurité simples et dédiées ou des automatismes très basiques et figés, tandis que le PLC s'impose dès qu'il y a une réelle logique de production à piloter, une perspective d'évolution, ou un besoin de traçabilité."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/plc-hmi",
+            "label": "PLC / HMI"
+          },
+          {
+            "href": "/pieces-industrielles/automatisme",
+            "label": "Automatisme"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Automatisation industrielle"
+          }
+        ]
+      },
+      "ar": {
+        "title": "PLC أو المرحلات: ماذا تختار لنظام الأتمتة الصناعي لديك؟",
+        "excerpt": "تعقيد المنطق، قابلية التطور، تكلفة الصيانة: متى يكفي المنطق السلكي التقليدي ومتى يصبح PLC ضرورياً.",
+        "category": "الأتمتة",
+        "content": [
+          "لنظام أتمتة بسيط، بعدد محدود من المداخل/المخارج ومنطق ثابت لن يتغير، يبقى حل قائم على المرحلات والمنطق السلكي مناسباً أحياناً: تكلفة أولية منخفضة، لا حاجة للبرمجة، وصيانة يفهمها كهربائي دون خبرة في الأتمتة.",
+          "بمجرد أن يصبح المنطق أكثر تعقيداً (توقيتات متعددة، عدّادات، تسلسلات شرطية، عدة أوضاع تشغيل)، تصبح وحدة PLC أكثر موثوقية وأسهل صيانة بكثير من شبكة معقدة من المرحلات، إضافة إلى تشخيص أسرع بكثير للأعطال عبر برنامجها.",
+          "قابلية التطور حجة حاسمة لصالح PLC: إضافة وظيفة أو تعديل تسلسل يتم بتعديل البرنامج فقط دون إعادة توصيل سلكي، مما يقلل بشكل كبير وقت وتكلفة أي تعديل مستقبلي للآلة.",
+          "PLC يسمح أيضاً بمراقبة وتتبع غير ممكنين بمنطق سلكي بحت: سجل الأعطال، عدّ الإنتاج، الاتصال بمحطة إشراف أو نظام إدارة إنتاج (MES)، وهي حاجة متزايدة حتى في منشآت متوسطة الحجم.",
+          "باختصار، تحتفظ المرحلات بمكانتها للوظائف الأمنية البسيطة والمخصصة أو الأتمتة الأساسية جداً والثابتة، بينما يفرض PLC نفسه بمجرد وجود منطق إنتاج حقيقي يجب التحكم فيه أو احتمال تطور أو حاجة للتتبع."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/plc-hmi",
+            "label": "PLC / HMI"
+          },
+          {
+            "href": "/pieces-industrielles/automatisme",
+            "label": "الأتمتة"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "الأتمتة الصناعية"
+          }
+        ]
+      },
+      "en": {
+        "title": "PLC or Relays: What Should Drive Your Industrial Automation?",
+        "excerpt": "Logic complexity, scalability, maintenance cost: when wired relay logic is still enough and when a PLC becomes essential.",
+        "category": "Automation",
+        "content": [
+          "For simple automation with a limited number of inputs/outputs and fixed logic that won't change, a relay-based, hard-wired solution can still make sense: low upfront cost, no programming needed, and maintenance any electrician can understand without automation skills.",
+          "Once the logic gets more complex (multiple timers, counters, conditional sequences, several operating modes), a PLC becomes far more reliable and easier to maintain than a tangle of relays, on top of offering much faster fault diagnosis through its programming software.",
+          "Scalability is a decisive argument for the PLC: adding a function or changing a sequence just means editing the program, with no physical rewiring, which drastically cuts the time and cost of any future machine modification.",
+          "A PLC also enables monitoring and traceability that pure wired logic can't offer: fault history, production counting, communication with a supervisory station or a production management system (MES) — an increasingly common need even for modest-sized setups.",
+          "In short, relays still have a place for simple, dedicated safety functions or very basic, fixed automation, while a PLC becomes necessary as soon as there's real production logic to control, a prospect of future change, or a need for traceability."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/plc-hmi",
+            "label": "PLC / HMI"
+          },
+          {
+            "href": "/pieces-industrielles/automatisme",
+            "label": "Automation parts"
+          },
+          {
+            "href": "/services/automatisation-industrielle",
+            "label": "Industrial automation"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a16",
+    "slug": "diagnostic-panne-industrielle-methode",
+    "readTimeMinutes": 6,
+    "publishedAt": "2026-04-13",
+    "translations": {
+      "fr": {
+        "title": "Diagnostic de panne industrielle : méthode et bons réflexes",
+        "excerpt": "Une démarche structurée pour diagnostiquer une panne machine rapidement, sans remplacer un composant au hasard.",
+        "category": "Maintenance",
+        "content": [
+          "Face à une panne, le premier réflexe doit être d'observer et de documenter les symptômes précis avant toute intervention : quel défaut s'affiche, à quel moment du cycle survient-il, est-il systématique ou intermittent, et qu'est-ce qui a changé juste avant son apparition (matière, réglage, maintenance récente).",
+          "La méthode la plus efficace consiste à aller du général au particulier : vérifier d'abord les éléments simples et rapides à contrôler (alimentation électrique, niveau d'huile, arrêts d'urgence, capteurs de sécurité) avant de suspecter un composant complexe comme une carte électronique ou un servo-variateur.",
+          "Un diagnostic rigoureux distingue toujours la cause et le symptôme : un défaut de pression hydraulique peut être le symptôme d'une pompe usée, mais aussi d'un filtre colmaté ou d'une fuite en amont. Remplacer directement le composant le plus visible sans identifier la cause racine entraîne souvent une panne récurrente.",
+          "L'historique de maintenance et les codes défaut enregistrés dans le PLC sont des sources d'information précieuses trop souvent négligées : la plupart des automates modernes conservent un historique d'alarmes qui permet de repérer un défaut intermittent difficile à reproduire manuellement.",
+          "Enfin, en cas de doute, isoler le sous-système suspect (hydraulique, électrique, mécanique) par un test ciblé plutôt que de multiplier les remplacements de pièces à l'aveugle permet d'économiser un temps et un budget souvent considérables, en particulier sur les pannes complexes."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance et dépannage"
+          },
+          {
+            "href": "/pieces-industrielles/electronique",
+            "label": "Pièces électroniques"
+          },
+          {
+            "href": "/contact",
+            "label": "Contacter un technicien"
+          }
+        ]
+      },
+      "ar": {
+        "title": "تشخيص الأعطال الصناعية: المنهجية والانعكاسات الصحيحة",
+        "excerpt": "منهج منظم لتشخيص عطل آلة بسرعة، دون استبدال مكوّن عشوائياً.",
+        "category": "الصيانة",
+        "content": [
+          "عند مواجهة عطل، يجب أن يكون الانعكاس الأول هو ملاحظة وتوثيق الأعراض بدقة قبل أي تدخل: ما هو الخطأ المعروض، في أي لحظة من الدورة يحدث، هل هو منتظم أم متقطع، وماذا تغيّر قبل ظهوره مباشرة (المادة، الضبط، صيانة حديثة).",
+          "أنجع طريقة هي الانتقال من العام إلى الخاص: فحص العناصر البسيطة والسريعة أولاً (التغذية الكهربائية، مستوى الزيت، أزرار التوقف الطارئ، حساسات الأمان) قبل الشك في مكوّن معقد مثل بطاقة إلكترونية أو محول سيرفو.",
+          "التشخيص الدقيق يميّز دائماً بين السبب والعرض: خلل في الضغط الهيدروليكي قد يكون عرضاً لمضخة متآكلة، لكن أيضاً لفلتر مسدود أو تسرب في المجرى العلوي. استبدال المكوّن الأكثر وضوحاً مباشرة دون تحديد السبب الجذري يؤدي غالباً لتكرار العطل.",
+          "سجل الصيانة وأكواد الأعطال المسجلة في PLC مصادر معلومات قيّمة كثيراً ما تُهمل: معظم وحدات التحكم الحديثة تحتفظ بسجل إنذارات يسمح باكتشاف عطل متقطع يصعب إعادة إنتاجه يدوياً.",
+          "أخيراً، في حالة الشك، عزل النظام الفرعي المشتبه به (هيدروليكي، كهربائي، ميكانيكي) باختبار موجّه بدلاً من مضاعفة استبدال القطع عشوائياً يوفر وقتاً وميزانية كبيرين غالباً، خاصة في الأعطال المعقدة."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "الصيانة والإصلاح"
+          },
+          {
+            "href": "/pieces-industrielles/electronique",
+            "label": "قطع إلكترونية"
+          },
+          {
+            "href": "/contact",
+            "label": "التواصل مع فني"
+          }
+        ]
+      },
+      "en": {
+        "title": "Industrial Fault Diagnosis: Method and Good Habits",
+        "excerpt": "A structured approach to diagnosing a machine fault quickly, without swapping parts at random.",
+        "category": "Maintenance",
+        "content": [
+          "When a fault occurs, the first instinct should be to observe and document the exact symptoms before touching anything: what error is displayed, at what point in the cycle it happens, whether it's consistent or intermittent, and what changed right before it appeared (material, settings, recent maintenance).",
+          "The most effective method is to go from general to specific: check the simple, quick things first (power supply, oil level, e-stops, safety sensors) before suspecting a complex component like an electronic board or a servo drive.",
+          "A rigorous diagnosis always separates cause from symptom: a hydraulic pressure fault can be a symptom of a worn pump, but also of a clogged filter or an upstream leak. Replacing the most visible component right away without identifying the root cause often leads to a repeat failure.",
+          "Maintenance history and fault codes logged in the PLC are valuable, too-often-overlooked information sources: most modern controllers keep an alarm history that helps spot an intermittent fault that's hard to reproduce manually.",
+          "Finally, when in doubt, isolating the suspected subsystem (hydraulic, electrical, mechanical) with a targeted test rather than blindly swapping parts one after another saves considerable time and budget, especially on complex failures."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/services/maintenance-depannage",
+            "label": "Maintenance & repair"
+          },
+          {
+            "href": "/pieces-industrielles/electronique",
+            "label": "Electronic parts"
+          },
+          {
+            "href": "/contact",
+            "label": "Contact a technician"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "a17",
+    "slug": "comment-choisir-moule-injection-plastique",
+    "readTimeMinutes": 6,
+    "publishedAt": "2026-04-18",
+    "translations": {
+      "fr": {
+        "title": "Comment choisir un moule d'injection plastique adapté à votre projet",
+        "excerpt": "Nombre d'empreintes, type d'acier, système de refroidissement : les critères techniques pour bien choisir ou faire fabriquer son moule.",
+        "category": "Moules",
+        "content": [
+          "Le premier choix structurant est le nombre d'empreintes du moule, déterminé par le volume de production attendu : un moule mono-empreinte convient à une petite série ou un prototype, tandis qu'un moule multi-empreintes réduit le coût unitaire de production mais augmente l'investissement initial et le tonnage machine nécessaire.",
+          "Le type d'acier utilisé pour le moule doit être choisi selon la durée de vie de production visée et la matière plastique transformée : un acier trempé est indispensable pour une matière abrasive (chargée fibre de verre) ou une production de très grande série, tandis qu'un acier plus standard convient à des séries limitées.",
+          "Le système de refroidissement du moule influence directement la cadence de production et la qualité dimensionnelle des pièces : un refroidissement mal conçu ou insuffisant allonge le temps de cycle et peut provoquer des déformations ou des retassures sur la pièce finie.",
+          "Le système d'éjection (éjecteurs, plaque dévêtisseuse, éjection par air) doit être adapté à la géométrie de la pièce pour éviter tout marquage ou déformation lors du démoulage, en particulier sur des pièces techniques à parois fines ou avec des contre-dépouilles.",
+          "Enfin, pour un moule d'occasion ou destiné à être remis en service, vérifiez l'état des colonnes de guidage, des empreintes (usure, traces de corrosion) et la compatibilité de son système d'alimentation (carotte, entrée directe) avec la machine sur laquelle il sera monté avant de valider l'achat."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/moules",
+            "label": "Moules industriels"
+          },
+          {
+            "href": "/machines",
+            "label": "Voir les machines disponibles"
+          },
+          {
+            "href": "/acheter",
+            "label": "Demander un équipement"
+          }
+        ]
+      },
+      "ar": {
+        "title": "كيف تختار قالب حقن بلاستيك مناسب لمشروعك",
+        "excerpt": "عدد التجاويف، نوع الفولاذ، نظام التبريد: المعايير التقنية لاختيار أو تصنيع قالبك بشكل صحيح.",
+        "category": "القوالب",
+        "content": [
+          "الاختيار الأول والأساسي هو عدد تجاويف القالب، ويُحدَّد حسب حجم الإنتاج المتوقع: قالب بتجويف واحد مناسب لسلسلة صغيرة أو نموذج أولي، بينما قالب متعدد التجاويف يقلل تكلفة الوحدة الإنتاجية لكنه يرفع الاستثمار الأولي والقوة المطلوبة للآلة.",
+          "نوع الفولاذ المستخدم في القالب يجب اختياره حسب عمر الإنتاج المستهدف والمادة البلاستيكية المُعالجة: فولاذ مقسّى ضروري لمادة كاشطة (مقواة بألياف الزجاج) أو إنتاج بسلسلة كبيرة جداً، بينما يكفي فولاذ قياسي لسلاسل محدودة.",
+          "نظام تبريد القالب يؤثر مباشرة على سرعة الإنتاج وجودة أبعاد القطع: تبريد سيء التصميم أو غير كافٍ يطيل زمن الدورة وقد يسبب تشوهات أو تجاويف انكماش في القطعة النهائية.",
+          "نظام الإخراج (الدافعات، لوحة النزع، الإخراج بالهواء) يجب أن يتناسب مع شكل القطعة لتجنب أي أثر أو تشوه عند إخراجها من القالب، خاصة في القطع التقنية ذات الجدران الرقيقة أو ذات الزوايا السلبية.",
+          "أخيراً، بالنسبة لقالب مستعمل أو مُراد إعادة تشغيله، تحقق من حالة أعمدة التوجيه والتجاويف (تآكل، آثار صدأ) وتوافق نظام التغذية (المدخل المباشر أو غير المباشر) مع الآلة التي سيُركّب عليها قبل تأكيد الشراء."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/moules",
+            "label": "القوالب الصناعية"
+          },
+          {
+            "href": "/machines",
+            "label": "عرض الآلات المتوفرة"
+          },
+          {
+            "href": "/acheter",
+            "label": "طلب معدة"
+          }
+        ]
+      },
+      "en": {
+        "title": "How to Choose a Plastic Injection Mold for Your Project",
+        "excerpt": "Cavity count, steel type, cooling system: the technical criteria for choosing or having the right mold made.",
+        "category": "Molds",
+        "content": [
+          "The first structural choice is the number of mold cavities, driven by expected production volume: a single-cavity mold suits a small run or a prototype, while a multi-cavity mold lowers unit production cost but raises the upfront investment and the required machine tonnage.",
+          "The steel grade used for the mold should be chosen based on the targeted production lifespan and the plastic material processed: hardened steel is essential for an abrasive material (glass-fiber reinforced) or very high-volume production, while a more standard steel is fine for limited runs.",
+          "The mold's cooling system directly affects production rate and the dimensional quality of parts: poorly designed or insufficient cooling lengthens cycle time and can cause warping or sink marks on the finished part.",
+          "The ejection system (ejector pins, stripper plate, air ejection) needs to match the part's geometry to avoid marking or deformation during demolding, especially on technical parts with thin walls or undercuts.",
+          "Finally, for a used mold or one being brought back into service, check the guide pillars, the cavities (wear, corrosion marks), and the compatibility of its feed system (direct or indirect gating) with the machine it will be mounted on before finalizing the purchase."
+        ],
+        "relatedLinks": [
+          {
+            "href": "/pieces-industrielles/moules",
+            "label": "Industrial molds"
+          },
+          {
+            "href": "/machines",
+            "label": "Browse available machines"
+          },
+          {
+            "href": "/acheter",
+            "label": "Request equipment"
+          }
+        ]
+      }
+    }
   }
 ]
