@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { getMachines } from "@/lib/data";
 import { addRuntimeMachine, type AdminMachineInput } from "@/lib/machinesStore";
 import { sanitizeUrl } from "@/lib/sanitize";
+import { notifyNewProduct } from "@/lib/pushNotifications";
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) {
@@ -40,6 +41,10 @@ export async function POST(request: NextRequest) {
       ? body.photos.map((p) => sanitizeUrl(p)).filter((p): p is string => Boolean(p)).slice(0, 10)
       : [],
   });
+
+  if (machine.status === "published") {
+    await notifyNewProduct({ name: `${machine.brand} ${machine.model}`, url: `/machines/${machine.slug}` });
+  }
 
   return NextResponse.json({ ok: true, machine });
 }

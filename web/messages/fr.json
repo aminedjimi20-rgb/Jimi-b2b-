@@ -759,5 +759,13 @@
   "langSwitcher": {
     "label": "Langue"
   },
-  "demoDataBadge": "Démo"
+  "demoDataBadge": "Démo",
+  "push": {
+    "promptTitle": "Activer les notifications ?",
+    "promptBody": "Soyez averti dès qu'un nouveau produit est disponible chez JIMI.",
+    "accept": "Activer",
+    "decline": "Plus tard",
+    "manageEnabled": "🔔 Notifications activées",
+    "manageDisabled": "🔕 Activer les notifications"
+  }
 }

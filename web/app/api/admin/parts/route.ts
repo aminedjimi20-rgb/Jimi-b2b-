@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { getParts } from "@/lib/data";
 import { addRuntimePart, type AdminPartInput } from "@/lib/partsStore";
 import { sanitizeUrl } from "@/lib/sanitize";
+import { notifyNewProduct } from "@/lib/pushNotifications";
 import type { PartCategory, PartCondition, PartStatus } from "@/lib/types";
 
 const VALID_CATEGORIES: PartCategory[] = ["electronique", "moules", "hydraulique", "mecanique"];
@@ -44,6 +45,10 @@ export async function POST(request: NextRequest) {
       ? body.photos.map((p) => sanitizeUrl(p)).filter((p): p is string => Boolean(p)).slice(0, 10)
       : [],
   });
+
+  if (part.status === "published") {
+    await notifyNewProduct({ name: part.name, url: `/pieces-industrielles/${part.category}` });
+  }
 
   return NextResponse.json({ ok: true, part });
 }

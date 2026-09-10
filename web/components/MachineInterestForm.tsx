@@ -6,6 +6,7 @@ import { FieldWrapper, TextInput, TextArea, Select } from "@/components/forms/fi
 import { SuccessMessage, ErrorMessage, HoneypotField } from "@/components/forms/FormStatusMessages";
 import { Button } from "@/components/ui/Button";
 import { wilayas } from "@/lib/wilayas";
+import { markPushEngaged } from "@/lib/pushClient";
 import { MessageCircle } from "lucide-react";
 
 type Status = "idle" | "open" | "submitting" | "success" | "error";
@@ -43,6 +44,7 @@ export function MachineInterestForm({
       });
       if (!res.ok) throw new Error("request_failed");
       setStatus("success");
+      void markPushEngaged();
     } catch {
       setStatus("error");
     }

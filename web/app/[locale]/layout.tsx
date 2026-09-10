@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
+import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { HtmlAttributes } from "@/components/HtmlAttributes";
 import { siteConfig } from "@/config/site.config";
 import { JsonLd } from "@/components/JsonLd";
@@ -109,6 +110,7 @@ export default async function LocaleLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <WhatsAppFloatingButton />
+        <PushNotificationManager />
       </div>
     </NextIntlClientProvider>
   );

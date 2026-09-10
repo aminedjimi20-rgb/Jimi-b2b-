@@ -759,5 +759,13 @@
   "langSwitcher": {
     "label": "Language"
   },
-  "demoDataBadge": "Demo"
+  "demoDataBadge": "Demo",
+  "push": {
+    "promptTitle": "Enable notifications?",
+    "promptBody": "Get notified as soon as a new product is available at JIMI.",
+    "accept": "Enable",
+    "decline": "Later",
+    "manageEnabled": "🔔 Notifications on",
+    "manageDisabled": "🔕 Enable notifications"
+  }
 }

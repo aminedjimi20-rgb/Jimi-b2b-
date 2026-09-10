@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { Factory, Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { siteConfig, buildWhatsAppLink } from "@/config/site.config";
 import { getTranslations } from "next-intl/server";
+import { PushSettingsLink } from "@/components/PushSettingsLink";
 
 export async function Footer() {
   const t = await getTranslations();
@@ -120,6 +121,7 @@ export async function Footer() {
             <Link href="/politique-de-confidentialite" className="hover:text-white">
               {t("footer.privacyLink")}
             </Link>
+            <PushSettingsLink />
             <p>{t("footer.madeWith")}</p>
           </div>
         </div>

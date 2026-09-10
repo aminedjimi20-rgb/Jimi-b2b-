@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { markPushEngaged } from "@/lib/pushClient";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -32,6 +33,7 @@ export function useLeadForm(type: "buy" | "sell" | "service" | "contact") {
       if (!res.ok) throw new Error("request_failed");
       setStatus("success");
       form.reset();
+      void markPushEngaged();
     } catch {
       setStatus("error");
     }

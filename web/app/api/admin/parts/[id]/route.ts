@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { updateRuntimePart, deleteRuntimePart, type AdminPartInput } from "@/lib/partsStore";
 import { sanitizeUrl } from "@/lib/sanitize";
+import { notifyNewProduct } from "@/lib/pushNotifications";
+import { getParts } from "@/lib/data";
 import type { PartCategory, PartCondition, PartStatus } from "@/lib/types";
 
 const VALID_CATEGORIES: PartCategory[] = ["electronique", "moules", "hydraulique", "mecanique"];
@@ -34,10 +36,22 @@ export async function PATCH(
       ? body.photos.map((p) => sanitizeUrl(p)).filter((p): p is string => Boolean(p)).slice(0, 10)
       : [];
   }
+
+  let wasPublished = false;
+  if (body.status === "published") {
+    const existing = (await getParts()).find((p) => p.id === id);
+    wasPublished = existing?.status === "published";
+  }
+
   const part = await updateRuntimePart(id, body);
   if (!part) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
+
+  if (part.status === "published" && !wasPublished) {
+    await notifyNewProduct({ name: part.name, url: `/pieces-industrielles/${part.category}` });
+  }
+
   return NextResponse.json({ ok: true, part });
 }
 
