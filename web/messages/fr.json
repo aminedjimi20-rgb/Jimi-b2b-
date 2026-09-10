@@ -727,6 +727,32 @@
       }
     }
   },
+  "catalogueHub": {
+    "eyebrow": "Acheter",
+    "pageTitle": "Que recherchez-vous ?",
+    "pageSubtitle": "Parcourez notre catalogue par catégorie : machines industrielles, pièces détachées ou moules d'injection.",
+    "seoTitle": "Acheter une machine, une pièce ou un moule en Algérie | JIMI Industrie",
+    "seoDescription": "Parcourez le catalogue JIMI Industrie en Algérie : machines d'injection plastique, pièces industrielles et moules d'injection, neufs, d'occasion ou reconditionnés.",
+    "cards": {
+      "machines": {
+        "title": "Machines industrielles",
+        "description": "Machines d'injection plastique neuves, d'occasion ou reconditionnées, prêtes à l'achat.",
+        "cta": "Voir les machines"
+      },
+      "pieces": {
+        "title": "Pièces industrielles",
+        "description": "Pièces électriques, électroniques, hydrauliques, mécaniques, automatisme, PLC/HMI, variateurs et servo moteurs.",
+        "cta": "Voir les pièces"
+      },
+      "moules": {
+        "title": "Moules d'injection",
+        "description": "Moules d'injection plastique pour vos lignes de production, neufs ou d'occasion.",
+        "cta": "Voir les moules"
+      }
+    },
+    "notFound": "Vous cherchez un équipement précis que vous ne trouvez pas dans le catalogue ?",
+    "notFoundCta": "Décrivez votre besoin, nous le recherchons pour vous"
+  },
   "acheterHub": {
     "eyebrow": "Acheter",
     "pageTitle": "Acheter un équipement industriel",

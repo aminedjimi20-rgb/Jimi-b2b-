@@ -727,6 +727,32 @@
       }
     }
   },
+  "catalogueHub": {
+    "eyebrow": "Buy",
+    "pageTitle": "What are you looking for?",
+    "pageSubtitle": "Browse our catalogue by category: industrial machines, spare parts or injection molds.",
+    "seoTitle": "Buy a machine, a part or a mold in Algeria | JIMI Industrie",
+    "seoDescription": "Browse the JIMI Industrie catalogue in Algeria: plastic injection machines, industrial parts and injection molds, new, used or refurbished.",
+    "cards": {
+      "machines": {
+        "title": "Industrial machines",
+        "description": "New, used or refurbished plastic injection machines, ready to buy.",
+        "cta": "View machines"
+      },
+      "pieces": {
+        "title": "Industrial parts",
+        "description": "Electrical, electronic, hydraulic, mechanical, automation, PLC/HMI, drives and servo motors.",
+        "cta": "View parts"
+      },
+      "moules": {
+        "title": "Injection molds",
+        "description": "Plastic injection molds for your production lines, new or used.",
+        "cta": "View molds"
+      }
+    },
+    "notFound": "Looking for something specific that isn't in the catalogue?",
+    "notFoundCta": "Describe what you need, we'll look for it for you"
+  },
   "acheterHub": {
     "eyebrow": "Buy",
     "pageTitle": "Buy industrial equipment",

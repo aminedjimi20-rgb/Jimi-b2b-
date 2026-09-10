@@ -45,7 +45,7 @@ export async function Hero() {
             className="animate-fade-up mt-9 flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row"
             style={{ animationDelay: "220ms" }}
           >
-            <Button href="/machines" size="lg" icon={<ShoppingCart size={18} />}>
+            <Button href="/catalogue" size="lg" icon={<ShoppingCart size={18} />}>
               {t("cta.acheter")}
             </Button>
             <Button
