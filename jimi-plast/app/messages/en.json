@@ -35,6 +35,9 @@
     "customers": "Customers",
     "myAccount": "My account",
     "vouchers": "Vouchers",
+    "manufacturers": "Manufacturers",
+    "purchases": "Purchases",
+    "stock": "Stock",
     "users": "Employees & roles",
     "requests": "Registration requests",
     "logout": "Sign out"
@@ -212,6 +215,34 @@
     "filterStatus": "All statuses",
     "filterCustomer": "All customers",
     "deleteConfirm": "Delete this draft?"
+  },
+  "manufacturers": {
+    "title": "Manufacturers",
+    "add": "New manufacturer",
+    "columns": { "name": "Name", "company": "Company", "phone": "Phone", "wilaya": "Province", "balance": "Debt" },
+    "form": { "name": "Name", "company": "Company", "phone": "Phone", "whatsapp": "WhatsApp", "wilaya": "Province", "contactName": "Main contact", "paymentTerms": "Payment terms" }
+  },
+  "purchases": {
+    "title": "Purchases",
+    "newPurchase": "New purchase voucher",
+    "selectManufacturer": "Select a manufacturer",
+    "columns": { "number": "No.", "manufacturer": "Manufacturer", "date": "Date", "total": "Total", "status": "Status" },
+    "unitCost": "Unit cost"
+  },
+  "stock": {
+    "title": "Stock",
+    "alerts": "Low stock alerts",
+    "movements": "Movement history",
+    "adjust": "Manual correction",
+    "product": "Product",
+    "currentStock": "Current stock",
+    "newStock": "New quantity (pieces)",
+    "reason": "Reason",
+    "columns": { "date": "Date", "product": "Product", "type": "Type", "quantity": "Quantity" },
+    "movementTypes": {
+      "SALE": "Sale", "SALE_CANCEL": "Sale cancelled", "PURCHASE": "Purchase",
+      "RETURN_CUSTOMER": "Customer return", "RETURN_SUPPLIER": "Supplier return", "ADJUSTMENT": "Adjustment"
+    }
   },
   "categories": {
     "title": "Categories",

@@ -35,6 +35,9 @@
     "customers": "العملاء",
     "myAccount": "حسابي",
     "vouchers": "البونات",
+    "manufacturers": "المصانع",
+    "purchases": "المشتريات",
+    "stock": "المخزون",
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج"
@@ -212,6 +215,34 @@
     "filterStatus": "كل الحالات",
     "filterCustomer": "كل العملاء",
     "deleteConfirm": "حذف هذه المسودة؟"
+  },
+  "manufacturers": {
+    "title": "المصانع",
+    "add": "مصنع جديد",
+    "columns": { "name": "الاسم", "company": "الشركة", "phone": "الهاتف", "wilaya": "الولاية", "balance": "الدين" },
+    "form": { "name": "الاسم", "company": "الشركة", "phone": "الهاتف", "whatsapp": "واتساب", "wilaya": "الولاية", "contactName": "جهة الاتصال", "paymentTerms": "شروط الدفع" }
+  },
+  "purchases": {
+    "title": "المشتريات",
+    "newPurchase": "بون شراء جديد",
+    "selectManufacturer": "اختر مصنعاً",
+    "columns": { "number": "الرقم", "manufacturer": "المصنع", "date": "التاريخ", "total": "الإجمالي", "status": "الحالة" },
+    "unitCost": "تكلفة الوحدة"
+  },
+  "stock": {
+    "title": "المخزون",
+    "alerts": "تنبيهات نقص المخزون",
+    "movements": "سجل الحركات",
+    "adjust": "تصحيح يدوي",
+    "product": "المنتج",
+    "currentStock": "المخزون الحالي",
+    "newStock": "الكمية الجديدة (قطعة)",
+    "reason": "السبب",
+    "columns": { "date": "التاريخ", "product": "المنتج", "type": "النوع", "quantity": "الكمية" },
+    "movementTypes": {
+      "SALE": "بيع", "SALE_CANCEL": "إلغاء بيع", "PURCHASE": "شراء",
+      "RETURN_CUSTOMER": "إرجاع عميل", "RETURN_SUPPLIER": "إرجاع لمصنع", "ADJUSTMENT": "تعديل"
+    }
   },
   "categories": {
     "title": "الفئات",

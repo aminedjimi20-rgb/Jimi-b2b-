@@ -96,6 +96,7 @@ model User {
   reviewedRequests RegistrationRequest[] @relation("ReviewedBy")
   customer        Customer?
   salesVouchers   SalesVoucher[]
+  purchaseVouchers PurchaseVoucher[]
 
   @@map("users")
 }
@@ -257,8 +258,9 @@ model PackagingUnit {
   label  String
   labelPlural String
 
-  products     Product[]
-  voucherItems SalesVoucherItem[]
+  products             Product[]
+  voucherItems         SalesVoucherItem[]
+  purchaseVoucherItems PurchaseVoucherItem[]
 
   @@map("packaging_units")
 }
@@ -320,8 +322,9 @@ model Product {
   prices         ProductPrice[]
   priceHistory   PriceHistory[]
   promotions     Promotion[]
-  voucherItems   SalesVoucherItem[]
-  stockMovements StockMovement[]
+  voucherItems         SalesVoucherItem[]
+  stockMovements       StockMovement[]
+  purchaseVoucherItems PurchaseVoucherItem[]
 
   @@index([categoryId])
   @@map("products")
@@ -507,6 +510,107 @@ model StockMovement {
 
   @@index([productId])
   @@map("stock_movements")
+}
+
+// ---------------------------------------------------------------------------
+// Fabricants, achats & inventaire (Phase 5)
+// ---------------------------------------------------------------------------
+
+model Manufacturer {
+  id            String   @id @default(cuid())
+  name          String
+  company       String?
+  phone         String?
+  whatsapp      String?
+  email         String?
+  address       String?
+  wilaya        String?
+  contactName   String?
+  paymentTerms  String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  entries          SupplierLedgerEntry[]
+  purchaseVouchers PurchaseVoucher[]
+
+  @@map("manufacturers")
+}
+
+enum SupplierLedgerEntryType {
+  PURCHASE_VOUCHER
+  PAYMENT
+  ADJUSTMENT
+}
+
+// Positif = ce qu'on doit au fabricant, négatif = ce qu'on a payé.
+model SupplierLedgerEntry {
+  id             String                  @id @default(cuid())
+  manufacturerId String
+  type           SupplierLedgerEntryType
+  amount         Decimal                 @db.Decimal(12, 2)
+  reference      String?
+  note           String?
+  createdById    String?
+  createdAt      DateTime                @default(now())
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+
+  @@index([manufacturerId])
+  @@map("supplier_ledger_entries")
+}
+
+enum PurchaseVoucherStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+model PurchaseVoucher {
+  id             String                @id @default(cuid())
+  number         String?               @unique // ACH-2026-000001, attribué à la confirmation
+  manufacturerId String
+  buyerId        String
+  status         PurchaseVoucherStatus @default(DRAFT)
+  discount       Decimal               @default(0) @db.Decimal(12, 2)
+  transportCost  Decimal               @default(0) @db.Decimal(12, 2)
+  paidAmount     Decimal               @default(0) @db.Decimal(12, 2)
+  previousDebt   Decimal?              @db.Decimal(12, 2)
+  notes          String?
+  hidden         Boolean               @default(false)
+  cancelReason   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  deletedAt   DateTime?
+
+  manufacturer Manufacturer          @relation(fields: [manufacturerId], references: [id])
+  buyer        User                  @relation(fields: [buyerId], references: [id])
+  items        PurchaseVoucherItem[]
+
+  @@index([manufacturerId])
+  @@index([status])
+  @@map("purchase_vouchers")
+}
+
+model PurchaseVoucherItem {
+  id                      String  @id @default(cuid())
+  voucherId               String
+  productId               String
+  packagingUnitId         String
+  quantityPackages        Int
+  unitsPerPackageSnapshot Int
+  totalUnits              Int
+  unitCost                Decimal @db.Decimal(12, 2)
+  lineTotal               Decimal @db.Decimal(12, 2)
+
+  voucher       PurchaseVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  product       Product         @relation(fields: [productId], references: [id])
+  packagingUnit PackagingUnit   @relation(fields: [packagingUnitId], references: [id])
+
+  @@map("purchase_voucher_items")
 }
 
 model Promotion {

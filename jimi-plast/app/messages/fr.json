@@ -35,6 +35,9 @@
     "customers": "Clients",
     "myAccount": "Mon compte",
     "vouchers": "Bons",
+    "manufacturers": "Fabricants",
+    "purchases": "Achats",
+    "stock": "Stock",
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion"
@@ -212,6 +215,34 @@
     "filterStatus": "Tous les statuts",
     "filterCustomer": "Tous les clients",
     "deleteConfirm": "Supprimer ce brouillon ?"
+  },
+  "manufacturers": {
+    "title": "Fabricants",
+    "add": "Nouveau fabricant",
+    "columns": { "name": "Nom", "company": "Société", "phone": "Téléphone", "wilaya": "Wilaya", "balance": "Dette" },
+    "form": { "name": "Nom", "company": "Société", "phone": "Téléphone", "whatsapp": "WhatsApp", "wilaya": "Wilaya", "contactName": "Contact principal", "paymentTerms": "Conditions de paiement" }
+  },
+  "purchases": {
+    "title": "Achats",
+    "newPurchase": "Nouveau bon d'achat",
+    "selectManufacturer": "Sélectionner un fabricant",
+    "columns": { "number": "N°", "manufacturer": "Fabricant", "date": "Date", "total": "Total", "status": "Statut" },
+    "unitCost": "Coût unitaire"
+  },
+  "stock": {
+    "title": "Stock",
+    "alerts": "Alertes stock faible",
+    "movements": "Historique des mouvements",
+    "adjust": "Correction manuelle",
+    "product": "Produit",
+    "currentStock": "Stock actuel",
+    "newStock": "Nouvelle quantité (pièces)",
+    "reason": "Raison",
+    "columns": { "date": "Date", "product": "Produit", "type": "Type", "quantity": "Quantité" },
+    "movementTypes": {
+      "SALE": "Vente", "SALE_CANCEL": "Annulation vente", "PURCHASE": "Achat",
+      "RETURN_CUSTOMER": "Retour client", "RETURN_SUPPLIER": "Retour fabricant", "ADJUSTMENT": "Ajustement"
+    }
   },
   "categories": {
     "title": "Catégories",
