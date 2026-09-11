@@ -95,6 +95,7 @@ model User {
   auditLogs       AuditLog[]       @relation("AuditLogActor")
   reviewedRequests RegistrationRequest[] @relation("ReviewedBy")
   customer        Customer?
+  salesVouchers   SalesVoucher[]
 
   @@map("users")
 }
@@ -256,7 +257,8 @@ model PackagingUnit {
   label  String
   labelPlural String
 
-  products Product[]
+  products     Product[]
+  voucherItems SalesVoucherItem[]
 
   @@map("packaging_units")
 }
@@ -270,9 +272,10 @@ model PriceTierType {
   permissionKey String // clé de Permission qui donne le droit de voir ce niveau
   sortOrder     Int    @default(0)
 
-  prices      ProductPrice[]
+  prices       ProductPrice[]
   priceHistory PriceHistory[]
-  promotions  Promotion[]
+  promotions   Promotion[]
+  voucherItems SalesVoucherItem[]
 
   @@map("price_tier_types")
 }
@@ -313,10 +316,12 @@ model Product {
 
   category      Category      @relation(fields: [categoryId], references: [id])
   packagingUnit PackagingUnit @relation(fields: [packagingUnitId], references: [id])
-  images        ProductImage[]
-  prices        ProductPrice[]
-  priceHistory  PriceHistory[]
-  promotions    Promotion[]
+  images         ProductImage[]
+  prices         ProductPrice[]
+  priceHistory   PriceHistory[]
+  promotions     Promotion[]
+  voucherItems   SalesVoucherItem[]
+  stockMovements StockMovement[]
 
   @@index([categoryId])
   @@map("products")
@@ -386,8 +391,9 @@ model Customer {
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
 
-  user    User          @relation(fields: [userId], references: [id])
-  entries LedgerEntry[]
+  user          User           @relation(fields: [userId], references: [id])
+  entries       LedgerEntry[]
+  salesVouchers SalesVoucher[]
 
   @@map("customers")
 }
@@ -415,6 +421,92 @@ model LedgerEntry {
 
   @@index([customerId])
   @@map("ledger_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Ventes & bons (Phase 4)
+// ---------------------------------------------------------------------------
+
+enum VoucherStatus {
+  DRAFT
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+model SalesVoucher {
+  id             String        @id @default(cuid())
+  number         String?       @unique // attribué uniquement à la confirmation (BL-2026-000001)
+  customerId     String
+  sellerId       String
+  status         VoucherStatus @default(DRAFT)
+  discount       Decimal       @default(0) @db.Decimal(12, 2)
+  transportCost  Decimal       @default(0) @db.Decimal(12, 2)
+  paidAmount     Decimal       @default(0) @db.Decimal(12, 2)
+  previousCredit Decimal?      @db.Decimal(12, 2) // solde du client juste avant confirmation (pour le PDF)
+  notes          String?
+  hidden         Boolean       @default(false)
+  cancelReason   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  deliveredAt DateTime?
+  deletedAt   DateTime?
+
+  customer Customer           @relation(fields: [customerId], references: [id])
+  seller   User               @relation(fields: [sellerId], references: [id])
+  items    SalesVoucherItem[]
+
+  @@index([customerId])
+  @@index([status])
+  @@map("sales_vouchers")
+}
+
+model SalesVoucherItem {
+  id                    String  @id @default(cuid())
+  voucherId             String
+  productId             String
+  priceTierTypeId       String
+  packagingUnitId       String
+  quantityPackages      Int // ex: 3 cartons
+  unitsPerPackageSnapshot Int // copié depuis Product au moment de l'ajout
+  totalUnits            Int // quantityPackages * unitsPerPackageSnapshot
+  unitPrice             Decimal @db.Decimal(12, 2) // prix pièce au moment de la vente, figé
+  lineTotal             Decimal @db.Decimal(12, 2)
+
+  voucher       SalesVoucher  @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+  priceTierType PriceTierType @relation(fields: [priceTierTypeId], references: [id])
+  packagingUnit PackagingUnit @relation(fields: [packagingUnitId], references: [id])
+
+  @@map("sales_voucher_items")
+}
+
+enum StockMovementType {
+  SALE
+  SALE_CANCEL
+  PURCHASE
+  RETURN_CUSTOMER
+  RETURN_SUPPLIER
+  ADJUSTMENT
+}
+
+model StockMovement {
+  id            String            @id @default(cuid())
+  productId     String
+  type          StockMovementType
+  quantity      Int // toujours en pièces ; négatif = sortie, positif = entrée
+  referenceType String? // "SalesVoucher" | "PurchaseVoucher" | ...
+  referenceId   String?
+  reason        String?
+  createdById   String?
+  createdAt     DateTime          @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("stock_movements")
 }
 
 model Promotion {

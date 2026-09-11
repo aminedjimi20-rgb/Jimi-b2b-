@@ -15,6 +15,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CatalogSettingsModule } from './catalog-settings/catalog-settings.module';
 import { ProductsModule } from './products/products.module';
 import { CustomersModule } from './customers/customers.module';
+import { VouchersModule } from './vouchers/vouchers.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -35,6 +36,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     CatalogSettingsModule,
     ProductsModule,
     CustomersModule,
+    VouchersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
