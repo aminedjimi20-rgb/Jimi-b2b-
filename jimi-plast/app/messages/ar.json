@@ -38,6 +38,8 @@
     "manufacturers": "المصانع",
     "purchases": "المشتريات",
     "stock": "المخزون",
+    "returns": "المرتجعات",
+    "transport": "النقل",
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج"
@@ -243,6 +245,29 @@
       "SALE": "بيع", "SALE_CANCEL": "إلغاء بيع", "PURCHASE": "شراء",
       "RETURN_CUSTOMER": "إرجاع عميل", "RETURN_SUPPLIER": "إرجاع لمصنع", "ADJUSTMENT": "تعديل"
     }
+  },
+  "returns": {
+    "title": "المرتجعات",
+    "new": "مرتجع جديد",
+    "type": "النوع",
+    "typeCustomer": "عميل",
+    "typeSupplier": "مصنع",
+    "party": "العميل / المصنع",
+    "product": "المنتج",
+    "quantity": "الكمية (قطعة)",
+    "reason": "السبب",
+    "addItem": "إضافة",
+    "validate": "تحقق",
+    "reject": "رفض",
+    "decision": "القرار",
+    "decisions": { "REFUND": "استرجاع", "CREDIT_NOTE": "رصيد دائن", "DEDUCT_NEXT": "خصم من البون القادم", "REPLACEMENT": "استبدال" },
+    "status": { "NEW": "جديد", "VALIDATED": "تم التحقق", "REJECTED": "مرفوض" },
+    "columns": { "number": "الرقم", "type": "النوع", "party": "العميل/المصنع", "value": "القيمة", "status": "الحالة" }
+  },
+  "transport": {
+    "title": "النقل",
+    "columns": { "voucher": "البون", "customer": "العميل", "driver": "السائق", "status": "الحالة", "cost": "التكلفة" },
+    "status": { "TO_PREPARE": "للتحضير", "PREPARED": "جاهزة", "IN_PROGRESS": "قيد التنفيذ", "DELIVERED": "تم التسليم", "CANCELLED": "ملغاة", "PROBLEM": "مشكلة" }
   },
   "categories": {
     "title": "الفئات",

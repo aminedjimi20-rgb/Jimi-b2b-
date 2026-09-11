@@ -19,6 +19,8 @@ import { VouchersModule } from './vouchers/vouchers.module';
 import { ManufacturersModule } from './manufacturers/manufacturers.module';
 import { PurchaseVouchersModule } from './purchase-vouchers/purchase-vouchers.module';
 import { StockModule } from './stock/stock.module';
+import { ReturnsModule } from './returns/returns.module';
+import { DeliveriesModule } from './deliveries/deliveries.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -43,6 +45,8 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     ManufacturersModule,
     PurchaseVouchersModule,
     StockModule,
+    ReturnsModule,
+    DeliveriesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

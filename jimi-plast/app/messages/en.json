@@ -38,6 +38,8 @@
     "manufacturers": "Manufacturers",
     "purchases": "Purchases",
     "stock": "Stock",
+    "returns": "Returns",
+    "transport": "Transport",
     "users": "Employees & roles",
     "requests": "Registration requests",
     "logout": "Sign out"
@@ -243,6 +245,29 @@
       "SALE": "Sale", "SALE_CANCEL": "Sale cancelled", "PURCHASE": "Purchase",
       "RETURN_CUSTOMER": "Customer return", "RETURN_SUPPLIER": "Supplier return", "ADJUSTMENT": "Adjustment"
     }
+  },
+  "returns": {
+    "title": "Returns",
+    "new": "New return",
+    "type": "Type",
+    "typeCustomer": "Customer",
+    "typeSupplier": "Manufacturer",
+    "party": "Customer / Manufacturer",
+    "product": "Product",
+    "quantity": "Quantity (pieces)",
+    "reason": "Reason",
+    "addItem": "Add",
+    "validate": "Validate",
+    "reject": "Reject",
+    "decision": "Decision",
+    "decisions": { "REFUND": "Refund", "CREDIT_NOTE": "Credit note", "DEDUCT_NEXT": "Deduct from next voucher", "REPLACEMENT": "Replacement" },
+    "status": { "NEW": "New", "VALIDATED": "Validated", "REJECTED": "Rejected" },
+    "columns": { "number": "No.", "type": "Type", "party": "Customer/Manufacturer", "value": "Value", "status": "Status" }
+  },
+  "transport": {
+    "title": "Transport",
+    "columns": { "voucher": "Voucher", "customer": "Customer", "driver": "Driver", "status": "Status", "cost": "Cost" },
+    "status": { "TO_PREPARE": "To prepare", "PREPARED": "Prepared", "IN_PROGRESS": "In progress", "DELIVERED": "Delivered", "CANCELLED": "Cancelled", "PROBLEM": "Problem" }
   },
   "categories": {
     "title": "Categories",

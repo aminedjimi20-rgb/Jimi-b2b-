@@ -46,6 +46,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ...(user.permissions.includes('stock.manage')
       ? [{ href: `/${locale}/stock`, label: t('stock') }]
       : []),
+    ...(user.permissions.includes('returns.manage')
+      ? [{ href: `/${locale}/returns`, label: t('returns') }]
+      : []),
+    ...(user.permissions.includes('transport.manage')
+      ? [{ href: `/${locale}/transport`, label: t('transport') }]
+      : []),
     ...(!user.permissions.includes('customers.manage') && ['wholesaler', 'retailer'].includes(user.role.key)
       ? [{ href: `/${locale}/account`, label: t('myAccount') }]
       : []),

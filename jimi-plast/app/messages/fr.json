@@ -38,6 +38,8 @@
     "manufacturers": "Fabricants",
     "purchases": "Achats",
     "stock": "Stock",
+    "returns": "Retours",
+    "transport": "Transport",
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion"
@@ -243,6 +245,29 @@
       "SALE": "Vente", "SALE_CANCEL": "Annulation vente", "PURCHASE": "Achat",
       "RETURN_CUSTOMER": "Retour client", "RETURN_SUPPLIER": "Retour fabricant", "ADJUSTMENT": "Ajustement"
     }
+  },
+  "returns": {
+    "title": "Retours",
+    "new": "Nouveau retour",
+    "type": "Type",
+    "typeCustomer": "Client",
+    "typeSupplier": "Fabricant",
+    "party": "Client / Fabricant",
+    "product": "Produit",
+    "quantity": "Quantité (pièces)",
+    "reason": "Raison",
+    "addItem": "Ajouter",
+    "validate": "Valider",
+    "reject": "Refuser",
+    "decision": "Décision",
+    "decisions": { "REFUND": "Remboursement", "CREDIT_NOTE": "Avoir", "DEDUCT_NEXT": "Déduction prochain bon", "REPLACEMENT": "Remplacement" },
+    "status": { "NEW": "Nouveau", "VALIDATED": "Validé", "REJECTED": "Refusé" },
+    "columns": { "number": "N°", "type": "Type", "party": "Client/Fabricant", "value": "Valeur", "status": "Statut" }
+  },
+  "transport": {
+    "title": "Transport",
+    "columns": { "voucher": "Bon", "customer": "Client", "driver": "Chauffeur", "status": "Statut", "cost": "Coût" },
+    "status": { "TO_PREPARE": "À préparer", "PREPARED": "Préparée", "IN_PROGRESS": "En cours", "DELIVERED": "Livrée", "CANCELLED": "Annulée", "PROBLEM": "Problème" }
   },
   "categories": {
     "title": "Catégories",
