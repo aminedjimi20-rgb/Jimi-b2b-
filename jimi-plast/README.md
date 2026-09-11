@@ -38,6 +38,11 @@ npm install
 npm run dev              # http://localhost:3000
 ```
 
+## En ligne
+
+- App : https://jimi-plast-app.vercel.app
+- API : https://jimi-plast-api.onrender.com/api
+
 ## Déploiement en ligne (Render + Vercel, gratuit)
 
 Deux boutons suffisent : aucun mot de passe ni jeton n'est partagé avec Claude,
