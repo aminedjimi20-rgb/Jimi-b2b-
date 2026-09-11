@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: jimi-plast-api
+    runtime: node
+    rootDir: jimi-plast/api
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm run prisma:seed && npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 22.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jimi-plast-db
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: WEB_APP_ORIGIN
+        value: http://localhost:3000
+      - key: SEED_ADMIN_EMAIL
+        value: admin@jimiplast.dz
+      - key: SEED_ADMIN_PASSWORD
+        value: ChangeMe123!
+
+databases:
+  - name: jimi-plast-db
+    plan: free
+    databaseName: jimiplast
+    user: jimiplast

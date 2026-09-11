@@ -4,6 +4,9 @@
   "description": "JIMI PLAST — API (NestJS + Prisma)",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",

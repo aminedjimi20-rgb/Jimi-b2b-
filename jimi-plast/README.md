@@ -38,6 +38,31 @@ npm install
 npm run dev              # http://localhost:3000
 ```
 
+## Déploiement en ligne (Render + Vercel, gratuit)
+
+Deux boutons suffisent : aucun mot de passe ni jeton n'est partagé avec Claude,
+tout se passe sur le compte de l'utilisateur.
+
+1. **API + base de données** → cliquer sur
+   [Déployer l'API sur Render](https://render.com/deploy?repo=https://github.com/aminedjimi20-rgb/Jimi-b2b-)
+   (le fichier `render.yaml` à la racine du dépôt provisionne automatiquement
+   le service web NestJS et la base PostgreSQL, exécute les migrations puis
+   le seed). Une fois déployé, noter l'URL du service, par ex.
+   `https://jimi-plast-api.onrender.com`.
+2. **Application web** → cliquer sur
+   [Déployer l'app sur Vercel](https://vercel.com/new/clone?repository-url=https://github.com/aminedjimi20-rgb/Jimi-b2b-&root-directory=jimi-plast/app&project-name=jimi-plast-app&env=NEXT_PUBLIC_API_URL&envDescription=URL+de+l%27API+JIMI+PLAST+(Render)%2C+ex+%3A+https://jimi-plast-api.onrender.com/api)
+   et renseigner `NEXT_PUBLIC_API_URL` = `<url-render>/api` quand Vercel le
+   demande. Une fois déployé, noter l'URL Vercel, par ex.
+   `https://jimi-plast-app.vercel.app`.
+3. Retourner sur Render → service `jimi-plast-api` → *Environment* → modifier
+   `WEB_APP_ORIGIN` avec l'URL Vercel exacte de l'étape 2 → sauvegarder (le
+   service redémarre automatiquement, ce qui active le CORS pour l'app).
+4. Ouvrir l'URL Vercel : connexion avec `admin@jimiplast.dz` /
+   `ChangeMe123!` (à changer immédiatement depuis *Mon compte*).
+
+Les deux services ont un plan gratuit qui se met en veille après inactivité
+(le premier chargement peut prendre ~30s le temps que l'API se réveille).
+
 ## État d'avancement
 
 - [x] **Phase 1 — Fondations** : auth JWT (access + refresh rotatif),
