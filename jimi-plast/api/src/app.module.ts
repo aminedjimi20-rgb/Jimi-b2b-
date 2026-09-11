@@ -21,6 +21,8 @@ import { PurchaseVouchersModule } from './purchase-vouchers/purchase-vouchers.mo
 import { StockModule } from './stock/stock.module';
 import { ReturnsModule } from './returns/returns.module';
 import { DeliveriesModule } from './deliveries/deliveries.module';
+import { ProductRequestsModule } from './product-requests/product-requests.module';
+import { NegotiationsModule } from './negotiations/negotiations.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -47,6 +49,8 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     StockModule,
     ReturnsModule,
     DeliveriesModule,
+    ProductRequestsModule,
+    NegotiationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

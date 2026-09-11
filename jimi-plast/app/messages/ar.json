@@ -40,6 +40,8 @@
     "stock": "المخزون",
     "returns": "المرتجعات",
     "transport": "النقل",
+    "productRequests": "طلبات المنتجات",
+    "negotiations": "التفاوض",
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج"
@@ -268,6 +270,20 @@
     "title": "النقل",
     "columns": { "voucher": "البون", "customer": "العميل", "driver": "السائق", "status": "الحالة", "cost": "التكلفة" },
     "status": { "TO_PREPARE": "للتحضير", "PREPARED": "جاهزة", "IN_PROGRESS": "قيد التنفيذ", "DELIVERED": "تم التسليم", "CANCELLED": "ملغاة", "PROBLEM": "مشكلة" }
+  },
+  "productRequests": {
+    "title": "طلبات المنتجات",
+    "columns": { "product": "المنتج", "customer": "العميل", "quantity": "الكمية", "status": "الحالة" },
+    "status": { "NEW": "جديدة", "SEARCHING": "قيد البحث", "FOUND": "تم العثور عليه", "ORDERED": "تم الطلب", "AVAILABLE": "متوفر", "REFUSED": "مرفوضة" }
+  },
+  "negotiations": {
+    "title": "التفاوض",
+    "columns": { "product": "المنتج", "customer": "العميل", "current": "السعر الحالي", "requested": "السعر المطلوب", "quantity": "الكمية", "status": "الحالة" },
+    "status": { "PENDING": "قيد الانتظار", "ACCEPTED": "مقبولة", "REJECTED": "مرفوضة", "COUNTERED": "عرض مضاد" },
+    "accept": "قبول",
+    "reject": "رفض",
+    "counter": "عرض مضاد",
+    "counterPrice": "السعر المقترح"
   },
   "categories": {
     "title": "الفئات",

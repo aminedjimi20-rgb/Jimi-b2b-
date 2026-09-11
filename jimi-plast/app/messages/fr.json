@@ -40,6 +40,8 @@
     "stock": "Stock",
     "returns": "Retours",
     "transport": "Transport",
+    "productRequests": "Demandes produits",
+    "negotiations": "Négociations",
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion"
@@ -268,6 +270,20 @@
     "title": "Transport",
     "columns": { "voucher": "Bon", "customer": "Client", "driver": "Chauffeur", "status": "Statut", "cost": "Coût" },
     "status": { "TO_PREPARE": "À préparer", "PREPARED": "Préparée", "IN_PROGRESS": "En cours", "DELIVERED": "Livrée", "CANCELLED": "Annulée", "PROBLEM": "Problème" }
+  },
+  "productRequests": {
+    "title": "Demandes de produits",
+    "columns": { "product": "Produit", "customer": "Client", "quantity": "Quantité", "status": "Statut" },
+    "status": { "NEW": "Nouvelle", "SEARCHING": "Recherche en cours", "FOUND": "Trouvé", "ORDERED": "Commandé", "AVAILABLE": "Disponible", "REFUSED": "Refusée" }
+  },
+  "negotiations": {
+    "title": "Négociations",
+    "columns": { "product": "Produit", "customer": "Client", "current": "Prix actuel", "requested": "Prix demandé", "quantity": "Quantité", "status": "Statut" },
+    "status": { "PENDING": "En attente", "ACCEPTED": "Acceptée", "REJECTED": "Refusée", "COUNTERED": "Contre-offre" },
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "counter": "Contre-offre",
+    "counterPrice": "Prix proposé"
   },
   "categories": {
     "title": "Catégories",

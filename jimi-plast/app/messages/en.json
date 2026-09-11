@@ -40,6 +40,8 @@
     "stock": "Stock",
     "returns": "Returns",
     "transport": "Transport",
+    "productRequests": "Product requests",
+    "negotiations": "Negotiations",
     "users": "Employees & roles",
     "requests": "Registration requests",
     "logout": "Sign out"
@@ -268,6 +270,20 @@
     "title": "Transport",
     "columns": { "voucher": "Voucher", "customer": "Customer", "driver": "Driver", "status": "Status", "cost": "Cost" },
     "status": { "TO_PREPARE": "To prepare", "PREPARED": "Prepared", "IN_PROGRESS": "In progress", "DELIVERED": "Delivered", "CANCELLED": "Cancelled", "PROBLEM": "Problem" }
+  },
+  "productRequests": {
+    "title": "Product requests",
+    "columns": { "product": "Product", "customer": "Customer", "quantity": "Quantity", "status": "Status" },
+    "status": { "NEW": "New", "SEARCHING": "Searching", "FOUND": "Found", "ORDERED": "Ordered", "AVAILABLE": "Available", "REFUSED": "Refused" }
+  },
+  "negotiations": {
+    "title": "Negotiations",
+    "columns": { "product": "Product", "customer": "Customer", "current": "Current price", "requested": "Requested price", "quantity": "Quantity", "status": "Status" },
+    "status": { "PENDING": "Pending", "ACCEPTED": "Accepted", "REJECTED": "Rejected", "COUNTERED": "Counter-offer" },
+    "accept": "Accept",
+    "reject": "Reject",
+    "counter": "Counter-offer",
+    "counterPrice": "Proposed price"
   },
   "categories": {
     "title": "Categories",

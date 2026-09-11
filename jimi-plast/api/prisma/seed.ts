@@ -29,6 +29,7 @@ const PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: 'catalog.manage', label: 'Gérer le catalogue (produits, catégories)', group: 'catalog' },
   { key: 'customers.manage', label: 'Gérer les dossiers clients', group: 'finance' },
   { key: 'credits.manage', label: 'Enregistrer paiements et ajustements de crédit', group: 'finance' },
+  { key: 'requests.manage', label: 'Traiter les demandes de produits et négociations', group: 'negotiations' },
 ];
 
 const PRICE_TIER_TYPES = [
