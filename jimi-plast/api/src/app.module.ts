@@ -14,6 +14,7 @@ import { RegistrationRequestsModule } from './registration-requests/registration
 import { CategoriesModule } from './categories/categories.module';
 import { CatalogSettingsModule } from './catalog-settings/catalog-settings.module';
 import { ProductsModule } from './products/products.module';
+import { CustomersModule } from './customers/customers.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -33,6 +34,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     CategoriesModule,
     CatalogSettingsModule,
     ProductsModule,
+    CustomersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

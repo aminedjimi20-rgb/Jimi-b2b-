@@ -67,6 +67,19 @@ export class RegistrationRequestsService {
         },
       });
 
+      // Rôle commercial (tout sauf admin/employee) => dossier client créé
+      // automatiquement avec les informations déjà fournies dans la demande.
+      if (role.key !== 'employee') {
+        await tx.customer.create({
+          data: {
+            userId: created.id,
+            businessName: request.businessName,
+            address: request.address,
+            wilaya: request.wilaya,
+          },
+        });
+      }
+
       return created;
     });
 

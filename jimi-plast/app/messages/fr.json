@@ -32,6 +32,8 @@
     "catalog": "Catalogue",
     "products": "Produits",
     "categories": "Catégories",
+    "customers": "Clients",
+    "myAccount": "Mon compte",
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion"
@@ -141,6 +143,44 @@
     "inactive": "Inactif",
     "priceHistory": "Historique des prix",
     "deleteConfirm": "Supprimer ce produit ? Il sera déplacé vers la corbeille."
+  },
+  "customers": {
+    "title": "Clients",
+    "addCustomer": "Nouveau client",
+    "columns": { "name": "Nom", "business": "Commerce", "phone": "Téléphone", "role": "Type", "balance": "Solde" },
+    "form": {
+      "fullName": "Nom complet",
+      "phone": "Téléphone",
+      "email": "Email",
+      "roleKey": "Type de client",
+      "initialPassword": "Mot de passe initial",
+      "businessName": "Nom du commerce",
+      "address": "Adresse",
+      "wilaya": "Wilaya",
+      "creditLimit": "Limite de crédit"
+    },
+    "detail": {
+      "balance": "Solde actuel",
+      "creditLimit": "Limite de crédit",
+      "history": "Historique",
+      "addPayment": "Enregistrer un paiement",
+      "addAdjustment": "Ajustement manuel",
+      "amount": "Montant",
+      "note": "Note",
+      "reason": "Raison",
+      "back": "Retour aux clients"
+    },
+    "entryTypes": {
+      "SALE_VOUCHER": "Bon de vente",
+      "PAYMENT": "Paiement",
+      "RETURN_CREDIT": "Avoir retour",
+      "ADJUSTMENT": "Ajustement"
+    },
+    "myAccount": {
+      "title": "Mon compte",
+      "business": "Commerce",
+      "noHistory": "Aucune opération pour le moment"
+    }
   },
   "categories": {
     "title": "Catégories",

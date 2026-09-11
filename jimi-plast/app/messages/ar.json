@@ -32,6 +32,8 @@
     "catalog": "الكتالوج",
     "products": "المنتجات",
     "categories": "الفئات",
+    "customers": "العملاء",
+    "myAccount": "حسابي",
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج"
@@ -141,6 +143,44 @@
     "inactive": "غير نشط",
     "priceHistory": "سجل الأسعار",
     "deleteConfirm": "حذف هذا المنتج؟ سيُنقل إلى سلة المحذوفات."
+  },
+  "customers": {
+    "title": "العملاء",
+    "addCustomer": "عميل جديد",
+    "columns": { "name": "الاسم", "business": "المحل", "phone": "الهاتف", "role": "النوع", "balance": "الرصيد" },
+    "form": {
+      "fullName": "الاسم الكامل",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "roleKey": "نوع العميل",
+      "initialPassword": "كلمة المرور الأولية",
+      "businessName": "اسم المحل",
+      "address": "العنوان",
+      "wilaya": "الولاية",
+      "creditLimit": "حد الائتمان"
+    },
+    "detail": {
+      "balance": "الرصيد الحالي",
+      "creditLimit": "حد الائتمان",
+      "history": "السجل",
+      "addPayment": "تسجيل دفعة",
+      "addAdjustment": "تعديل يدوي",
+      "amount": "المبلغ",
+      "note": "ملاحظة",
+      "reason": "السبب",
+      "back": "العودة إلى العملاء"
+    },
+    "entryTypes": {
+      "SALE_VOUCHER": "بون بيع",
+      "PAYMENT": "دفعة",
+      "RETURN_CREDIT": "رصيد إرجاع",
+      "ADJUSTMENT": "تعديل"
+    },
+    "myAccount": {
+      "title": "حسابي",
+      "business": "المحل",
+      "noHistory": "لا توجد عمليات بعد"
+    }
   },
   "categories": {
     "title": "الفئات",

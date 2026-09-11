@@ -32,6 +32,8 @@
     "catalog": "Catalog",
     "products": "Products",
     "categories": "Categories",
+    "customers": "Customers",
+    "myAccount": "My account",
     "users": "Employees & roles",
     "requests": "Registration requests",
     "logout": "Sign out"
@@ -141,6 +143,44 @@
     "inactive": "Inactive",
     "priceHistory": "Price history",
     "deleteConfirm": "Delete this product? It will be moved to trash."
+  },
+  "customers": {
+    "title": "Customers",
+    "addCustomer": "New customer",
+    "columns": { "name": "Name", "business": "Business", "phone": "Phone", "role": "Type", "balance": "Balance" },
+    "form": {
+      "fullName": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "roleKey": "Customer type",
+      "initialPassword": "Initial password",
+      "businessName": "Business name",
+      "address": "Address",
+      "wilaya": "Province",
+      "creditLimit": "Credit limit"
+    },
+    "detail": {
+      "balance": "Current balance",
+      "creditLimit": "Credit limit",
+      "history": "History",
+      "addPayment": "Record a payment",
+      "addAdjustment": "Manual adjustment",
+      "amount": "Amount",
+      "note": "Note",
+      "reason": "Reason",
+      "back": "Back to customers"
+    },
+    "entryTypes": {
+      "SALE_VOUCHER": "Sales voucher",
+      "PAYMENT": "Payment",
+      "RETURN_CREDIT": "Return credit",
+      "ADJUSTMENT": "Adjustment"
+    },
+    "myAccount": {
+      "title": "My account",
+      "business": "Business",
+      "noHistory": "No transactions yet"
+    }
   },
   "categories": {
     "title": "Categories",
