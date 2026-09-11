@@ -1,0 +1,70 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/auth-context';
+import { LocaleSwitcher } from '@/components/locale-switcher';
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { user, loading, logout } = useAuth();
+  const { locale } = useParams<{ locale: string }>();
+  const pathname = usePathname();
+  const router = useRouter();
+  const t = useTranslations('nav');
+
+  useEffect(() => {
+    if (!loading && !user) router.replace(`/${locale}/login`);
+  }, [loading, user, locale, router]);
+
+  if (loading || !user) {
+    return <div className="flex min-h-screen items-center justify-center text-muted">…</div>;
+  }
+
+  const links = [
+    { href: `/${locale}/dashboard`, label: t('dashboard') },
+    ...(user.permissions.includes('users.manage')
+      ? [
+          { href: `/${locale}/requests`, label: t('requests') },
+          { href: `/${locale}/users`, label: t('users') },
+        ]
+      : []),
+  ];
+
+  return (
+    <div className="flex min-h-screen bg-paper">
+      <aside className="flex w-60 flex-col border-e border-line bg-panel p-4">
+        <div className="mb-8 font-mono text-sm font-semibold uppercase tracking-wider text-accent">
+          JIMI PLAST
+        </div>
+        <nav className="flex flex-1 flex-col gap-1">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`rounded px-3 py-2 text-sm ${
+                pathname === link.href ? 'bg-accent/10 font-medium text-accent' : 'text-ink hover:bg-line/40'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="border-t border-line pt-4">
+          <p className="truncate text-sm font-medium text-ink">{user.fullName}</p>
+          <p className="truncate text-xs text-muted">{user.role.name}</p>
+          <button onClick={logout} className="mt-3 text-xs text-accent hover:underline">
+            {t('logout')}
+          </button>
+        </div>
+      </aside>
+      <div className="flex-1">
+        <header className="flex justify-end border-b border-line bg-panel px-6 py-3">
+          <LocaleSwitcher current={locale} />
+        </header>
+        <main className="p-6">{children}</main>
+      </div>
+    </div>
+  );
+}

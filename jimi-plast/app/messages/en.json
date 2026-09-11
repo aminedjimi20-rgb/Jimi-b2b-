@@ -1,0 +1,86 @@
+{
+  "app": { "name": "JIMI PLAST" },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Access your JIMI PLAST workspace",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "noAccount": "No account yet?",
+    "registerLink": "Request access",
+    "error": "Incorrect email or password"
+  },
+  "register": {
+    "title": "Access request",
+    "subtitle": "Your request will be reviewed by an administrator before activation.",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "email": "Email address",
+    "address": "Address",
+    "wilaya": "Province",
+    "businessName": "Business name (if applicable)",
+    "requestedRole": "Account type wanted",
+    "roleWholesaler": "Wholesaler",
+    "roleRetailer": "Retailer",
+    "notes": "Additional information",
+    "submit": "Send request",
+    "success": "Your request has been sent. An administrator will review it.",
+    "backToLogin": "Back to sign in"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Employees & roles",
+    "requests": "Registration requests",
+    "logout": "Sign out"
+  },
+  "dashboard": {
+    "welcome": "Hello {name}",
+    "roleLabel": "Role",
+    "pendingRequests": "Pending requests",
+    "activeUsers": "Active accounts",
+    "rolesConfigured": "Configured roles",
+    "placeholder": "Products, Orders, Stock, Vouchers and Statistics modules are coming in the next phases."
+  },
+  "requests": {
+    "title": "Registration requests",
+    "empty": "No pending requests",
+    "columns": { "name": "Name", "phone": "Phone", "type": "Requested type", "date": "Date", "status": "Status" },
+    "status": { "NEW": "New", "INFO_REQUESTED": "Info requested", "ACCEPTED": "Accepted", "REJECTED": "Rejected" },
+    "accept": "Accept",
+    "reject": "Reject",
+    "requestInfo": "Request info",
+    "acceptTitle": "Accept request",
+    "selectRole": "Role to assign",
+    "initialPassword": "Initial password",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "note": "Note"
+  },
+  "users": {
+    "title": "Employees, roles & permissions",
+    "tabUsers": "Users",
+    "tabRoles": "Roles & permissions",
+    "columns": { "name": "Name", "email": "Email", "role": "Role", "status": "Status", "lastLogin": "Last login" },
+    "suspend": "Suspend",
+    "activate": "Reactivate",
+    "permissionGroups": {
+      "prices": "Prices",
+      "orders": "Orders",
+      "vouchers": "Vouchers",
+      "finance": "Finance",
+      "suppliers": "Manufacturers",
+      "stock": "Stock",
+      "returns": "Returns",
+      "transport": "Transport",
+      "negotiations": "Negotiations",
+      "stats": "Statistics",
+      "admin": "Administration",
+      "documents": "Documents"
+    }
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "error": "Something went wrong"
+  }
+}

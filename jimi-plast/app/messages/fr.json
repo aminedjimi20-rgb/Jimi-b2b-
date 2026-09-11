@@ -1,0 +1,86 @@
+{
+  "app": { "name": "JIMI PLAST" },
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Accédez à votre espace JIMI PLAST",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "noAccount": "Pas encore de compte ?",
+    "registerLink": "Demander un accès",
+    "error": "Email ou mot de passe incorrect"
+  },
+  "register": {
+    "title": "Demande d'accès",
+    "subtitle": "Votre demande sera examinée par un administrateur avant activation.",
+    "fullName": "Nom complet",
+    "phone": "Téléphone",
+    "email": "Adresse email",
+    "address": "Adresse",
+    "wilaya": "Wilaya",
+    "businessName": "Nom du commerce (si applicable)",
+    "requestedRole": "Type de compte souhaité",
+    "roleWholesaler": "Grossiste",
+    "roleRetailer": "Détaillant",
+    "notes": "Informations complémentaires",
+    "submit": "Envoyer la demande",
+    "success": "Votre demande a été envoyée. Un administrateur va l'examiner.",
+    "backToLogin": "Retour à la connexion"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "users": "Employés & rôles",
+    "requests": "Demandes d'inscription",
+    "logout": "Déconnexion"
+  },
+  "dashboard": {
+    "welcome": "Bonjour {name}",
+    "roleLabel": "Rôle",
+    "pendingRequests": "Demandes en attente",
+    "activeUsers": "Comptes actifs",
+    "rolesConfigured": "Rôles configurés",
+    "placeholder": "Les modules Produits, Commandes, Stock, Bons et Statistiques arrivent dans les phases suivantes."
+  },
+  "requests": {
+    "title": "Demandes d'inscription",
+    "empty": "Aucune demande en attente",
+    "columns": { "name": "Nom", "phone": "Téléphone", "type": "Type souhaité", "date": "Date", "status": "Statut" },
+    "status": { "NEW": "Nouvelle", "INFO_REQUESTED": "Infos demandées", "ACCEPTED": "Acceptée", "REJECTED": "Refusée" },
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "requestInfo": "Demander des infos",
+    "acceptTitle": "Accepter la demande",
+    "selectRole": "Rôle à attribuer",
+    "initialPassword": "Mot de passe initial",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "note": "Note"
+  },
+  "users": {
+    "title": "Employés, rôles & permissions",
+    "tabUsers": "Utilisateurs",
+    "tabRoles": "Rôles & permissions",
+    "columns": { "name": "Nom", "email": "Email", "role": "Rôle", "status": "Statut", "lastLogin": "Dernière connexion" },
+    "suspend": "Suspendre",
+    "activate": "Réactiver",
+    "permissionGroups": {
+      "prices": "Prix",
+      "orders": "Commandes",
+      "vouchers": "Bons",
+      "finance": "Finance",
+      "suppliers": "Fabricants",
+      "stock": "Stock",
+      "returns": "Retours",
+      "transport": "Transport",
+      "negotiations": "Négociations",
+      "stats": "Statistiques",
+      "admin": "Administration",
+      "documents": "Documents"
+    }
+  },
+  "common": {
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "error": "Une erreur est survenue"
+  }
+}

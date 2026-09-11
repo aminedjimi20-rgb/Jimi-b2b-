@@ -1,0 +1,86 @@
+{
+  "app": { "name": "جيمي بلاست" },
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "ادخل إلى مساحة عمل جيمي بلاست",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "submit": "دخول",
+    "noAccount": "ليس لديك حساب؟",
+    "registerLink": "اطلب الوصول",
+    "error": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+  },
+  "register": {
+    "title": "طلب انضمام",
+    "subtitle": "سيقوم أحد المسؤولين بمراجعة طلبك قبل التفعيل.",
+    "fullName": "الاسم الكامل",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "address": "العنوان",
+    "wilaya": "الولاية",
+    "businessName": "اسم المحل (إن وجد)",
+    "requestedRole": "نوع الحساب المطلوب",
+    "roleWholesaler": "بالجملة",
+    "roleRetailer": "بالتجزئة",
+    "notes": "معلومات إضافية",
+    "submit": "إرسال الطلب",
+    "success": "تم إرسال طلبك. سيقوم أحد المسؤولين بمراجعته.",
+    "backToLogin": "العودة لتسجيل الدخول"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "الموظفون والأدوار",
+    "requests": "طلبات الانضمام",
+    "logout": "تسجيل الخروج"
+  },
+  "dashboard": {
+    "welcome": "مرحبًا {name}",
+    "roleLabel": "الدور",
+    "pendingRequests": "طلبات معلقة",
+    "activeUsers": "حسابات نشطة",
+    "rolesConfigured": "الأدوار المُعدة",
+    "placeholder": "وحدات المنتجات والطلبات والمخزون والسندات والإحصائيات قادمة في المراحل القادمة."
+  },
+  "requests": {
+    "title": "طلبات الانضمام",
+    "empty": "لا توجد طلبات معلقة",
+    "columns": { "name": "الاسم", "phone": "الهاتف", "type": "النوع المطلوب", "date": "التاريخ", "status": "الحالة" },
+    "status": { "NEW": "جديدة", "INFO_REQUESTED": "طلب معلومات", "ACCEPTED": "مقبولة", "REJECTED": "مرفوضة" },
+    "accept": "قبول",
+    "reject": "رفض",
+    "requestInfo": "طلب معلومات",
+    "acceptTitle": "قبول الطلب",
+    "selectRole": "الدور المسند",
+    "initialPassword": "كلمة المرور الأولية",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "note": "ملاحظة"
+  },
+  "users": {
+    "title": "الموظفون والأدوار والصلاحيات",
+    "tabUsers": "المستخدمون",
+    "tabRoles": "الأدوار والصلاحيات",
+    "columns": { "name": "الاسم", "email": "البريد الإلكتروني", "role": "الدور", "status": "الحالة", "lastLogin": "آخر دخول" },
+    "suspend": "تعليق",
+    "activate": "إعادة تفعيل",
+    "permissionGroups": {
+      "prices": "الأسعار",
+      "orders": "الطلبات",
+      "vouchers": "السندات",
+      "finance": "المالية",
+      "suppliers": "المصانع",
+      "stock": "المخزون",
+      "returns": "المرتجعات",
+      "transport": "النقل",
+      "negotiations": "التفاوض",
+      "stats": "الإحصائيات",
+      "admin": "الإدارة",
+      "documents": "المستندات"
+    }
+  },
+  "common": {
+    "loading": "جارٍ التحميل…",
+    "save": "حفظ",
+    "error": "حدث خطأ ما"
+  }
+}
