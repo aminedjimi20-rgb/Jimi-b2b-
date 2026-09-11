@@ -91,6 +91,11 @@
       "documents": "المستندات"
     }
   },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات",
+    "markAllRead": "تحديد الكل كمقروء"
+  },
   "common": {
     "loading": "جارٍ التحميل…",
     "save": "حفظ",

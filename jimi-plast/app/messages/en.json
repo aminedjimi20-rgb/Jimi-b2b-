@@ -91,6 +91,11 @@
       "documents": "Documents"
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all as read"
+  },
   "common": {
     "loading": "Loading…",
     "save": "Save",

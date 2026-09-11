@@ -97,6 +97,7 @@ model User {
   customer        Customer?
   salesVouchers   SalesVoucher[]
   purchaseVouchers PurchaseVoucher[]
+  notifications   Notification[]
 
   @@map("users")
 }
@@ -772,6 +773,26 @@ model Negotiation {
   product  Product  @relation(fields: [productId], references: [id])
 
   @@map("negotiations")
+}
+
+// ---------------------------------------------------------------------------
+// Centre de notifications interne (Phase 8)
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
 }
 
 model Promotion {

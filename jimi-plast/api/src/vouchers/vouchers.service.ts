@@ -65,7 +65,7 @@ export class VouchersService {
     const voucher = await this.prisma.salesVoucher.findFirst({
       where: { id, deletedAt: null },
       include: {
-        customer: { include: { user: { select: { fullName: true, phone: true } } } },
+        customer: { include: { user: { select: { id: true, fullName: true, phone: true } } } },
         seller: { select: { fullName: true } },
         items: { include: { product: true, priceTierType: true, packagingUnit: true } },
       },
@@ -231,7 +231,7 @@ export class VouchersService {
       type: 'order.confirmed',
       title: 'Bon confirmé',
       body: `Bon ${number} confirmé — total ${total} DA`,
-      data: { voucherId: id },
+      data: { voucherId: id, userId: voucher.customer.user.id },
     });
 
     return this.getById(id);

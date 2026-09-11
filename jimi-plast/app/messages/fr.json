@@ -91,6 +91,11 @@
       "documents": "Documents"
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification",
+    "markAllRead": "Tout marquer comme lu"
+  },
   "common": {
     "loading": "Chargement…",
     "save": "Enregistrer",

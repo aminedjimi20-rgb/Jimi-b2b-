@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { NotificationBell } from '@/components/notification-bell';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -97,7 +98,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
       <div className="flex-1">
-        <header className="flex justify-end border-b border-line bg-panel px-6 py-3">
+        <header className="flex items-center justify-end gap-3 border-b border-line bg-panel px-6 py-3">
+          <NotificationBell />
           <LocaleSwitcher current={locale} />
         </header>
         <main className="p-6">{children}</main>
