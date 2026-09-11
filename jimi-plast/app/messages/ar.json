@@ -29,6 +29,9 @@
   },
   "nav": {
     "dashboard": "لوحة التحكم",
+    "catalog": "الكتالوج",
+    "products": "المنتجات",
+    "categories": "الفئات",
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج"
@@ -81,6 +84,76 @@
   "common": {
     "loading": "جارٍ التحميل…",
     "save": "حفظ",
-    "error": "حدث خطأ ما"
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "error": "حدث خطأ ما",
+    "empty": "لا توجد عناصر",
+    "search": "بحث…",
+    "loginToSeePrices": "سجّل الدخول لرؤية الأسعار"
+  },
+  "catalog": {
+    "title": "الكتالوج",
+    "allCategories": "كل الفئات",
+    "sortPriority": "الأولوية",
+    "sortNewest": "الأحدث",
+    "sortNameAsc": "الاسم (أ→ي)",
+    "sortNameDesc": "الاسم (ي→أ)",
+    "inStock": "متوفر",
+    "outOfStock": "نفدت الكمية",
+    "onlyInStock": "المتوفر فقط",
+    "onlyOnSale": "العروض فقط",
+    "onlyNew": "الجديد فقط",
+    "new": "جديد",
+    "featured": "مميز",
+    "promo": "عرض",
+    "perPackage": "{count} {unit}/{package}",
+    "noResults": "لا يوجد منتج يطابق بحثك"
+  },
+  "products": {
+    "title": "المنتجات",
+    "addProduct": "منتج جديد",
+    "editProduct": "تعديل المنتج",
+    "columns": { "sku": "المرجع", "name": "الاسم", "category": "الفئة", "stock": "المخزون", "status": "الحالة" },
+    "form": {
+      "sku": "المرجع (SKU)",
+      "category": "الفئة",
+      "nameFr": "الاسم (فرنسي)",
+      "nameAr": "الاسم (عربي)",
+      "nameEn": "الاسم (إنجليزي)",
+      "brand": "العلامة التجارية",
+      "packagingUnit": "وحدة التعبئة",
+      "unitsPerPackage": "عدد القطع في وحدة التعبئة",
+      "costPrice": "سعر الشراء (التكلفة)",
+      "currentStock": "المخزون الحالي",
+      "stockMin": "الحد الأدنى للمخزون",
+      "priceFactory": "سعر المصنع",
+      "priceWholesale": "سعر الجملة",
+      "priceRetail": "سعر التجزئة",
+      "isNew": "منتج جديد",
+      "isFeatured": "مميز",
+      "isActive": "نشط",
+      "images": "الصور (رابط)",
+      "addImage": "إضافة صورة"
+    },
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "priceHistory": "سجل الأسعار",
+    "deleteConfirm": "حذف هذا المنتج؟ سيُنقل إلى سلة المحذوفات."
+  },
+  "categories": {
+    "title": "الفئات",
+    "addCategory": "فئة جديدة",
+    "columns": { "name": "الاسم", "slug": "الرابط", "parent": "الفئة الأم", "products": "المنتجات" },
+    "form": {
+      "slug": "الرابط (slug)",
+      "nameFr": "الاسم (فرنسي)",
+      "nameAr": "الاسم (عربي)",
+      "nameEn": "الاسم (إنجليزي)",
+      "parent": "الفئة الأم"
+    },
+    "none": "بدون",
+    "deleteConfirm": "حذف هذه الفئة؟"
   }
 }

@@ -29,6 +29,9 @@
   },
   "nav": {
     "dashboard": "Tableau de bord",
+    "catalog": "Catalogue",
+    "products": "Produits",
+    "categories": "Catégories",
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion"
@@ -81,6 +84,76 @@
   "common": {
     "loading": "Chargement…",
     "save": "Enregistrer",
-    "error": "Une erreur est survenue"
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "error": "Une erreur est survenue",
+    "empty": "Aucun élément",
+    "search": "Rechercher…",
+    "loginToSeePrices": "Connectez-vous pour voir les prix"
+  },
+  "catalog": {
+    "title": "Catalogue",
+    "allCategories": "Toutes les catégories",
+    "sortPriority": "Priorité",
+    "sortNewest": "Plus récents",
+    "sortNameAsc": "Nom (A→Z)",
+    "sortNameDesc": "Nom (Z→A)",
+    "inStock": "En stock",
+    "outOfStock": "Rupture de stock",
+    "onlyInStock": "Disponibles uniquement",
+    "onlyOnSale": "Promotions uniquement",
+    "onlyNew": "Nouveautés uniquement",
+    "new": "Nouveau",
+    "featured": "Mis en avant",
+    "promo": "Promotion",
+    "perPackage": "{count} {unit}/{package}",
+    "noResults": "Aucun produit ne correspond à votre recherche"
+  },
+  "products": {
+    "title": "Produits",
+    "addProduct": "Nouveau produit",
+    "editProduct": "Modifier le produit",
+    "columns": { "sku": "Référence", "name": "Nom", "category": "Catégorie", "stock": "Stock", "status": "Statut" },
+    "form": {
+      "sku": "Référence (SKU)",
+      "category": "Catégorie",
+      "nameFr": "Nom (Français)",
+      "nameAr": "Nom (Arabe)",
+      "nameEn": "Nom (Anglais)",
+      "brand": "Marque",
+      "packagingUnit": "Unité de conditionnement",
+      "unitsPerPackage": "Pièces par unité de conditionnement",
+      "costPrice": "Prix d'achat (coût)",
+      "currentStock": "Stock actuel",
+      "stockMin": "Stock minimum",
+      "priceFactory": "Prix usine",
+      "priceWholesale": "Prix grossiste",
+      "priceRetail": "Prix détaillant",
+      "isNew": "Nouveau produit",
+      "isFeatured": "Mis en avant",
+      "isActive": "Actif",
+      "images": "Photos (URL)",
+      "addImage": "Ajouter une photo"
+    },
+    "active": "Actif",
+    "inactive": "Inactif",
+    "priceHistory": "Historique des prix",
+    "deleteConfirm": "Supprimer ce produit ? Il sera déplacé vers la corbeille."
+  },
+  "categories": {
+    "title": "Catégories",
+    "addCategory": "Nouvelle catégorie",
+    "columns": { "name": "Nom", "slug": "Slug", "parent": "Parent", "products": "Produits" },
+    "form": {
+      "slug": "Slug (URL)",
+      "nameFr": "Nom (Français)",
+      "nameAr": "Nom (Arabe)",
+      "nameEn": "Nom (Anglais)",
+      "parent": "Catégorie parente"
+    },
+    "none": "Aucune",
+    "deleteConfirm": "Supprimer cette catégorie ?"
   }
 }

@@ -29,6 +29,9 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "catalog": "Catalog",
+    "products": "Products",
+    "categories": "Categories",
     "users": "Employees & roles",
     "requests": "Registration requests",
     "logout": "Sign out"
@@ -81,6 +84,76 @@
   "common": {
     "loading": "Loading…",
     "save": "Save",
-    "error": "Something went wrong"
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "error": "Something went wrong",
+    "empty": "No items",
+    "search": "Search…",
+    "loginToSeePrices": "Sign in to see prices"
+  },
+  "catalog": {
+    "title": "Catalog",
+    "allCategories": "All categories",
+    "sortPriority": "Priority",
+    "sortNewest": "Newest",
+    "sortNameAsc": "Name (A→Z)",
+    "sortNameDesc": "Name (Z→A)",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "onlyInStock": "In stock only",
+    "onlyOnSale": "On sale only",
+    "onlyNew": "New only",
+    "new": "New",
+    "featured": "Featured",
+    "promo": "Sale",
+    "perPackage": "{count} {unit}/{package}",
+    "noResults": "No product matches your search"
+  },
+  "products": {
+    "title": "Products",
+    "addProduct": "New product",
+    "editProduct": "Edit product",
+    "columns": { "sku": "SKU", "name": "Name", "category": "Category", "stock": "Stock", "status": "Status" },
+    "form": {
+      "sku": "SKU",
+      "category": "Category",
+      "nameFr": "Name (French)",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "brand": "Brand",
+      "packagingUnit": "Packaging unit",
+      "unitsPerPackage": "Pieces per packaging unit",
+      "costPrice": "Cost price",
+      "currentStock": "Current stock",
+      "stockMin": "Minimum stock",
+      "priceFactory": "Factory price",
+      "priceWholesale": "Wholesale price",
+      "priceRetail": "Retail price",
+      "isNew": "New product",
+      "isFeatured": "Featured",
+      "isActive": "Active",
+      "images": "Photos (URL)",
+      "addImage": "Add a photo"
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "priceHistory": "Price history",
+    "deleteConfirm": "Delete this product? It will be moved to trash."
+  },
+  "categories": {
+    "title": "Categories",
+    "addCategory": "New category",
+    "columns": { "name": "Name", "slug": "Slug", "parent": "Parent", "products": "Products" },
+    "form": {
+      "slug": "Slug (URL)",
+      "nameFr": "Name (French)",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "parent": "Parent category"
+    },
+    "none": "None",
+    "deleteConfirm": "Delete this category?"
   }
 }
