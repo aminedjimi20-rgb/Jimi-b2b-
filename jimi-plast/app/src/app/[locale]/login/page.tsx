@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -11,12 +11,23 @@ export default function LoginPage() {
   const t = useTranslations('login');
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
-  const { login } = useAuth();
+  const { user, loading, login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Revenir sur /login (bouton précédent du navigateur, onglet rouvert...)
+    // alors que la session est toujours valide ne doit pas réafficher le
+    // formulaire — sinon l'utilisateur croit avoir été déconnecté.
+    if (!loading && user) router.replace(`/${locale}/dashboard`);
+  }, [loading, user, locale, router]);
+
+  if (loading || user) {
+    return <div className="flex min-h-screen items-center justify-center text-muted">…</div>;
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
