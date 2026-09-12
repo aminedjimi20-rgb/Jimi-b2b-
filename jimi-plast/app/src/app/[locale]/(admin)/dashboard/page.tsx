@@ -39,6 +39,14 @@ interface Overview {
   pendingProductRequests: number;
 }
 
+function toInputDate(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+
+function daysAgo(n: number) {
+  return new Date(Date.now() - n * 24 * 60 * 60 * 1000);
+}
+
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
   const { user, token, hasPermission } = useAuth();
@@ -50,6 +58,8 @@ export default function DashboardPage() {
   const [credits, setCredits] = useState<CreditsStats | null>(null);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [overview, setOverview] = useState<Overview | null>(null);
+  const [from, setFrom] = useState(() => toInputDate(daysAgo(30)));
+  const [to, setTo] = useState(() => toInputDate(new Date()));
 
   useEffect(() => {
     if (!token) return;
@@ -59,13 +69,33 @@ export default function DashboardPage() {
       api.get<RoleRow[]>('/roles', token).then((rows) => setRolesCount(rows.length));
     }
     if (hasPermission('stats.view')) {
-      api.get<SalesStats>('/stats/sales', token).then(setSales);
-      api.get<MarginStats>('/stats/margin', token).then(setMargin);
       api.get<CreditsStats>('/stats/credits', token).then(setCredits);
-      api.get<TopProduct[]>('/stats/top-products?limit=5', token).then(setTopProducts);
       api.get<Overview>('/stats/overview', token).then(setOverview);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, hasPermission]);
+
+  useEffect(() => {
+    if (!token || !hasPermission('stats.view')) return;
+    const qs = `from=${from}&to=${to}`;
+    api.get<SalesStats>(`/stats/sales?${qs}`, token).then(setSales);
+    api.get<MarginStats>(`/stats/margin?${qs}`, token).then(setMargin);
+    api.get<TopProduct[]>(`/stats/top-products?${qs}&limit=5`, token).then(setTopProducts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, hasPermission, from, to]);
+
+  function applyPreset(days: number | 'year' | 'all') {
+    if (days === 'all') {
+      setFrom(toInputDate(new Date(2020, 0, 1)));
+      setTo(toInputDate(new Date()));
+    } else if (days === 'year') {
+      setFrom(toInputDate(new Date(new Date().getFullYear(), 0, 1)));
+      setTo(toInputDate(new Date()));
+    } else {
+      setFrom(toInputDate(daysAgo(days)));
+      setTo(toInputDate(new Date()));
+    }
+  }
 
   if (!user) return null;
 
@@ -79,16 +109,46 @@ export default function DashboardPage() {
       </div>
 
       {hasPermission('stats.view') && sales && margin && credits && (
-        <CollapsibleSection id="stats" title="Statistiques (30 jours)">
+        <CollapsibleSection id="stats" title={t('statsTitle')}>
+          <div className="mb-1 flex flex-wrap items-end gap-3 rounded-lg border border-line bg-panel p-3">
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted">{t('dateFrom')}</span>
+              <input
+                type="date"
+                value={from}
+                max={to}
+                onChange={(e) => setFrom(e.target.value)}
+                className="rounded border border-line bg-paper px-2 py-1 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted">{t('dateTo')}</span>
+              <input
+                type="date"
+                value={to}
+                min={from}
+                max={toInputDate(new Date())}
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded border border-line bg-paper px-2 py-1 text-sm"
+              />
+            </label>
+            <div className="flex flex-wrap gap-1">
+              <PresetButton onClick={() => applyPreset(7)}>{t('preset7d')}</PresetButton>
+              <PresetButton onClick={() => applyPreset(30)}>{t('preset30d')}</PresetButton>
+              <PresetButton onClick={() => applyPreset(90)}>{t('preset90d')}</PresetButton>
+              <PresetButton onClick={() => applyPreset('year')}>{t('presetYear')}</PresetButton>
+              <PresetButton onClick={() => applyPreset('all')}>{t('presetAll')}</PresetButton>
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Chiffre d'affaires (30j)" value={`${sales.revenue.toLocaleString()} DA`} />
-            <StatCard label="Marge (30j)" value={`${margin.totalMargin.toLocaleString()} DA (${margin.marginPercent}%)`} />
-            <StatCard label="Panier moyen" value={`${sales.averageBasket.toLocaleString()} DA`} />
-            <StatCard label="Bons confirmés (30j)" value={sales.voucherCount} />
-            <StatCard label="Crédit clients" value={`${credits.totalCustomerDebt.toLocaleString()} DA`} accent />
-            <StatCard label="Dette fabricants" value={`${credits.totalSupplierDebt.toLocaleString()} DA`} accent />
-            {overview && <StatCard label="Stock faible" value={overview.lowStockCount} accent={overview.lowStockCount > 0} />}
-            {overview && <StatCard label="Demandes en attente" value={overview.pendingProductRequests + overview.pendingNegotiations + overview.pendingReturns} />}
+            <StatCard label={t('revenue')} value={`${sales.revenue.toLocaleString()} DA`} />
+            <StatCard label={t('margin')} value={`${margin.totalMargin.toLocaleString()} DA (${margin.marginPercent}%)`} />
+            <StatCard label={t('averageBasket')} value={`${sales.averageBasket.toLocaleString()} DA`} />
+            <StatCard label={t('confirmedVouchers')} value={sales.voucherCount} />
+            <StatCard label={t('customerCredit')} value={`${credits.totalCustomerDebt.toLocaleString()} DA`} accent />
+            <StatCard label={t('supplierDebt')} value={`${credits.totalSupplierDebt.toLocaleString()} DA`} accent />
+            {overview && <StatCard label={t('lowStock')} value={overview.lowStockCount} accent={overview.lowStockCount > 0} />}
+            {overview && <StatCard label={t('pendingTotal')} value={overview.pendingProductRequests + overview.pendingNegotiations + overview.pendingReturns} />}
           </div>
         </CollapsibleSection>
       )}
@@ -104,7 +164,7 @@ export default function DashboardPage() {
       )}
 
       {hasPermission('stats.view') && topProducts.length > 0 && (
-        <CollapsibleSection id="top-products" title="Produits les plus vendus (30 derniers jours)">
+        <CollapsibleSection id="top-products" title={t('topProductsTitle')}>
           <div className="rounded-lg border border-line bg-panel p-4">
             <ul className="flex flex-col gap-1 text-sm">
               {topProducts.map((p) => (
@@ -154,6 +214,18 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
       </button>
       {open && children}
     </div>
+  );
+}
+
+function PresetButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded border border-line bg-paper px-2 py-1 text-xs text-ink hover:bg-line/30"
+    >
+      {children}
+    </button>
   );
 }
 
