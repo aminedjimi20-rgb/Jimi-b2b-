@@ -94,7 +94,8 @@
   "notifications": {
     "title": "الإشعارات",
     "empty": "لا توجد إشعارات",
-    "markAllRead": "تحديد الكل كمقروء"
+    "markAllRead": "تحديد الكل كمقروء",
+    "delete": "حذف"
   },
   "common": {
     "loading": "جارٍ التحميل…",

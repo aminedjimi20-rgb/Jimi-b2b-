@@ -48,6 +48,11 @@ export function NotificationBell() {
     reload();
   }
 
+  async function remove(id: string) {
+    await api.delete(`/notifications/${id}`, token);
+    reload();
+  }
+
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen((v) => !v)} className="relative rounded p-1.5 text-ink hover:bg-line/30">
@@ -71,10 +76,23 @@ export function NotificationBell() {
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 && <p className="p-4 text-center text-sm text-muted">{t('empty')}</p>}
             {notifications.map((n) => (
-              <div key={n.id} className={`border-b border-line px-3 py-2 last:border-b-0 ${!n.readAt ? 'bg-accent/5' : ''}`}>
-                <p className="text-sm font-medium text-ink">{n.title}</p>
-                <p className="text-xs text-muted">{n.body}</p>
-                <p className="mt-0.5 text-[10px] text-muted">{new Date(n.createdAt).toLocaleString()}</p>
+              <div
+                key={n.id}
+                className={`group flex items-start justify-between gap-2 border-b border-line px-3 py-2 last:border-b-0 ${!n.readAt ? 'bg-accent/5' : ''}`}
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink">{n.title}</p>
+                  <p className="text-xs text-muted">{n.body}</p>
+                  <p className="mt-0.5 text-[10px] text-muted">{new Date(n.createdAt).toLocaleString()}</p>
+                </div>
+                <button
+                  onClick={() => remove(n.id)}
+                  title={t('delete')}
+                  aria-label={t('delete')}
+                  className="shrink-0 rounded p-1 text-muted opacity-60 hover:bg-line/40 hover:text-red-600 hover:opacity-100"
+                >
+                  🗑
+                </button>
               </div>
             ))}
           </div>
