@@ -156,6 +156,19 @@ code (comme WhatsApp Web), immédiate et sans dépendre d'un bot tiers :
 Les deux canaux (CallMeBot et Green API) sont actifs en parallèle —
 configurer un seul des deux suffit.
 
+**État actuel (vérifié en production) :** le canal Green API est
+configuré et fonctionne — chaque nouvelle demande d'inscription est
+bien reçue. L'instance Green API est liée au numéro admin
+(0777168962) lui-même, donc le message arrive dans la discussion
+WhatsApp **"Vous"** (message à soi-même) plutôt que comme message
+entrant classique — WhatsApp n'envoie pas de notification push pour
+ce cas précis, il faut ouvrir cette discussion pour voir les nouvelles
+demandes. Pour une vraie notification push, il faudrait que l'instance
+soit liée à un numéro WhatsApp différent de celui qui reçoit (ex. un
+second numéro dédié) ; à défaut, CallMeBot (bot tiers, numéro
+différent) donnerait une vraie notification s'il répond — voir
+procédure ci-dessus.
+
 ## Limites connues / suite naturelle
 
 - Les brouillons de bons se sauvegardent automatiquement côté serveur
