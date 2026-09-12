@@ -27,6 +27,30 @@ export class VouchersController {
     return this.vouchersService.list({ status, customerId, hidden: hidden === 'true', dateFrom, dateTo });
   }
 
+  @Get('mine')
+  @RequirePermissions()
+  listMine(@CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.listMine(user.id);
+  }
+
+  @Post('mine/draft')
+  @RequirePermissions()
+  createMineDraft(@CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.getOrCreateOwnDraft(user.id);
+  }
+
+  @Get('mine/:id')
+  @RequirePermissions()
+  getMineById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.getMineById(user.id, id);
+  }
+
+  @Put('mine/:id')
+  @RequirePermissions()
+  updateMine(@Param('id') id: string, @Body() dto: UpsertVoucherDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.updateMine(user.id, id, dto);
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.vouchersService.getById(id);

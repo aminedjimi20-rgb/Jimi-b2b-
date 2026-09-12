@@ -90,7 +90,16 @@ export class ProductsService {
       this.prisma.product.findMany({
         where,
         include: {
-          category: { select: { id: true, slug: true, nameFr: true, nameAr: true, nameEn: true } },
+          category: {
+            select: {
+              id: true,
+              slug: true,
+              nameFr: true,
+              nameAr: true,
+              nameEn: true,
+              parent: { select: { id: true, nameFr: true, nameAr: true, nameEn: true } },
+            },
+          },
           packagingUnit: true,
           images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
           promotions: {
@@ -130,7 +139,7 @@ export class ProductsService {
     const product = await this.prisma.product.findFirst({
       where: { id, deletedAt: null },
       include: {
-        category: true,
+        category: { include: { parent: true } },
         packagingUnit: true,
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
         promotions: {
@@ -174,11 +183,19 @@ export class ProductsService {
       attributes: Prisma.JsonValue;
       brand: string | null;
       currentStock: number;
+      unitsPerPackage: number;
       isNew: boolean;
       isFeatured: boolean;
       isSeasonal: boolean;
       createdAt: Date;
-      category: { id: string; slug: string; nameFr: string; nameAr: string | null; nameEn: string | null };
+      category: {
+        id: string;
+        slug: string;
+        nameFr: string;
+        nameAr: string | null;
+        nameEn: string | null;
+        parent?: { id: string; nameFr: string; nameAr: string | null; nameEn: string | null } | null;
+      };
       packagingUnit: { id: string; key: string; label: string; labelPlural: string };
       images: { id: string; url: string; isPrimary: boolean }[];
     },
@@ -198,6 +215,7 @@ export class ProductsService {
       brand: product.brand,
       category: product.category,
       packagingUnit: product.packagingUnit,
+      unitsPerPackage: product.unitsPerPackage,
       images: product.images,
       isNew: product.isNew,
       isFeatured: product.isFeatured,

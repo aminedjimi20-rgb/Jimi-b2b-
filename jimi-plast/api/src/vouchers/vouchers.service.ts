@@ -84,6 +84,57 @@ export class VouchersService {
     return this.getById(voucher.id);
   }
 
+  /** Bon de commande de l'espace client — un client ne voit et ne modifie que ses propres bons. */
+  async listMine(userId: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { userId } });
+    if (!customer) return [];
+    return this.list({ customerId: customer.id, hidden: false });
+  }
+
+  async getOrCreateOwnDraft(userId: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { userId }, include: { user: { select: { fullName: true } } } });
+    if (!customer) throw new NotFoundException('Aucun dossier client associé à ce compte');
+
+    const existingDraft = await this.prisma.salesVoucher.findFirst({
+      where: { customerId: customer.id, status: 'DRAFT', deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (existingDraft) return this.getById(existingDraft.id);
+
+    const voucher = await this.prisma.salesVoucher.create({
+      data: { customerId: customer.id, sellerId: userId, status: 'DRAFT' },
+    });
+
+    await this.notifications.notify({
+      type: 'order.draft_started',
+      title: 'Nouvelle commande en préparation',
+      body: `${customer.user.fullName} prépare une commande depuis le catalogue`,
+      data: { voucherId: voucher.id },
+    });
+
+    return this.getById(voucher.id);
+  }
+
+  private async assertOwnVoucher(userId: string, id: string) {
+    const voucher = await this.prisma.salesVoucher.findFirst({
+      where: { id, deletedAt: null },
+      include: { customer: true },
+    });
+    if (!voucher || voucher.customer.userId !== userId) throw new NotFoundException('Bon introuvable');
+    return voucher;
+  }
+
+  async getMineById(userId: string, id: string) {
+    await this.assertOwnVoucher(userId, id);
+    return this.getById(id);
+  }
+
+  async updateMine(userId: string, id: string, dto: UpsertVoucherDto) {
+    await this.assertOwnVoucher(userId, id);
+    const { customerId: _customerId, ...rest } = dto;
+    return this.update(id, rest, userId);
+  }
+
   private async resolveTierForCustomer(customerId: string) {
     const customer = await this.prisma.customer.findUniqueOrThrow({
       where: { id: customerId },

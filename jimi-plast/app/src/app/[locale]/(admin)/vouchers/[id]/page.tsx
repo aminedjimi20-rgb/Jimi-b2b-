@@ -38,9 +38,11 @@ interface Voucher {
 export default function VoucherEditorPage() {
   const t = useTranslations('vouchers');
   const tCommon = useTranslations('common');
-  const { token } = useAuth();
+  const { token, hasPermission } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
+  const canManage = hasPermission('vouchers.create');
+  const basePath = canManage ? '/vouchers' : '/vouchers/mine';
 
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [products, setProducts] = useState<ProductOption[]>([]);
@@ -56,7 +58,7 @@ export default function VoucherEditorPage() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function reload() {
-    api.get<Voucher>(`/vouchers/${id}`, token).then((v) => {
+    api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
       setVoucher(v);
       setDiscount(v.discount);
       setTransportCost(v.transportCost);
@@ -80,7 +82,7 @@ export default function VoucherEditorPage() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
         try {
-          await api.put(`/vouchers/${id}`, patch, token);
+          await api.put(`${basePath}/${id}`, patch, token);
           setSavedAt(new Date());
           reload();
         } catch {
@@ -89,7 +91,7 @@ export default function VoucherEditorPage() {
       }, 500);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, token],
+    [id, token, basePath],
   );
 
   function addItem() {
@@ -137,8 +139,11 @@ export default function VoucherEditorPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <button onClick={() => router.push(`/${locale}/vouchers`)} className="w-fit text-sm text-accent hover:underline">
-        ← {t('back')}
+      <button
+        onClick={() => router.push(`/${locale}/${canManage ? 'vouchers' : 'catalog'}`)}
+        className="w-fit text-sm text-accent hover:underline"
+      >
+        ← {canManage ? t('back') : t('backToCatalog')}
       </button>
 
       <div className="flex items-center justify-between">
@@ -148,14 +153,16 @@ export default function VoucherEditorPage() {
         </div>
         <div className="flex items-center gap-2">
           {isDraft && savedAt && <span className="text-xs text-muted">{t('autoSaved')} {savedAt.toLocaleTimeString()}</span>}
-          <a
-            href={`${process.env.NEXT_PUBLIC_API_URL}/vouchers/${id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
-          >
-            {t('viewPdf')}
-          </a>
+          {canManage && (
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL}/vouchers/${id}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
+            >
+              {t('viewPdf')}
+            </a>
+          )}
         </div>
       </div>
 
@@ -243,7 +250,7 @@ export default function VoucherEditorPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {isDraft && (
+      {isDraft && canManage && (
         <div>
           <p className="mb-2 text-xs text-muted">{t('confirmWarning')}</p>
           <button onClick={confirmVoucher} className="rounded bg-teal px-4 py-2 text-sm font-medium text-white">
@@ -252,7 +259,11 @@ export default function VoucherEditorPage() {
         </div>
       )}
 
-      {voucher.status === 'CONFIRMED' && (
+      {isDraft && !canManage && (
+        <p className="text-xs text-muted">{t('waitingForStaffConfirmation')}</p>
+      )}
+
+      {voucher.status === 'CONFIRMED' && canManage && (
         <div className="flex flex-wrap items-center gap-3">
           <button onClick={deliverVoucher} className="rounded bg-teal px-4 py-2 text-sm font-medium text-white">
             {t('deliver')}

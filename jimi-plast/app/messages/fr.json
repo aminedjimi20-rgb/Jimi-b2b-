@@ -48,7 +48,8 @@
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion",
     "trash": "Corbeille",
-    "besoins": "Besoins"
+    "besoins": "Besoins",
+    "myOrders": "Mes commandes"
   },
   "dashboard": {
     "welcome": "Bonjour {name}",
@@ -165,7 +166,14 @@
     "featured": "Mis en avant",
     "promo": "Promotion",
     "perPackage": "{count} {unit}/{package}",
-    "noResults": "Aucun produit ne correspond à votre recherche"
+    "noResults": "Aucun produit ne correspond à votre recherche",
+    "cart": "Panier",
+    "cartEmpty": "Votre panier est vide",
+    "cartTotal": "Total",
+    "checkout": "Passer la commande",
+    "chooseCustomer": "Choisir le client",
+    "addToCart": "Ajouter au panier",
+    "piecesPerPackage": "{count} pièces / {unit}"
   },
   "products": {
     "title": "Produits",
@@ -287,7 +295,10 @@
     "removeItem": "Retirer",
     "filterStatus": "Tous les statuts",
     "filterCustomer": "Tous les clients",
-    "deleteConfirm": "Supprimer ce brouillon ?"
+    "deleteConfirm": "Supprimer ce brouillon ?",
+    "backToCatalog": "Retour au catalogue",
+    "waitingForStaffConfirmation": "Votre commande est en attente de confirmation par notre équipe.",
+    "noOrders": "Aucune commande pour le moment"
   },
   "manufacturers": {
     "title": "Fabricants",

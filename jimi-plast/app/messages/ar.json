@@ -48,7 +48,8 @@
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج",
     "trash": "سلة المهملات",
-    "besoins": "الاحتياجات"
+    "besoins": "الاحتياجات",
+    "myOrders": "طلباتي"
   },
   "dashboard": {
     "welcome": "مرحبًا {name}",
@@ -165,7 +166,14 @@
     "featured": "مميز",
     "promo": "عرض",
     "perPackage": "{count} {unit}/{package}",
-    "noResults": "لا يوجد منتج يطابق بحثك"
+    "noResults": "لا يوجد منتج يطابق بحثك",
+    "cart": "السلة",
+    "cartEmpty": "سلتك فارغة",
+    "cartTotal": "المجموع",
+    "checkout": "إرسال الطلبية",
+    "chooseCustomer": "اختر الزبون",
+    "addToCart": "أضف إلى السلة",
+    "piecesPerPackage": "{count} حبة / {unit}"
   },
   "products": {
     "title": "المنتجات",
@@ -287,7 +295,10 @@
     "removeItem": "إزالة",
     "filterStatus": "كل الحالات",
     "filterCustomer": "كل العملاء",
-    "deleteConfirm": "حذف هذه المسودة؟"
+    "deleteConfirm": "حذف هذه المسودة؟",
+    "backToCatalog": "العودة إلى الكاتالوڤ",
+    "waitingForStaffConfirmation": "طلبيتك في انتظار تأكيد فريقنا.",
+    "noOrders": "لا توجد طلبيات بعد"
   },
   "manufacturers": {
     "title": "المصانع",

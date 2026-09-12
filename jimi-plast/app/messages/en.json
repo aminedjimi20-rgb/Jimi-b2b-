@@ -48,7 +48,8 @@
     "requests": "Registration requests",
     "logout": "Sign out",
     "trash": "Trash",
-    "besoins": "Needs"
+    "besoins": "Needs",
+    "myOrders": "My orders"
   },
   "dashboard": {
     "welcome": "Hello {name}",
@@ -165,7 +166,14 @@
     "featured": "Featured",
     "promo": "Sale",
     "perPackage": "{count} {unit}/{package}",
-    "noResults": "No product matches your search"
+    "noResults": "No product matches your search",
+    "cart": "Cart",
+    "cartEmpty": "Your cart is empty",
+    "cartTotal": "Total",
+    "checkout": "Place order",
+    "chooseCustomer": "Choose customer",
+    "addToCart": "Add to cart",
+    "piecesPerPackage": "{count} pieces / {unit}"
   },
   "products": {
     "title": "Products",
@@ -287,7 +295,10 @@
     "removeItem": "Remove",
     "filterStatus": "All statuses",
     "filterCustomer": "All customers",
-    "deleteConfirm": "Delete this draft?"
+    "deleteConfirm": "Delete this draft?",
+    "backToCatalog": "Back to catalog",
+    "waitingForStaffConfirmation": "Your order is awaiting confirmation from our team.",
+    "noOrders": "No orders yet"
   },
   "manufacturers": {
     "title": "Manufacturers",
