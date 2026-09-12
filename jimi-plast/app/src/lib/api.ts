@@ -58,24 +58,45 @@ async function refreshAccessToken(): Promise<string | null> {
   return refreshPromise;
 }
 
+const WAKE_UP_RETRY_DELAYS_MS = [4000, 8000, 15000];
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * L'instance Render gratuite s'endort après inactivité : le premier appel
+ * peut échouer (connexion refusée pendant le démarrage) ou renvoyer la
+ * page d'attente HTML de Render au lieu du JSON attendu, avant que l'API
+ * soit vraiment prête (~30-50s). Sans retry, l'utilisateur devait
+ * recharger la page et resaisir ses identifiants pour qu'une seconde
+ * tentative, plus tardive, réussisse.
+ */
 async function request<T>(
   path: string,
   options: RequestInit = {},
   token?: string | null,
   retried = false,
+  wakeAttempt = 0,
 ): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+  } catch {
+    if (wakeAttempt < WAKE_UP_RETRY_DELAYS_MS.length) {
+      await sleep(WAKE_UP_RETRY_DELAYS_MS[wakeAttempt]);
+      return request<T>(path, options, token, retried, wakeAttempt + 1);
+    }
+    throw new ApiError(0, 'Le serveur ne répond pas — vérifiez votre connexion et réessayez.');
+  }
 
   if (res.status === 401 && token && !retried) {
     const newToken = await refreshAccessToken();
-    if (newToken) return request<T>(path, options, newToken, true);
+    if (newToken) return request<T>(path, options, newToken, true, wakeAttempt);
   }
 
   if (!res.ok) {
@@ -84,7 +105,17 @@ async function request<T>(
   }
 
   if (res.status === 204) return undefined as T;
-  return res.json();
+
+  try {
+    return await res.json();
+  } catch {
+    // Réponse 200 mais pas du JSON : page d'attente de Render pendant le réveil.
+    if (wakeAttempt < WAKE_UP_RETRY_DELAYS_MS.length) {
+      await sleep(WAKE_UP_RETRY_DELAYS_MS[wakeAttempt]);
+      return request<T>(path, options, token, retried, wakeAttempt + 1);
+    }
+    throw new ApiError(0, 'Le serveur démarre encore — réessayez dans quelques secondes.');
+  }
 }
 
 export const api = {

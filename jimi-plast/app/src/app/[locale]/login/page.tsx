@@ -37,7 +37,10 @@ export default function LoginPage() {
       await login(email, password);
       router.push(`/${locale}/dashboard`);
     } catch (err) {
-      setError(err instanceof ApiError ? t('error') : 'Erreur réseau');
+      // status 0 = serveur endormi/en train de démarrer (voir api.ts) : le
+      // message explique la situation plutôt que de laisser croire à un
+      // mot de passe incorrect.
+      setError(err instanceof ApiError && err.status !== 0 ? t('error') : (err as Error).message || 'Erreur réseau');
     } finally {
       setSubmitting(false);
     }
