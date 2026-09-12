@@ -139,6 +139,23 @@ Tant que ces deux variables ne sont pas renseignées, le canal ne fait
 rien (silencieux) — les autres canaux (cloche interne + logs) continuent
 de fonctionner normalement.
 
+**Si CallMeBot ne répond pas** (leur bot gratuit peut être surchargé —
+leur propre FAQ recommande de réessayer après 24h en cas d'échec),
+une seconde option indépendante est branchée en parallèle :
+[Green API](https://green-api.com) — une instance WhatsApp liée par QR
+code (comme WhatsApp Web), immédiate et sans dépendre d'un bot tiers :
+
+1. Créer un compte gratuit sur green-api.com (plan "Developer").
+2. Créer une instance, attendre ~2 min, cliquer "Get QR".
+3. Depuis le téléphone **0777168962** : WhatsApp → Paramètres →
+   Appareils connectés → Lier un appareil → scanner ce QR code.
+4. Renseigner sur Render : `GREENAPI_INSTANCE_ID`, `GREENAPI_API_TOKEN`
+   (visibles dans la console Green API) et `GREENAPI_TARGET_PHONE`
+   (numéro complet sans `+`, ex. `213777168962`).
+
+Les deux canaux (CallMeBot et Green API) sont actifs en parallèle —
+configurer un seul des deux suffit.
+
 ## Limites connues / suite naturelle
 
 - Les brouillons de bons se sauvegardent automatiquement côté serveur
