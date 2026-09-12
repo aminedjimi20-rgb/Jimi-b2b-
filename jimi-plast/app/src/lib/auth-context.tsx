@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { api, ApiError } from './api';
+import { api, ApiError, TOKEN_KEY, REFRESH_KEY, setTokensUpdatedHandler } from './api';
 
 interface CurrentUser {
   id: string;
@@ -22,13 +22,21 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-const TOKEN_KEY = 'jimiplast_access_token';
-const REFRESH_KEY = 'jimiplast_refresh_token';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Reçoit les tokens rafraîchis silencieusement par api.ts (access token
+    // expiré en cours de session) pour garder le contexte React synchronisé.
+    setTokensUpdatedHandler((newAccessToken) => {
+      setToken(newAccessToken);
+      if (!newAccessToken) setUser(null);
+    });
+    return () => setTokensUpdatedHandler(null);
+  }, []);
 
   useEffect(() => {
     const stored = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
@@ -39,8 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api
       .get<CurrentUser>('/auth/me', stored)
       .then((me) => {
+        // Ce call peut avoir déclenché un rafraîchissement silencieux
+        // (access token expiré) : relire le token courant dans le storage
+        // plutôt que d'utiliser `stored`, qui serait alors périmé.
         setUser(me);
-        setToken(stored);
+        setToken(localStorage.getItem(TOKEN_KEY));
       })
       .catch(() => {
         localStorage.removeItem(TOKEN_KEY);
