@@ -1,5 +1,7 @@
 {
-  "app": { "name": "جيمي بلاست" },
+  "app": {
+    "name": "جيمي بلاست"
+  },
   "login": {
     "title": "تسجيل الدخول",
     "subtitle": "ادخل إلى مساحة عمل جيمي بلاست",
@@ -44,7 +46,8 @@
     "negotiations": "التفاوض",
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "trash": "سلة المهملات"
   },
   "dashboard": {
     "welcome": "مرحبًا {name}",
@@ -57,8 +60,19 @@
   "requests": {
     "title": "طلبات الانضمام",
     "empty": "لا توجد طلبات معلقة",
-    "columns": { "name": "الاسم", "phone": "الهاتف", "type": "النوع المطلوب", "date": "التاريخ", "status": "الحالة" },
-    "status": { "NEW": "جديدة", "INFO_REQUESTED": "طلب معلومات", "ACCEPTED": "مقبولة", "REJECTED": "مرفوضة" },
+    "columns": {
+      "name": "الاسم",
+      "phone": "الهاتف",
+      "type": "النوع المطلوب",
+      "date": "التاريخ",
+      "status": "الحالة"
+    },
+    "status": {
+      "NEW": "جديدة",
+      "INFO_REQUESTED": "طلب معلومات",
+      "ACCEPTED": "مقبولة",
+      "REJECTED": "مرفوضة"
+    },
     "accept": "قبول",
     "reject": "رفض",
     "requestInfo": "طلب معلومات",
@@ -73,7 +87,13 @@
     "title": "الموظفون والأدوار والصلاحيات",
     "tabUsers": "المستخدمون",
     "tabRoles": "الأدوار والصلاحيات",
-    "columns": { "name": "الاسم", "email": "البريد الإلكتروني", "role": "الدور", "status": "الحالة", "lastLogin": "آخر دخول" },
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "status": "الحالة",
+      "lastLogin": "آخر دخول"
+    },
     "suspend": "تعليق",
     "activate": "إعادة تفعيل",
     "permissionGroups": {
@@ -131,7 +151,13 @@
     "title": "المنتجات",
     "addProduct": "منتج جديد",
     "editProduct": "تعديل المنتج",
-    "columns": { "sku": "المرجع", "name": "الاسم", "category": "الفئة", "stock": "المخزون", "status": "الحالة" },
+    "columns": {
+      "sku": "المرجع",
+      "name": "الاسم",
+      "category": "الفئة",
+      "stock": "المخزون",
+      "status": "الحالة"
+    },
     "form": {
       "sku": "المرجع (SKU)",
       "category": "الفئة",
@@ -161,7 +187,13 @@
   "customers": {
     "title": "العملاء",
     "addCustomer": "عميل جديد",
-    "columns": { "name": "الاسم", "business": "المحل", "phone": "الهاتف", "role": "النوع", "balance": "الرصيد" },
+    "columns": {
+      "name": "الاسم",
+      "business": "المحل",
+      "phone": "الهاتف",
+      "role": "النوع",
+      "balance": "الرصيد"
+    },
     "form": {
       "fullName": "الاسم الكامل",
       "phone": "الهاتف",
@@ -199,8 +231,19 @@
   "vouchers": {
     "title": "البونات",
     "newVoucher": "بون جديد",
-    "columns": { "number": "الرقم", "customer": "العميل", "date": "التاريخ", "total": "الإجمالي", "status": "الحالة" },
-    "status": { "DRAFT": "مسودة", "CONFIRMED": "مؤكد", "DELIVERED": "تم التسليم", "CANCELLED": "ملغى" },
+    "columns": {
+      "number": "الرقم",
+      "customer": "العميل",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "status": "الحالة"
+    },
+    "status": {
+      "DRAFT": "مسودة",
+      "CONFIRMED": "مؤكد",
+      "DELIVERED": "تم التسليم",
+      "CANCELLED": "ملغى"
+    },
     "selectCustomer": "اختر عميلاً",
     "addProduct": "إضافة منتج",
     "product": "المنتج",
@@ -229,14 +272,34 @@
   "manufacturers": {
     "title": "المصانع",
     "add": "مصنع جديد",
-    "columns": { "name": "الاسم", "company": "الشركة", "phone": "الهاتف", "wilaya": "الولاية", "balance": "الدين" },
-    "form": { "name": "الاسم", "company": "الشركة", "phone": "الهاتف", "whatsapp": "واتساب", "wilaya": "الولاية", "contactName": "جهة الاتصال", "paymentTerms": "شروط الدفع" }
+    "columns": {
+      "name": "الاسم",
+      "company": "الشركة",
+      "phone": "الهاتف",
+      "wilaya": "الولاية",
+      "balance": "الدين"
+    },
+    "form": {
+      "name": "الاسم",
+      "company": "الشركة",
+      "phone": "الهاتف",
+      "whatsapp": "واتساب",
+      "wilaya": "الولاية",
+      "contactName": "جهة الاتصال",
+      "paymentTerms": "شروط الدفع"
+    }
   },
   "purchases": {
     "title": "المشتريات",
     "newPurchase": "بون شراء جديد",
     "selectManufacturer": "اختر مصنعاً",
-    "columns": { "number": "الرقم", "manufacturer": "المصنع", "date": "التاريخ", "total": "الإجمالي", "status": "الحالة" },
+    "columns": {
+      "number": "الرقم",
+      "manufacturer": "المصنع",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "status": "الحالة"
+    },
     "unitCost": "تكلفة الوحدة"
   },
   "stock": {
@@ -248,10 +311,19 @@
     "currentStock": "المخزون الحالي",
     "newStock": "الكمية الجديدة (قطعة)",
     "reason": "السبب",
-    "columns": { "date": "التاريخ", "product": "المنتج", "type": "النوع", "quantity": "الكمية" },
+    "columns": {
+      "date": "التاريخ",
+      "product": "المنتج",
+      "type": "النوع",
+      "quantity": "الكمية"
+    },
     "movementTypes": {
-      "SALE": "بيع", "SALE_CANCEL": "إلغاء بيع", "PURCHASE": "شراء",
-      "RETURN_CUSTOMER": "إرجاع عميل", "RETURN_SUPPLIER": "إرجاع لمصنع", "ADJUSTMENT": "تعديل"
+      "SALE": "بيع",
+      "SALE_CANCEL": "إلغاء بيع",
+      "PURCHASE": "شراء",
+      "RETURN_CUSTOMER": "إرجاع عميل",
+      "RETURN_SUPPLIER": "إرجاع لمصنع",
+      "ADJUSTMENT": "تعديل"
     }
   },
   "returns": {
@@ -268,24 +340,90 @@
     "validate": "تحقق",
     "reject": "رفض",
     "decision": "القرار",
-    "decisions": { "REFUND": "استرجاع", "CREDIT_NOTE": "رصيد دائن", "DEDUCT_NEXT": "خصم من البون القادم", "REPLACEMENT": "استبدال" },
-    "status": { "NEW": "جديد", "VALIDATED": "تم التحقق", "REJECTED": "مرفوض" },
-    "columns": { "number": "الرقم", "type": "النوع", "party": "العميل/المصنع", "value": "القيمة", "status": "الحالة" }
+    "decisions": {
+      "REFUND": "استرجاع",
+      "CREDIT_NOTE": "رصيد دائن",
+      "DEDUCT_NEXT": "خصم من البون القادم",
+      "REPLACEMENT": "استبدال"
+    },
+    "status": {
+      "NEW": "جديد",
+      "VALIDATED": "تم التحقق",
+      "REJECTED": "مرفوض"
+    },
+    "columns": {
+      "number": "الرقم",
+      "type": "النوع",
+      "party": "العميل/المصنع",
+      "value": "القيمة",
+      "status": "الحالة"
+    }
   },
   "transport": {
     "title": "النقل",
-    "columns": { "voucher": "البون", "customer": "العميل", "driver": "السائق", "status": "الحالة", "cost": "التكلفة" },
-    "status": { "TO_PREPARE": "للتحضير", "PREPARED": "جاهزة", "IN_PROGRESS": "قيد التنفيذ", "DELIVERED": "تم التسليم", "CANCELLED": "ملغاة", "PROBLEM": "مشكلة" }
+    "columns": {
+      "voucher": "البون",
+      "customer": "العميل",
+      "driver": "السائق",
+      "status": "الحالة",
+      "cost": "التكلفة"
+    },
+    "status": {
+      "TO_PREPARE": "للتحضير",
+      "PREPARED": "جاهزة",
+      "IN_PROGRESS": "قيد التنفيذ",
+      "DELIVERED": "تم التسليم",
+      "CANCELLED": "ملغاة",
+      "PROBLEM": "مشكلة"
+    },
+    "newDelivery": "توصيل جديد",
+    "selectVoucher": "اختر بون مؤكد",
+    "noVoucher": "لا يوجد بون مؤكد بلا توصيل",
+    "driverName": "السائق",
+    "vehicle": "المركبة",
+    "driverPhone": "هاتف السائق",
+    "address": "العنوان",
+    "wilaya": "الولاية",
+    "cost": "التكلفة الفعلية",
+    "billedToCustomer": "المفوتر للعميل",
+    "notes": "ملاحظات",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل"
   },
   "productRequests": {
     "title": "طلبات المنتجات",
-    "columns": { "product": "المنتج", "customer": "العميل", "quantity": "الكمية", "status": "الحالة" },
-    "status": { "NEW": "جديدة", "SEARCHING": "قيد البحث", "FOUND": "تم العثور عليه", "ORDERED": "تم الطلب", "AVAILABLE": "متوفر", "REFUSED": "مرفوضة" }
+    "columns": {
+      "product": "المنتج",
+      "customer": "العميل",
+      "quantity": "الكمية",
+      "status": "الحالة"
+    },
+    "status": {
+      "NEW": "جديدة",
+      "SEARCHING": "قيد البحث",
+      "FOUND": "تم العثور عليه",
+      "ORDERED": "تم الطلب",
+      "AVAILABLE": "متوفر",
+      "REFUSED": "مرفوضة"
+    }
   },
   "negotiations": {
     "title": "التفاوض",
-    "columns": { "product": "المنتج", "customer": "العميل", "current": "السعر الحالي", "requested": "السعر المطلوب", "quantity": "الكمية", "status": "الحالة" },
-    "status": { "PENDING": "قيد الانتظار", "ACCEPTED": "مقبولة", "REJECTED": "مرفوضة", "COUNTERED": "عرض مضاد" },
+    "columns": {
+      "product": "المنتج",
+      "customer": "العميل",
+      "current": "السعر الحالي",
+      "requested": "السعر المطلوب",
+      "quantity": "الكمية",
+      "status": "الحالة"
+    },
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "ACCEPTED": "مقبولة",
+      "REJECTED": "مرفوضة",
+      "COUNTERED": "عرض مضاد"
+    },
     "accept": "قبول",
     "reject": "رفض",
     "counter": "عرض مضاد",
@@ -294,7 +432,12 @@
   "categories": {
     "title": "الفئات",
     "addCategory": "فئة جديدة",
-    "columns": { "name": "الاسم", "slug": "الرابط", "parent": "الفئة الأم", "products": "المنتجات" },
+    "columns": {
+      "name": "الاسم",
+      "slug": "الرابط",
+      "parent": "الفئة الأم",
+      "products": "المنتجات"
+    },
     "form": {
       "slug": "الرابط (slug)",
       "nameFr": "الاسم (فرنسي)",
@@ -304,5 +447,23 @@
     },
     "none": "بدون",
     "deleteConfirm": "حذف هذه الفئة؟"
+  },
+  "trash": {
+    "title": "سلة المهملات",
+    "empty": "سلة المهملات فارغة",
+    "columns": {
+      "type": "النوع",
+      "deletedBy": "حذفها",
+      "deletedAt": "التاريخ"
+    },
+    "restore": "استعادة",
+    "purge": "حذف نهائي",
+    "purgeConfirm": "حذف هذا العنصر نهائيا؟ لا يمكن التراجع عن هذا الإجراء.",
+    "entityTypes": {
+      "Product": "منتج",
+      "Category": "فئة",
+      "Manufacturer": "مصنّع",
+      "Notification": "إشعار"
+    }
   }
 }

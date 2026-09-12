@@ -24,6 +24,7 @@ import { DeliveriesModule } from './deliveries/deliveries.module';
 import { ProductRequestsModule } from './product-requests/product-requests.module';
 import { NegotiationsModule } from './negotiations/negotiations.module';
 import { StatsModule } from './stats/stats.module';
+import { TrashModule } from './trash/trash.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -53,6 +54,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     ProductRequestsModule,
     NegotiationsModule,
     StatsModule,
+    TrashModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

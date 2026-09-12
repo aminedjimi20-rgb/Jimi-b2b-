@@ -68,6 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { href: `/${locale}/users`, label: t('users') },
         ]
       : []),
+    ...(user.permissions.includes('trash.restore') ? [{ href: `/${locale}/trash`, label: t('trash') }] : []),
   ];
 
   return (

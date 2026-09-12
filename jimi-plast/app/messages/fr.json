@@ -1,5 +1,7 @@
 {
-  "app": { "name": "JIMI PLAST" },
+  "app": {
+    "name": "JIMI PLAST"
+  },
   "login": {
     "title": "Connexion",
     "subtitle": "Accédez à votre espace JIMI PLAST",
@@ -44,7 +46,8 @@
     "negotiations": "Négociations",
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "trash": "Corbeille"
   },
   "dashboard": {
     "welcome": "Bonjour {name}",
@@ -57,8 +60,19 @@
   "requests": {
     "title": "Demandes d'inscription",
     "empty": "Aucune demande en attente",
-    "columns": { "name": "Nom", "phone": "Téléphone", "type": "Type souhaité", "date": "Date", "status": "Statut" },
-    "status": { "NEW": "Nouvelle", "INFO_REQUESTED": "Infos demandées", "ACCEPTED": "Acceptée", "REJECTED": "Refusée" },
+    "columns": {
+      "name": "Nom",
+      "phone": "Téléphone",
+      "type": "Type souhaité",
+      "date": "Date",
+      "status": "Statut"
+    },
+    "status": {
+      "NEW": "Nouvelle",
+      "INFO_REQUESTED": "Infos demandées",
+      "ACCEPTED": "Acceptée",
+      "REJECTED": "Refusée"
+    },
     "accept": "Accepter",
     "reject": "Refuser",
     "requestInfo": "Demander des infos",
@@ -73,7 +87,13 @@
     "title": "Employés, rôles & permissions",
     "tabUsers": "Utilisateurs",
     "tabRoles": "Rôles & permissions",
-    "columns": { "name": "Nom", "email": "Email", "role": "Rôle", "status": "Statut", "lastLogin": "Dernière connexion" },
+    "columns": {
+      "name": "Nom",
+      "email": "Email",
+      "role": "Rôle",
+      "status": "Statut",
+      "lastLogin": "Dernière connexion"
+    },
     "suspend": "Suspendre",
     "activate": "Réactiver",
     "permissionGroups": {
@@ -131,7 +151,13 @@
     "title": "Produits",
     "addProduct": "Nouveau produit",
     "editProduct": "Modifier le produit",
-    "columns": { "sku": "Référence", "name": "Nom", "category": "Catégorie", "stock": "Stock", "status": "Statut" },
+    "columns": {
+      "sku": "Référence",
+      "name": "Nom",
+      "category": "Catégorie",
+      "stock": "Stock",
+      "status": "Statut"
+    },
     "form": {
       "sku": "Référence (SKU)",
       "category": "Catégorie",
@@ -161,7 +187,13 @@
   "customers": {
     "title": "Clients",
     "addCustomer": "Nouveau client",
-    "columns": { "name": "Nom", "business": "Commerce", "phone": "Téléphone", "role": "Type", "balance": "Solde" },
+    "columns": {
+      "name": "Nom",
+      "business": "Commerce",
+      "phone": "Téléphone",
+      "role": "Type",
+      "balance": "Solde"
+    },
     "form": {
       "fullName": "Nom complet",
       "phone": "Téléphone",
@@ -199,8 +231,19 @@
   "vouchers": {
     "title": "Bons",
     "newVoucher": "Nouveau bon",
-    "columns": { "number": "N°", "customer": "Client", "date": "Date", "total": "Total", "status": "Statut" },
-    "status": { "DRAFT": "Brouillon", "CONFIRMED": "Confirmé", "DELIVERED": "Livré", "CANCELLED": "Annulé" },
+    "columns": {
+      "number": "N°",
+      "customer": "Client",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut"
+    },
+    "status": {
+      "DRAFT": "Brouillon",
+      "CONFIRMED": "Confirmé",
+      "DELIVERED": "Livré",
+      "CANCELLED": "Annulé"
+    },
     "selectCustomer": "Sélectionner un client",
     "addProduct": "Ajouter un produit",
     "product": "Produit",
@@ -229,14 +272,34 @@
   "manufacturers": {
     "title": "Fabricants",
     "add": "Nouveau fabricant",
-    "columns": { "name": "Nom", "company": "Société", "phone": "Téléphone", "wilaya": "Wilaya", "balance": "Dette" },
-    "form": { "name": "Nom", "company": "Société", "phone": "Téléphone", "whatsapp": "WhatsApp", "wilaya": "Wilaya", "contactName": "Contact principal", "paymentTerms": "Conditions de paiement" }
+    "columns": {
+      "name": "Nom",
+      "company": "Société",
+      "phone": "Téléphone",
+      "wilaya": "Wilaya",
+      "balance": "Dette"
+    },
+    "form": {
+      "name": "Nom",
+      "company": "Société",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "wilaya": "Wilaya",
+      "contactName": "Contact principal",
+      "paymentTerms": "Conditions de paiement"
+    }
   },
   "purchases": {
     "title": "Achats",
     "newPurchase": "Nouveau bon d'achat",
     "selectManufacturer": "Sélectionner un fabricant",
-    "columns": { "number": "N°", "manufacturer": "Fabricant", "date": "Date", "total": "Total", "status": "Statut" },
+    "columns": {
+      "number": "N°",
+      "manufacturer": "Fabricant",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut"
+    },
     "unitCost": "Coût unitaire"
   },
   "stock": {
@@ -248,10 +311,19 @@
     "currentStock": "Stock actuel",
     "newStock": "Nouvelle quantité (pièces)",
     "reason": "Raison",
-    "columns": { "date": "Date", "product": "Produit", "type": "Type", "quantity": "Quantité" },
+    "columns": {
+      "date": "Date",
+      "product": "Produit",
+      "type": "Type",
+      "quantity": "Quantité"
+    },
     "movementTypes": {
-      "SALE": "Vente", "SALE_CANCEL": "Annulation vente", "PURCHASE": "Achat",
-      "RETURN_CUSTOMER": "Retour client", "RETURN_SUPPLIER": "Retour fabricant", "ADJUSTMENT": "Ajustement"
+      "SALE": "Vente",
+      "SALE_CANCEL": "Annulation vente",
+      "PURCHASE": "Achat",
+      "RETURN_CUSTOMER": "Retour client",
+      "RETURN_SUPPLIER": "Retour fabricant",
+      "ADJUSTMENT": "Ajustement"
     }
   },
   "returns": {
@@ -268,24 +340,90 @@
     "validate": "Valider",
     "reject": "Refuser",
     "decision": "Décision",
-    "decisions": { "REFUND": "Remboursement", "CREDIT_NOTE": "Avoir", "DEDUCT_NEXT": "Déduction prochain bon", "REPLACEMENT": "Remplacement" },
-    "status": { "NEW": "Nouveau", "VALIDATED": "Validé", "REJECTED": "Refusé" },
-    "columns": { "number": "N°", "type": "Type", "party": "Client/Fabricant", "value": "Valeur", "status": "Statut" }
+    "decisions": {
+      "REFUND": "Remboursement",
+      "CREDIT_NOTE": "Avoir",
+      "DEDUCT_NEXT": "Déduction prochain bon",
+      "REPLACEMENT": "Remplacement"
+    },
+    "status": {
+      "NEW": "Nouveau",
+      "VALIDATED": "Validé",
+      "REJECTED": "Refusé"
+    },
+    "columns": {
+      "number": "N°",
+      "type": "Type",
+      "party": "Client/Fabricant",
+      "value": "Valeur",
+      "status": "Statut"
+    }
   },
   "transport": {
     "title": "Transport",
-    "columns": { "voucher": "Bon", "customer": "Client", "driver": "Chauffeur", "status": "Statut", "cost": "Coût" },
-    "status": { "TO_PREPARE": "À préparer", "PREPARED": "Préparée", "IN_PROGRESS": "En cours", "DELIVERED": "Livrée", "CANCELLED": "Annulée", "PROBLEM": "Problème" }
+    "columns": {
+      "voucher": "Bon",
+      "customer": "Client",
+      "driver": "Chauffeur",
+      "status": "Statut",
+      "cost": "Coût"
+    },
+    "status": {
+      "TO_PREPARE": "À préparer",
+      "PREPARED": "Préparée",
+      "IN_PROGRESS": "En cours",
+      "DELIVERED": "Livrée",
+      "CANCELLED": "Annulée",
+      "PROBLEM": "Problème"
+    },
+    "newDelivery": "Nouvelle livraison",
+    "selectVoucher": "Choisir un bon confirmé",
+    "noVoucher": "Aucun bon confirmé sans livraison",
+    "driverName": "Chauffeur",
+    "vehicle": "Véhicule",
+    "driverPhone": "Téléphone chauffeur",
+    "address": "Adresse",
+    "wilaya": "Wilaya",
+    "cost": "Coût réel",
+    "billedToCustomer": "Facturé au client",
+    "notes": "Notes",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier"
   },
   "productRequests": {
     "title": "Demandes de produits",
-    "columns": { "product": "Produit", "customer": "Client", "quantity": "Quantité", "status": "Statut" },
-    "status": { "NEW": "Nouvelle", "SEARCHING": "Recherche en cours", "FOUND": "Trouvé", "ORDERED": "Commandé", "AVAILABLE": "Disponible", "REFUSED": "Refusée" }
+    "columns": {
+      "product": "Produit",
+      "customer": "Client",
+      "quantity": "Quantité",
+      "status": "Statut"
+    },
+    "status": {
+      "NEW": "Nouvelle",
+      "SEARCHING": "Recherche en cours",
+      "FOUND": "Trouvé",
+      "ORDERED": "Commandé",
+      "AVAILABLE": "Disponible",
+      "REFUSED": "Refusée"
+    }
   },
   "negotiations": {
     "title": "Négociations",
-    "columns": { "product": "Produit", "customer": "Client", "current": "Prix actuel", "requested": "Prix demandé", "quantity": "Quantité", "status": "Statut" },
-    "status": { "PENDING": "En attente", "ACCEPTED": "Acceptée", "REJECTED": "Refusée", "COUNTERED": "Contre-offre" },
+    "columns": {
+      "product": "Produit",
+      "customer": "Client",
+      "current": "Prix actuel",
+      "requested": "Prix demandé",
+      "quantity": "Quantité",
+      "status": "Statut"
+    },
+    "status": {
+      "PENDING": "En attente",
+      "ACCEPTED": "Acceptée",
+      "REJECTED": "Refusée",
+      "COUNTERED": "Contre-offre"
+    },
     "accept": "Accepter",
     "reject": "Refuser",
     "counter": "Contre-offre",
@@ -294,7 +432,12 @@
   "categories": {
     "title": "Catégories",
     "addCategory": "Nouvelle catégorie",
-    "columns": { "name": "Nom", "slug": "Slug", "parent": "Parent", "products": "Produits" },
+    "columns": {
+      "name": "Nom",
+      "slug": "Slug",
+      "parent": "Parent",
+      "products": "Produits"
+    },
     "form": {
       "slug": "Slug (URL)",
       "nameFr": "Nom (Français)",
@@ -304,5 +447,23 @@
     },
     "none": "Aucune",
     "deleteConfirm": "Supprimer cette catégorie ?"
+  },
+  "trash": {
+    "title": "Corbeille",
+    "empty": "La corbeille est vide",
+    "columns": {
+      "type": "Type",
+      "deletedBy": "Supprimé par",
+      "deletedAt": "Le"
+    },
+    "restore": "Restaurer",
+    "purge": "Supprimer définitivement",
+    "purgeConfirm": "Supprimer définitivement cet élément ? Cette action est irréversible.",
+    "entityTypes": {
+      "Product": "Produit",
+      "Category": "Catégorie",
+      "Manufacturer": "Fabricant",
+      "Notification": "Notification"
+    }
   }
 }

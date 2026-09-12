@@ -79,40 +79,45 @@ export default function DashboardPage() {
       </div>
 
       {hasPermission('stats.view') && sales && margin && credits && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="Chiffre d'affaires (30j)" value={`${sales.revenue.toLocaleString()} DA`} />
-          <StatCard label="Marge (30j)" value={`${margin.totalMargin.toLocaleString()} DA (${margin.marginPercent}%)`} />
-          <StatCard label="Panier moyen" value={`${sales.averageBasket.toLocaleString()} DA`} />
-          <StatCard label="Bons confirmés (30j)" value={sales.voucherCount} />
-          <StatCard label="Crédit clients" value={`${credits.totalCustomerDebt.toLocaleString()} DA`} accent />
-          <StatCard label="Dette fabricants" value={`${credits.totalSupplierDebt.toLocaleString()} DA`} accent />
-          {overview && <StatCard label="Stock faible" value={overview.lowStockCount} accent={overview.lowStockCount > 0} />}
-          {overview && <StatCard label="Demandes en attente" value={overview.pendingProductRequests + overview.pendingNegotiations + overview.pendingReturns} />}
-        </div>
+        <CollapsibleSection id="stats" title="Statistiques (30 jours)">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Chiffre d'affaires (30j)" value={`${sales.revenue.toLocaleString()} DA`} />
+            <StatCard label="Marge (30j)" value={`${margin.totalMargin.toLocaleString()} DA (${margin.marginPercent}%)`} />
+            <StatCard label="Panier moyen" value={`${sales.averageBasket.toLocaleString()} DA`} />
+            <StatCard label="Bons confirmés (30j)" value={sales.voucherCount} />
+            <StatCard label="Crédit clients" value={`${credits.totalCustomerDebt.toLocaleString()} DA`} accent />
+            <StatCard label="Dette fabricants" value={`${credits.totalSupplierDebt.toLocaleString()} DA`} accent />
+            {overview && <StatCard label="Stock faible" value={overview.lowStockCount} accent={overview.lowStockCount > 0} />}
+            {overview && <StatCard label="Demandes en attente" value={overview.pendingProductRequests + overview.pendingNegotiations + overview.pendingReturns} />}
+          </div>
+        </CollapsibleSection>
       )}
 
       {hasPermission('users.manage') && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard label={t('pendingRequests')} value={pendingCount ?? '—'} />
-          <StatCard label={t('activeUsers')} value={activeUsers ?? '—'} />
-          <StatCard label={t('rolesConfigured')} value={rolesCount ?? '—'} />
-        </div>
+        <CollapsibleSection id="admin" title="Administration">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <StatCard label={t('pendingRequests')} value={pendingCount ?? '—'} />
+            <StatCard label={t('activeUsers')} value={activeUsers ?? '—'} />
+            <StatCard label={t('rolesConfigured')} value={rolesCount ?? '—'} />
+          </div>
+        </CollapsibleSection>
       )}
 
       {hasPermission('stats.view') && topProducts.length > 0 && (
-        <div className="rounded-lg border border-line bg-panel p-4">
-          <h3 className="mb-2 text-sm font-semibold text-ink">Produits les plus vendus (30 derniers jours)</h3>
-          <ul className="flex flex-col gap-1 text-sm">
-            {topProducts.map((p) => (
-              <li key={p.nameFr} className="flex justify-between border-t border-line py-1.5 first:border-t-0">
-                <span className="text-ink">{p.nameFr}</span>
-                <span className="tabular text-muted">
-                  {p.unitsSold} pièces — {p.revenue.toLocaleString()} DA
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <CollapsibleSection id="top-products" title="Produits les plus vendus (30 derniers jours)">
+          <div className="rounded-lg border border-line bg-panel p-4">
+            <ul className="flex flex-col gap-1 text-sm">
+              {topProducts.map((p) => (
+                <li key={p.nameFr} className="flex justify-between border-t border-line py-1.5 first:border-t-0">
+                  <span className="text-ink">{p.nameFr}</span>
+                  <span className="tabular text-muted">
+                    {p.unitsSold} pièces — {p.revenue.toLocaleString()} DA
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </CollapsibleSection>
       )}
 
       {!hasPermission('stats.view') && (
@@ -120,6 +125,34 @@ export default function DashboardPage() {
           {t('placeholder')}
         </div>
       )}
+    </div>
+  );
+}
+
+function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  const storageKey = `jimiplast_dash_${id}`;
+  const [open, setOpen] = useState(true);
+
+  useEffect(() => {
+    setOpen(localStorage.getItem(storageKey) !== 'closed');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function toggle() {
+    setOpen((v) => {
+      const next = !v;
+      localStorage.setItem(storageKey, next ? 'open' : 'closed');
+      return next;
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <button onClick={toggle} className="flex items-center gap-2 text-sm font-semibold text-ink">
+        <span className={`inline-block text-xs text-muted transition-transform ${open ? 'rotate-90' : ''}`}>▶</span>
+        {title}
+      </button>
+      {open && children}
     </div>
   );
 }
