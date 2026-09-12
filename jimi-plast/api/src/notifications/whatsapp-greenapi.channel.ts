@@ -29,8 +29,16 @@ export class WhatsAppGreenApiChannel implements NotificationChannel {
   }
 
   async send(event: NotificationEvent): Promise<void> {
-    if (!this.instanceId || !this.apiToken || !this.targetPhone) return;
-    if (!this.eventTypes.has(event.type)) return;
+    if (!this.instanceId || !this.apiToken || !this.targetPhone) {
+      this.logger.warn(
+        `[greenapi] config manquante (instanceId=${!!this.instanceId}, apiToken=${!!this.apiToken}, targetPhone=${!!this.targetPhone}) — événement "${event.type}" ignoré`,
+      );
+      return;
+    }
+    if (!this.eventTypes.has(event.type)) {
+      this.logger.log(`[greenapi] type "${event.type}" non suivi (WHATSAPP_NOTIFY_EVENT_TYPES) — ignoré`);
+      return;
+    }
 
     const url = `https://api.green-api.com/waInstance${this.instanceId}/sendMessage/${this.apiToken}`;
     const res = await fetch(url, {
@@ -41,8 +49,11 @@ export class WhatsAppGreenApiChannel implements NotificationChannel {
         message: `${event.title}\n${event.body}`,
       }),
     });
+    const body = await res.text();
     if (!res.ok) {
-      this.logger.error(`Green API a répondu ${res.status} pour l'événement "${event.type}"`);
+      this.logger.error(`[greenapi] HTTP ${res.status} pour l'événement "${event.type}": ${body}`);
+    } else {
+      this.logger.log(`[greenapi] envoyé pour "${event.type}": ${body}`);
     }
   }
 }
