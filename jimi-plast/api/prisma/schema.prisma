@@ -98,6 +98,8 @@ model User {
   salesVouchers   SalesVoucher[]
   purchaseVouchers PurchaseVoucher[]
   notifications   Notification[]
+  besoins         Besoin[]         @relation("BesoinAuthor")
+  besoinsAnswered Besoin[]         @relation("BesoinRespondedBy")
 
   @@map("users")
 }
@@ -794,6 +796,28 @@ model Notification {
 
   @@index([userId, readAt])
   @@map("notifications")
+}
+
+// "Besoin" (ajout hors cahier des charges initial, à la demande de
+// l'admin) : n'importe quel utilisateur connecté (employé, grossiste,
+// détaillant) peut signaler un besoin/une remarque liée aux dépôts.
+// L'admin (permission besoins.manage) voit tout, avec l'auteur ; chaque
+// autre utilisateur ne voit que ses propres messages et la réponse reçue —
+// jamais ceux des autres.
+model Besoin {
+  id             String    @id @default(cuid())
+  authorId       String
+  message        String
+  response       String?
+  respondedById  String?
+  respondedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  author       User  @relation("BesoinAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  respondedBy  User? @relation("BesoinRespondedBy", fields: [respondedById], references: [id])
+
+  @@index([authorId])
+  @@map("besoins")
 }
 
 model Promotion {

@@ -26,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const links = [
     { href: `/${locale}/dashboard`, label: t('dashboard') },
     { href: `/${locale}/catalog`, label: t('catalog') },
+    { href: `/${locale}/besoins`, label: t('besoins') },
     ...(user.permissions.includes('catalog.manage')
       ? [
           { href: `/${locale}/products`, label: t('products') },

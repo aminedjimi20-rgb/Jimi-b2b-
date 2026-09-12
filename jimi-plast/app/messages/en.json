@@ -47,7 +47,8 @@
     "users": "Employees & roles",
     "requests": "Registration requests",
     "logout": "Sign out",
-    "trash": "Trash"
+    "trash": "Trash",
+    "besoins": "Needs"
   },
   "dashboard": {
     "welcome": "Hello {name}",
@@ -108,7 +109,8 @@
       "negotiations": "Negotiations",
       "stats": "Statistics",
       "admin": "Administration",
-      "documents": "Documents"
+      "documents": "Documents",
+      "besoins": "Needs"
     }
   },
   "notifications": {
@@ -465,5 +467,19 @@
       "Manufacturer": "Manufacturer",
       "Notification": "Notification"
     }
+  },
+  "besoins": {
+    "title": "Needs",
+    "subtitle": "Report a need or remark related to the depots.",
+    "placeholder": "E.g.: we are low on 50L bag cartons at the depot...",
+    "send": "Send",
+    "empty": "No needs reported yet",
+    "mine": "My needs",
+    "all": "All needs",
+    "respondPlaceholder": "Your response...",
+    "respond": "Respond",
+    "responded": "Answered",
+    "pending": "Pending",
+    "yourResponse": "Your response"
   }
 }

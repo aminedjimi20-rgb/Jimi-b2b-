@@ -47,7 +47,8 @@
     "users": "الموظفون والأدوار",
     "requests": "طلبات الانضمام",
     "logout": "تسجيل الخروج",
-    "trash": "سلة المهملات"
+    "trash": "سلة المهملات",
+    "besoins": "الاحتياجات"
   },
   "dashboard": {
     "welcome": "مرحبًا {name}",
@@ -108,7 +109,8 @@
       "negotiations": "التفاوض",
       "stats": "الإحصائيات",
       "admin": "الإدارة",
-      "documents": "المستندات"
+      "documents": "المستندات",
+      "besoins": "الاحتياجات"
     }
   },
   "notifications": {
@@ -465,5 +467,19 @@
       "Manufacturer": "مصنّع",
       "Notification": "إشعار"
     }
+  },
+  "besoins": {
+    "title": "الاحتياجات",
+    "subtitle": "أبلغ عن حاجة أو ملاحظة متعلقة بالمخازن.",
+    "placeholder": "مثال: ناقصين كراتين أكياس 50 لتر في المخزن...",
+    "send": "إرسال",
+    "empty": "لا توجد احتياجات بعد",
+    "mine": "احتياجاتي",
+    "all": "كل الاحتياجات",
+    "respondPlaceholder": "ردك...",
+    "respond": "رد",
+    "responded": "تم الرد",
+    "pending": "قيد الانتظار",
+    "yourResponse": "ردك"
   }
 }

@@ -47,7 +47,8 @@
     "users": "Employés & rôles",
     "requests": "Demandes d'inscription",
     "logout": "Déconnexion",
-    "trash": "Corbeille"
+    "trash": "Corbeille",
+    "besoins": "Besoins"
   },
   "dashboard": {
     "welcome": "Bonjour {name}",
@@ -108,7 +109,8 @@
       "negotiations": "Négociations",
       "stats": "Statistiques",
       "admin": "Administration",
-      "documents": "Documents"
+      "documents": "Documents",
+      "besoins": "Besoins"
     }
   },
   "notifications": {
@@ -465,5 +467,19 @@
       "Manufacturer": "Fabricant",
       "Notification": "Notification"
     }
+  },
+  "besoins": {
+    "title": "Besoins",
+    "subtitle": "Signalez un besoin ou une remarque liée aux dépôts.",
+    "placeholder": "Ex. : il manque des cartons de sacs 50L au dépôt...",
+    "send": "Envoyer",
+    "empty": "Aucun besoin pour le moment",
+    "mine": "Mes besoins",
+    "all": "Tous les besoins",
+    "respondPlaceholder": "Votre réponse...",
+    "respond": "Répondre",
+    "responded": "Répondu",
+    "pending": "En attente",
+    "yourResponse": "Votre réponse"
   }
 }

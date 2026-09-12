@@ -30,6 +30,7 @@ const PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: 'customers.manage', label: 'Gérer les dossiers clients', group: 'finance' },
   { key: 'credits.manage', label: 'Enregistrer paiements et ajustements de crédit', group: 'finance' },
   { key: 'requests.manage', label: 'Traiter les demandes de produits et négociations', group: 'negotiations' },
+  { key: 'besoins.manage', label: 'Voir et répondre aux besoins remontés par tous', group: 'besoins' },
 ];
 
 const PRICE_TIER_TYPES = [
