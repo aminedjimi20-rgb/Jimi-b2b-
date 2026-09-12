@@ -16,11 +16,15 @@ services:
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: WEB_APP_ORIGIN
-        value: http://localhost:3000
+        value: https://jimi-plast-app.vercel.app
       - key: SEED_ADMIN_EMAIL
         value: admin@jimiplast.dz
       - key: SEED_ADMIN_PASSWORD
         value: ChangeMe123!
+      - key: WHATSAPP_CALLMEBOT_PHONE
+        sync: false
+      - key: WHATSAPP_CALLMEBOT_APIKEY
+        sync: false
 
 databases:
   - name: jimi-plast-db

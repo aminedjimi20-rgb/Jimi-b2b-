@@ -114,6 +114,31 @@ Les deux services ont un plan gratuit qui se met en veille après inactivité
   les deux projets, build de production vérifié, parcours critiques
   retestés de bout en bout après l'ajout de chaque module.
 
+## Notifications WhatsApp (nouvelles demandes d'inscription)
+
+Le canal `WhatsAppNotificationChannel` (`src/notifications/whatsapp-notification.channel.ts`)
+envoie un vrai message WhatsApp au numéro admin via l'API gratuite
+[CallMeBot](https://www.callmebot.com/blog/free-api-whatsapp-messages/) à
+chaque nouvelle demande d'inscription. Aucune inscription "entreprise"
+n'est nécessaire, mais WhatsApp exige que le numéro destinataire donne son
+accord une fois — une seule action, 30 secondes, depuis le téléphone
+**0777168962** :
+
+1. Enregistrer le contact **+34 644 44 88 07** dans les contacts du téléphone.
+2. Depuis ce téléphone, envoyer sur WhatsApp au contact `+34 644 44 88 07`
+   le message exact : `I allow callmebot to send me messages`
+3. CallMeBot répond avec un message contenant une **API Key** (un nombre).
+4. Renseigner sur Render (service `jimi-plast-api` → Environment) :
+   - `WHATSAPP_CALLMEBOT_PHONE` = le numéro complet au format international,
+     ex. `213777168962`
+   - `WHATSAPP_CALLMEBOT_APIKEY` = la clé reçue à l'étape 3
+   - Sauvegarder → le service redémarre et le canal s'active automatiquement
+     (aucune modification de code nécessaire).
+
+Tant que ces deux variables ne sont pas renseignées, le canal ne fait
+rien (silencieux) — les autres canaux (cloche interne + logs) continuent
+de fonctionner normalement.
+
 ## Limites connues / suite naturelle
 
 - Les brouillons de bons se sauvegardent automatiquement côté serveur
@@ -125,11 +150,10 @@ Les deux services ont un plan gratuit qui se met en veille après inactivité
 - Pas encore de formulaire côté client pour créer sa propre demande de
   produit ou négociation depuis son espace (l'API est prête et
   testée ; seul l'écran manque).
-- Notifications WhatsApp/email : l'architecture par adaptateur est en
-  place (voir `src/notifications/`) mais seul le canal interne et la
-  console sont branchés — il suffit d'ajouter une classe implémentant
-  `NotificationChannel` pour brancher un vrai canal WhatsApp Business
-  ou email, sans toucher au reste du code.
+- Notification email : l'architecture par adaptateur (voir
+  `src/notifications/`) permet de brancher un canal email sans toucher
+  au reste du code, mais aucun canal email réel n'est branché pour
+  l'instant (WhatsApp est branché — voir section dédiée ci-dessus).
 - Pas de tests automatisés (unitaires/e2e) ni de CI — tout a été
   vérifié manuellement (API + navigateur réel) à chaque phase.
 - Photos de produits/bons : l'upload direct depuis l'app (caméra) n'est
