@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface UserRow {
   id: string;
   fullName: string;
+  avatarUrl: string | null;
   email: string;
   status: 'ACTIVE' | 'SUSPENDED' | 'PENDING' | 'REJECTED';
   lastLoginAt: string | null;
@@ -30,6 +32,7 @@ interface Role {
 
 export default function UsersPage() {
   const t = useTranslations('users');
+  const tCommon = useTranslations('common');
   const { token } = useAuth();
   const [tab, setTab] = useState<'users' | 'roles'>('users');
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -66,6 +69,11 @@ export default function UsersPage() {
     if (!token) return;
     const next = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     await api.put(`/users/${user.id}/status`, { status: next }, token);
+    reloadUsers();
+  }
+
+  async function setUserAvatar(userId: string, avatarUrl: string) {
+    await api.put(`/users/${userId}/avatar`, { avatarUrl }, token);
     reloadUsers();
   }
 
@@ -113,7 +121,25 @@ export default function UsersPage() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-t border-line">
-                  <td className="px-4 py-2 font-medium text-ink">{u.fullName}</td>
+                  <td className="px-4 py-2 font-medium text-ink">
+                    <div className="flex items-center gap-2">
+                      {u.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={u.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+                      ) : (
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
+                          {u.fullName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      <span>{u.fullName}</span>
+                      <ImageUploadButton
+                        folder="avatars"
+                        label={tCommon('uploadPhoto')}
+                        onUploaded={(url) => setUserAvatar(u.id, url)}
+                        className="text-xs text-accent hover:underline"
+                      />
+                    </div>
+                  </td>
                   <td className="px-4 py-2 font-mono text-xs">{u.email}</td>
                   <td className="px-4 py-2">{u.role.name}</td>
                   <td className="px-4 py-2">

@@ -129,7 +129,8 @@
     "error": "حدث خطأ ما",
     "empty": "لا توجد عناصر",
     "search": "بحث…",
-    "loginToSeePrices": "سجّل الدخول لرؤية الأسعار"
+    "loginToSeePrices": "سجّل الدخول لرؤية الأسعار",
+    "uploadPhoto": "من المعرض"
   },
   "catalog": {
     "title": "الكتالوج",
@@ -288,7 +289,8 @@
       "whatsapp": "واتساب",
       "wilaya": "الولاية",
       "contactName": "جهة الاتصال",
-      "paymentTerms": "شروط الدفع"
+      "paymentTerms": "شروط الدفع",
+      "logo": "الشعار"
     }
   },
   "purchases": {
@@ -391,7 +393,8 @@
     "notes": "ملاحظات",
     "save": "حفظ",
     "cancel": "إلغاء",
-    "edit": "تعديل"
+    "edit": "تعديل",
+    "driverPhoto": "صورة السائق"
   },
   "productRequests": {
     "title": "طلبات المنتجات",

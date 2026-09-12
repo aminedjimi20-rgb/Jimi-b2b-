@@ -80,6 +80,7 @@ model User {
   phone        String?
   passwordHash String
   fullName     String
+  avatarUrl    String?
   status       UserStatus @default(ACTIVE)
   roleId       String
   locale       String     @default("fr") // fr | ar | en — préférence d'interface
@@ -528,6 +529,7 @@ model StockMovement {
 model Manufacturer {
   id            String   @id @default(cuid())
   name          String
+  logoUrl       String?
   company       String?
   phone         String?
   whatsapp      String?
@@ -702,6 +704,7 @@ model Delivery {
   id              String         @id @default(cuid())
   voucherId       String         @unique
   driverName      String?
+  driverPhotoUrl  String?
   vehicle         String?
   driverPhone     String?
   address         String?

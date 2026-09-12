@@ -26,7 +26,7 @@ export class CustomersService {
   async list() {
     const customers = await this.prisma.customer.findMany({
       where: { deletedAt: null },
-      include: { user: { select: { id: true, fullName: true, email: true, phone: true, status: true, role: true } } },
+      include: { user: { select: { id: true, fullName: true, avatarUrl: true, email: true, phone: true, status: true, role: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -44,7 +44,7 @@ export class CustomersService {
   async getById(id: string) {
     const customer = await this.prisma.customer.findFirst({
       where: { id, deletedAt: null },
-      include: { user: { select: { id: true, fullName: true, email: true, phone: true, status: true, role: true } } },
+      include: { user: { select: { id: true, fullName: true, avatarUrl: true, email: true, phone: true, status: true, role: true } } },
     });
     if (!customer) throw new NotFoundException('Client introuvable');
 
@@ -109,7 +109,7 @@ export class CustomersService {
           wilaya: dto.wilaya,
         },
         include: {
-          user: { select: { id: true, fullName: true, email: true, phone: true, status: true, role: true } },
+          user: { select: { id: true, fullName: true, avatarUrl: true, email: true, phone: true, status: true, role: true } },
         },
       });
     });

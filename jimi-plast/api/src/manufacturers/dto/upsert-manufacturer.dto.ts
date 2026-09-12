@@ -7,6 +7,10 @@ export class UpsertManufacturerDto {
 
   @IsOptional()
   @IsString()
+  logoUrl?: string;
+
+  @IsOptional()
+  @IsString()
   company?: string;
 
   @IsOptional()

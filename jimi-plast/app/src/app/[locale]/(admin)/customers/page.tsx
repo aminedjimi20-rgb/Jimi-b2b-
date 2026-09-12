@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface Role {
   key: string;
@@ -15,7 +16,7 @@ interface CustomerRow {
   businessName: string | null;
   wilaya: string | null;
   balance: number;
-  user: { fullName: string; phone: string | null; role: Role };
+  user: { id: string; fullName: string; avatarUrl: string | null; phone: string | null; role: Role };
 }
 
 const EMPTY_FORM = {
@@ -44,6 +45,11 @@ export default function CustomersPage() {
 
   function reload() {
     api.get<CustomerRow[]>('/customers', token).then(setCustomers);
+  }
+
+  async function setCustomerAvatar(userId: string, avatarUrl: string) {
+    await api.put(`/users/${userId}/avatar`, { avatarUrl }, token);
+    reload();
   }
 
   useEffect(() => {
@@ -131,7 +137,25 @@ export default function CustomersPage() {
                 onClick={() => router.push(`/${locale}/customers/${c.id}`)}
                 className="cursor-pointer border-t border-line hover:bg-line/20"
               >
-                <td className="px-4 py-2 font-medium text-ink">{c.user.fullName}</td>
+                <td className="px-4 py-2 font-medium text-ink">
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    {c.user.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.user.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+                    ) : (
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
+                        {c.user.fullName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span>{c.user.fullName}</span>
+                    <ImageUploadButton
+                      folder="customers"
+                      label={tCommon('uploadPhoto')}
+                      onUploaded={(url) => setCustomerAvatar(c.user.id, url)}
+                      className="text-xs text-accent hover:underline"
+                    />
+                  </div>
+                </td>
                 <td className="px-4 py-2 text-muted">{c.businessName ?? '—'}</td>
                 <td className="px-4 py-2 font-mono text-xs">{c.user.phone}</td>
                 <td className="px-4 py-2 text-xs text-muted">{c.user.role.name}</td>

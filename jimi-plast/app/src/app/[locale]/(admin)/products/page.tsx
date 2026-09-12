@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface Category {
   id: string;
@@ -178,11 +179,15 @@ export default function ProductsAdminPage() {
     reloadProducts();
   }
 
-  async function addImage() {
-    if (!editingId || !newImageUrl) return;
-    await api.post(`/products/${editingId}/images`, { url: newImageUrl }, token);
-    setNewImageUrl('');
+  async function addImageFromUrl(url: string) {
+    if (!editingId || !url) return;
+    await api.post(`/products/${editingId}/images`, { url }, token);
     reloadProducts();
+  }
+
+  async function addImage() {
+    await addImageFromUrl(newImageUrl);
+    setNewImageUrl('');
   }
 
   async function removeImage(imageId: string) {
@@ -380,6 +385,12 @@ export default function ProductsAdminPage() {
                 <button type="button" onClick={addImage} className="rounded border border-line px-2 py-1 text-xs">
                   {t('form.addImage')}
                 </button>
+                <ImageUploadButton
+                  folder="products"
+                  onUploaded={addImageFromUrl}
+                  label={tCommon('uploadPhoto')}
+                  className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-50"
+                />
               </div>
             </div>
           )}

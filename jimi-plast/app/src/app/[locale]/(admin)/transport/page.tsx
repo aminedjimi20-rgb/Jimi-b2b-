@@ -4,11 +4,13 @@ import { Fragment, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface DeliveryRow {
   id: string;
   voucherId: string;
   driverName: string | null;
+  driverPhotoUrl: string | null;
   vehicle: string | null;
   driverPhone: string | null;
   address: string | null;
@@ -30,6 +32,7 @@ const STATUSES = ['TO_PREPARE', 'PREPARED', 'IN_PROGRESS', 'DELIVERED', 'CANCELL
 
 const emptyForm = {
   driverName: '',
+  driverPhotoUrl: '',
   vehicle: '',
   driverPhone: '',
   address: '',
@@ -68,6 +71,7 @@ export default function TransportPage() {
     setCreatingFor('');
     setForm({
       driverName: d.driverName ?? '',
+      driverPhotoUrl: d.driverPhotoUrl ?? '',
       vehicle: d.vehicle ?? '',
       driverPhone: d.driverPhone ?? '',
       address: d.address ?? '',
@@ -120,6 +124,20 @@ export default function TransportPage() {
             className="rounded border border-line bg-paper px-3 py-2 text-ink outline-none focus:border-accent"
           />
         </label>
+        <div className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">{t('driverPhoto')}</span>
+          <div className="flex items-center gap-3">
+            {form.driverPhotoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={form.driverPhotoUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
+            )}
+            <ImageUploadButton
+              folder="drivers"
+              label={tc('uploadPhoto')}
+              onUploaded={(url) => setForm((f) => ({ ...f, driverPhotoUrl: url }))}
+            />
+          </div>
+        </div>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{t('vehicle')}</span>
           <input
@@ -268,7 +286,15 @@ export default function TransportPage() {
                 <tr className="border-t border-line">
                   <td className="px-4 py-2 font-mono text-xs">{d.voucher.number}</td>
                   <td className="px-4 py-2 text-ink">{d.voucher.customer.user.fullName}</td>
-                  <td className="px-4 py-2 text-muted">{d.driverName ?? '—'}</td>
+                  <td className="px-4 py-2 text-muted">
+                    <div className="flex items-center gap-2">
+                      {d.driverPhotoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={d.driverPhotoUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+                      )}
+                      {d.driverName ?? '—'}
+                    </div>
+                  </td>
                   <td className="px-4 py-2 tabular">{Number(d.cost).toLocaleString()} DA</td>
                   <td className="px-4 py-2">
                     <select

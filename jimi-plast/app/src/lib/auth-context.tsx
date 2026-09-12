@@ -7,6 +7,7 @@ interface CurrentUser {
   id: string;
   email: string;
   fullName: string;
+  avatarUrl: string | null;
   locale: string;
   role: { id: string; key: string; name: string };
   permissions: string[];
@@ -19,6 +20,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (...keys: string[]) => boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -88,9 +90,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user],
   );
 
+  const refreshUser = useCallback(async () => {
+    if (!token) return;
+    const me = await api.get<CurrentUser>('/auth/me', token);
+    setUser(me);
+  }, [token]);
+
   const value = useMemo(
-    () => ({ user, token, loading, login, logout, hasPermission }),
-    [user, token, loading, login, logout, hasPermission],
+    () => ({ user, token, loading, login, logout, hasPermission, refreshUser }),
+    [user, token, loading, login, logout, hasPermission, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

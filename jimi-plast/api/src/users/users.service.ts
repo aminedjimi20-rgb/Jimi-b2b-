@@ -19,6 +19,7 @@ export class UsersService {
       select: {
         id: true,
         fullName: true,
+        avatarUrl: true,
         email: true,
         phone: true,
         status: true,
@@ -27,6 +28,16 @@ export class UsersService {
         role: { select: { id: true, key: true, name: true } },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async setAvatar(userId: string, avatarUrl: string) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId, deletedAt: null } });
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+      select: { id: true, fullName: true, avatarUrl: true },
     });
   }
 

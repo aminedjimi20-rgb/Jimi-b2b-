@@ -129,7 +129,8 @@
     "error": "Une erreur est survenue",
     "empty": "Aucun élément",
     "search": "Rechercher…",
-    "loginToSeePrices": "Connectez-vous pour voir les prix"
+    "loginToSeePrices": "Connectez-vous pour voir les prix",
+    "uploadPhoto": "Depuis la galerie"
   },
   "catalog": {
     "title": "Catalogue",
@@ -288,7 +289,8 @@
       "whatsapp": "WhatsApp",
       "wilaya": "Wilaya",
       "contactName": "Contact principal",
-      "paymentTerms": "Conditions de paiement"
+      "paymentTerms": "Conditions de paiement",
+      "logo": "Logo"
     }
   },
   "purchases": {
@@ -391,7 +393,8 @@
     "notes": "Notes",
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "driverPhoto": "Photo du chauffeur"
   },
   "productRequests": {
     "title": "Demandes de produits",

@@ -129,7 +129,8 @@
     "error": "Something went wrong",
     "empty": "No items",
     "search": "Search…",
-    "loginToSeePrices": "Sign in to see prices"
+    "loginToSeePrices": "Sign in to see prices",
+    "uploadPhoto": "From gallery"
   },
   "catalog": {
     "title": "Catalog",
@@ -288,7 +289,8 @@
       "whatsapp": "WhatsApp",
       "wilaya": "Province",
       "contactName": "Main contact",
-      "paymentTerms": "Payment terms"
+      "paymentTerms": "Payment terms",
+      "logo": "Logo"
     }
   },
   "purchases": {
@@ -391,7 +393,8 @@
     "notes": "Notes",
     "save": "Save",
     "cancel": "Cancel",
-    "edit": "Edit"
+    "edit": "Edit",
+    "driverPhoto": "Driver photo"
   },
   "productRequests": {
     "title": "Product requests",

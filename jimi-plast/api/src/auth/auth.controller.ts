@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
@@ -8,6 +8,7 @@ import { AuthenticatedUser } from './auth.types';
 import { RegisterRequestDto } from './dto/register-request.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { SetAvatarDto } from './dto/set-avatar.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -46,5 +47,10 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.me(user.id);
+  }
+
+  @Put('me/avatar')
+  setAvatar(@Body() dto: SetAvatarDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.authService.setAvatar(user.id, dto.avatarUrl);
   }
 }

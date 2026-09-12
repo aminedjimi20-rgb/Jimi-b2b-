@@ -5,15 +5,23 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
+import { api } from '@/lib/api';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { NotificationBell } from '@/components/notification-bell';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, logout } = useAuth();
+  const { user, token, loading, logout, refreshUser } = useAuth();
   const { locale } = useParams<{ locale: string }>();
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('nav');
+  const tCommon = useTranslations('common');
+
+  async function onAvatarUploaded(url: string) {
+    await api.put('/auth/me/avatar', { avatarUrl: url }, token);
+    await refreshUser();
+  }
 
   useEffect(() => {
     if (!loading && !user) router.replace(`/${locale}/login`);
@@ -92,9 +100,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </nav>
         <div className="border-t border-line pt-4">
-          <p className="truncate text-sm font-medium text-ink">{user.fullName}</p>
-          <p className="truncate text-xs text-muted">{user.role.name}</p>
-          <button onClick={logout} className="mt-3 text-xs text-accent hover:underline">
+          <div className="flex items-center gap-2">
+            {user.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
+            ) : (
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
+                {user.fullName.charAt(0).toUpperCase()}
+              </span>
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-ink">{user.fullName}</p>
+              <p className="truncate text-xs text-muted">{user.role.name}</p>
+            </div>
+          </div>
+          <div className="mt-2">
+            <ImageUploadButton
+              folder="avatars"
+              label={tCommon('uploadPhoto')}
+              onUploaded={onAvatarUploaded}
+              className="text-xs text-accent hover:underline"
+            />
+          </div>
+          <button onClick={logout} className="mt-2 text-xs text-accent hover:underline">
             {t('logout')}
           </button>
         </div>

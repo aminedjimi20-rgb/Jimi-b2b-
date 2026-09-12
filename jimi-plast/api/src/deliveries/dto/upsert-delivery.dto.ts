@@ -7,6 +7,10 @@ export class UpsertDeliveryDto {
 
   @IsOptional()
   @IsString()
+  driverPhotoUrl?: string;
+
+  @IsOptional()
+  @IsString()
   vehicle?: string;
 
   @IsOptional()

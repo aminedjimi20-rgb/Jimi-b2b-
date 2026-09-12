@@ -103,6 +103,11 @@ export class AuthService {
     });
   }
 
+  async setAvatar(userId: string, avatarUrl: string) {
+    await this.prisma.user.update({ where: { id: userId }, data: { avatarUrl } });
+    return { avatarUrl };
+  }
+
   async me(userId: string) {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -113,6 +118,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
+      avatarUrl: user.avatarUrl,
       locale: user.locale,
       role: { id: user.role.id, key: user.role.key, name: user.role.name },
       permissions,

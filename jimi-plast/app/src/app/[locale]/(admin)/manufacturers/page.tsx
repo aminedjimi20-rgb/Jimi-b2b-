@@ -4,17 +4,28 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface Manufacturer {
   id: string;
   name: string;
+  logoUrl: string | null;
   company: string | null;
   phone: string | null;
   wilaya: string | null;
   balance: number;
 }
 
-const EMPTY = { name: '', company: '', phone: '', whatsapp: '', wilaya: '', contactName: '', paymentTerms: '' };
+const EMPTY = {
+  name: '',
+  logoUrl: '',
+  company: '',
+  phone: '',
+  whatsapp: '',
+  wilaya: '',
+  contactName: '',
+  paymentTerms: '',
+};
 
 export default function ManufacturersPage() {
   const t = useTranslations('manufacturers');
@@ -61,6 +72,20 @@ export default function ManufacturersPage() {
 
       {showForm && (
         <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 rounded-lg border border-line bg-panel p-4 sm:grid-cols-3">
+          <div className="flex flex-col gap-1 text-sm sm:col-span-3">
+            <span className="text-muted">{t('form.logo')}</span>
+            <div className="flex items-center gap-3">
+              {form.logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={form.logoUrl} alt="" className="h-12 w-12 rounded object-cover" />
+              )}
+              <ImageUploadButton
+                folder="manufacturers"
+                label={tCommon('uploadPhoto')}
+                onUploaded={(url) => setForm((f) => ({ ...f, logoUrl: url }))}
+              />
+            </div>
+          </div>
           {(['name', 'company', 'phone', 'whatsapp', 'wilaya', 'contactName', 'paymentTerms'] as const).map((f) => (
             <label key={f} className="flex flex-col gap-1 text-sm">
               <span className="text-muted">{t(`form.${f}`)}</span>
@@ -91,7 +116,19 @@ export default function ManufacturersPage() {
           <tbody>
             {items.map((m) => (
               <tr key={m.id} className="border-t border-line">
-                <td className="px-4 py-2 font-medium text-ink">{m.name}</td>
+                <td className="px-4 py-2 font-medium text-ink">
+                  <div className="flex items-center gap-2">
+                    {m.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.logoUrl} alt="" className="h-8 w-8 rounded object-cover" />
+                    ) : (
+                      <span className="flex h-8 w-8 items-center justify-center rounded bg-line/40 text-xs text-muted">
+                        {m.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    {m.name}
+                  </div>
+                </td>
                 <td className="px-4 py-2 text-muted">{m.company}</td>
                 <td className="px-4 py-2 font-mono text-xs">{m.phone}</td>
                 <td className={`px-4 py-2 tabular font-medium ${m.balance > 0 ? 'text-accent' : 'text-teal'}`}>
