@@ -101,6 +101,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="flex items-center justify-end gap-3 border-b border-line bg-panel px-6 py-3">
           <NotificationBell />
           <LocaleSwitcher current={locale} />
+          <button onClick={logout} className="text-xs text-accent hover:underline">
+            {t('logout')}
+          </button>
         </header>
         <main className="p-6">{children}</main>
       </div>
