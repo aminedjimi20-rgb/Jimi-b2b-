@@ -107,7 +107,11 @@ async function request<T>(
   if (res.status === 204) return undefined as T;
 
   try {
-    return await res.json();
+    const text = await res.text();
+    // Un contrôleur qui renvoie null/undefined produit un corps 200 vide
+    // (Content-Length: 0) — un cas normal, pas une page d'attente Render.
+    if (text === '') return undefined as T;
+    return JSON.parse(text) as T;
   } catch {
     // Réponse 200 mais pas du JSON : page d'attente de Render pendant le réveil.
     if (wakeAttempt < WAKE_UP_RETRY_DELAYS_MS.length) {

@@ -59,7 +59,10 @@ export class StatsService {
     let totalMargin = 0;
     let totalRevenue = 0;
     for (const item of items) {
-      const cost = Number(item.product.costPrice ?? 0) * item.totalUnits;
+      // Le coût figé à la confirmation prime toujours — sinon un changement de
+      // coût catalogue plus tard fausserait rétroactivement la marge des ventes passées.
+      const unitCost = item.costPriceSnapshot ?? item.product.costPrice ?? 0;
+      const cost = Number(unitCost) * item.totalUnits;
       const revenue = Number(item.lineTotal);
       totalMargin += revenue - cost;
       totalRevenue += revenue;

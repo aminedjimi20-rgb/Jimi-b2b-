@@ -60,6 +60,12 @@ export class ProductsController {
     return this.productsService.priceHistory(id);
   }
 
+  @Get(':id/last-change')
+  @RequirePermissions('catalog.manage')
+  lastChange(@Param('id') id: string) {
+    return this.productsService.getLastChange(id);
+  }
+
   @Post()
   @RequirePermissions('catalog.manage')
   create(@Body() dto: UpsertProductDto, @CurrentUser() user: AuthenticatedUser) {

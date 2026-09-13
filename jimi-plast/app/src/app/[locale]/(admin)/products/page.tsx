@@ -25,6 +25,15 @@ interface PriceTierType {
   key: string;
   label: string;
 }
+interface LastChange {
+  at: string;
+  kind: 'field' | 'price';
+  field: string | null;
+  label: string | null;
+  oldValue: unknown;
+  newValue: unknown;
+  actorName: string | null;
+}
 interface FullProduct {
   id: string;
   sku: string;
@@ -89,12 +98,23 @@ export default function ProductsAdminPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [manufacturerFilter, setManufacturerFilter] = useState('');
+  const [lastChanges, setLastChanges] = useState<Record<string, LastChange | null>>({});
 
   function reloadProducts() {
     api
       .get<{ items: { id: string }[] }>('/products?pageSize=100', token)
       .then((res) => Promise.all(res.items.map((p) => api.get<FullProduct>(`/products/${p.id}/full`, token))))
-      .then(setProducts);
+      .then((rows) => {
+        setProducts(rows);
+        Promise.all(
+          rows.map((p) =>
+            api
+              .get<LastChange | null>(`/products/${p.id}/last-change`, token)
+              .then((change) => [p.id, change] as const)
+              .catch(() => [p.id, null] as const),
+          ),
+        ).then((entries) => setLastChanges(Object.fromEntries(entries)));
+      });
   }
 
   useEffect(() => {
@@ -286,36 +306,53 @@ export default function ProductsAdminPage() {
                 <th className="px-4 py-2 text-start">{t('form.manufacturer')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.stock')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.status')}</th>
+                <th className="px-4 py-2 text-start">{t('columns.lastChange')}</th>
                 <th className="px-4 py-2"></th>
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((p) => (
-                <tr key={p.id} className={`border-t border-line ${editingId === p.id ? 'bg-accent/5' : ''}`}>
-                  <td className="px-4 py-2 font-mono text-xs">{p.sku}</td>
-                  <td className="px-4 py-2 font-medium text-ink">{p.nameFr}</td>
-                  <td className="px-4 py-2 text-xs text-muted">{p.category.nameFr}</td>
-                  <td className="px-4 py-2 text-xs text-muted">{p.manufacturer?.name ?? '—'}</td>
-                  <td className="px-4 py-2 tabular">{p.currentStock}</td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
-                        p.isActive ? 'bg-teal/15 text-teal' : 'bg-line/40 text-muted'
-                      }`}
-                    >
-                      {p.isActive ? t('active') : t('inactive')}
-                    </span>
-                  </td>
-                  <td className="flex gap-2 px-4 py-2 text-end">
-                    <button onClick={() => startEdit(p)} className="text-xs text-accent hover:underline">
-                      {tCommon('edit')}
-                    </button>
-                    <button onClick={() => remove(p)} className="text-xs text-red-600 hover:underline">
-                      {tCommon('delete')}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filteredProducts.map((p) => {
+                const change = lastChanges[p.id];
+                return (
+                  <tr key={p.id} className={`border-t border-line ${editingId === p.id ? 'bg-accent/5' : ''}`}>
+                    <td className="px-4 py-2 font-mono text-xs">{p.sku}</td>
+                    <td className="px-4 py-2 font-medium text-ink">{p.nameFr}</td>
+                    <td className="px-4 py-2 text-xs text-muted">{p.category.nameFr}</td>
+                    <td className="px-4 py-2 text-xs text-muted">{p.manufacturer?.name ?? '—'}</td>
+                    <td className="px-4 py-2 tabular">{p.currentStock}</td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs ${
+                          p.isActive ? 'bg-teal/15 text-teal' : 'bg-line/40 text-muted'
+                        }`}
+                      >
+                        {p.isActive ? t('active') : t('inactive')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-xs text-muted">
+                      {change ? (
+                        <>
+                          <p className="text-ink">{describeChange(change, t)}</p>
+                          <p className="text-[10px]">
+                            {new Date(change.at).toLocaleString()}
+                            {change.actorName && ` — ${change.actorName}`}
+                          </p>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td className="flex gap-2 px-4 py-2 text-end">
+                      <button onClick={() => startEdit(p)} className="text-xs text-accent hover:underline">
+                        {tCommon('edit')}
+                      </button>
+                      <button onClick={() => remove(p)} className="text-xs text-red-600 hover:underline">
+                        {tCommon('delete')}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           {filteredProducts.length === 0 && <p className="p-4 text-center text-xs text-muted">{tCommon('empty')}</p>}
@@ -512,6 +549,47 @@ export default function ProductsAdminPage() {
       </form>
     </div>
   );
+}
+
+const FIELD_LABEL_KEYS: Record<string, string> = {
+  sku: 'form.sku',
+  categoryId: 'form.category',
+  manufacturerId: 'form.manufacturer',
+  brand: 'form.brand',
+  nameFr: 'form.nameFr',
+  nameAr: 'form.nameAr',
+  nameEn: 'form.nameEn',
+  packagingUnitId: 'form.packagingUnit',
+  unitsPerPackage: 'form.unitsPerPackage',
+  costPrice: 'form.costPrice',
+  currentStock: 'form.currentStock',
+  stockMin: 'form.stockMin',
+  isActive: 'form.isActive',
+  isNew: 'form.isNew',
+  isFeatured: 'form.isFeatured',
+};
+
+function formatChangeValue(v: unknown): string {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'boolean') return v ? '✓' : '✗';
+  return String(v);
+}
+
+function describeChange(change: LastChange, t: ReturnType<typeof useTranslations>): string {
+  if (change.kind === 'price') {
+    return `${change.label ?? t('form.priceFactory')}: ${formatChangeValue(change.oldValue)} → ${change.newValue} DA`;
+  }
+  if (!change.field) return t('createdLabel' as never);
+  return change.field
+    .split(',')
+    .map((f) => {
+      const labelKey = FIELD_LABEL_KEYS[f];
+      const label = labelKey ? t(labelKey as never) : f;
+      const oldV = (change.oldValue as Record<string, unknown> | null)?.[f];
+      const newV = (change.newValue as Record<string, unknown> | null)?.[f];
+      return `${label}: ${formatChangeValue(oldV)} → ${formatChangeValue(newV)}`;
+    })
+    .join(', ');
 }
 
 function Field({

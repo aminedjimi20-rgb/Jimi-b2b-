@@ -204,7 +204,8 @@
       "name": "الاسم",
       "category": "الفئة",
       "stock": "المخزون",
-      "status": "الحالة"
+      "status": "الحالة",
+      "lastChange": "آخر تعديل"
     },
     "form": {
       "sku": "المرجع (SKU)",
@@ -232,7 +233,8 @@
     "active": "نشط",
     "inactive": "غير نشط",
     "priceHistory": "سجل الأسعار",
-    "deleteConfirm": "حذف هذا المنتج؟ سيُنقل إلى سلة المحذوفات."
+    "deleteConfirm": "حذف هذا المنتج؟ سيُنقل إلى سلة المحذوفات.",
+    "createdLabel": "تم إنشاء المنتوج"
   },
   "customers": {
     "title": "العملاء",

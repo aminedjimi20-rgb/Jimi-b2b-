@@ -271,28 +271,135 @@ export class ProductsService {
     const existing = await this.prisma.product.findFirst({ where: { id, deletedAt: null } });
     if (!existing) throw new NotFoundException('Produit introuvable');
 
-    const { prices: _prices, ...productData } = dto;
+    const { prices: _prices, ...rest } = dto;
+    const productData = { ...rest, manufacturerId: dto.manufacturerId || null };
 
-    const updated = await this.prisma.product.update({
-      where: { id },
-      data: {
-        ...productData,
-        manufacturerId: dto.manufacturerId || null,
-        attributes: productData.attributes as Prisma.InputJsonValue | undefined,
-        seasonStart: dto.seasonStart ? new Date(dto.seasonStart) : undefined,
-        seasonEnd: dto.seasonEnd ? new Date(dto.seasonEnd) : undefined,
-      },
+    // Diff champ par champ : le journal doit dire précisément ce qui a changé
+    // (et le stock/coût figés ailleurs ne doivent jamais bouger rétroactivement
+    // les comptes déjà passés avec les clients ou fabricants).
+    const changedFields: string[] = [];
+    const oldValues: Record<string, unknown> = {};
+    const newValues: Record<string, unknown> = {};
+    for (const key of Object.keys(productData)) {
+      if (key === 'attributes') continue;
+      const oldRaw = (existing as unknown as Record<string, unknown>)[key];
+      const newRaw = (productData as unknown as Record<string, unknown>)[key];
+      const oldVal = (oldRaw instanceof Prisma.Decimal ? oldRaw.toString() : oldRaw) ?? null;
+      const newVal = (newRaw instanceof Prisma.Decimal ? newRaw.toString() : newRaw) ?? null;
+      if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+        changedFields.push(key);
+        oldValues[key] = oldRaw;
+        newValues[key] = newRaw;
+      }
+    }
+
+    const stockDiff = changedFields.includes('currentStock')
+      ? Number(productData.currentStock) - existing.currentStock
+      : 0;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.product.update({
+        where: { id },
+        data: {
+          ...productData,
+          attributes: productData.attributes as Prisma.InputJsonValue | undefined,
+          seasonStart: dto.seasonStart ? new Date(dto.seasonStart) : undefined,
+          seasonEnd: dto.seasonEnd ? new Date(dto.seasonEnd) : undefined,
+        },
+      });
+
+      // Toute correction de stock — même faite depuis la fiche produit plutôt
+      // que l'écran d'ajustement dédié — passe par le même journal de mouvements.
+      if (stockDiff !== 0) {
+        await tx.stockMovement.create({
+          data: {
+            productId: id,
+            type: 'ADJUSTMENT',
+            quantity: stockDiff,
+            reason: 'Modifié depuis la fiche produit',
+            createdById: actorId,
+          },
+        });
+      }
+
+      return result;
     });
 
-    await this.auditLog.record({
-      entityType: 'Product',
-      entityId: id,
-      action: 'UPDATE',
-      oldValue: existing,
-      newValue: productData,
-      actorId,
-    });
+    if (changedFields.length > 0) {
+      await this.auditLog.record({
+        entityType: 'Product',
+        entityId: id,
+        action: 'UPDATE',
+        field: changedFields.join(','),
+        oldValue: oldValues,
+        newValue: newValues,
+        actorId,
+      });
+    }
+
     return updated;
+  }
+
+  /** Dernier changement connu sur ce produit (champ modifié ou prix), tous journaux confondus. */
+  async getLastChange(id: string) {
+    const [lastAudit, lastPrice] = await Promise.all([
+      this.prisma.auditLog.findFirst({
+        where: { entityType: 'Product', entityId: id },
+        orderBy: { createdAt: 'desc' },
+        include: { actor: { select: { fullName: true } } },
+      }),
+      this.prisma.priceHistory.findFirst({
+        where: { productId: id },
+        orderBy: { createdAt: 'desc' },
+        include: { priceTierType: { select: { label: true } } },
+      }),
+    ]);
+
+    const candidates: {
+      at: Date;
+      kind: 'field' | 'price';
+      field: string | null;
+      label: string | null;
+      oldValue: unknown;
+      newValue: unknown;
+      actorId: string | null;
+      actorName: string | null;
+    }[] = [];
+
+    if (lastAudit) {
+      candidates.push({
+        at: lastAudit.createdAt,
+        kind: 'field',
+        field: lastAudit.field,
+        label: null,
+        oldValue: lastAudit.oldValue ? JSON.parse(lastAudit.oldValue) : null,
+        newValue: lastAudit.newValue ? JSON.parse(lastAudit.newValue) : null,
+        actorId: lastAudit.actorId,
+        actorName: lastAudit.actor?.fullName ?? null,
+      });
+    }
+    if (lastPrice) {
+      candidates.push({
+        at: lastPrice.createdAt,
+        kind: 'price',
+        field: 'price',
+        label: lastPrice.priceTierType.label,
+        oldValue: lastPrice.oldPrice != null ? Number(lastPrice.oldPrice) : null,
+        newValue: Number(lastPrice.newPrice),
+        actorId: lastPrice.changedById,
+        actorName: null,
+      });
+    }
+
+    candidates.sort((a, b) => b.at.getTime() - a.at.getTime());
+    const top = candidates[0];
+    if (!top) return null;
+
+    if (!top.actorName && top.actorId) {
+      const actor = await this.prisma.user.findUnique({ where: { id: top.actorId }, select: { fullName: true } });
+      top.actorName = actor?.fullName ?? null;
+    }
+    return top;
   }
 
   async setPrice(productId: string, dto: SetPriceDto, actorId: string) {

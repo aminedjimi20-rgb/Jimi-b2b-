@@ -204,7 +204,8 @@
       "name": "Nom",
       "category": "Catégorie",
       "stock": "Stock",
-      "status": "Statut"
+      "status": "Statut",
+      "lastChange": "Dernière modification"
     },
     "form": {
       "sku": "Référence (SKU)",
@@ -232,7 +233,8 @@
     "active": "Actif",
     "inactive": "Inactif",
     "priceHistory": "Historique des prix",
-    "deleteConfirm": "Supprimer ce produit ? Il sera déplacé vers la corbeille."
+    "deleteConfirm": "Supprimer ce produit ? Il sera déplacé vers la corbeille.",
+    "createdLabel": "Produit créé"
   },
   "customers": {
     "title": "Clients",

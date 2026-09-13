@@ -246,6 +246,12 @@ export class VouchersService {
             createdById: actorId,
           },
         });
+        // Fige le coût au moment de la vente : si le coût catalogue change plus
+        // tard (nouvel achat, correction), la marge de ce bon ne doit pas bouger.
+        await tx.salesVoucherItem.update({
+          where: { id: item.id },
+          data: { costPriceSnapshot: item.product.costPrice },
+        });
       }
 
       await tx.ledgerEntry.create({

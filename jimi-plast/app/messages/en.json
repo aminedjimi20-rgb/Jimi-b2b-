@@ -204,7 +204,8 @@
       "name": "Name",
       "category": "Category",
       "stock": "Stock",
-      "status": "Status"
+      "status": "Status",
+      "lastChange": "Last change"
     },
     "form": {
       "sku": "SKU",
@@ -232,7 +233,8 @@
     "active": "Active",
     "inactive": "Inactive",
     "priceHistory": "Price history",
-    "deleteConfirm": "Delete this product? It will be moved to trash."
+    "deleteConfirm": "Delete this product? It will be moved to trash.",
+    "createdLabel": "Product created"
   },
   "customers": {
     "title": "Customers",

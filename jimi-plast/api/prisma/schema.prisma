@@ -489,6 +489,7 @@ model SalesVoucherItem {
   totalUnits            Int // quantityPackages * unitsPerPackageSnapshot
   unitPrice             Decimal @db.Decimal(12, 2) // prix pièce au moment de la vente, figé
   lineTotal             Decimal @db.Decimal(12, 2)
+  costPriceSnapshot     Decimal? @db.Decimal(12, 2) // coût d'achat au moment de la confirmation, figé — la marge des ventes passées ne doit jamais bouger si le coût catalogue change ensuite
 
   voucher       SalesVoucher  @relation(fields: [voucherId], references: [id], onDelete: Cascade)
   product       Product       @relation(fields: [productId], references: [id])
