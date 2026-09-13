@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { cart, useCart } from '@/lib/cart';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { ImageLightbox } from '@/components/image-lightbox';
 
 interface Category {
   id: string;
@@ -96,6 +97,7 @@ export default function CatalogPage() {
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [lightboxProduct, setLightboxProduct] = useState<Product | null>(null);
 
   const canManageVouchers = hasPermission('vouchers.create');
 
@@ -275,10 +277,31 @@ export default function CatalogPage() {
             const mainPrice = p.prices[0];
             return (
               <div key={p.id} className="flex flex-col rounded-lg border border-line bg-panel p-3 shadow-sm">
-                <div className="relative mb-2 flex aspect-square items-center justify-center rounded bg-paper text-muted">
+                <div
+                  className={`group relative mb-2 flex aspect-square items-center justify-center overflow-hidden rounded bg-paper text-muted ${
+                    p.images.length > 0 ? 'cursor-zoom-in' : ''
+                  }`}
+                  onClick={() => p.images.length > 0 && setLightboxProduct(p)}
+                >
                   {p.images[0] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full rounded object-cover" />
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.images[0].url}
+                        alt={localizedName(p, locale)}
+                        className="h-full w-full rounded object-cover transition-transform duration-200 group-hover:scale-110"
+                      />
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/20">
+                        <span className="scale-75 text-xl text-white opacity-0 transition group-hover:scale-100 group-hover:opacity-100">
+                          🔍
+                        </span>
+                      </div>
+                      {p.images.length > 1 && (
+                        <span className="absolute bottom-1 end-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                          +{p.images.length - 1}
+                        </span>
+                      )}
+                    </>
                   ) : (
                     <span className="text-3xl">📦</span>
                   )}
@@ -440,6 +463,14 @@ export default function CatalogPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {lightboxProduct && (
+        <ImageLightbox
+          images={lightboxProduct.images}
+          title={localizedName(lightboxProduct, locale)}
+          onClose={() => setLightboxProduct(null)}
+        />
       )}
     </div>
   );
