@@ -489,20 +489,29 @@
   "categories": {
     "title": "Catégories",
     "addCategory": "Nouvelle catégorie",
+    "searchPlaceholder": "Rechercher une catégorie...",
     "columns": {
       "name": "Nom",
       "slug": "Slug",
       "parent": "Parent",
-      "products": "Produits"
+      "products": "Produits",
+      "order": "Ordre"
     },
     "form": {
       "slug": "Slug (URL)",
       "nameFr": "Nom (Français)",
       "nameAr": "Nom (Arabe)",
       "nameEn": "Nom (Anglais)",
-      "parent": "Catégorie parente"
+      "parent": "Catégorie parente",
+      "type": "Type",
+      "typeRoot": "Catégorie principale",
+      "typeSub": "Sous-catégorie",
+      "chooseParent": "Choisir la catégorie parente",
+      "sortOrder": "Ordre d'affichage"
     },
     "none": "Aucune",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
     "deleteConfirm": "Supprimer cette catégorie ?"
   },
   "trash": {

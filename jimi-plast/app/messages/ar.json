@@ -489,20 +489,29 @@
   "categories": {
     "title": "الفئات",
     "addCategory": "فئة جديدة",
+    "searchPlaceholder": "البحث عن فئة...",
     "columns": {
       "name": "الاسم",
       "slug": "الرابط",
       "parent": "الفئة الأم",
-      "products": "المنتجات"
+      "products": "المنتجات",
+      "order": "الترتيب"
     },
     "form": {
       "slug": "الرابط (slug)",
       "nameFr": "الاسم (فرنسي)",
       "nameAr": "الاسم (عربي)",
       "nameEn": "الاسم (إنجليزي)",
-      "parent": "الفئة الأم"
+      "parent": "الفئة الأم",
+      "type": "النوع",
+      "typeRoot": "فئة رئيسية",
+      "typeSub": "فئة فرعية",
+      "chooseParent": "اختر الفئة الأم",
+      "sortOrder": "ترتيب العرض"
     },
     "none": "بدون",
+    "moveUp": "تحريك للأعلى",
+    "moveDown": "تحريك للأسفل",
     "deleteConfirm": "حذف هذه الفئة؟"
   },
   "trash": {

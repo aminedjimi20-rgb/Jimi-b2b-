@@ -55,7 +55,10 @@ export class CategoriesService {
   async remove(id: string, actorId: string, reason?: string) {
     const category = await this.prisma.category.findUnique({
       where: { id },
-      include: { products: { where: { deletedAt: null }, take: 1 }, children: { take: 1 } },
+      include: {
+        products: { where: { deletedAt: null }, take: 1 },
+        children: { where: { deletedAt: null }, take: 1 },
+      },
     });
     if (!category) throw new NotFoundException('Catégorie introuvable');
     if (category.products.length > 0 || category.children.length > 0) {
