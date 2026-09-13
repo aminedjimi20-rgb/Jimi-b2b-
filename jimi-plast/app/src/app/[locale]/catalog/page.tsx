@@ -119,6 +119,7 @@ export default function CatalogPage() {
   const [modalPieces, setModalPieces] = useState('');
   const [modalUnitPrice, setModalUnitPrice] = useState('');
   const [modalDiscount, setModalDiscount] = useState('0');
+  const [modalDiscountPercent, setModalDiscountPercent] = useState('0');
 
   const canManageVouchers = hasPermission('vouchers.create');
   const canManageCatalog = hasPermission('catalog.manage');
@@ -205,6 +206,30 @@ export default function CatalogPage() {
     setModalPieces(String(p.unitsPerPackage));
     setModalUnitPrice(String(price));
     setModalDiscount('0');
+    setModalDiscountPercent('0');
+  }
+
+  /** Sous-total plein (cartons catalogue × prix catalogue) — base de calcul du %. */
+  function modalStandard(): number {
+    if (!addingProduct) return 0;
+    const catalogPrice = priceForView(addingProduct)?.price ?? 0;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    return qty * addingProduct.unitsPerPackage * catalogPrice;
+  }
+
+  function onModalDiscountChange(v: string) {
+    const clean = onlyDecimal(v);
+    setModalDiscount(clean);
+    const standard = modalStandard();
+    setModalDiscountPercent(standard > 0 ? String(Math.round(((Number(clean) || 0) / standard) * 10000) / 100) : '0');
+  }
+
+  function onModalDiscountPercentChange(v: string) {
+    const clean = onlyDecimal(v);
+    setModalDiscountPercent(clean);
+    const standard = modalStandard();
+    const pct = Math.max(0, Number(clean) || 0);
+    setModalDiscount(String(Math.round(standard * (pct / 100) * 100) / 100));
   }
 
   function onModalQtyChange(v: string) {
@@ -243,7 +268,9 @@ export default function CatalogPage() {
     const unitPrice = Math.max(0, Number(modalUnitPrice) || 0);
     const standard = qty * addingProduct.unitsPerPackage * catalogPrice;
     const actual = pieces * unitPrice;
-    setModalDiscount(String(Math.max(0, Math.round((standard - actual) * 100) / 100)));
+    const suggested = Math.max(0, Math.round((standard - actual) * 100) / 100);
+    setModalDiscount(String(suggested));
+    setModalDiscountPercent(standard > 0 ? String(Math.round((suggested / standard) * 10000) / 100) : '0');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalQty, modalPieces, modalUnitPrice, addingProduct]);
 
@@ -674,17 +701,27 @@ export default function CatalogPage() {
                           {tCommon('delete')}
                         </button>
                       </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <label className="flex items-center gap-1 text-[11px] text-muted">
-                          {t('discount')}
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={line.discount || 0}
-                            onChange={(e) => cart.setDiscount(activeId, line.productId, Math.max(0, Number(onlyDecimal(e.target.value)) || 0))}
-                            className="w-16 rounded border border-line bg-paper px-1.5 py-0.5 text-xs"
-                          />
-                        </label>
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <span className="text-[11px] text-muted">{t('discount')}</span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={lineStandard ? Math.round(((line.discount || 0) / lineStandard) * 10000) / 100 : 0}
+                          onChange={(e) => {
+                            const pct = Math.max(0, Number(onlyDecimal(e.target.value)) || 0);
+                            cart.setDiscount(activeId, line.productId, lineStandard ? Math.round(lineStandard * (pct / 100) * 100) / 100 : 0);
+                          }}
+                          className="w-12 rounded border border-line bg-paper px-1.5 py-0.5 text-xs"
+                        />
+                        <span className="text-[10px] text-muted">%</span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={line.discount || 0}
+                          onChange={(e) => cart.setDiscount(activeId, line.productId, Math.max(0, Number(onlyDecimal(e.target.value)) || 0))}
+                          className="w-16 rounded border border-line bg-paper px-1.5 py-0.5 text-xs"
+                        />
+                        <span className="text-[10px] text-muted">DA</span>
                         {lineTotal != null && <span className="ms-auto text-xs font-medium tabular text-ink">{lineTotal.toLocaleString()} DA</span>}
                       </div>
                     </div>
@@ -818,16 +855,27 @@ export default function CatalogPage() {
               return (
                 <div className="mt-3 flex flex-col gap-1.5 text-sm">
                   {standard != null && <ModalRow label={t('subtotal')} value={`${standard.toLocaleString()} DA`} />}
-                  <label className="flex items-center justify-between gap-2 text-muted">
+                  <div className="flex items-center justify-between gap-2 text-muted">
                     <span>{t('discount')}</span>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={modalDiscount}
-                      onChange={(e) => setModalDiscount(onlyDecimal(e.target.value))}
-                      className="w-24 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
-                    />
-                  </label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={modalDiscountPercent}
+                        onChange={(e) => onModalDiscountPercentChange(e.target.value)}
+                        className="w-16 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
+                      />
+                      <span className="text-xs">%</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={modalDiscount}
+                        onChange={(e) => onModalDiscountChange(e.target.value)}
+                        className="w-20 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
+                      />
+                      <span className="text-xs">DA</span>
+                    </div>
+                  </div>
                   <ModalRow label={t('total')} value={`${total.toLocaleString()} DA`} bold />
                 </div>
               );
