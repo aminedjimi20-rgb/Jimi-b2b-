@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
-import { cart, useCart } from '@/lib/cart';
+import { cart, useCarts } from '@/lib/cart';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { ImageLightbox } from '@/components/image-lightbox';
 
@@ -76,7 +76,7 @@ export default function CatalogPage() {
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
   const { user, token, hasPermission } = useAuth();
-  const cartLines = useCart();
+  const { sessions, activeId } = useCarts();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -91,7 +91,6 @@ export default function CatalogPage() {
   const [onlyOnSale, setOnlyOnSale] = useState(false);
   const [onlyNew, setOnlyNew] = useState(false);
 
-  const [quantities, setQuantities] = useState<Record<string, string>>({});
   const [showCart, setShowCart] = useState(false);
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
   const [pickingCustomer, setPickingCustomer] = useState(false);
@@ -100,6 +99,9 @@ export default function CatalogPage() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [lightboxProduct, setLightboxProduct] = useState<Product | null>(null);
   const [viewTier, setViewTier] = useState('');
+  const [addingProduct, setAddingProduct] = useState<Product | null>(null);
+  const [modalQty, setModalQty] = useState('1');
+  const [modalDiscount, setModalDiscount] = useState('0');
 
   const canManageVouchers = hasPermission('vouchers.create');
 
@@ -163,17 +165,27 @@ export default function CatalogPage() {
     return p.prices[0];
   }
 
-  const cartCount = cartLines.reduce((s, l) => s + l.quantityPackages, 0);
+  const activeCart = sessions.find((s) => s.id === activeId);
+  const cartLines = activeCart?.items ?? [];
+  const totalCartCount = sessions.reduce((s, sess) => s + sess.items.reduce((s2, i) => s2 + i.quantityPackages, 0), 0);
   const cartDetails = cartLines.map((line) => ({ line, product: catalogIndex.get(line.productId) }));
   const cartTotal = cartDetails.reduce((sum, { line, product }) => {
     const price = (product ? priceForView(product)?.price : undefined) ?? 0;
-    return sum + price * line.quantityPackages;
+    return sum + Math.max(0, price * line.quantityPackages - (line.discount || 0));
   }, 0);
 
-  function addToCart(productId: string) {
-    const qty = Math.max(1, Number(quantities[productId] ?? '1'));
-    cart.add(productId, qty);
-    setQuantities((q) => ({ ...q, [productId]: '1' }));
+  function openAddModal(p: Product) {
+    setAddingProduct(p);
+    setModalQty('1');
+    setModalDiscount('0');
+  }
+
+  function confirmAdd() {
+    if (!addingProduct) return;
+    const qty = Math.max(1, Number(modalQty) || 1);
+    const discount = Math.max(0, Number(modalDiscount) || 0);
+    cart.add(addingProduct.id, qty, discount);
+    setAddingProduct(null);
   }
 
   async function checkout() {
@@ -190,11 +202,12 @@ export default function CatalogPage() {
     setCheckoutError(null);
     try {
       const payloadItems = cartLines.map((l) => ({ productId: l.productId, quantityPackages: l.quantityPackages }));
+      const totalDiscount = cartLines.reduce((s, l) => s + (l.discount || 0), 0);
 
       if (canManageVouchers) {
         const voucher = await api.post<{ id: string }>('/vouchers/draft', { customerId: selectedCustomerId }, token);
-        await api.put(`/vouchers/${voucher.id}`, { items: payloadItems }, token);
-        cart.clear();
+        await api.put(`/vouchers/${voucher.id}`, { items: payloadItems, discount: totalDiscount }, token);
+        cart.closeSession(activeId);
         router.push(`/${locale}/vouchers/${voucher.id}`);
       } else {
         const voucher = await api.post<DraftVoucher>('/vouchers/mine/draft', undefined, token);
@@ -203,8 +216,8 @@ export default function CatalogPage() {
           merged.set(line.productId, (merged.get(line.productId) ?? 0) + line.quantityPackages);
         }
         const mergedItems = Array.from(merged.entries()).map(([productId, quantityPackages]) => ({ productId, quantityPackages }));
-        await api.put(`/vouchers/mine/${voucher.id}`, { items: mergedItems }, token);
-        cart.clear();
+        await api.put(`/vouchers/mine/${voucher.id}`, { items: mergedItems, discount: totalDiscount }, token);
+        cart.closeSession(activeId);
         router.push(`/${locale}/vouchers/${voucher.id}`);
       }
     } catch {
@@ -216,7 +229,7 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="flex items-center justify-between border-b border-line bg-panel px-6 py-4">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-panel px-6 py-4 shadow-sm">
         <Link href={`/${locale}/catalog`} className="font-mono text-sm font-semibold uppercase tracking-wider text-accent">
           JIMI PLAST
         </Link>
@@ -226,9 +239,9 @@ export default function CatalogPage() {
             className="relative rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
           >
             🛒 {t('cart')}
-            {cartCount > 0 && (
+            {totalCartCount > 0 && (
               <span className="absolute -end-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-white">
-                {cartCount}
+                {totalCartCount}
               </span>
             )}
           </button>
@@ -396,22 +409,12 @@ export default function CatalogPage() {
                   </span>
                 </div>
                 {p.availability === 'IN_STOCK' && (
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <input
-                      type="number"
-                      min={1}
-                      value={quantities[p.id] ?? '1'}
-                      onChange={(e) => setQuantities((q) => ({ ...q, [p.id]: e.target.value }))}
-                      className="w-14 rounded border border-line bg-paper px-2 py-1 text-xs"
-                    />
-                    <span className="text-[10px] text-muted">{p.packagingUnit.label}</span>
-                    <button
-                      onClick={() => addToCart(p.id)}
-                      className="ms-auto rounded bg-accent px-2 py-1 text-xs font-medium text-white hover:opacity-90"
-                    >
-                      {t('addToCart')}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => openAddModal(p)}
+                    className="mt-2 w-full rounded bg-accent px-2 py-1.5 text-xs font-medium text-white hover:opacity-90"
+                  >
+                    {t('addToCart')}
+                  </button>
                 )}
               </div>
             );
@@ -433,33 +436,91 @@ export default function CatalogPage() {
               </button>
             </div>
 
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {sessions.map((s, i) => (
+                <div
+                  key={s.id}
+                  onClick={() => cart.setActiveId(s.id)}
+                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${
+                    s.id === activeId ? 'border-accent bg-accent/10 font-medium text-accent' : 'border-line text-muted hover:bg-line/30'
+                  }`}
+                >
+                  <span>{s.label || `${t('cart')} ${i + 1}`}</span>
+                  {s.items.length > 0 && (
+                    <span className="rounded-full bg-line/50 px-1.5 text-[10px]">
+                      {s.items.reduce((sum, it) => sum + it.quantityPackages, 0)}
+                    </span>
+                  )}
+                  {sessions.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cart.closeSession(s.id);
+                      }}
+                      className="text-muted hover:text-red-600"
+                      aria-label={t('closeCart')}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                onClick={() => cart.createSession()}
+                className="rounded-full border border-dashed border-line px-2.5 py-1 text-xs text-muted hover:border-accent hover:text-accent"
+              >
+                + {t('newCart')}
+              </button>
+            </div>
+
+            {activeCart && (
+              <input
+                value={activeCart.label}
+                onChange={(e) => cart.renameSession(activeCart.id, e.target.value)}
+                placeholder={t('cartLabelPlaceholder')}
+                className="mt-2 rounded border border-line bg-paper px-2 py-1 text-xs"
+              />
+            )}
+
             {cartDetails.length === 0 ? (
               <p className="mt-6 text-sm text-muted">{t('cartEmpty')}</p>
             ) : (
               <div className="mt-4 flex flex-1 flex-col gap-3 overflow-y-auto">
-                {cartDetails.map(({ line, product }) => (
-                  <div key={line.productId} className="rounded border border-line p-2">
-                    <p className="text-sm font-medium text-ink">{product ? localizedName(product, locale) : line.productId}</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <input
-                        type="number"
-                        min={1}
-                        value={line.quantityPackages}
-                        onChange={(e) => cart.setQuantity(line.productId, Math.max(1, Number(e.target.value)))}
-                        className="w-16 rounded border border-line bg-paper px-2 py-1 text-xs"
-                      />
-                      <span className="text-xs text-muted">{product?.packagingUnit.label ?? ''}</span>
-                      {product && priceForView(product) && (
-                        <span className="ms-auto text-xs tabular text-ink">
-                          {(priceForView(product)!.price * line.quantityPackages).toLocaleString()} DA
-                        </span>
-                      )}
-                      <button onClick={() => cart.remove(line.productId)} className="text-xs text-red-600 hover:underline">
-                        {tCommon('delete')}
-                      </button>
+                {cartDetails.map(({ line, product }) => {
+                  const unitPrice = product ? priceForView(product)?.price : undefined;
+                  const lineTotal = unitPrice != null ? Math.max(0, unitPrice * line.quantityPackages - (line.discount || 0)) : undefined;
+                  return (
+                    <div key={line.productId} className="rounded border border-line p-2">
+                      <p className="text-sm font-medium text-ink">{product ? localizedName(product, locale) : line.productId}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={1}
+                          value={line.quantityPackages}
+                          onChange={(e) => cart.setQuantity(activeId, line.productId, Math.max(1, Number(e.target.value)))}
+                          className="w-16 rounded border border-line bg-paper px-2 py-1 text-xs"
+                        />
+                        <span className="text-xs text-muted">{product?.packagingUnit.label ?? ''}</span>
+                        <button onClick={() => cart.remove(activeId, line.productId)} className="ms-auto text-xs text-red-600 hover:underline">
+                          {tCommon('delete')}
+                        </button>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <label className="flex items-center gap-1 text-[11px] text-muted">
+                          {t('discount')}
+                          <input
+                            type="number"
+                            min={0}
+                            value={line.discount || 0}
+                            onChange={(e) => cart.setDiscount(activeId, line.productId, Math.max(0, Number(e.target.value)))}
+                            className="w-16 rounded border border-line bg-paper px-1.5 py-0.5 text-xs"
+                          />
+                        </label>
+                        {lineTotal != null && <span className="ms-auto text-xs font-medium tabular text-ink">{lineTotal.toLocaleString()} DA</span>}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -515,6 +576,59 @@ export default function CatalogPage() {
         </div>
       )}
 
+      {addingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setAddingProduct(null)}>
+          <div className="w-full max-w-sm rounded-lg bg-panel p-4" onClick={(e) => e.stopPropagation()}>
+            <h2 className="mb-1 text-sm font-semibold text-ink">{localizedName(addingProduct, locale)}</h2>
+            <p className="mb-3 text-xs text-muted">
+              {t('piecesPerPackage', { count: addingProduct.unitsPerPackage, unit: addingProduct.packagingUnit.label })}
+            </p>
+
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-muted">{t('quantityCartons')}</span>
+              <input
+                type="number"
+                min={1}
+                value={modalQty}
+                onChange={(e) => setModalQty(e.target.value)}
+                className="rounded border border-line bg-paper px-3 py-2"
+              />
+            </label>
+
+            {(() => {
+              const price = priceForView(addingProduct);
+              const qty = Math.max(1, Number(modalQty) || 1);
+              const totalPieces = qty * addingProduct.unitsPerPackage;
+              const subtotal = (price?.price ?? 0) * qty;
+              const discount = Math.max(0, Number(modalDiscount) || 0);
+              const finalTotal = Math.max(0, subtotal - discount);
+              return (
+                <div className="mt-3 flex flex-col gap-1.5 text-sm">
+                  <ModalRow label={t('totalPieces')} value={String(totalPieces)} />
+                  {price && <ModalRow label={t('unitPrice')} value={`${price.price} DA`} />}
+                  {price && <ModalRow label={t('subtotal')} value={`${subtotal.toLocaleString()} DA`} />}
+                  <label className="flex items-center justify-between gap-2 text-muted">
+                    <span>{t('discount')}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={modalDiscount}
+                      onChange={(e) => setModalDiscount(e.target.value)}
+                      className="w-24 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
+                    />
+                  </label>
+                  {price && <ModalRow label={t('total')} value={`${finalTotal.toLocaleString()} DA`} bold />}
+                </div>
+              );
+            })()}
+
+            <button onClick={confirmAdd} className="mt-4 w-full rounded bg-accent px-3 py-2 text-sm font-medium text-white">
+              {t('confirmAdd')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {lightboxProduct && (
         <ImageLightbox
           images={lightboxProduct.images}
@@ -522,6 +636,15 @@ export default function CatalogPage() {
           onClose={() => setLightboxProduct(null)}
         />
       )}
+    </div>
+  );
+}
+
+function ModalRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <div className={`flex justify-between ${bold ? 'font-semibold text-ink' : 'text-muted'}`}>
+      <span>{label}</span>
+      <span className="tabular">{value}</span>
     </div>
   );
 }

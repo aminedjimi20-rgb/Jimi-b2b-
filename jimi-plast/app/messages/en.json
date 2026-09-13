@@ -175,7 +175,17 @@
     "addToCart": "Add to cart",
     "piecesPerPackage": "{count} pieces / {unit}",
     "viewPricesAs": "View prices as",
-    "costPrice": "Cost"
+    "costPrice": "Cost",
+    "closeCart": "Close this cart",
+    "newCart": "New cart",
+    "cartLabelPlaceholder": "Cart name (customer...)",
+    "quantityCartons": "Quantity (cartons)",
+    "totalPieces": "Total pieces",
+    "discount": "Discount (DA)",
+    "confirmAdd": "Confirm",
+    "unitPrice": "Unit price",
+    "subtotal": "Subtotal",
+    "total": "Total"
   },
   "products": {
     "title": "Products",

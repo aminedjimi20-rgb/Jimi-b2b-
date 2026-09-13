@@ -175,7 +175,17 @@
     "addToCart": "أضف إلى السلة",
     "piecesPerPackage": "{count} حبة / {unit}",
     "viewPricesAs": "عرض الأسعار",
-    "costPrice": "الشراء"
+    "costPrice": "الشراء",
+    "closeCart": "غلق هذا البانيي",
+    "newCart": "بانيي جديد",
+    "cartLabelPlaceholder": "اسم البانيي (الزبون...)",
+    "quantityCartons": "الكمية (كراطن)",
+    "totalPieces": "مجموع القطع",
+    "discount": "التخفيض (دج)",
+    "confirmAdd": "تأكيد",
+    "unitPrice": "سعر الوحدة",
+    "subtotal": "المجموع الفرعي",
+    "total": "المجموع"
   },
   "products": {
     "title": "المنتجات",
