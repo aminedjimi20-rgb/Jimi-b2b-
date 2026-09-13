@@ -520,7 +520,8 @@
       "Product": "Product",
       "Category": "Category",
       "Manufacturer": "Manufacturer",
-      "Notification": "Notification"
+      "Notification": "Notification",
+      "Besoin": "Need"
     }
   },
   "besoins": {
@@ -535,6 +536,11 @@
     "respond": "Respond",
     "responded": "Answered",
     "pending": "Pending",
-    "yourResponse": "Your response"
+    "yourResponse": "Your response",
+    "showHidden": "Show hidden needs",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this need? It will be moved to the trash."
   }
 }

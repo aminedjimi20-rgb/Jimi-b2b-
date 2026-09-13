@@ -520,7 +520,8 @@
       "Product": "Produit",
       "Category": "Catégorie",
       "Manufacturer": "Fabricant",
-      "Notification": "Notification"
+      "Notification": "Notification",
+      "Besoin": "Besoin"
     }
   },
   "besoins": {
@@ -535,6 +536,11 @@
     "respond": "Répondre",
     "responded": "Répondu",
     "pending": "En attente",
-    "yourResponse": "Votre réponse"
+    "yourResponse": "Votre réponse",
+    "showHidden": "Afficher les besoins masqués",
+    "hide": "Masquer",
+    "unhide": "Afficher",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce besoin ? Il sera déplacé vers la corbeille."
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { BesoinsService } from './besoins.service';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -28,13 +28,31 @@ export class BesoinsController {
 
   @Get()
   @RequirePermissions('besoins.manage')
-  all() {
-    return this.besoinsService.all();
+  all(@Query('includeHidden') includeHidden?: string) {
+    return this.besoinsService.all(includeHidden === 'true');
   }
 
   @Put(':id/respond')
   @RequirePermissions('besoins.manage')
   respond(@Param('id') id: string, @Body() dto: RespondBesoinDto, @CurrentUser() user: AuthenticatedUser) {
     return this.besoinsService.respond(id, user.id, dto);
+  }
+
+  @Put(':id/hide')
+  @RequirePermissions('besoins.manage')
+  hide(@Param('id') id: string) {
+    return this.besoinsService.hide(id);
+  }
+
+  @Put(':id/unhide')
+  @RequirePermissions('besoins.manage')
+  unhide(@Param('id') id: string) {
+    return this.besoinsService.unhide(id);
+  }
+
+  @Delete(':id')
+  @RequirePermissions('besoins.manage')
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.besoinsService.remove(id, user.id);
   }
 }

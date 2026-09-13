@@ -520,7 +520,8 @@
       "Product": "منتج",
       "Category": "فئة",
       "Manufacturer": "مصنّع",
-      "Notification": "إشعار"
+      "Notification": "إشعار",
+      "Besoin": "احتياج"
     }
   },
   "besoins": {
@@ -535,6 +536,11 @@
     "respond": "رد",
     "responded": "تم الرد",
     "pending": "قيد الانتظار",
-    "yourResponse": "ردك"
+    "yourResponse": "ردك",
+    "showHidden": "إظهار الاحتياجات المخفية",
+    "hide": "إخفاء",
+    "unhide": "إظهار",
+    "delete": "حذف",
+    "deleteConfirm": "حذف هذا الاحتياج؟ سيتم نقله إلى سلة المهملات."
   }
 }

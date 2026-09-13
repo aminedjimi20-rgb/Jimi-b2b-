@@ -10,6 +10,7 @@ interface BesoinRow {
   message: string;
   response: string | null;
   respondedAt: string | null;
+  hiddenAt: string | null;
   createdAt: string;
   author?: { fullName: string; role: { name: string; key: string } };
 }
@@ -24,16 +25,17 @@ export default function BesoinsPage() {
   const [mine, setMine] = useState<BesoinRow[]>([]);
   const [all, setAll] = useState<BesoinRow[]>([]);
   const [responseDrafts, setResponseDrafts] = useState<Record<string, string>>({});
+  const [showHidden, setShowHidden] = useState(false);
 
   function reload() {
     if (!token) return;
     api.get<BesoinRow[]>('/besoins/mine', token).then(setMine);
-    if (canManage) api.get<BesoinRow[]>('/besoins', token).then(setAll);
+    if (canManage) api.get<BesoinRow[]>(`/besoins?includeHidden=${showHidden}`, token).then(setAll);
   }
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, canManage]);
+  }, [token, canManage, showHidden]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +55,17 @@ export default function BesoinsPage() {
     if (!response) return;
     await api.put(`/besoins/${id}/respond`, { response }, token);
     setResponseDrafts((d) => ({ ...d, [id]: '' }));
+    reload();
+  }
+
+  async function toggleHide(b: BesoinRow) {
+    await api.put(`/besoins/${b.id}/${b.hiddenAt ? 'unhide' : 'hide'}`, undefined, token);
+    reload();
+  }
+
+  async function remove(id: string) {
+    if (!window.confirm(t('deleteConfirm'))) return;
+    await api.delete(`/besoins/${id}`, token);
     reload();
   }
 
@@ -82,13 +95,30 @@ export default function BesoinsPage() {
 
       {canManage ? (
         <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-ink">{t('all')}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-ink">{t('all')}</h2>
+            <label className="flex items-center gap-2 text-xs text-muted">
+              <input type="checkbox" checked={showHidden} onChange={(e) => setShowHidden(e.target.checked)} />
+              {t('showHidden')}
+            </label>
+          </div>
           {all.length === 0 && <p className="text-sm text-muted">{t('empty')}</p>}
           {all.map((b) => (
-            <div key={b.id} className="flex flex-col gap-2 rounded-lg border border-line bg-panel p-4">
+            <div
+              key={b.id}
+              className={`flex flex-col gap-2 rounded-lg border border-line bg-panel p-4 ${b.hiddenAt ? 'opacity-50' : ''}`}
+            >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-ink">{b.author?.fullName}</span>
-                <span className="text-xs text-muted">{new Date(b.createdAt).toLocaleString()}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted">{new Date(b.createdAt).toLocaleString()}</span>
+                  <button onClick={() => toggleHide(b)} className="text-xs text-muted hover:text-accent hover:underline">
+                    {b.hiddenAt ? t('unhide') : t('hide')}
+                  </button>
+                  <button onClick={() => remove(b.id)} className="text-xs text-red-500 hover:underline">
+                    {t('delete')}
+                  </button>
+                </div>
               </div>
               <p className="text-sm text-ink">{b.message}</p>
               {b.response ? (
