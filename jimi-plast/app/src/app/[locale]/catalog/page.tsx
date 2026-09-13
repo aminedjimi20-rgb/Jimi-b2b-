@@ -259,8 +259,8 @@ export default function CatalogPage() {
         cart.closeSession(activeId);
         router.push(`/${locale}/vouchers/${voucher.id}`);
       }
-    } catch {
-      setCheckoutError(tCommon('error'));
+    } catch (e) {
+      setCheckoutError(e instanceof Error ? e.message : tCommon('error'));
     } finally {
       setCheckingOut(false);
     }
@@ -354,7 +354,7 @@ export default function CatalogPage() {
             {t('onlyNew')}
           </label>
 
-          {availableTiers.length > 1 && (
+          {canManageVouchers && availableTiers.length > 1 && (
             <label className="flex items-center gap-1.5 text-sm text-ink">
               <span className="text-xs text-muted">{t('viewPricesAs')}</span>
               <select
@@ -435,10 +435,21 @@ export default function CatalogPage() {
                     {t('costPrice')}: {p.costPrice.toLocaleString()} DA
                   </p>
                 )}
+                {canManageVouchers &&
+                  (() => {
+                    const factoryPrice = p.prices.find((pr) => pr.tierKey === 'factory');
+                    return (
+                      factoryPrice && (
+                        <p className="text-[11px] text-muted">
+                          {factoryPrice.label}: {factoryPrice.price.toLocaleString()} DA
+                        </p>
+                      )
+                    );
+                  })()}
                 <div className="mt-2 flex items-center justify-between">
                   {mainPrice ? (
                     <div className="font-mono text-sm font-semibold text-ink">
-                      {availableTiers.length > 1 && (
+                      {canManageVouchers && availableTiers.length > 1 && (
                         <span className="me-1 block text-[10px] font-normal text-muted">{mainPrice.label}</span>
                       )}
                       {mainPrice.hasPromotion && (
