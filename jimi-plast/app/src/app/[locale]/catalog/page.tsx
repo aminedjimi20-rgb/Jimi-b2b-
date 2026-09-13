@@ -276,17 +276,6 @@ export default function CatalogPage() {
           JIMI PLAST
         </Link>
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setShowCart(true)}
-            className="relative rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
-          >
-            🛒 {t('cart')}
-            {totalCartCount > 0 && (
-              <span className="absolute -end-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-white">
-                {totalCartCount}
-              </span>
-            )}
-          </button>
           {user ? (
             <Link href={`/${locale}/dashboard`} className="text-sm text-ink hover:underline">
               {user.fullName}
@@ -521,6 +510,19 @@ export default function CatalogPage() {
           <p className="mt-6 text-center text-xs text-muted">{total} produits</p>
         )}
       </div>
+
+      <button
+        onClick={() => setShowCart(true)}
+        aria-label={t('cart')}
+        className="fixed bottom-5 end-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-2xl text-white shadow-lg transition hover:scale-105 hover:opacity-90"
+      >
+        🛒
+        {totalCartCount > 0 && (
+          <span className="absolute -end-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-paper bg-red-600 px-1 text-xs font-bold text-white">
+            {totalCartCount}
+          </span>
+        )}
+      </button>
 
       {showCart && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40" onClick={() => setShowCart(false)}>
