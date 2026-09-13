@@ -1,0 +1,540 @@
+{
+  "app": {
+    "name": "JIMI PLAST"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Access your JIMI PLAST workspace",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "noAccount": "No account yet?",
+    "registerLink": "Request access",
+    "error": "Incorrect email or password"
+  },
+  "register": {
+    "title": "Access request",
+    "subtitle": "Your request will be reviewed by an administrator before activation.",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "email": "Email address",
+    "address": "Address",
+    "wilaya": "Province",
+    "businessName": "Business name (if applicable)",
+    "requestedRole": "Account type wanted",
+    "roleWholesaler": "Wholesaler",
+    "roleRetailer": "Retailer",
+    "notes": "Additional information",
+    "submit": "Send request",
+    "success": "Your request has been sent. An administrator will review it.",
+    "backToLogin": "Back to sign in"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "catalog": "Catalog",
+    "products": "Products",
+    "categories": "Categories",
+    "customers": "Customers",
+    "myAccount": "My account",
+    "vouchers": "Vouchers",
+    "manufacturers": "Manufacturers",
+    "purchases": "Purchases",
+    "stock": "Stock",
+    "returns": "Returns",
+    "transport": "Transport",
+    "productRequests": "Product requests",
+    "negotiations": "Negotiations",
+    "users": "Employees & roles",
+    "requests": "Registration requests",
+    "logout": "Sign out",
+    "trash": "Trash",
+    "besoins": "Needs",
+    "myOrders": "My orders"
+  },
+  "dashboard": {
+    "welcome": "Hello {name}",
+    "roleLabel": "Role",
+    "pendingRequests": "Pending requests",
+    "activeUsers": "Active accounts",
+    "rolesConfigured": "Configured roles",
+    "placeholder": "Products, Orders, Stock, Vouchers and Statistics modules are coming in the next phases.",
+    "statsTitle": "Statistics",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "preset7d": "7 days",
+    "preset30d": "30 days",
+    "preset90d": "90 days",
+    "presetYear": "This year",
+    "presetAll": "All time",
+    "revenue": "Revenue",
+    "margin": "Margin",
+    "averageBasket": "Average basket",
+    "confirmedVouchers": "Confirmed vouchers",
+    "customerCredit": "Customer credit",
+    "supplierDebt": "Supplier debt",
+    "lowStock": "Low stock",
+    "pendingTotal": "Pending requests",
+    "topProductsTitle": "Best-selling products"
+  },
+  "requests": {
+    "title": "Registration requests",
+    "empty": "No pending requests",
+    "columns": {
+      "name": "Name",
+      "phone": "Phone",
+      "type": "Requested type",
+      "date": "Date",
+      "status": "Status"
+    },
+    "status": {
+      "NEW": "New",
+      "INFO_REQUESTED": "Info requested",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected"
+    },
+    "accept": "Accept",
+    "reject": "Reject",
+    "requestInfo": "Request info",
+    "acceptTitle": "Accept request",
+    "selectRole": "Role to assign",
+    "initialPassword": "Initial password",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "note": "Note"
+  },
+  "users": {
+    "title": "Employees, roles & permissions",
+    "tabUsers": "Users",
+    "tabRoles": "Roles & permissions",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "lastLogin": "Last login"
+    },
+    "suspend": "Suspend",
+    "activate": "Reactivate",
+    "permissionGroups": {
+      "prices": "Prices",
+      "orders": "Orders",
+      "vouchers": "Vouchers",
+      "finance": "Finance",
+      "suppliers": "Manufacturers",
+      "stock": "Stock",
+      "returns": "Returns",
+      "transport": "Transport",
+      "negotiations": "Negotiations",
+      "stats": "Statistics",
+      "admin": "Administration",
+      "documents": "Documents",
+      "besoins": "Needs"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all as read",
+    "delete": "Delete"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "error": "Something went wrong",
+    "empty": "No items",
+    "search": "Search…",
+    "loginToSeePrices": "Sign in to see prices",
+    "uploadPhoto": "From gallery"
+  },
+  "catalog": {
+    "title": "Catalog",
+    "allCategories": "All categories",
+    "sortPriority": "Priority",
+    "sortNewest": "Newest",
+    "sortNameAsc": "Name (A→Z)",
+    "sortNameDesc": "Name (Z→A)",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "onlyInStock": "In stock only",
+    "onlyOnSale": "On sale only",
+    "onlyNew": "New only",
+    "new": "New",
+    "featured": "Featured",
+    "promo": "Sale",
+    "perPackage": "{count} {unit}/{package}",
+    "noResults": "No product matches your search",
+    "cart": "Cart",
+    "cartEmpty": "Your cart is empty",
+    "cartTotal": "Total",
+    "checkout": "Place order",
+    "chooseCustomer": "Choose customer",
+    "addToCart": "Add to cart",
+    "piecesPerPackage": "{count} pieces / {unit}",
+    "viewPricesAs": "View prices as",
+    "costPrice": "Cost",
+    "closeCart": "Close this cart",
+    "newCart": "New cart",
+    "cartLabelPlaceholder": "Cart name (customer...)",
+    "quantityCartons": "Quantity (cartons)",
+    "totalPieces": "Total pieces",
+    "discount": "Discount (DA)",
+    "confirmAdd": "Confirm",
+    "unitPrice": "Unit price",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "newProduct": "New product",
+    "pieces": "pieces",
+    "piecesHint": "Adjust the piece count if a received carton is short — the discount is computed automatically.",
+    "stockCartons": "{count} cartons in stock",
+    "unitsPerPackage": "Pieces / carton",
+    "adjustedWarning": "Manual adjustment — differs from catalog values",
+    "adjusted": "Adjusted",
+    "inCart": "In cart"
+  },
+  "products": {
+    "title": "Products",
+    "addProduct": "New product",
+    "editProduct": "Edit product",
+    "columns": {
+      "sku": "SKU",
+      "name": "Name",
+      "category": "Category",
+      "stock": "Stock",
+      "status": "Status",
+      "lastChange": "Last change"
+    },
+    "form": {
+      "sku": "SKU",
+      "category": "Category",
+      "nameFr": "Name (French)",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "brand": "Brand",
+      "packagingUnit": "Packaging unit",
+      "unitsPerPackage": "Pieces per packaging unit",
+      "costPrice": "Cost price",
+      "currentStock": "Current stock",
+      "stockMin": "Minimum stock",
+      "priceFactory": "Factory price",
+      "priceWholesale": "Wholesale price",
+      "priceRetail": "Retail price",
+      "isNew": "New product",
+      "isFeatured": "Featured",
+      "isActive": "Active",
+      "images": "Photos (URL)",
+      "addImage": "Add a photo",
+      "manufacturer": "Manufacturer",
+      "noManufacturer": "— No manufacturer —"
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "priceHistory": "Price history",
+    "deleteConfirm": "Delete this product? It will be moved to trash.",
+    "createdLabel": "Product created"
+  },
+  "customers": {
+    "title": "Customers",
+    "addCustomer": "New customer",
+    "columns": {
+      "name": "Name",
+      "business": "Business",
+      "phone": "Phone",
+      "role": "Type",
+      "balance": "Balance"
+    },
+    "form": {
+      "fullName": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "roleKey": "Customer type",
+      "initialPassword": "Initial password",
+      "businessName": "Business name",
+      "address": "Address",
+      "wilaya": "Province",
+      "creditLimit": "Credit limit"
+    },
+    "detail": {
+      "balance": "Current balance",
+      "creditLimit": "Credit limit",
+      "history": "History",
+      "addPayment": "Record a payment",
+      "addAdjustment": "Manual adjustment",
+      "amount": "Amount",
+      "note": "Note",
+      "reason": "Reason",
+      "back": "Back to customers"
+    },
+    "entryTypes": {
+      "SALE_VOUCHER": "Sales voucher",
+      "PAYMENT": "Payment",
+      "RETURN_CREDIT": "Return credit",
+      "ADJUSTMENT": "Adjustment"
+    },
+    "myAccount": {
+      "title": "My account",
+      "business": "Business",
+      "noHistory": "No transactions yet"
+    }
+  },
+  "vouchers": {
+    "title": "Vouchers",
+    "newVoucher": "New voucher",
+    "columns": {
+      "number": "No.",
+      "customer": "Customer",
+      "date": "Date",
+      "total": "Total",
+      "status": "Status"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled"
+    },
+    "selectCustomer": "Select a customer",
+    "addProduct": "Add a product",
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "pieces": "pieces",
+    "discount": "Discount",
+    "transport": "Transport",
+    "paidAmount": "Amount paid",
+    "notes": "Notes",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "confirm": "Confirm voucher",
+    "confirmWarning": "Once confirmed, the voucher can no longer be edited.",
+    "deliver": "Mark as delivered",
+    "cancel": "Cancel voucher",
+    "cancelReason": "Cancellation reason",
+    "viewPdf": "View PDF",
+    "autoSaved": "Auto-saved",
+    "back": "Back to vouchers",
+    "removeItem": "Remove",
+    "filterStatus": "All statuses",
+    "filterCustomer": "All customers",
+    "deleteConfirm": "Delete this draft?",
+    "backToCatalog": "Back to catalog",
+    "waitingForStaffConfirmation": "Your order is awaiting confirmation from our team.",
+    "noOrders": "No orders yet"
+  },
+  "manufacturers": {
+    "title": "Manufacturers",
+    "add": "New manufacturer",
+    "columns": {
+      "name": "Name",
+      "company": "Company",
+      "phone": "Phone",
+      "wilaya": "Province",
+      "balance": "Debt"
+    },
+    "form": {
+      "name": "Name",
+      "company": "Company",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "wilaya": "Province",
+      "contactName": "Main contact",
+      "paymentTerms": "Payment terms",
+      "logo": "Logo"
+    }
+  },
+  "purchases": {
+    "title": "Purchases",
+    "newPurchase": "New purchase voucher",
+    "selectManufacturer": "Select a manufacturer",
+    "columns": {
+      "number": "No.",
+      "manufacturer": "Manufacturer",
+      "date": "Date",
+      "total": "Total",
+      "status": "Status"
+    },
+    "unitCost": "Unit cost"
+  },
+  "stock": {
+    "title": "Stock",
+    "alerts": "Low stock alerts",
+    "movements": "Movement history",
+    "adjust": "Manual correction",
+    "product": "Product",
+    "currentStock": "Current stock",
+    "newStock": "New quantity (pieces)",
+    "reason": "Reason",
+    "columns": {
+      "date": "Date",
+      "product": "Product",
+      "type": "Type",
+      "quantity": "Quantity"
+    },
+    "movementTypes": {
+      "SALE": "Sale",
+      "SALE_CANCEL": "Sale cancelled",
+      "PURCHASE": "Purchase",
+      "RETURN_CUSTOMER": "Customer return",
+      "RETURN_SUPPLIER": "Supplier return",
+      "ADJUSTMENT": "Adjustment"
+    }
+  },
+  "returns": {
+    "title": "Returns",
+    "new": "New return",
+    "type": "Type",
+    "typeCustomer": "Customer",
+    "typeSupplier": "Manufacturer",
+    "party": "Customer / Manufacturer",
+    "product": "Product",
+    "quantity": "Quantity (pieces)",
+    "reason": "Reason",
+    "addItem": "Add",
+    "validate": "Validate",
+    "reject": "Reject",
+    "decision": "Decision",
+    "decisions": {
+      "REFUND": "Refund",
+      "CREDIT_NOTE": "Credit note",
+      "DEDUCT_NEXT": "Deduct from next voucher",
+      "REPLACEMENT": "Replacement"
+    },
+    "status": {
+      "NEW": "New",
+      "VALIDATED": "Validated",
+      "REJECTED": "Rejected"
+    },
+    "columns": {
+      "number": "No.",
+      "type": "Type",
+      "party": "Customer/Manufacturer",
+      "value": "Value",
+      "status": "Status"
+    }
+  },
+  "transport": {
+    "title": "Transport",
+    "columns": {
+      "voucher": "Voucher",
+      "customer": "Customer",
+      "driver": "Driver",
+      "status": "Status",
+      "cost": "Cost"
+    },
+    "status": {
+      "TO_PREPARE": "To prepare",
+      "PREPARED": "Prepared",
+      "IN_PROGRESS": "In progress",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled",
+      "PROBLEM": "Problem"
+    },
+    "newDelivery": "New delivery",
+    "selectVoucher": "Select a confirmed voucher",
+    "noVoucher": "No confirmed voucher without a delivery",
+    "driverName": "Driver",
+    "vehicle": "Vehicle",
+    "driverPhone": "Driver phone",
+    "address": "Address",
+    "wilaya": "Wilaya",
+    "cost": "Actual cost",
+    "billedToCustomer": "Billed to customer",
+    "notes": "Notes",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "driverPhoto": "Driver photo"
+  },
+  "productRequests": {
+    "title": "Product requests",
+    "columns": {
+      "product": "Product",
+      "customer": "Customer",
+      "quantity": "Quantity",
+      "status": "Status"
+    },
+    "status": {
+      "NEW": "New",
+      "SEARCHING": "Searching",
+      "FOUND": "Found",
+      "ORDERED": "Ordered",
+      "AVAILABLE": "Available",
+      "REFUSED": "Refused"
+    }
+  },
+  "negotiations": {
+    "title": "Negotiations",
+    "columns": {
+      "product": "Product",
+      "customer": "Customer",
+      "current": "Current price",
+      "requested": "Requested price",
+      "quantity": "Quantity",
+      "status": "Status"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "COUNTERED": "Counter-offer"
+    },
+    "accept": "Accept",
+    "reject": "Reject",
+    "counter": "Counter-offer",
+    "counterPrice": "Proposed price"
+  },
+  "categories": {
+    "title": "Categories",
+    "addCategory": "New category",
+    "columns": {
+      "name": "Name",
+      "slug": "Slug",
+      "parent": "Parent",
+      "products": "Products"
+    },
+    "form": {
+      "slug": "Slug (URL)",
+      "nameFr": "Name (French)",
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "parent": "Parent category"
+    },
+    "none": "None",
+    "deleteConfirm": "Delete this category?"
+  },
+  "trash": {
+    "title": "Trash",
+    "empty": "Trash is empty",
+    "columns": {
+      "type": "Type",
+      "deletedBy": "Deleted by",
+      "deletedAt": "On"
+    },
+    "restore": "Restore",
+    "purge": "Delete permanently",
+    "purgeConfirm": "Permanently delete this item? This cannot be undone.",
+    "entityTypes": {
+      "Product": "Product",
+      "Category": "Category",
+      "Manufacturer": "Manufacturer",
+      "Notification": "Notification"
+    }
+  },
+  "besoins": {
+    "title": "Needs",
+    "subtitle": "Report a need or remark related to the depots.",
+    "placeholder": "E.g.: we are low on 50L bag cartons at the depot...",
+    "send": "Send",
+    "empty": "No needs reported yet",
+    "mine": "My needs",
+    "all": "All needs",
+    "respondPlaceholder": "Your response...",
+    "respond": "Respond",
+    "responded": "Answered",
+    "pending": "Pending",
+    "yourResponse": "Your response"
+  }
+}

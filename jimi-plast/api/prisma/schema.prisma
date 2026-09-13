@@ -1,0 +1,846 @@
+// JIMI PLAST — Phase 1: fondations (auth, rôles/permissions, audit, corbeille, séquences)
+// Les phases suivantes ajouteront les modèles catalogue/clients/bons/stock/etc.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identité & accès
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  key         String   @unique // "admin" | "employee" | "wholesaler" | "retailer" | custom
+  name        String
+  description String?
+  isSystem    Boolean  @default(false) // les 4 rôles de base, non supprimables
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  key         String   @unique // ex: "prices.view_wholesale"
+  label       String
+  group       String // regroupement pour l'UI: "prices", "orders", "stock", ...
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// Surcharge individuelle pour un utilisateur (accorde ou retire un droit
+// précis par rapport à ce que donne son rôle) — utilisé surtout pour EMPLOYEE.
+model UserPermission {
+  userId       String
+  permissionId String
+  granted      Boolean // true = accordé explicitement, false = retiré explicitement
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+  @@map("user_permissions")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  phone        String?
+  passwordHash String
+  fullName     String
+  avatarUrl    String?
+  status       UserStatus @default(ACTIVE)
+  roleId       String
+  locale       String     @default("fr") // fr | ar | en — préférence d'interface
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+  deletedAt   DateTime? // suppression logique — voir TrashItem pour la trace
+
+  role            Role             @relation(fields: [roleId], references: [id])
+  userPermissions UserPermission[]
+  refreshTokens   RefreshToken[]
+  auditLogs       AuditLog[]       @relation("AuditLogActor")
+  reviewedRequests RegistrationRequest[] @relation("ReviewedBy")
+  customer        Customer?
+  salesVouchers   SalesVoucher[]
+  purchaseVouchers PurchaseVoucher[]
+  notifications   Notification[]
+  besoins         Besoin[]         @relation("BesoinAuthor")
+  besoinsAnswered Besoin[]         @relation("BesoinRespondedBy")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id              String    @id @default(cuid())
+  userId          String
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  replacedByToken String?
+  createdAt       DateTime  @default(now())
+  userAgent       String?
+  ip              String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Demandes d'inscription — jamais acceptées automatiquement (cf. §3 cahier des charges)
+// ---------------------------------------------------------------------------
+
+enum RegistrationStatus {
+  NEW
+  INFO_REQUESTED
+  ACCEPTED
+  REJECTED
+}
+
+model RegistrationRequest {
+  id                  String             @id @default(cuid())
+  fullName            String
+  phone               String
+  email               String
+  address             String?
+  wilaya              String?
+  businessName        String?
+  requestedRoleKey    String? // suggestion du client: "wholesaler" | "retailer" | ...
+  notes               String?
+  status              RegistrationStatus @default(NEW)
+  reviewNote          String?
+  reviewedById        String?
+  reviewedAt          DateTime?
+  createdUserId       String? // renseigné une fois le compte créé après acceptation
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  reviewedBy User? @relation("ReviewedBy", fields: [reviewedById], references: [id])
+
+  @@map("registration_requests")
+}
+
+// ---------------------------------------------------------------------------
+// Transversal : audit, corbeille, séquences de numérotation, réglages, i18n
+// ---------------------------------------------------------------------------
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  RESTORE
+  PURGE
+  LOGIN
+  LOGIN_FAILED
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  entityType String // "User", "Product", "SalesVoucher", ...
+  entityId   String
+  action     AuditAction
+  field      String?
+  oldValue   String?
+  newValue   String?
+  reason     String?
+  actorId    String?
+  createdAt  DateTime    @default(now())
+
+  actor User? @relation("AuditLogActor", fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model TrashItem {
+  id          String    @id @default(cuid())
+  entityType  String
+  entityId    String
+  snapshot    Json // état complet de l'entité au moment de la suppression
+  reason      String?
+  deletedById String?
+  deletedAt   DateTime  @default(now())
+  restoredAt  DateTime?
+  purgedAt    DateTime?
+
+  @@index([entityType, entityId])
+  @@map("trash_items")
+}
+
+// Compteur atomique par type de document et par année : BL-2026-000001
+model NumberSequence {
+  key        String // "BL" | "ACH" | "RET" | "PAY" | ...
+  year       Int
+  lastNumber Int    @default(0)
+
+  @@id([key, year])
+  @@map("number_sequences")
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Translation {
+  key    String
+  locale String // "fr" | "ar" | "en"
+  value  String
+
+  @@id([key, locale])
+  @@map("translations")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue & tarification (Phase 2)
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameFr    String
+  nameAr    String?
+  nameEn    String?
+  parentId  String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@map("categories")
+}
+
+// Unité de conditionnement (pièce, carton, palette...) — administrable.
+model PackagingUnit {
+  id     String @id @default(cuid())
+  key    String @unique // "unit" | "carton" | "palette" | ...
+  label  String
+  labelPlural String
+
+  products             Product[]
+  voucherItems         SalesVoucherItem[]
+  purchaseVoucherItems PurchaseVoucherItem[]
+
+  @@map("packaging_units")
+}
+
+// Niveau de prix (usine/gros/détail...) — administrable, lié à une permission
+// de visibilité (permissionKey) pour que la logique d'affichage reste générique.
+model PriceTierType {
+  id            String @id @default(cuid())
+  key           String @unique // "factory" | "wholesale" | "retail" | ...
+  label         String
+  permissionKey String // clé de Permission qui donne le droit de voir ce niveau
+  sortOrder     Int    @default(0)
+
+  prices       ProductPrice[]
+  priceHistory PriceHistory[]
+  promotions   Promotion[]
+  voucherItems SalesVoucherItem[]
+
+  @@map("price_tier_types")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  sku         String   @unique
+  barcode     String?
+  categoryId  String
+  manufacturerId String?
+  brand       String?
+  nameFr      String
+  nameAr      String?
+  nameEn      String?
+  descriptionFr String?
+  descriptionAr String?
+  descriptionEn String?
+  attributes  Json?    // couleur, matière, dimensions, poids... libre et extensible
+
+  packagingUnitId  String
+  unitsPerPackage  Int     @default(1) // ex: 10 pièces / carton
+  costPrice        Decimal? @db.Decimal(12, 2) // prix d'achat — visible seulement via costs.view
+
+  currentStock Int     @default(0)
+  stockMin     Int     @default(0)
+  stockMax     Int?
+
+  isActive    Boolean   @default(true)
+  isNew       Boolean   @default(false)
+  isFeatured  Boolean   @default(false)
+  isSeasonal  Boolean   @default(false)
+  seasonStart DateTime?
+  seasonEnd   DateTime?
+  manualPriority Int?   // override manuel de l'ordre d'affichage
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  category      Category      @relation(fields: [categoryId], references: [id])
+  manufacturer  Manufacturer? @relation(fields: [manufacturerId], references: [id])
+  packagingUnit PackagingUnit @relation(fields: [packagingUnitId], references: [id])
+  images         ProductImage[]
+  prices         ProductPrice[]
+  priceHistory   PriceHistory[]
+  promotions     Promotion[]
+  voucherItems         SalesVoucherItem[]
+  stockMovements       StockMovement[]
+  purchaseVoucherItems PurchaseVoucherItem[]
+  returnItems          ReturnItem[]
+  negotiations         Negotiation[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model ProductPrice {
+  productId       String
+  priceTierTypeId String
+  price           Decimal @db.Decimal(12, 2)
+  updatedAt       DateTime @updatedAt
+
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceTierType PriceTierType @relation(fields: [priceTierTypeId], references: [id])
+
+  @@id([productId, priceTierTypeId])
+  @@map("product_prices")
+}
+
+model PriceHistory {
+  id              String   @id @default(cuid())
+  productId       String
+  priceTierTypeId String
+  oldPrice        Decimal? @db.Decimal(12, 2)
+  newPrice        Decimal  @db.Decimal(12, 2)
+  changedById     String?
+  reason          String?
+  createdAt       DateTime @default(now())
+
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceTierType PriceTierType @relation(fields: [priceTierTypeId], references: [id])
+
+  @@index([productId])
+  @@map("price_history")
+}
+
+enum DiscountType {
+  PERCENT
+  AMOUNT
+}
+
+// ---------------------------------------------------------------------------
+// Clients & comptes (Phase 3)
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  businessName String?
+  address      String?
+  wilaya       String?
+  creditLimit  Decimal  @default(0) @db.Decimal(12, 2)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  user          User           @relation(fields: [userId], references: [id])
+  entries       LedgerEntry[]
+  salesVouchers   SalesVoucher[]
+  returns         Return[]
+  productRequests ProductRequest[]
+  negotiations    Negotiation[]
+
+  @@map("customers")
+}
+
+enum LedgerEntryType {
+  SALE_VOUCHER
+  PAYMENT
+  RETURN_CREDIT
+  ADJUSTMENT
+}
+
+// Un montant positif = ce que le client doit (facture/bon) ; négatif = ce
+// qu'il a réglé. Le solde n'est jamais stocké : toujours SUM(amount).
+model LedgerEntry {
+  id          String          @id @default(cuid())
+  customerId  String
+  type        LedgerEntryType
+  amount      Decimal         @db.Decimal(12, 2)
+  reference   String?
+  note        String?
+  createdById String?
+  createdAt   DateTime        @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("ledger_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Ventes & bons (Phase 4)
+// ---------------------------------------------------------------------------
+
+enum VoucherStatus {
+  DRAFT
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+model SalesVoucher {
+  id             String        @id @default(cuid())
+  number         String?       @unique // attribué uniquement à la confirmation (BL-2026-000001)
+  customerId     String
+  sellerId       String
+  status         VoucherStatus @default(DRAFT)
+  discount       Decimal       @default(0) @db.Decimal(12, 2)
+  transportCost  Decimal       @default(0) @db.Decimal(12, 2)
+  paidAmount     Decimal       @default(0) @db.Decimal(12, 2)
+  previousCredit Decimal?      @db.Decimal(12, 2) // solde du client juste avant confirmation (pour le PDF)
+  notes          String?
+  hidden         Boolean       @default(false)
+  cancelReason   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  deliveredAt DateTime?
+  deletedAt   DateTime?
+
+  customer Customer           @relation(fields: [customerId], references: [id])
+  seller   User               @relation(fields: [sellerId], references: [id])
+  items    SalesVoucherItem[]
+  delivery Delivery?
+
+  @@index([customerId])
+  @@index([status])
+  @@map("sales_vouchers")
+}
+
+model SalesVoucherItem {
+  id                    String  @id @default(cuid())
+  voucherId             String
+  productId             String
+  priceTierTypeId       String
+  packagingUnitId       String
+  quantityPackages      Int // ex: 3 cartons
+  unitsPerPackageSnapshot Int // copié depuis Product au moment de l'ajout
+  totalUnits            Int // quantityPackages * unitsPerPackageSnapshot
+  unitPrice             Decimal @db.Decimal(12, 2) // prix pièce au moment de la vente, figé
+  lineTotal             Decimal @db.Decimal(12, 2)
+  costPriceSnapshot     Decimal? @db.Decimal(12, 2) // coût d'achat au moment de la confirmation, figé — la marge des ventes passées ne doit jamais bouger si le coût catalogue change ensuite
+
+  voucher       SalesVoucher  @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id])
+  priceTierType PriceTierType @relation(fields: [priceTierTypeId], references: [id])
+  packagingUnit PackagingUnit @relation(fields: [packagingUnitId], references: [id])
+
+  @@map("sales_voucher_items")
+}
+
+enum StockMovementType {
+  SALE
+  SALE_CANCEL
+  PURCHASE
+  RETURN_CUSTOMER
+  RETURN_SUPPLIER
+  ADJUSTMENT
+}
+
+model StockMovement {
+  id            String            @id @default(cuid())
+  productId     String
+  type          StockMovementType
+  quantity      Int // toujours en pièces ; négatif = sortie, positif = entrée
+  referenceType String? // "SalesVoucher" | "PurchaseVoucher" | ...
+  referenceId   String?
+  reason        String?
+  createdById   String?
+  createdAt     DateTime          @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("stock_movements")
+}
+
+// ---------------------------------------------------------------------------
+// Fabricants, achats & inventaire (Phase 5)
+// ---------------------------------------------------------------------------
+
+model Manufacturer {
+  id            String   @id @default(cuid())
+  name          String
+  logoUrl       String?
+  company       String?
+  phone         String?
+  whatsapp      String?
+  email         String?
+  address       String?
+  wilaya        String?
+  contactName   String?
+  paymentTerms  String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  entries          SupplierLedgerEntry[]
+  purchaseVouchers PurchaseVoucher[]
+  returns          Return[]
+  products         Product[]
+
+  @@map("manufacturers")
+}
+
+enum SupplierLedgerEntryType {
+  PURCHASE_VOUCHER
+  PAYMENT
+  ADJUSTMENT
+}
+
+// Positif = ce qu'on doit au fabricant, négatif = ce qu'on a payé.
+model SupplierLedgerEntry {
+  id             String                  @id @default(cuid())
+  manufacturerId String
+  type           SupplierLedgerEntryType
+  amount         Decimal                 @db.Decimal(12, 2)
+  reference      String?
+  note           String?
+  createdById    String?
+  createdAt      DateTime                @default(now())
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+
+  @@index([manufacturerId])
+  @@map("supplier_ledger_entries")
+}
+
+enum PurchaseVoucherStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+model PurchaseVoucher {
+  id             String                @id @default(cuid())
+  number         String?               @unique // ACH-2026-000001, attribué à la confirmation
+  manufacturerId String
+  buyerId        String
+  status         PurchaseVoucherStatus @default(DRAFT)
+  discount       Decimal               @default(0) @db.Decimal(12, 2)
+  transportCost  Decimal               @default(0) @db.Decimal(12, 2)
+  paidAmount     Decimal               @default(0) @db.Decimal(12, 2)
+  previousDebt   Decimal?              @db.Decimal(12, 2)
+  notes          String?
+  hidden         Boolean               @default(false)
+  cancelReason   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  deletedAt   DateTime?
+
+  manufacturer Manufacturer          @relation(fields: [manufacturerId], references: [id])
+  buyer        User                  @relation(fields: [buyerId], references: [id])
+  items        PurchaseVoucherItem[]
+
+  @@index([manufacturerId])
+  @@index([status])
+  @@map("purchase_vouchers")
+}
+
+model PurchaseVoucherItem {
+  id                      String  @id @default(cuid())
+  voucherId               String
+  productId               String
+  packagingUnitId         String
+  quantityPackages        Int
+  unitsPerPackageSnapshot Int
+  totalUnits              Int
+  unitCost                Decimal @db.Decimal(12, 2)
+  lineTotal               Decimal @db.Decimal(12, 2)
+
+  voucher       PurchaseVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  product       Product         @relation(fields: [productId], references: [id])
+  packagingUnit PackagingUnit   @relation(fields: [packagingUnitId], references: [id])
+
+  @@map("purchase_voucher_items")
+}
+
+// ---------------------------------------------------------------------------
+// Retours & transport (Phase 6)
+// ---------------------------------------------------------------------------
+
+enum ReturnType {
+  CUSTOMER
+  SUPPLIER
+}
+
+enum ReturnStatus {
+  NEW
+  VALIDATED
+  REJECTED
+}
+
+enum ReturnDecision {
+  REFUND
+  CREDIT_NOTE
+  DEDUCT_NEXT
+  REPLACEMENT
+}
+
+// Les retours se gèrent en pièces, jamais en cartons (§16 du cahier des charges).
+model Return {
+  id             String         @id @default(cuid())
+  number         String?        @unique // RET-2026-000001, attribué à la validation
+  type           ReturnType
+  customerId     String?
+  manufacturerId String?
+  status         ReturnStatus   @default(NEW)
+  decision       ReturnDecision?
+  totalValue     Decimal        @default(0) @db.Decimal(12, 2)
+  createdById    String?
+  createdAt      DateTime       @default(now())
+  validatedAt    DateTime?
+  deletedAt      DateTime?
+
+  customer     Customer?    @relation(fields: [customerId], references: [id])
+  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id])
+  items        ReturnItem[]
+
+  @@map("returns")
+}
+
+enum ReturnItemCondition {
+  DAMAGED
+  DEFECTIVE
+  OTHER
+}
+
+model ReturnItem {
+  id        String              @id @default(cuid())
+  returnId  String
+  productId String
+  quantity  Int // en pièces
+  reason    String
+  condition ReturnItemCondition @default(DAMAGED)
+  unitPrice Decimal             @db.Decimal(12, 2)
+  lineTotal Decimal             @db.Decimal(12, 2)
+
+  return  Return  @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("return_items")
+}
+
+enum DeliveryStatus {
+  TO_PREPARE
+  PREPARED
+  IN_PROGRESS
+  DELIVERED
+  CANCELLED
+  PROBLEM
+}
+
+model Delivery {
+  id              String         @id @default(cuid())
+  voucherId       String         @unique
+  driverName      String?
+  driverPhotoUrl  String?
+  vehicle         String?
+  driverPhone     String?
+  address         String?
+  wilaya          String?
+  status          DeliveryStatus @default(TO_PREPARE)
+  cost            Decimal        @default(0) @db.Decimal(12, 2)
+  billedToCustomer Decimal       @default(0) @db.Decimal(12, 2)
+  notes           String?
+  scheduledAt     DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  voucher SalesVoucher @relation(fields: [voucherId], references: [id])
+
+  @@map("deliveries")
+}
+
+// ---------------------------------------------------------------------------
+// Demandes produits & négociation (Phase 7)
+// ---------------------------------------------------------------------------
+
+enum ProductRequestStatus {
+  NEW
+  SEARCHING
+  FOUND
+  ORDERED
+  AVAILABLE
+  REFUSED
+}
+
+model ProductRequest {
+  id             String               @id @default(cuid())
+  customerId     String
+  productName    String
+  description    String?
+  photoUrl       String?
+  quantityWanted Int?
+  status         ProductRequestStatus @default(NEW)
+  adminNote      String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@map("product_requests")
+}
+
+enum NegotiationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTERED
+}
+
+model Negotiation {
+  id               String            @id @default(cuid())
+  customerId       String
+  productId        String
+  currentPrice     Decimal           @db.Decimal(12, 2) // prix catalogue du client au moment de la demande
+  requestedPrice   Decimal           @db.Decimal(12, 2)
+  requestedQuantity Int
+  status           NegotiationStatus @default(PENDING)
+  counterPrice     Decimal?          @db.Decimal(12, 2)
+  validUntil       DateTime?
+  adminNote        String?
+  createdAt        DateTime          @default(now())
+  respondedAt      DateTime?
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@map("negotiations")
+}
+
+// ---------------------------------------------------------------------------
+// Centre de notifications interne (Phase 8)
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+// "Besoin" (ajout hors cahier des charges initial, à la demande de
+// l'admin) : n'importe quel utilisateur connecté (employé, grossiste,
+// détaillant) peut signaler un besoin/une remarque liée aux dépôts.
+// L'admin (permission besoins.manage) voit tout, avec l'auteur ; chaque
+// autre utilisateur ne voit que ses propres messages et la réponse reçue —
+// jamais ceux des autres.
+model Besoin {
+  id             String    @id @default(cuid())
+  authorId       String
+  message        String
+  response       String?
+  respondedById  String?
+  respondedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  author       User  @relation("BesoinAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  respondedBy  User? @relation("BesoinRespondedBy", fields: [respondedById], references: [id])
+
+  @@index([authorId])
+  @@map("besoins")
+}
+
+model Promotion {
+  id              String       @id @default(cuid())
+  productId       String
+  priceTierTypeId String
+  discountType    DiscountType
+  discountValue   Decimal      @db.Decimal(12, 2)
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceTierType PriceTierType @relation(fields: [priceTierTypeId], references: [id])
+
+  @@index([productId])
+  @@map("promotions")
+}

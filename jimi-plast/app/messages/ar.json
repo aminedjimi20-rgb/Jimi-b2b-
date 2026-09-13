@@ -1,0 +1,540 @@
+{
+  "app": {
+    "name": "جيمي بلاست"
+  },
+  "login": {
+    "title": "تسجيل الدخول",
+    "subtitle": "ادخل إلى مساحة عمل جيمي بلاست",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "submit": "دخول",
+    "noAccount": "ليس لديك حساب؟",
+    "registerLink": "اطلب الوصول",
+    "error": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+  },
+  "register": {
+    "title": "طلب انضمام",
+    "subtitle": "سيقوم أحد المسؤولين بمراجعة طلبك قبل التفعيل.",
+    "fullName": "الاسم الكامل",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "address": "العنوان",
+    "wilaya": "الولاية",
+    "businessName": "اسم المحل (إن وجد)",
+    "requestedRole": "نوع الحساب المطلوب",
+    "roleWholesaler": "بالجملة",
+    "roleRetailer": "بالتجزئة",
+    "notes": "معلومات إضافية",
+    "submit": "إرسال الطلب",
+    "success": "تم إرسال طلبك. سيقوم أحد المسؤولين بمراجعته.",
+    "backToLogin": "العودة لتسجيل الدخول"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "catalog": "الكتالوج",
+    "products": "المنتجات",
+    "categories": "الفئات",
+    "customers": "العملاء",
+    "myAccount": "حسابي",
+    "vouchers": "البونات",
+    "manufacturers": "المصانع",
+    "purchases": "المشتريات",
+    "stock": "المخزون",
+    "returns": "المرتجعات",
+    "transport": "النقل",
+    "productRequests": "طلبات المنتجات",
+    "negotiations": "التفاوض",
+    "users": "الموظفون والأدوار",
+    "requests": "طلبات الانضمام",
+    "logout": "تسجيل الخروج",
+    "trash": "سلة المهملات",
+    "besoins": "الاحتياجات",
+    "myOrders": "طلباتي"
+  },
+  "dashboard": {
+    "welcome": "مرحبًا {name}",
+    "roleLabel": "الدور",
+    "pendingRequests": "طلبات معلقة",
+    "activeUsers": "حسابات نشطة",
+    "rolesConfigured": "الأدوار المُعدة",
+    "placeholder": "وحدات المنتجات والطلبات والمخزون والسندات والإحصائيات قادمة في المراحل القادمة.",
+    "statsTitle": "الإحصائيات",
+    "dateFrom": "من",
+    "dateTo": "إلى",
+    "preset7d": "7 أيام",
+    "preset30d": "30 يوم",
+    "preset90d": "90 يوم",
+    "presetYear": "هذه السنة",
+    "presetAll": "الكل",
+    "revenue": "رقم الأعمال",
+    "margin": "الهامش",
+    "averageBasket": "متوسط السلة",
+    "confirmedVouchers": "الوصولات المؤكدة",
+    "customerCredit": "دين الزبائن",
+    "supplierDebt": "دين الموردين",
+    "lowStock": "مخزون منخفض",
+    "pendingTotal": "طلبات معلقة",
+    "topProductsTitle": "المنتجات الأكثر مبيعا"
+  },
+  "requests": {
+    "title": "طلبات الانضمام",
+    "empty": "لا توجد طلبات معلقة",
+    "columns": {
+      "name": "الاسم",
+      "phone": "الهاتف",
+      "type": "النوع المطلوب",
+      "date": "التاريخ",
+      "status": "الحالة"
+    },
+    "status": {
+      "NEW": "جديدة",
+      "INFO_REQUESTED": "طلب معلومات",
+      "ACCEPTED": "مقبولة",
+      "REJECTED": "مرفوضة"
+    },
+    "accept": "قبول",
+    "reject": "رفض",
+    "requestInfo": "طلب معلومات",
+    "acceptTitle": "قبول الطلب",
+    "selectRole": "الدور المسند",
+    "initialPassword": "كلمة المرور الأولية",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "note": "ملاحظة"
+  },
+  "users": {
+    "title": "الموظفون والأدوار والصلاحيات",
+    "tabUsers": "المستخدمون",
+    "tabRoles": "الأدوار والصلاحيات",
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "status": "الحالة",
+      "lastLogin": "آخر دخول"
+    },
+    "suspend": "تعليق",
+    "activate": "إعادة تفعيل",
+    "permissionGroups": {
+      "prices": "الأسعار",
+      "orders": "الطلبات",
+      "vouchers": "السندات",
+      "finance": "المالية",
+      "suppliers": "المصانع",
+      "stock": "المخزون",
+      "returns": "المرتجعات",
+      "transport": "النقل",
+      "negotiations": "التفاوض",
+      "stats": "الإحصائيات",
+      "admin": "الإدارة",
+      "documents": "المستندات",
+      "besoins": "الاحتياجات"
+    }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "delete": "حذف"
+  },
+  "common": {
+    "loading": "جارٍ التحميل…",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "error": "حدث خطأ ما",
+    "empty": "لا توجد عناصر",
+    "search": "بحث…",
+    "loginToSeePrices": "سجّل الدخول لرؤية الأسعار",
+    "uploadPhoto": "من المعرض"
+  },
+  "catalog": {
+    "title": "الكتالوج",
+    "allCategories": "كل الفئات",
+    "sortPriority": "الأولوية",
+    "sortNewest": "الأحدث",
+    "sortNameAsc": "الاسم (أ→ي)",
+    "sortNameDesc": "الاسم (ي→أ)",
+    "inStock": "متوفر",
+    "outOfStock": "نفدت الكمية",
+    "onlyInStock": "المتوفر فقط",
+    "onlyOnSale": "العروض فقط",
+    "onlyNew": "الجديد فقط",
+    "new": "جديد",
+    "featured": "مميز",
+    "promo": "عرض",
+    "perPackage": "{count} {unit}/{package}",
+    "noResults": "لا يوجد منتج يطابق بحثك",
+    "cart": "السلة",
+    "cartEmpty": "سلتك فارغة",
+    "cartTotal": "المجموع",
+    "checkout": "إرسال الطلبية",
+    "chooseCustomer": "اختر الزبون",
+    "addToCart": "أضف إلى السلة",
+    "piecesPerPackage": "{count} حبة / {unit}",
+    "viewPricesAs": "عرض الأسعار",
+    "costPrice": "الشراء",
+    "closeCart": "غلق هذا البانيي",
+    "newCart": "بانيي جديد",
+    "cartLabelPlaceholder": "اسم البانيي (الزبون...)",
+    "quantityCartons": "الكمية (كراطن)",
+    "totalPieces": "مجموع القطع",
+    "discount": "التخفيض (دج)",
+    "confirmAdd": "تأكيد",
+    "unitPrice": "سعر الوحدة",
+    "subtotal": "المجموع الفرعي",
+    "total": "المجموع",
+    "newProduct": "منتوج جديد",
+    "pieces": "قطعة",
+    "piecesHint": "بدل عدد القطع إذا كان الكرطون ناقص — التخفيض يتحسب أوتوماتيكيا.",
+    "stockCartons": "{count} كرطونة فالستوك",
+    "unitsPerPackage": "قطعة / كرطونة",
+    "adjustedWarning": "تعديل يدوي — يختلف عن قيم الكاتالوڤ",
+    "adjusted": "معدّل",
+    "inCart": "فالبانيي"
+  },
+  "products": {
+    "title": "المنتجات",
+    "addProduct": "منتج جديد",
+    "editProduct": "تعديل المنتج",
+    "columns": {
+      "sku": "المرجع",
+      "name": "الاسم",
+      "category": "الفئة",
+      "stock": "المخزون",
+      "status": "الحالة",
+      "lastChange": "آخر تعديل"
+    },
+    "form": {
+      "sku": "المرجع (SKU)",
+      "category": "الفئة",
+      "nameFr": "الاسم (فرنسي)",
+      "nameAr": "الاسم (عربي)",
+      "nameEn": "الاسم (إنجليزي)",
+      "brand": "العلامة التجارية",
+      "packagingUnit": "وحدة التعبئة",
+      "unitsPerPackage": "عدد القطع في وحدة التعبئة",
+      "costPrice": "سعر الشراء (التكلفة)",
+      "currentStock": "المخزون الحالي",
+      "stockMin": "الحد الأدنى للمخزون",
+      "priceFactory": "سعر المصنع",
+      "priceWholesale": "سعر الجملة",
+      "priceRetail": "سعر التجزئة",
+      "isNew": "منتج جديد",
+      "isFeatured": "مميز",
+      "isActive": "نشط",
+      "images": "الصور (رابط)",
+      "addImage": "إضافة صورة",
+      "manufacturer": "الصانع",
+      "noManufacturer": "— بدون صانع —"
+    },
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "priceHistory": "سجل الأسعار",
+    "deleteConfirm": "حذف هذا المنتج؟ سيُنقل إلى سلة المحذوفات.",
+    "createdLabel": "تم إنشاء المنتوج"
+  },
+  "customers": {
+    "title": "العملاء",
+    "addCustomer": "عميل جديد",
+    "columns": {
+      "name": "الاسم",
+      "business": "المحل",
+      "phone": "الهاتف",
+      "role": "النوع",
+      "balance": "الرصيد"
+    },
+    "form": {
+      "fullName": "الاسم الكامل",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "roleKey": "نوع العميل",
+      "initialPassword": "كلمة المرور الأولية",
+      "businessName": "اسم المحل",
+      "address": "العنوان",
+      "wilaya": "الولاية",
+      "creditLimit": "حد الائتمان"
+    },
+    "detail": {
+      "balance": "الرصيد الحالي",
+      "creditLimit": "حد الائتمان",
+      "history": "السجل",
+      "addPayment": "تسجيل دفعة",
+      "addAdjustment": "تعديل يدوي",
+      "amount": "المبلغ",
+      "note": "ملاحظة",
+      "reason": "السبب",
+      "back": "العودة إلى العملاء"
+    },
+    "entryTypes": {
+      "SALE_VOUCHER": "بون بيع",
+      "PAYMENT": "دفعة",
+      "RETURN_CREDIT": "رصيد إرجاع",
+      "ADJUSTMENT": "تعديل"
+    },
+    "myAccount": {
+      "title": "حسابي",
+      "business": "المحل",
+      "noHistory": "لا توجد عمليات بعد"
+    }
+  },
+  "vouchers": {
+    "title": "البونات",
+    "newVoucher": "بون جديد",
+    "columns": {
+      "number": "الرقم",
+      "customer": "العميل",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "status": "الحالة"
+    },
+    "status": {
+      "DRAFT": "مسودة",
+      "CONFIRMED": "مؤكد",
+      "DELIVERED": "تم التسليم",
+      "CANCELLED": "ملغى"
+    },
+    "selectCustomer": "اختر عميلاً",
+    "addProduct": "إضافة منتج",
+    "product": "المنتج",
+    "quantity": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "pieces": "قطعة",
+    "discount": "الخصم",
+    "transport": "النقل",
+    "paidAmount": "المبلغ المدفوع",
+    "notes": "ملاحظات",
+    "subtotal": "المجموع الفرعي",
+    "total": "الإجمالي",
+    "confirm": "تأكيد البون",
+    "confirmWarning": "بعد التأكيد، لا يمكن تعديل البون.",
+    "deliver": "تحديد كمُسلَّم",
+    "cancel": "إلغاء البون",
+    "cancelReason": "سبب الإلغاء",
+    "viewPdf": "عرض PDF",
+    "autoSaved": "تم الحفظ تلقائياً",
+    "back": "العودة إلى البونات",
+    "removeItem": "إزالة",
+    "filterStatus": "كل الحالات",
+    "filterCustomer": "كل العملاء",
+    "deleteConfirm": "حذف هذه المسودة؟",
+    "backToCatalog": "العودة إلى الكاتالوڤ",
+    "waitingForStaffConfirmation": "طلبيتك في انتظار تأكيد فريقنا.",
+    "noOrders": "لا توجد طلبيات بعد"
+  },
+  "manufacturers": {
+    "title": "المصانع",
+    "add": "مصنع جديد",
+    "columns": {
+      "name": "الاسم",
+      "company": "الشركة",
+      "phone": "الهاتف",
+      "wilaya": "الولاية",
+      "balance": "الدين"
+    },
+    "form": {
+      "name": "الاسم",
+      "company": "الشركة",
+      "phone": "الهاتف",
+      "whatsapp": "واتساب",
+      "wilaya": "الولاية",
+      "contactName": "جهة الاتصال",
+      "paymentTerms": "شروط الدفع",
+      "logo": "الشعار"
+    }
+  },
+  "purchases": {
+    "title": "المشتريات",
+    "newPurchase": "بون شراء جديد",
+    "selectManufacturer": "اختر مصنعاً",
+    "columns": {
+      "number": "الرقم",
+      "manufacturer": "المصنع",
+      "date": "التاريخ",
+      "total": "الإجمالي",
+      "status": "الحالة"
+    },
+    "unitCost": "تكلفة الوحدة"
+  },
+  "stock": {
+    "title": "المخزون",
+    "alerts": "تنبيهات نقص المخزون",
+    "movements": "سجل الحركات",
+    "adjust": "تصحيح يدوي",
+    "product": "المنتج",
+    "currentStock": "المخزون الحالي",
+    "newStock": "الكمية الجديدة (قطعة)",
+    "reason": "السبب",
+    "columns": {
+      "date": "التاريخ",
+      "product": "المنتج",
+      "type": "النوع",
+      "quantity": "الكمية"
+    },
+    "movementTypes": {
+      "SALE": "بيع",
+      "SALE_CANCEL": "إلغاء بيع",
+      "PURCHASE": "شراء",
+      "RETURN_CUSTOMER": "إرجاع عميل",
+      "RETURN_SUPPLIER": "إرجاع لمصنع",
+      "ADJUSTMENT": "تعديل"
+    }
+  },
+  "returns": {
+    "title": "المرتجعات",
+    "new": "مرتجع جديد",
+    "type": "النوع",
+    "typeCustomer": "عميل",
+    "typeSupplier": "مصنع",
+    "party": "العميل / المصنع",
+    "product": "المنتج",
+    "quantity": "الكمية (قطعة)",
+    "reason": "السبب",
+    "addItem": "إضافة",
+    "validate": "تحقق",
+    "reject": "رفض",
+    "decision": "القرار",
+    "decisions": {
+      "REFUND": "استرجاع",
+      "CREDIT_NOTE": "رصيد دائن",
+      "DEDUCT_NEXT": "خصم من البون القادم",
+      "REPLACEMENT": "استبدال"
+    },
+    "status": {
+      "NEW": "جديد",
+      "VALIDATED": "تم التحقق",
+      "REJECTED": "مرفوض"
+    },
+    "columns": {
+      "number": "الرقم",
+      "type": "النوع",
+      "party": "العميل/المصنع",
+      "value": "القيمة",
+      "status": "الحالة"
+    }
+  },
+  "transport": {
+    "title": "النقل",
+    "columns": {
+      "voucher": "البون",
+      "customer": "العميل",
+      "driver": "السائق",
+      "status": "الحالة",
+      "cost": "التكلفة"
+    },
+    "status": {
+      "TO_PREPARE": "للتحضير",
+      "PREPARED": "جاهزة",
+      "IN_PROGRESS": "قيد التنفيذ",
+      "DELIVERED": "تم التسليم",
+      "CANCELLED": "ملغاة",
+      "PROBLEM": "مشكلة"
+    },
+    "newDelivery": "توصيل جديد",
+    "selectVoucher": "اختر بون مؤكد",
+    "noVoucher": "لا يوجد بون مؤكد بلا توصيل",
+    "driverName": "السائق",
+    "vehicle": "المركبة",
+    "driverPhone": "هاتف السائق",
+    "address": "العنوان",
+    "wilaya": "الولاية",
+    "cost": "التكلفة الفعلية",
+    "billedToCustomer": "المفوتر للعميل",
+    "notes": "ملاحظات",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "driverPhoto": "صورة السائق"
+  },
+  "productRequests": {
+    "title": "طلبات المنتجات",
+    "columns": {
+      "product": "المنتج",
+      "customer": "العميل",
+      "quantity": "الكمية",
+      "status": "الحالة"
+    },
+    "status": {
+      "NEW": "جديدة",
+      "SEARCHING": "قيد البحث",
+      "FOUND": "تم العثور عليه",
+      "ORDERED": "تم الطلب",
+      "AVAILABLE": "متوفر",
+      "REFUSED": "مرفوضة"
+    }
+  },
+  "negotiations": {
+    "title": "التفاوض",
+    "columns": {
+      "product": "المنتج",
+      "customer": "العميل",
+      "current": "السعر الحالي",
+      "requested": "السعر المطلوب",
+      "quantity": "الكمية",
+      "status": "الحالة"
+    },
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "ACCEPTED": "مقبولة",
+      "REJECTED": "مرفوضة",
+      "COUNTERED": "عرض مضاد"
+    },
+    "accept": "قبول",
+    "reject": "رفض",
+    "counter": "عرض مضاد",
+    "counterPrice": "السعر المقترح"
+  },
+  "categories": {
+    "title": "الفئات",
+    "addCategory": "فئة جديدة",
+    "columns": {
+      "name": "الاسم",
+      "slug": "الرابط",
+      "parent": "الفئة الأم",
+      "products": "المنتجات"
+    },
+    "form": {
+      "slug": "الرابط (slug)",
+      "nameFr": "الاسم (فرنسي)",
+      "nameAr": "الاسم (عربي)",
+      "nameEn": "الاسم (إنجليزي)",
+      "parent": "الفئة الأم"
+    },
+    "none": "بدون",
+    "deleteConfirm": "حذف هذه الفئة؟"
+  },
+  "trash": {
+    "title": "سلة المهملات",
+    "empty": "سلة المهملات فارغة",
+    "columns": {
+      "type": "النوع",
+      "deletedBy": "حذفها",
+      "deletedAt": "التاريخ"
+    },
+    "restore": "استعادة",
+    "purge": "حذف نهائي",
+    "purgeConfirm": "حذف هذا العنصر نهائيا؟ لا يمكن التراجع عن هذا الإجراء.",
+    "entityTypes": {
+      "Product": "منتج",
+      "Category": "فئة",
+      "Manufacturer": "مصنّع",
+      "Notification": "إشعار"
+    }
+  },
+  "besoins": {
+    "title": "الاحتياجات",
+    "subtitle": "أبلغ عن حاجة أو ملاحظة متعلقة بالمخازن.",
+    "placeholder": "مثال: ناقصين كراتين أكياس 50 لتر في المخزن...",
+    "send": "إرسال",
+    "empty": "لا توجد احتياجات بعد",
+    "mine": "احتياجاتي",
+    "all": "كل الاحتياجات",
+    "respondPlaceholder": "ردك...",
+    "respond": "رد",
+    "responded": "تم الرد",
+    "pending": "قيد الانتظار",
+    "yourResponse": "ردك"
+  }
+}

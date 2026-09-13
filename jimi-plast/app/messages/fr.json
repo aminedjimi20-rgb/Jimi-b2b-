@@ -1,0 +1,540 @@
+{
+  "app": {
+    "name": "JIMI PLAST"
+  },
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Accédez à votre espace JIMI PLAST",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "noAccount": "Pas encore de compte ?",
+    "registerLink": "Demander un accès",
+    "error": "Email ou mot de passe incorrect"
+  },
+  "register": {
+    "title": "Demande d'accès",
+    "subtitle": "Votre demande sera examinée par un administrateur avant activation.",
+    "fullName": "Nom complet",
+    "phone": "Téléphone",
+    "email": "Adresse email",
+    "address": "Adresse",
+    "wilaya": "Wilaya",
+    "businessName": "Nom du commerce (si applicable)",
+    "requestedRole": "Type de compte souhaité",
+    "roleWholesaler": "Grossiste",
+    "roleRetailer": "Détaillant",
+    "notes": "Informations complémentaires",
+    "submit": "Envoyer la demande",
+    "success": "Votre demande a été envoyée. Un administrateur va l'examiner.",
+    "backToLogin": "Retour à la connexion"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "catalog": "Catalogue",
+    "products": "Produits",
+    "categories": "Catégories",
+    "customers": "Clients",
+    "myAccount": "Mon compte",
+    "vouchers": "Bons",
+    "manufacturers": "Fabricants",
+    "purchases": "Achats",
+    "stock": "Stock",
+    "returns": "Retours",
+    "transport": "Transport",
+    "productRequests": "Demandes produits",
+    "negotiations": "Négociations",
+    "users": "Employés & rôles",
+    "requests": "Demandes d'inscription",
+    "logout": "Déconnexion",
+    "trash": "Corbeille",
+    "besoins": "Besoins",
+    "myOrders": "Mes commandes"
+  },
+  "dashboard": {
+    "welcome": "Bonjour {name}",
+    "roleLabel": "Rôle",
+    "pendingRequests": "Demandes en attente",
+    "activeUsers": "Comptes actifs",
+    "rolesConfigured": "Rôles configurés",
+    "placeholder": "Les modules Produits, Commandes, Stock, Bons et Statistiques arrivent dans les phases suivantes.",
+    "statsTitle": "Statistiques",
+    "dateFrom": "Du",
+    "dateTo": "Au",
+    "preset7d": "7 jours",
+    "preset30d": "30 jours",
+    "preset90d": "90 jours",
+    "presetYear": "Cette année",
+    "presetAll": "Tout",
+    "revenue": "Chiffre d'affaires",
+    "margin": "Marge",
+    "averageBasket": "Panier moyen",
+    "confirmedVouchers": "Bons confirmés",
+    "customerCredit": "Crédit clients",
+    "supplierDebt": "Dette fabricants",
+    "lowStock": "Stock faible",
+    "pendingTotal": "Demandes en attente",
+    "topProductsTitle": "Produits les plus vendus"
+  },
+  "requests": {
+    "title": "Demandes d'inscription",
+    "empty": "Aucune demande en attente",
+    "columns": {
+      "name": "Nom",
+      "phone": "Téléphone",
+      "type": "Type souhaité",
+      "date": "Date",
+      "status": "Statut"
+    },
+    "status": {
+      "NEW": "Nouvelle",
+      "INFO_REQUESTED": "Infos demandées",
+      "ACCEPTED": "Acceptée",
+      "REJECTED": "Refusée"
+    },
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "requestInfo": "Demander des infos",
+    "acceptTitle": "Accepter la demande",
+    "selectRole": "Rôle à attribuer",
+    "initialPassword": "Mot de passe initial",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "note": "Note"
+  },
+  "users": {
+    "title": "Employés, rôles & permissions",
+    "tabUsers": "Utilisateurs",
+    "tabRoles": "Rôles & permissions",
+    "columns": {
+      "name": "Nom",
+      "email": "Email",
+      "role": "Rôle",
+      "status": "Statut",
+      "lastLogin": "Dernière connexion"
+    },
+    "suspend": "Suspendre",
+    "activate": "Réactiver",
+    "permissionGroups": {
+      "prices": "Prix",
+      "orders": "Commandes",
+      "vouchers": "Bons",
+      "finance": "Finance",
+      "suppliers": "Fabricants",
+      "stock": "Stock",
+      "returns": "Retours",
+      "transport": "Transport",
+      "negotiations": "Négociations",
+      "stats": "Statistiques",
+      "admin": "Administration",
+      "documents": "Documents",
+      "besoins": "Besoins"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification",
+    "markAllRead": "Tout marquer comme lu",
+    "delete": "Supprimer"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "error": "Une erreur est survenue",
+    "empty": "Aucun élément",
+    "search": "Rechercher…",
+    "loginToSeePrices": "Connectez-vous pour voir les prix",
+    "uploadPhoto": "Depuis la galerie"
+  },
+  "catalog": {
+    "title": "Catalogue",
+    "allCategories": "Toutes les catégories",
+    "sortPriority": "Priorité",
+    "sortNewest": "Plus récents",
+    "sortNameAsc": "Nom (A→Z)",
+    "sortNameDesc": "Nom (Z→A)",
+    "inStock": "En stock",
+    "outOfStock": "Rupture de stock",
+    "onlyInStock": "Disponibles uniquement",
+    "onlyOnSale": "Promotions uniquement",
+    "onlyNew": "Nouveautés uniquement",
+    "new": "Nouveau",
+    "featured": "Mis en avant",
+    "promo": "Promotion",
+    "perPackage": "{count} {unit}/{package}",
+    "noResults": "Aucun produit ne correspond à votre recherche",
+    "cart": "Panier",
+    "cartEmpty": "Votre panier est vide",
+    "cartTotal": "Total",
+    "checkout": "Passer la commande",
+    "chooseCustomer": "Choisir le client",
+    "addToCart": "Ajouter au panier",
+    "piecesPerPackage": "{count} pièces / {unit}",
+    "viewPricesAs": "Voir les prix",
+    "costPrice": "Achat",
+    "closeCart": "Fermer ce panier",
+    "newCart": "Nouveau panier",
+    "cartLabelPlaceholder": "Nom du panier (client...)",
+    "quantityCartons": "Quantité (cartons)",
+    "totalPieces": "Pièces au total",
+    "discount": "Remise (DA)",
+    "confirmAdd": "Confirmer",
+    "unitPrice": "Prix unitaire",
+    "subtotal": "Sous-total",
+    "total": "Total",
+    "newProduct": "Nouveau produit",
+    "pieces": "pièces",
+    "piecesHint": "Modifiez les pièces si un carton reçu est incomplet — la remise se calcule automatiquement.",
+    "stockCartons": "{count} cartons en stock",
+    "unitsPerPackage": "Pièces / carton",
+    "adjustedWarning": "Ajustement manuel — écart avec les valeurs catalogue",
+    "adjusted": "Ajusté",
+    "inCart": "Dans le panier"
+  },
+  "products": {
+    "title": "Produits",
+    "addProduct": "Nouveau produit",
+    "editProduct": "Modifier le produit",
+    "columns": {
+      "sku": "Référence",
+      "name": "Nom",
+      "category": "Catégorie",
+      "stock": "Stock",
+      "status": "Statut",
+      "lastChange": "Dernière modification"
+    },
+    "form": {
+      "sku": "Référence (SKU)",
+      "category": "Catégorie",
+      "nameFr": "Nom (Français)",
+      "nameAr": "Nom (Arabe)",
+      "nameEn": "Nom (Anglais)",
+      "brand": "Marque",
+      "packagingUnit": "Unité de conditionnement",
+      "unitsPerPackage": "Pièces par unité de conditionnement",
+      "costPrice": "Prix d'achat (coût)",
+      "currentStock": "Stock actuel",
+      "stockMin": "Stock minimum",
+      "priceFactory": "Prix usine",
+      "priceWholesale": "Prix grossiste",
+      "priceRetail": "Prix détaillant",
+      "isNew": "Nouveau produit",
+      "isFeatured": "Mis en avant",
+      "isActive": "Actif",
+      "images": "Photos (URL)",
+      "addImage": "Ajouter une photo",
+      "manufacturer": "Fabricant",
+      "noManufacturer": "— Aucun fabricant —"
+    },
+    "active": "Actif",
+    "inactive": "Inactif",
+    "priceHistory": "Historique des prix",
+    "deleteConfirm": "Supprimer ce produit ? Il sera déplacé vers la corbeille.",
+    "createdLabel": "Produit créé"
+  },
+  "customers": {
+    "title": "Clients",
+    "addCustomer": "Nouveau client",
+    "columns": {
+      "name": "Nom",
+      "business": "Commerce",
+      "phone": "Téléphone",
+      "role": "Type",
+      "balance": "Solde"
+    },
+    "form": {
+      "fullName": "Nom complet",
+      "phone": "Téléphone",
+      "email": "Email",
+      "roleKey": "Type de client",
+      "initialPassword": "Mot de passe initial",
+      "businessName": "Nom du commerce",
+      "address": "Adresse",
+      "wilaya": "Wilaya",
+      "creditLimit": "Limite de crédit"
+    },
+    "detail": {
+      "balance": "Solde actuel",
+      "creditLimit": "Limite de crédit",
+      "history": "Historique",
+      "addPayment": "Enregistrer un paiement",
+      "addAdjustment": "Ajustement manuel",
+      "amount": "Montant",
+      "note": "Note",
+      "reason": "Raison",
+      "back": "Retour aux clients"
+    },
+    "entryTypes": {
+      "SALE_VOUCHER": "Bon de vente",
+      "PAYMENT": "Paiement",
+      "RETURN_CREDIT": "Avoir retour",
+      "ADJUSTMENT": "Ajustement"
+    },
+    "myAccount": {
+      "title": "Mon compte",
+      "business": "Commerce",
+      "noHistory": "Aucune opération pour le moment"
+    }
+  },
+  "vouchers": {
+    "title": "Bons",
+    "newVoucher": "Nouveau bon",
+    "columns": {
+      "number": "N°",
+      "customer": "Client",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut"
+    },
+    "status": {
+      "DRAFT": "Brouillon",
+      "CONFIRMED": "Confirmé",
+      "DELIVERED": "Livré",
+      "CANCELLED": "Annulé"
+    },
+    "selectCustomer": "Sélectionner un client",
+    "addProduct": "Ajouter un produit",
+    "product": "Produit",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "pieces": "pièces",
+    "discount": "Remise",
+    "transport": "Transport",
+    "paidAmount": "Montant payé",
+    "notes": "Observations",
+    "subtotal": "Sous-total",
+    "total": "Total",
+    "confirm": "Confirmer le bon",
+    "confirmWarning": "Une fois confirmé, le bon ne peut plus être modifié.",
+    "deliver": "Marquer comme livré",
+    "cancel": "Annuler le bon",
+    "cancelReason": "Raison de l'annulation",
+    "viewPdf": "Voir le PDF",
+    "autoSaved": "Enregistré automatiquement",
+    "back": "Retour aux bons",
+    "removeItem": "Retirer",
+    "filterStatus": "Tous les statuts",
+    "filterCustomer": "Tous les clients",
+    "deleteConfirm": "Supprimer ce brouillon ?",
+    "backToCatalog": "Retour au catalogue",
+    "waitingForStaffConfirmation": "Votre commande est en attente de confirmation par notre équipe.",
+    "noOrders": "Aucune commande pour le moment"
+  },
+  "manufacturers": {
+    "title": "Fabricants",
+    "add": "Nouveau fabricant",
+    "columns": {
+      "name": "Nom",
+      "company": "Société",
+      "phone": "Téléphone",
+      "wilaya": "Wilaya",
+      "balance": "Dette"
+    },
+    "form": {
+      "name": "Nom",
+      "company": "Société",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "wilaya": "Wilaya",
+      "contactName": "Contact principal",
+      "paymentTerms": "Conditions de paiement",
+      "logo": "Logo"
+    }
+  },
+  "purchases": {
+    "title": "Achats",
+    "newPurchase": "Nouveau bon d'achat",
+    "selectManufacturer": "Sélectionner un fabricant",
+    "columns": {
+      "number": "N°",
+      "manufacturer": "Fabricant",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut"
+    },
+    "unitCost": "Coût unitaire"
+  },
+  "stock": {
+    "title": "Stock",
+    "alerts": "Alertes stock faible",
+    "movements": "Historique des mouvements",
+    "adjust": "Correction manuelle",
+    "product": "Produit",
+    "currentStock": "Stock actuel",
+    "newStock": "Nouvelle quantité (pièces)",
+    "reason": "Raison",
+    "columns": {
+      "date": "Date",
+      "product": "Produit",
+      "type": "Type",
+      "quantity": "Quantité"
+    },
+    "movementTypes": {
+      "SALE": "Vente",
+      "SALE_CANCEL": "Annulation vente",
+      "PURCHASE": "Achat",
+      "RETURN_CUSTOMER": "Retour client",
+      "RETURN_SUPPLIER": "Retour fabricant",
+      "ADJUSTMENT": "Ajustement"
+    }
+  },
+  "returns": {
+    "title": "Retours",
+    "new": "Nouveau retour",
+    "type": "Type",
+    "typeCustomer": "Client",
+    "typeSupplier": "Fabricant",
+    "party": "Client / Fabricant",
+    "product": "Produit",
+    "quantity": "Quantité (pièces)",
+    "reason": "Raison",
+    "addItem": "Ajouter",
+    "validate": "Valider",
+    "reject": "Refuser",
+    "decision": "Décision",
+    "decisions": {
+      "REFUND": "Remboursement",
+      "CREDIT_NOTE": "Avoir",
+      "DEDUCT_NEXT": "Déduction prochain bon",
+      "REPLACEMENT": "Remplacement"
+    },
+    "status": {
+      "NEW": "Nouveau",
+      "VALIDATED": "Validé",
+      "REJECTED": "Refusé"
+    },
+    "columns": {
+      "number": "N°",
+      "type": "Type",
+      "party": "Client/Fabricant",
+      "value": "Valeur",
+      "status": "Statut"
+    }
+  },
+  "transport": {
+    "title": "Transport",
+    "columns": {
+      "voucher": "Bon",
+      "customer": "Client",
+      "driver": "Chauffeur",
+      "status": "Statut",
+      "cost": "Coût"
+    },
+    "status": {
+      "TO_PREPARE": "À préparer",
+      "PREPARED": "Préparée",
+      "IN_PROGRESS": "En cours",
+      "DELIVERED": "Livrée",
+      "CANCELLED": "Annulée",
+      "PROBLEM": "Problème"
+    },
+    "newDelivery": "Nouvelle livraison",
+    "selectVoucher": "Choisir un bon confirmé",
+    "noVoucher": "Aucun bon confirmé sans livraison",
+    "driverName": "Chauffeur",
+    "vehicle": "Véhicule",
+    "driverPhone": "Téléphone chauffeur",
+    "address": "Adresse",
+    "wilaya": "Wilaya",
+    "cost": "Coût réel",
+    "billedToCustomer": "Facturé au client",
+    "notes": "Notes",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "driverPhoto": "Photo du chauffeur"
+  },
+  "productRequests": {
+    "title": "Demandes de produits",
+    "columns": {
+      "product": "Produit",
+      "customer": "Client",
+      "quantity": "Quantité",
+      "status": "Statut"
+    },
+    "status": {
+      "NEW": "Nouvelle",
+      "SEARCHING": "Recherche en cours",
+      "FOUND": "Trouvé",
+      "ORDERED": "Commandé",
+      "AVAILABLE": "Disponible",
+      "REFUSED": "Refusée"
+    }
+  },
+  "negotiations": {
+    "title": "Négociations",
+    "columns": {
+      "product": "Produit",
+      "customer": "Client",
+      "current": "Prix actuel",
+      "requested": "Prix demandé",
+      "quantity": "Quantité",
+      "status": "Statut"
+    },
+    "status": {
+      "PENDING": "En attente",
+      "ACCEPTED": "Acceptée",
+      "REJECTED": "Refusée",
+      "COUNTERED": "Contre-offre"
+    },
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "counter": "Contre-offre",
+    "counterPrice": "Prix proposé"
+  },
+  "categories": {
+    "title": "Catégories",
+    "addCategory": "Nouvelle catégorie",
+    "columns": {
+      "name": "Nom",
+      "slug": "Slug",
+      "parent": "Parent",
+      "products": "Produits"
+    },
+    "form": {
+      "slug": "Slug (URL)",
+      "nameFr": "Nom (Français)",
+      "nameAr": "Nom (Arabe)",
+      "nameEn": "Nom (Anglais)",
+      "parent": "Catégorie parente"
+    },
+    "none": "Aucune",
+    "deleteConfirm": "Supprimer cette catégorie ?"
+  },
+  "trash": {
+    "title": "Corbeille",
+    "empty": "La corbeille est vide",
+    "columns": {
+      "type": "Type",
+      "deletedBy": "Supprimé par",
+      "deletedAt": "Le"
+    },
+    "restore": "Restaurer",
+    "purge": "Supprimer définitivement",
+    "purgeConfirm": "Supprimer définitivement cet élément ? Cette action est irréversible.",
+    "entityTypes": {
+      "Product": "Produit",
+      "Category": "Catégorie",
+      "Manufacturer": "Fabricant",
+      "Notification": "Notification"
+    }
+  },
+  "besoins": {
+    "title": "Besoins",
+    "subtitle": "Signalez un besoin ou une remarque liée aux dépôts.",
+    "placeholder": "Ex. : il manque des cartons de sacs 50L au dépôt...",
+    "send": "Envoyer",
+    "empty": "Aucun besoin pour le moment",
+    "mine": "Mes besoins",
+    "all": "Tous les besoins",
+    "respondPlaceholder": "Votre réponse...",
+    "respond": "Répondre",
+    "responded": "Répondu",
+    "pending": "En attente",
+    "yourResponse": "Votre réponse"
+  }
+}
