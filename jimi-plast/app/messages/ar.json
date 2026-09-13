@@ -185,7 +185,8 @@
     "confirmAdd": "تأكيد",
     "unitPrice": "سعر الوحدة",
     "subtotal": "المجموع الفرعي",
-    "total": "المجموع"
+    "total": "المجموع",
+    "newProduct": "منتوج جديد"
   },
   "products": {
     "title": "المنتجات",

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
@@ -65,6 +66,8 @@ export default function ProductsAdminPage() {
   const t = useTranslations('products');
   const tCommon = useTranslations('common');
   const { token } = useAuth();
+  const searchParams = useSearchParams();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [products, setProducts] = useState<FullProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -74,6 +77,7 @@ export default function ProductsAdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [appliedEditParam, setAppliedEditParam] = useState<string | null>(null);
 
   function reloadProducts() {
     api
@@ -90,6 +94,17 @@ export default function ProductsAdminPage() {
     api.get<PriceTierType[]>('/catalog-settings/price-tier-types').then(setPriceTierTypes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  useEffect(() => {
+    const editParam = searchParams.get('edit');
+    if (!editParam || editParam === appliedEditParam) return;
+    const target = products.find((p) => p.id === editParam);
+    if (!target) return;
+    startEdit(target);
+    setAppliedEditParam(editParam);
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, products, appliedEditParam]);
 
   const tierId = (key: string) => priceTierTypes.find((p) => p.key === key)?.id;
 
@@ -244,7 +259,7 @@ export default function ProductsAdminPage() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="w-full rounded-lg border border-line bg-panel p-4 xl:w-96">
+      <form ref={formRef} onSubmit={onSubmit} className="w-full rounded-lg border border-line bg-panel p-4 xl:w-96">
         <h2 className="text-sm font-semibold text-ink">{editingId ? t('editProduct') : t('addProduct')}</h2>
         <div className="mt-3 flex flex-col gap-3">
           <Field label={t('form.sku')} value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} />

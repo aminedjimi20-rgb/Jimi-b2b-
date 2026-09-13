@@ -185,7 +185,8 @@
     "confirmAdd": "Confirm",
     "unitPrice": "Unit price",
     "subtotal": "Subtotal",
-    "total": "Total"
+    "total": "Total",
+    "newProduct": "New product"
   },
   "products": {
     "title": "Products",

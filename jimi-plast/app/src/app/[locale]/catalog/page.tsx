@@ -104,6 +104,7 @@ export default function CatalogPage() {
   const [modalDiscount, setModalDiscount] = useState('0');
 
   const canManageVouchers = hasPermission('vouchers.create');
+  const canManageCatalog = hasPermission('catalog.manage');
 
   useEffect(() => {
     api.get<Category[]>('/categories').then(setCategories);
@@ -259,7 +260,17 @@ export default function CatalogPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+          {canManageCatalog && (
+            <Link
+              href={`/${locale}/products`}
+              className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
+            >
+              + {t('newProduct')}
+            </Link>
+          )}
+        </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
           <input
@@ -408,14 +419,24 @@ export default function CatalogPage() {
                     {p.availability === 'IN_STOCK' ? t('inStock') : t('outOfStock')}
                   </span>
                 </div>
-                {p.availability === 'IN_STOCK' && (
-                  <button
-                    onClick={() => openAddModal(p)}
-                    className="mt-2 w-full rounded bg-accent px-2 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                  >
-                    {t('addToCart')}
-                  </button>
-                )}
+                <div className="mt-2 flex gap-1.5">
+                  {p.availability === 'IN_STOCK' && (
+                    <button
+                      onClick={() => openAddModal(p)}
+                      className="flex-1 rounded bg-accent px-2 py-1.5 text-xs font-medium text-white hover:opacity-90"
+                    >
+                      {t('addToCart')}
+                    </button>
+                  )}
+                  {canManageCatalog && (
+                    <Link
+                      href={`/${locale}/products?edit=${p.id}`}
+                      className="rounded border border-line px-2 py-1.5 text-xs text-ink hover:bg-line/30"
+                    >
+                      {tCommon('edit')}
+                    </Link>
+                  )}
+                </div>
               </div>
             );
           })}
