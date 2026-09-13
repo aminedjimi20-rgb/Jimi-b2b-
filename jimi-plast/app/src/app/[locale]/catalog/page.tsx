@@ -188,6 +188,7 @@ export default function CatalogPage() {
 
   const activeCart = sessions.find((s) => s.id === activeId);
   const cartLines = activeCart?.items ?? [];
+  const cartProductIds = new Set(cartLines.map((l) => l.productId));
   const totalCartCount = sessions.reduce((s, sess) => s + sess.items.reduce((s2, i) => s2 + i.quantityPackages, 0), 0);
   const cartDetails = cartLines.map((line) => ({ line, product: catalogIndex.get(line.productId) }));
   const cartTotal = cartDetails.reduce((sum, { line, product }) => {
@@ -448,8 +449,19 @@ export default function CatalogPage() {
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => {
             const mainPrice = priceForView(p);
+            const inCart = cartProductIds.has(p.id);
             return (
-              <div key={p.id} className="flex flex-col rounded-lg border border-line bg-panel p-3 shadow-sm">
+              <div
+                key={p.id}
+                className={`flex flex-col rounded-lg border p-3 shadow-sm ${
+                  inCart ? 'border-teal bg-teal/5' : 'border-line bg-panel'
+                }`}
+              >
+                {inCart && (
+                  <span className="mb-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-teal px-2 py-0.5 text-[10px] font-semibold text-white">
+                    ✓ {t('inCart')}
+                  </span>
+                )}
                 <div
                   className={`group relative mb-2 flex aspect-square items-center justify-center overflow-hidden rounded bg-paper text-muted ${
                     p.images.length > 0 ? 'cursor-zoom-in' : ''

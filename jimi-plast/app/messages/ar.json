@@ -192,7 +192,8 @@
     "stockCartons": "{count} كرطونة فالستوك",
     "unitsPerPackage": "قطعة / كرطونة",
     "adjustedWarning": "تعديل يدوي — يختلف عن قيم الكاتالوڤ",
-    "adjusted": "معدّل"
+    "adjusted": "معدّل",
+    "inCart": "فالبانيي"
   },
   "products": {
     "title": "المنتجات",

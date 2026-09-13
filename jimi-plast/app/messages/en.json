@@ -192,7 +192,8 @@
     "stockCartons": "{count} cartons in stock",
     "unitsPerPackage": "Pieces / carton",
     "adjustedWarning": "Manual adjustment — differs from catalog values",
-    "adjusted": "Adjusted"
+    "adjusted": "Adjusted",
+    "inCart": "In cart"
   },
   "products": {
     "title": "Products",
