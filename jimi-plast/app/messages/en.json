@@ -173,7 +173,9 @@
     "checkout": "Place order",
     "chooseCustomer": "Choose customer",
     "addToCart": "Add to cart",
-    "piecesPerPackage": "{count} pieces / {unit}"
+    "piecesPerPackage": "{count} pieces / {unit}",
+    "viewPricesAs": "View prices as",
+    "costPrice": "Cost"
   },
   "products": {
     "title": "Products",

@@ -173,7 +173,9 @@
     "checkout": "Passer la commande",
     "chooseCustomer": "Choisir le client",
     "addToCart": "Ajouter au panier",
-    "piecesPerPackage": "{count} pièces / {unit}"
+    "piecesPerPackage": "{count} pièces / {unit}",
+    "viewPricesAs": "Voir les prix",
+    "costPrice": "Achat"
   },
   "products": {
     "title": "Produits",

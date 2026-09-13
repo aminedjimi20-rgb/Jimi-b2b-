@@ -173,7 +173,9 @@
     "checkout": "إرسال الطلبية",
     "chooseCustomer": "اختر الزبون",
     "addToCart": "أضف إلى السلة",
-    "piecesPerPackage": "{count} حبة / {unit}"
+    "piecesPerPackage": "{count} حبة / {unit}",
+    "viewPricesAs": "عرض الأسعار",
+    "costPrice": "الشراء"
   },
   "products": {
     "title": "المنتجات",

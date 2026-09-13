@@ -114,7 +114,7 @@ export class ProductsService {
     const priceMap = await this.pricing.resolveVisiblePricesForMany(productIds, permissions);
 
     let items = products.map((p) => ({
-      ...this.toPublicShape(p, priceMap.get(p.id) ?? []),
+      ...this.toPublicShape(p, priceMap.get(p.id) ?? [], permissions),
       _priority: this.priorityScore({ ...p, hasActivePromotion: p.promotions.length > 0 }),
     }));
 
@@ -150,7 +150,7 @@ export class ProductsService {
     if (!product) throw new NotFoundException('Produit introuvable');
 
     const prices = await this.pricing.resolveVisiblePrices(id, permissions);
-    return this.toPublicShape(product, prices);
+    return this.toPublicShape(product, prices, permissions);
   }
 
   /** Vue interne complète (coûts, stock exact, historique) — réservée aux permissions adéquates. */
@@ -184,6 +184,7 @@ export class ProductsService {
       brand: string | null;
       currentStock: number;
       unitsPerPackage: number;
+      costPrice: Prisma.Decimal | null;
       isNew: boolean;
       isFeatured: boolean;
       isSeasonal: boolean;
@@ -200,6 +201,7 @@ export class ProductsService {
       images: { id: string; url: string; isPrimary: boolean }[];
     },
     prices: VisiblePrice[],
+    permissions: string[] | null,
   ) {
     return {
       id: product.id,
@@ -216,6 +218,7 @@ export class ProductsService {
       category: product.category,
       packagingUnit: product.packagingUnit,
       unitsPerPackage: product.unitsPerPackage,
+      costPrice: permissions?.includes('costs.view') && product.costPrice != null ? Number(product.costPrice) : null,
       images: product.images,
       isNew: product.isNew,
       isFeatured: product.isFeatured,

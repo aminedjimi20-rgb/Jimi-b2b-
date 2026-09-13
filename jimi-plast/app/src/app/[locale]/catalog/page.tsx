@@ -45,6 +45,7 @@ interface Product {
   category: CategoryRef;
   packagingUnit: { label: string; labelPlural: string };
   unitsPerPackage: number;
+  costPrice: number | null;
   images: { url: string; isPrimary: boolean }[];
   isNew: boolean;
   isFeatured: boolean;
@@ -98,6 +99,7 @@ export default function CatalogPage() {
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [lightboxProduct, setLightboxProduct] = useState<Product | null>(null);
+  const [viewTier, setViewTier] = useState('');
 
   const canManageVouchers = hasPermission('vouchers.create');
 
@@ -138,10 +140,33 @@ export default function CatalogPage() {
 
   const topCategories = useMemo(() => categories.filter((c) => !c.parentId), [categories]);
 
+  const availableTiers = useMemo(() => {
+    const map = new Map<string, string>();
+    products.forEach((p) => p.prices.forEach((pr) => map.set(pr.tierKey, pr.label)));
+    return Array.from(map.entries()).map(([tierKey, label]) => ({ tierKey, label }));
+  }, [products]);
+
+  useEffect(() => {
+    if (availableTiers.length <= 1) {
+      if (viewTier) setViewTier('');
+      return;
+    }
+    if (!availableTiers.some((t) => t.tierKey === viewTier)) {
+      const preferred = ['wholesale', 'retail'].find((key) => availableTiers.some((t) => t.tierKey === key));
+      setViewTier(preferred ?? availableTiers[0].tierKey);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableTiers]);
+
+  function priceForView(p: Product): Price | undefined {
+    if (viewTier) return p.prices.find((pr) => pr.tierKey === viewTier) ?? p.prices[0];
+    return p.prices[0];
+  }
+
   const cartCount = cartLines.reduce((s, l) => s + l.quantityPackages, 0);
   const cartDetails = cartLines.map((line) => ({ line, product: catalogIndex.get(line.productId) }));
   const cartTotal = cartDetails.reduce((sum, { line, product }) => {
-    const price = product?.prices[0]?.price ?? 0;
+    const price = (product ? priceForView(product)?.price : undefined) ?? 0;
     return sum + price * line.quantityPackages;
   }, 0);
 
@@ -266,6 +291,23 @@ export default function CatalogPage() {
             <input type="checkbox" checked={onlyNew} onChange={(e) => setOnlyNew(e.target.checked)} />
             {t('onlyNew')}
           </label>
+
+          {availableTiers.length > 1 && (
+            <label className="flex items-center gap-1.5 text-sm text-ink">
+              <span className="text-xs text-muted">{t('viewPricesAs')}</span>
+              <select
+                value={viewTier}
+                onChange={(e) => setViewTier(e.target.value)}
+                className="rounded border border-accent bg-panel px-2 py-1.5 text-sm text-accent"
+              >
+                {availableTiers.map((tier) => (
+                  <option key={tier.tierKey} value={tier.tierKey}>
+                    {tier.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
 
         {!loading && products.length === 0 && (
@@ -274,7 +316,7 @@ export default function CatalogPage() {
 
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => {
-            const mainPrice = p.prices[0];
+            const mainPrice = priceForView(p);
             return (
               <div key={p.id} className="flex flex-col rounded-lg border border-line bg-panel p-3 shadow-sm">
                 <div
@@ -326,9 +368,17 @@ export default function CatalogPage() {
                 <p className="text-xs text-muted">
                   {t('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
                 </p>
+                {p.costPrice != null && (
+                  <p className="text-[11px] text-orange-600">
+                    {t('costPrice')}: {p.costPrice.toLocaleString()} DA
+                  </p>
+                )}
                 <div className="mt-2 flex items-center justify-between">
                   {mainPrice ? (
                     <div className="font-mono text-sm font-semibold text-ink">
+                      {availableTiers.length > 1 && (
+                        <span className="me-1 block text-[10px] font-normal text-muted">{mainPrice.label}</span>
+                      )}
                       {mainPrice.hasPromotion && (
                         <span className="me-1 text-xs text-muted line-through">{mainPrice.originalPrice} DA</span>
                       )}
@@ -399,9 +449,9 @@ export default function CatalogPage() {
                         className="w-16 rounded border border-line bg-paper px-2 py-1 text-xs"
                       />
                       <span className="text-xs text-muted">{product?.packagingUnit.label ?? ''}</span>
-                      {product?.prices[0] && (
+                      {product && priceForView(product) && (
                         <span className="ms-auto text-xs tabular text-ink">
-                          {(product.prices[0].price * line.quantityPackages).toLocaleString()} DA
+                          {(priceForView(product)!.price * line.quantityPackages).toLocaleString()} DA
                         </span>
                       )}
                       <button onClick={() => cart.remove(line.productId)} className="text-xs text-red-600 hover:underline">
