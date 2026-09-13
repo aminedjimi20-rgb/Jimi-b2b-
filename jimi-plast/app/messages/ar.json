@@ -189,7 +189,10 @@
     "newProduct": "منتوج جديد",
     "pieces": "قطعة",
     "piecesHint": "بدل عدد القطع إذا كان الكرطون ناقص — التخفيض يتحسب أوتوماتيكيا.",
-    "stockCartons": "{count} كرطونة فالستوك"
+    "stockCartons": "{count} كرطونة فالستوك",
+    "unitsPerPackage": "قطعة / كرطونة",
+    "adjustedWarning": "تعديل يدوي — يختلف عن قيم الكاتالوڤ",
+    "adjusted": "معدّل"
   },
   "products": {
     "title": "المنتجات",

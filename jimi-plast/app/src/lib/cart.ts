@@ -4,6 +4,15 @@ export interface CartLine {
   productId: string;
   quantityPackages: number;
   discount: number;
+  /** Pièces/carton effectivement utilisées pour cette ligne, si différentes du catalogue. */
+  unitsPerPackage?: number;
+  /** Nombre de pièces réel indiqué à l'ajout, si différent de quantityPackages × unitsPerPackage. */
+  totalPieces?: number;
+}
+
+export interface CartLineMeta {
+  unitsPerPackage?: number;
+  totalPieces?: number;
 }
 
 export interface CartSession {
@@ -89,7 +98,7 @@ export const cart = {
   renameSession(id: string, label: string) {
     writeCarts(readCarts().map((s) => (s.id === id ? { ...s, label } : s)));
   },
-  add(productId: string, quantityPackages: number, discount = 0, cartId?: string) {
+  add(productId: string, quantityPackages: number, discount = 0, meta?: CartLineMeta, cartId?: string) {
     const { sessions, activeId } = ensureActiveCart(readCarts());
     const targetId = cartId ?? activeId;
     const next = sessions.map((s) => {
@@ -99,8 +108,12 @@ export const cart = {
       if (existing) {
         existing.quantityPackages += quantityPackages;
         existing.discount += discount;
+        // Un réajout du même produit avec un ajustement manuel remplace l'ancien
+        // (cumuler des "pièces réelles" de deux ajouts séparés n'aurait pas de sens clair).
+        existing.unitsPerPackage = meta?.unitsPerPackage;
+        existing.totalPieces = meta?.totalPieces;
       } else {
-        items.push({ productId, quantityPackages, discount });
+        items.push({ productId, quantityPackages, discount, unitsPerPackage: meta?.unitsPerPackage, totalPieces: meta?.totalPieces });
       }
       return { ...s, items };
     });

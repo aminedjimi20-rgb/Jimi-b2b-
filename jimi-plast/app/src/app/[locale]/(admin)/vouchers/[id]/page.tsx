@@ -239,7 +239,9 @@ export default function VoucherEditorPage() {
           disabled={!isDraft}
           onChange={(e) => { setNotes(e.target.value); autoSave({ notes: e.target.value }); }}
           rows={2}
-          className="rounded border border-line bg-panel px-3 py-2"
+          className={`rounded border px-3 py-2 ${
+            notes.includes('⚠') ? 'border-amber-500 bg-amber-500/10 text-amber-700' : 'border-line bg-panel'
+          }`}
         />
       </label>
 

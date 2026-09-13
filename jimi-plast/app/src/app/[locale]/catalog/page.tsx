@@ -62,6 +62,7 @@ interface CustomerOption {
 
 interface DraftVoucher {
   id: string;
+  notes: string | null;
   items: { product: { id: string }; quantityPackages: number }[];
 }
 
@@ -69,6 +70,18 @@ const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: 
   if (locale === 'ar' && item.nameAr) return item.nameAr;
   if (locale === 'en' && item.nameEn) return item.nameEn;
   return item.nameFr;
+};
+
+// Champs numériques en type="text" + inputMode plutôt que type="number" : les
+// inputs number contrôlés perdent des frappes sur mobile (le "0" par défaut,
+// puis les chiffres suivants, disparaissent en tapant vite) — bug connu de
+// React + Android/iOS avec value contrôlée. Texte + filtrage manuel = fiable.
+const onlyDigits = (v: string) => v.replace(/[^0-9]/g, '');
+const onlyDecimal = (v: string) => {
+  const cleaned = v.replace(/[^0-9.]/g, '');
+  const firstDot = cleaned.indexOf('.');
+  if (firstDot === -1) return cleaned;
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
 };
 
 export default function CatalogPage() {
@@ -102,6 +115,7 @@ export default function CatalogPage() {
   const [viewTier, setViewTier] = useState('');
   const [addingProduct, setAddingProduct] = useState<Product | null>(null);
   const [modalQty, setModalQty] = useState('1');
+  const [modalUnitsPerPackage, setModalUnitsPerPackage] = useState('');
   const [modalPieces, setModalPieces] = useState('');
   const [modalUnitPrice, setModalUnitPrice] = useState('');
   const [modalDiscount, setModalDiscount] = useState('0');
@@ -187,24 +201,35 @@ export default function CatalogPage() {
     const price = priceForView(p)?.price ?? 0;
     setAddingProduct(p);
     setModalQty('1');
+    setModalUnitsPerPackage(String(p.unitsPerPackage));
     setModalPieces(String(p.unitsPerPackage));
     setModalUnitPrice(String(price));
     setModalDiscount('0');
   }
 
   function onModalQtyChange(v: string) {
-    setModalQty(v);
-    if (!addingProduct) return;
-    const qty = Math.max(0, Number(v) || 0);
-    setModalPieces(String(qty * addingProduct.unitsPerPackage));
+    const clean = onlyDigits(v);
+    setModalQty(clean);
+    const qty = Math.max(0, Number(clean) || 0);
+    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    setModalPieces(String(qty * upp));
+  }
+
+  function onModalUnitsPerPackageChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalUnitsPerPackage(clean);
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const upp = Math.max(0, Number(clean) || 0);
+    setModalPieces(String(qty * upp));
   }
 
   function onModalPiecesChange(v: string) {
-    setModalPieces(v);
-    if (!addingProduct || addingProduct.unitsPerPackage <= 0) return;
-    const pieces = Math.max(0, Number(v) || 0);
-    const neededCartons = Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage));
-    setModalQty(String(neededCartons));
+    const clean = onlyDigits(v);
+    setModalPieces(clean);
+    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    if (upp <= 0) return;
+    const pieces = Math.max(0, Number(clean) || 0);
+    setModalQty(String(Math.max(1, Math.ceil(pieces / upp))));
   }
 
   // Suggère automatiquement une remise = écart entre le prix catalogue plein
@@ -226,8 +251,31 @@ export default function CatalogPage() {
     if (!addingProduct) return;
     const qty = Math.max(1, Number(modalQty) || 1);
     const discount = Math.max(0, Number(modalDiscount) || 0);
-    cart.add(addingProduct.id, qty, discount);
+    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    const isNominal = upp === addingProduct.unitsPerPackage && pieces === qty * upp;
+    cart.add(addingProduct.id, qty, discount, isNominal ? undefined : { unitsPerPackage: upp, totalPieces: pieces });
     setAddingProduct(null);
+  }
+
+  // Le bon ne connaît que quantityPackages/discount — pas d'ajustement pièces/carton
+  // par ligne. On rend l'écart traçable en le consignant dans les observations du bon.
+  function buildAdjustmentNote(): string | null {
+    const lines = cartLines
+      .map((line) => {
+        const product = catalogIndex.get(line.productId);
+        if (!product) return null;
+        const effectiveUpp = line.unitsPerPackage ?? product.unitsPerPackage;
+        const nominalPieces = line.quantityPackages * effectiveUpp;
+        const isAdjusted =
+          (line.unitsPerPackage != null && line.unitsPerPackage !== product.unitsPerPackage) ||
+          (line.totalPieces != null && line.totalPieces !== nominalPieces);
+        if (!isAdjusted) return null;
+        const actualPieces = line.totalPieces ?? nominalPieces;
+        return `${localizedName(product, locale)} : ${actualPieces} ${t('pieces')} (${effectiveUpp}/${t('pieces')} × ${line.quantityPackages}) — remise ${(line.discount || 0).toLocaleString()} DA`;
+      })
+      .filter((s): s is string => Boolean(s));
+    return lines.length > 0 ? `⚠ ${t('adjustedWarning')} : ${lines.join(' | ')}` : null;
   }
 
   async function checkout() {
@@ -245,10 +293,11 @@ export default function CatalogPage() {
     try {
       const payloadItems = cartLines.map((l) => ({ productId: l.productId, quantityPackages: l.quantityPackages }));
       const totalDiscount = cartLines.reduce((s, l) => s + (l.discount || 0), 0);
+      const adjustmentNote = buildAdjustmentNote();
 
       if (canManageVouchers) {
         const voucher = await api.post<{ id: string }>('/vouchers/draft', { customerId: selectedCustomerId }, token);
-        await api.put(`/vouchers/${voucher.id}`, { items: payloadItems, discount: totalDiscount }, token);
+        await api.put(`/vouchers/${voucher.id}`, { items: payloadItems, discount: totalDiscount, notes: adjustmentNote ?? undefined }, token);
         cart.closeSession(activeId);
         router.push(`/${locale}/vouchers/${voucher.id}`);
       } else {
@@ -258,7 +307,8 @@ export default function CatalogPage() {
           merged.set(line.productId, (merged.get(line.productId) ?? 0) + line.quantityPackages);
         }
         const mergedItems = Array.from(merged.entries()).map(([productId, quantityPackages]) => ({ productId, quantityPackages }));
-        await api.put(`/vouchers/mine/${voucher.id}`, { items: mergedItems, discount: totalDiscount }, token);
+        const combinedNotes = [voucher.notes, adjustmentNote].filter(Boolean).join(' | ') || undefined;
+        await api.put(`/vouchers/mine/${voucher.id}`, { items: mergedItems, discount: totalDiscount, notes: combinedNotes }, token);
         cart.closeSession(activeId);
         router.push(`/${locale}/vouchers/${voucher.id}`);
       }
@@ -586,18 +636,34 @@ export default function CatalogPage() {
               <div className="mt-4 flex flex-1 flex-col gap-3 overflow-y-auto">
                 {cartDetails.map(({ line, product }) => {
                   const unitPrice = product ? priceForView(product)?.price : undefined;
-                  const totalPieces = product ? line.quantityPackages * product.unitsPerPackage : undefined;
-                  const lineStandard = unitPrice != null && totalPieces != null ? unitPrice * totalPieces : undefined;
+                  const effectiveUpp = line.unitsPerPackage ?? product?.unitsPerPackage;
+                  const nominalPieces = effectiveUpp != null ? line.quantityPackages * effectiveUpp : undefined;
+                  const totalPieces = line.totalPieces ?? nominalPieces;
+                  const lineStandard =
+                    unitPrice != null && product ? unitPrice * line.quantityPackages * product.unitsPerPackage : undefined;
                   const lineTotal = lineStandard != null ? Math.max(0, lineStandard - (line.discount || 0)) : undefined;
+                  const isAdjusted =
+                    (product && line.unitsPerPackage != null && line.unitsPerPackage !== product.unitsPerPackage) ||
+                    (nominalPieces != null && line.totalPieces != null && line.totalPieces !== nominalPieces);
                   return (
-                    <div key={line.productId} className="rounded border border-line p-2">
-                      <p className="text-sm font-medium text-ink">{product ? localizedName(product, locale) : line.productId}</p>
+                    <div
+                      key={line.productId}
+                      className={`rounded border p-2 ${isAdjusted ? 'border-amber-500 bg-amber-500/10' : 'border-line'}`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium text-ink">{product ? localizedName(product, locale) : line.productId}</p>
+                        {isAdjusted && (
+                          <span className="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                            ⚠ {t('adjusted')}
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-1 flex items-center gap-2">
                         <input
-                          type="number"
-                          min={1}
+                          type="text"
+                          inputMode="numeric"
                           value={line.quantityPackages}
-                          onChange={(e) => cart.setQuantity(activeId, line.productId, Math.max(1, Number(e.target.value)))}
+                          onChange={(e) => cart.setQuantity(activeId, line.productId, Math.max(1, Number(onlyDigits(e.target.value)) || 1))}
                           className="w-16 rounded border border-line bg-paper px-2 py-1 text-xs"
                         />
                         <span className="text-xs text-muted">
@@ -612,10 +678,10 @@ export default function CatalogPage() {
                         <label className="flex items-center gap-1 text-[11px] text-muted">
                           {t('discount')}
                           <input
-                            type="number"
-                            min={0}
+                            type="text"
+                            inputMode="decimal"
                             value={line.discount || 0}
-                            onChange={(e) => cart.setDiscount(activeId, line.productId, Math.max(0, Number(e.target.value)))}
+                            onChange={(e) => cart.setDiscount(activeId, line.productId, Math.max(0, Number(onlyDecimal(e.target.value)) || 0))}
                             className="w-16 rounded border border-line bg-paper px-1.5 py-0.5 text-xs"
                           />
                         </label>
@@ -687,37 +753,57 @@ export default function CatalogPage() {
               {t('piecesPerPackage', { count: addingProduct.unitsPerPackage, unit: addingProduct.packagingUnit.label })}
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <label className="flex flex-col gap-1 text-sm">
                 <span className="text-muted">{t('quantityCartons')}</span>
                 <input
-                  type="number"
-                  min={1}
+                  type="text"
+                  inputMode="numeric"
                   value={modalQty}
                   onChange={(e) => onModalQtyChange(e.target.value)}
-                  className="rounded border border-line bg-paper px-3 py-2"
+                  className="rounded border border-line bg-paper px-2 py-2"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{t('unitsPerPackage')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalUnitsPerPackage}
+                  onChange={(e) => onModalUnitsPerPackageChange(e.target.value)}
+                  className={`rounded border bg-paper px-2 py-2 ${
+                    Number(modalUnitsPerPackage) !== addingProduct.unitsPerPackage ? 'border-amber-500 text-amber-600' : 'border-line'
+                  }`}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 <span className="text-muted">{t('totalPieces')}</span>
                 <input
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="numeric"
                   value={modalPieces}
                   onChange={(e) => onModalPiecesChange(e.target.value)}
-                  className="rounded border border-line bg-paper px-3 py-2"
+                  className={`rounded border bg-paper px-2 py-2 ${
+                    Number(modalPieces) !== Math.max(0, Number(modalQty) || 0) * Math.max(0, Number(modalUnitsPerPackage) || 0)
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-line'
+                  }`}
                 />
               </label>
             </div>
+            {(Number(modalUnitsPerPackage) !== addingProduct.unitsPerPackage ||
+              Number(modalPieces) !== Math.max(0, Number(modalQty) || 0) * Math.max(0, Number(modalUnitsPerPackage) || 0)) && (
+              <p className="mt-1 text-[11px] font-medium text-amber-600">{t('adjustedWarning')}</p>
+            )}
             <p className="mt-1 text-[11px] text-muted">{t('piecesHint')}</p>
 
             <label className="mt-3 flex flex-col gap-1 text-sm">
               <span className="text-muted">{t('unitPrice')}</span>
               <input
-                type="number"
-                min={0}
+                type="text"
+                inputMode="decimal"
                 value={modalUnitPrice}
-                onChange={(e) => setModalUnitPrice(e.target.value)}
+                onChange={(e) => setModalUnitPrice(onlyDecimal(e.target.value))}
                 className="rounded border border-line bg-paper px-3 py-2"
               />
             </label>
@@ -735,10 +821,10 @@ export default function CatalogPage() {
                   <label className="flex items-center justify-between gap-2 text-muted">
                     <span>{t('discount')}</span>
                     <input
-                      type="number"
-                      min={0}
+                      type="text"
+                      inputMode="decimal"
                       value={modalDiscount}
-                      onChange={(e) => setModalDiscount(e.target.value)}
+                      onChange={(e) => setModalDiscount(onlyDecimal(e.target.value))}
                       className="w-24 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
                     />
                   </label>

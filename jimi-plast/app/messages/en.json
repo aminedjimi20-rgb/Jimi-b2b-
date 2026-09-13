@@ -189,7 +189,10 @@
     "newProduct": "New product",
     "pieces": "pieces",
     "piecesHint": "Adjust the piece count if a received carton is short — the discount is computed automatically.",
-    "stockCartons": "{count} cartons in stock"
+    "stockCartons": "{count} cartons in stock",
+    "unitsPerPackage": "Pieces / carton",
+    "adjustedWarning": "Manual adjustment — differs from catalog values",
+    "adjusted": "Adjusted"
   },
   "products": {
     "title": "Products",
