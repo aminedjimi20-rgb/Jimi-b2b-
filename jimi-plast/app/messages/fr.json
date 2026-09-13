@@ -188,7 +188,8 @@
     "total": "Total",
     "newProduct": "Nouveau produit",
     "pieces": "pièces",
-    "piecesHint": "Modifiez les pièces si un carton reçu est incomplet — la remise se calcule automatiquement."
+    "piecesHint": "Modifiez les pièces si un carton reçu est incomplet — la remise se calcule automatiquement.",
+    "stockCartons": "{count} cartons en stock"
   },
   "products": {
     "title": "Produits",

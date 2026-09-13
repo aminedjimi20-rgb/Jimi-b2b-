@@ -225,6 +225,7 @@ export class ProductsService {
       isSeasonal: product.isSeasonal,
       createdAt: product.createdAt,
       availability: product.currentStock > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK',
+      currentStock: permissions?.includes('stock.manage') ? product.currentStock : null,
       prices,
       hasPromotion: prices.some((p) => p.hasPromotion),
     };

@@ -188,7 +188,8 @@
     "total": "Total",
     "newProduct": "New product",
     "pieces": "pieces",
-    "piecesHint": "Adjust the piece count if a received carton is short — the discount is computed automatically."
+    "piecesHint": "Adjust the piece count if a received carton is short — the discount is computed automatically.",
+    "stockCartons": "{count} cartons in stock"
   },
   "products": {
     "title": "Products",

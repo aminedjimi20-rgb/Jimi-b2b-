@@ -50,6 +50,7 @@ interface Product {
   isNew: boolean;
   isFeatured: boolean;
   availability: 'IN_STOCK' | 'OUT_OF_STOCK';
+  currentStock: number | null;
   prices: Price[];
   hasPromotion: boolean;
 }
@@ -107,6 +108,8 @@ export default function CatalogPage() {
 
   const canManageVouchers = hasPermission('vouchers.create');
   const canManageCatalog = hasPermission('catalog.manage');
+  const canSeeStock = hasPermission('stock.manage');
+  const [stockRevealId, setStockRevealId] = useState<string | null>(null);
 
   useEffect(() => {
     api.get<Category[]>('/categories').then(setCategories);
@@ -460,13 +463,36 @@ export default function CatalogPage() {
                   ) : (
                     <span className="text-xs text-muted">{tCommon('loginToSeePrices')}</span>
                   )}
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] ${
-                      p.availability === 'IN_STOCK' ? 'bg-teal/15 text-teal' : 'bg-red-100 text-red-600'
-                    }`}
-                  >
-                    {p.availability === 'IN_STOCK' ? t('inStock') : t('outOfStock')}
-                  </span>
+                  <div className="relative">
+                    {canSeeStock ? (
+                      <button
+                        type="button"
+                        onClick={() => setStockRevealId((id) => (id === p.id ? null : p.id))}
+                        className={`rounded-full px-2 py-0.5 text-[10px] ${
+                          p.availability === 'IN_STOCK' ? 'bg-teal/15 text-teal' : 'bg-red-100 text-red-600'
+                        }`}
+                      >
+                        {p.availability === 'IN_STOCK' ? t('inStock') : t('outOfStock')}
+                      </button>
+                    ) : (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] ${
+                          p.availability === 'IN_STOCK' ? 'bg-teal/15 text-teal' : 'bg-red-100 text-red-600'
+                        }`}
+                      >
+                        {p.availability === 'IN_STOCK' ? t('inStock') : t('outOfStock')}
+                      </span>
+                    )}
+                    {canSeeStock && stockRevealId === p.id && p.currentStock != null && (
+                      <div className="absolute end-0 top-full z-10 mt-1 whitespace-nowrap rounded border border-line bg-panel px-2 py-1 text-[11px] text-ink shadow-lg">
+                        {t('stockCartons', { count: Math.floor(p.currentStock / p.unitsPerPackage) })}
+                        {p.currentStock % p.unitsPerPackage > 0 && (
+                          <span className="text-muted"> + {p.currentStock % p.unitsPerPackage} {t('pieces')}</span>
+                        )}
+                        <span className="ms-1 text-muted">({p.currentStock} {t('pieces')})</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-2 flex gap-1.5">
                   {p.availability === 'IN_STOCK' && (
