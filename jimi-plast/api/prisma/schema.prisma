@@ -291,6 +291,7 @@ model Product {
   sku         String   @unique
   barcode     String?
   categoryId  String
+  manufacturerId String?
   brand       String?
   nameFr      String
   nameAr      String?
@@ -321,6 +322,7 @@ model Product {
   deletedAt DateTime?
 
   category      Category      @relation(fields: [categoryId], references: [id])
+  manufacturer  Manufacturer? @relation(fields: [manufacturerId], references: [id])
   packagingUnit PackagingUnit @relation(fields: [packagingUnitId], references: [id])
   images         ProductImage[]
   prices         ProductPrice[]
@@ -546,6 +548,7 @@ model Manufacturer {
   entries          SupplierLedgerEntry[]
   purchaseVouchers PurchaseVoucher[]
   returns          Return[]
+  products         Product[]
 
   @@map("manufacturers")
 }

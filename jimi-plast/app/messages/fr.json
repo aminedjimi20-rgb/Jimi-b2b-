@@ -225,7 +225,9 @@
       "isFeatured": "Mis en avant",
       "isActive": "Actif",
       "images": "Photos (URL)",
-      "addImage": "Ajouter une photo"
+      "addImage": "Ajouter une photo",
+      "manufacturer": "Fabricant",
+      "noManufacturer": "— Aucun fabricant —"
     },
     "active": "Actif",
     "inactive": "Inactif",

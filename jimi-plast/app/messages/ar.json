@@ -225,7 +225,9 @@
       "isFeatured": "مميز",
       "isActive": "نشط",
       "images": "الصور (رابط)",
-      "addImage": "إضافة صورة"
+      "addImage": "إضافة صورة",
+      "manufacturer": "الصانع",
+      "noManufacturer": "— بدون صانع —"
     },
     "active": "نشط",
     "inactive": "غير نشط",

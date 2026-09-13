@@ -159,6 +159,7 @@ export class ProductsService {
       where: { id, deletedAt: null },
       include: {
         category: true,
+        manufacturer: true,
         packagingUnit: true,
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
         prices: { include: { priceTierType: true } },
@@ -240,6 +241,7 @@ export class ProductsService {
     const product = await this.prisma.product.create({
       data: {
         ...productData,
+        manufacturerId: dto.manufacturerId || null,
         attributes: productData.attributes as Prisma.InputJsonValue | undefined,
         seasonStart: dto.seasonStart ? new Date(dto.seasonStart) : undefined,
         seasonEnd: dto.seasonEnd ? new Date(dto.seasonEnd) : undefined,
@@ -275,6 +277,7 @@ export class ProductsService {
       where: { id },
       data: {
         ...productData,
+        manufacturerId: dto.manufacturerId || null,
         attributes: productData.attributes as Prisma.InputJsonValue | undefined,
         seasonStart: dto.seasonStart ? new Date(dto.seasonStart) : undefined,
         seasonEnd: dto.seasonEnd ? new Date(dto.seasonEnd) : undefined,

@@ -28,6 +28,10 @@ export class UpsertProductDto {
 
   @IsOptional()
   @IsString()
+  manufacturerId?: string;
+
+  @IsOptional()
+  @IsString()
   brand?: string;
 
   @IsString()
