@@ -186,7 +186,9 @@
     "unitPrice": "Prix unitaire",
     "subtotal": "Sous-total",
     "total": "Total",
-    "newProduct": "Nouveau produit"
+    "newProduct": "Nouveau produit",
+    "pieces": "pièces",
+    "piecesHint": "Modifiez les pièces si un carton reçu est incomplet — la remise se calcule automatiquement."
   },
   "products": {
     "title": "Produits",

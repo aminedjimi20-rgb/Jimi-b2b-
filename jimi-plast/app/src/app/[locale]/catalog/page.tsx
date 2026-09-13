@@ -101,6 +101,8 @@ export default function CatalogPage() {
   const [viewTier, setViewTier] = useState('');
   const [addingProduct, setAddingProduct] = useState<Product | null>(null);
   const [modalQty, setModalQty] = useState('1');
+  const [modalPieces, setModalPieces] = useState('');
+  const [modalUnitPrice, setModalUnitPrice] = useState('');
   const [modalDiscount, setModalDiscount] = useState('0');
 
   const canManageVouchers = hasPermission('vouchers.create');
@@ -171,15 +173,51 @@ export default function CatalogPage() {
   const totalCartCount = sessions.reduce((s, sess) => s + sess.items.reduce((s2, i) => s2 + i.quantityPackages, 0), 0);
   const cartDetails = cartLines.map((line) => ({ line, product: catalogIndex.get(line.productId) }));
   const cartTotal = cartDetails.reduce((sum, { line, product }) => {
-    const price = (product ? priceForView(product)?.price : undefined) ?? 0;
-    return sum + Math.max(0, price * line.quantityPackages - (line.discount || 0));
+    if (!product) return sum;
+    const price = priceForView(product)?.price;
+    if (price == null) return sum;
+    const standard = price * line.quantityPackages * product.unitsPerPackage;
+    return sum + Math.max(0, standard - (line.discount || 0));
   }, 0);
 
   function openAddModal(p: Product) {
+    const price = priceForView(p)?.price ?? 0;
     setAddingProduct(p);
     setModalQty('1');
+    setModalPieces(String(p.unitsPerPackage));
+    setModalUnitPrice(String(price));
     setModalDiscount('0');
   }
+
+  function onModalQtyChange(v: string) {
+    setModalQty(v);
+    if (!addingProduct) return;
+    const qty = Math.max(0, Number(v) || 0);
+    setModalPieces(String(qty * addingProduct.unitsPerPackage));
+  }
+
+  function onModalPiecesChange(v: string) {
+    setModalPieces(v);
+    if (!addingProduct || addingProduct.unitsPerPackage <= 0) return;
+    const pieces = Math.max(0, Number(v) || 0);
+    const neededCartons = Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage));
+    setModalQty(String(neededCartons));
+  }
+
+  // Suggère automatiquement une remise = écart entre le prix catalogue plein
+  // (cartons entiers) et ce que le vendeur indique réellement livrer/facturer —
+  // utile quand un carton reçu est incomplet. Reste modifiable manuellement.
+  useEffect(() => {
+    if (!addingProduct) return;
+    const catalogPrice = priceForView(addingProduct)?.price ?? 0;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    const unitPrice = Math.max(0, Number(modalUnitPrice) || 0);
+    const standard = qty * addingProduct.unitsPerPackage * catalogPrice;
+    const actual = pieces * unitPrice;
+    setModalDiscount(String(Math.max(0, Math.round((standard - actual) * 100) / 100)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalQty, modalPieces, modalUnitPrice, addingProduct]);
 
   function confirmAdd() {
     if (!addingProduct) return;
@@ -389,7 +427,7 @@ export default function CatalogPage() {
                   {p.category.parent ? `${localizedName(p.category.parent, locale)} › ` : ''}
                   {localizedName(p.category, locale)}
                 </p>
-                <p className="text-xs text-muted">
+                <p className="text-xs font-medium text-accent">
                   {t('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
                 </p>
                 {p.costPrice != null && (
@@ -509,7 +547,9 @@ export default function CatalogPage() {
               <div className="mt-4 flex flex-1 flex-col gap-3 overflow-y-auto">
                 {cartDetails.map(({ line, product }) => {
                   const unitPrice = product ? priceForView(product)?.price : undefined;
-                  const lineTotal = unitPrice != null ? Math.max(0, unitPrice * line.quantityPackages - (line.discount || 0)) : undefined;
+                  const totalPieces = product ? line.quantityPackages * product.unitsPerPackage : undefined;
+                  const lineStandard = unitPrice != null && totalPieces != null ? unitPrice * totalPieces : undefined;
+                  const lineTotal = lineStandard != null ? Math.max(0, lineStandard - (line.discount || 0)) : undefined;
                   return (
                     <div key={line.productId} className="rounded border border-line p-2">
                       <p className="text-sm font-medium text-ink">{product ? localizedName(product, locale) : line.productId}</p>
@@ -521,7 +561,10 @@ export default function CatalogPage() {
                           onChange={(e) => cart.setQuantity(activeId, line.productId, Math.max(1, Number(e.target.value)))}
                           className="w-16 rounded border border-line bg-paper px-2 py-1 text-xs"
                         />
-                        <span className="text-xs text-muted">{product?.packagingUnit.label ?? ''}</span>
+                        <span className="text-xs text-muted">
+                          {product?.packagingUnit.label ?? ''}
+                          {totalPieces != null && ` (${totalPieces} ${t('pieces')})`}
+                        </span>
                         <button onClick={() => cart.remove(activeId, line.productId)} className="ms-auto text-xs text-red-600 hover:underline">
                           {tCommon('delete')}
                         </button>
@@ -598,36 +641,58 @@ export default function CatalogPage() {
       )}
 
       {addingProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setAddingProduct(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setAddingProduct(null)}>
           <div className="w-full max-w-sm rounded-lg bg-panel p-4" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-1 text-sm font-semibold text-ink">{localizedName(addingProduct, locale)}</h2>
-            <p className="mb-3 text-xs text-muted">
+            <p className="mb-3 text-xs font-medium text-accent">
               {t('piecesPerPackage', { count: addingProduct.unitsPerPackage, unit: addingProduct.packagingUnit.label })}
             </p>
 
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-muted">{t('quantityCartons')}</span>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{t('quantityCartons')}</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={modalQty}
+                  onChange={(e) => onModalQtyChange(e.target.value)}
+                  className="rounded border border-line bg-paper px-3 py-2"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{t('totalPieces')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={modalPieces}
+                  onChange={(e) => onModalPiecesChange(e.target.value)}
+                  className="rounded border border-line bg-paper px-3 py-2"
+                />
+              </label>
+            </div>
+            <p className="mt-1 text-[11px] text-muted">{t('piecesHint')}</p>
+
+            <label className="mt-3 flex flex-col gap-1 text-sm">
+              <span className="text-muted">{t('unitPrice')}</span>
               <input
                 type="number"
-                min={1}
-                value={modalQty}
-                onChange={(e) => setModalQty(e.target.value)}
+                min={0}
+                value={modalUnitPrice}
+                onChange={(e) => setModalUnitPrice(e.target.value)}
                 className="rounded border border-line bg-paper px-3 py-2"
               />
             </label>
 
             {(() => {
-              const price = priceForView(addingProduct);
-              const qty = Math.max(1, Number(modalQty) || 1);
-              const totalPieces = qty * addingProduct.unitsPerPackage;
-              const subtotal = (price?.price ?? 0) * qty;
+              const catalogPrice = priceForView(addingProduct)?.price;
+              const qty = Math.max(0, Number(modalQty) || 0);
               const discount = Math.max(0, Number(modalDiscount) || 0);
-              const finalTotal = Math.max(0, subtotal - discount);
+              const standard = catalogPrice != null ? qty * addingProduct.unitsPerPackage * catalogPrice : undefined;
+              const actual = Math.max(0, Number(modalPieces) || 0) * Math.max(0, Number(modalUnitPrice) || 0);
+              const total = standard != null ? Math.max(0, standard - discount) : actual;
               return (
                 <div className="mt-3 flex flex-col gap-1.5 text-sm">
-                  <ModalRow label={t('totalPieces')} value={String(totalPieces)} />
-                  {price && <ModalRow label={t('unitPrice')} value={`${price.price} DA`} />}
-                  {price && <ModalRow label={t('subtotal')} value={`${subtotal.toLocaleString()} DA`} />}
+                  {standard != null && <ModalRow label={t('subtotal')} value={`${standard.toLocaleString()} DA`} />}
                   <label className="flex items-center justify-between gap-2 text-muted">
                     <span>{t('discount')}</span>
                     <input
@@ -638,7 +703,7 @@ export default function CatalogPage() {
                       className="w-24 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
                     />
                   </label>
-                  {price && <ModalRow label={t('total')} value={`${finalTotal.toLocaleString()} DA`} bold />}
+                  <ModalRow label={t('total')} value={`${total.toLocaleString()} DA`} bold />
                 </div>
               );
             })()}

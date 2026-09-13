@@ -186,7 +186,9 @@
     "unitPrice": "Unit price",
     "subtotal": "Subtotal",
     "total": "Total",
-    "newProduct": "New product"
+    "newProduct": "New product",
+    "pieces": "pieces",
+    "piecesHint": "Adjust the piece count if a received carton is short — the discount is computed automatically."
   },
   "products": {
     "title": "Products",
