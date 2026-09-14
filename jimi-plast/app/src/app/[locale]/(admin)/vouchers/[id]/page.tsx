@@ -5,11 +5,24 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { ImageLightbox } from '@/components/image-lightbox';
 
-interface ProductOption {
+interface Price {
+  tierKey: string;
+  label: string;
+  price: number;
+}
+interface PickerProduct {
   id: string;
   nameFr: string;
+  nameAr: string | null;
+  nameEn: string | null;
+  category: { nameFr: string; nameAr: string | null; nameEn: string | null };
   packagingUnit: { label: string };
+  unitsPerPackage: number;
+  images: { url: string }[];
+  availability: 'IN_STOCK' | 'OUT_OF_STOCK';
+  prices: Price[];
 }
 interface VoucherItem {
   id: string;
@@ -35,19 +48,35 @@ interface Voucher {
   items: VoucherItem[];
 }
 
+const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
+  if (locale === 'ar' && item.nameAr) return item.nameAr;
+  if (locale === 'en' && item.nameEn) return item.nameEn;
+  return item.nameFr;
+};
+
+// Champs numériques en type="text" + inputMode plutôt que type="number" : les
+// inputs number contrôlés perdent des frappes sur mobile — bug connu de
+// React + Android/iOS avec value contrôlée. Texte + filtrage manuel = fiable.
+const onlyDigits = (v: string) => v.replace(/[^0-9]/g, '');
+const onlyDecimal = (v: string) => {
+  const cleaned = v.replace(/[^0-9.]/g, '');
+  const firstDot = cleaned.indexOf('.');
+  if (firstDot === -1) return cleaned;
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+};
+
 export default function VoucherEditorPage() {
   const t = useTranslations('vouchers');
+  const tCatalog = useTranslations('catalog');
   const tCommon = useTranslations('common');
   const { token, hasPermission } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
   const canManage = hasPermission('vouchers.create');
+  const canSeeStock = hasPermission('stock.manage');
   const basePath = canManage ? '/vouchers' : '/vouchers/mine';
 
   const [voucher, setVoucher] = useState<Voucher | null>(null);
-  const [products, setProducts] = useState<ProductOption[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState('');
-  const [quantity, setQuantity] = useState('1');
   const [discount, setDiscount] = useState('0');
   const [transportCost, setTransportCost] = useState('0');
   const [paidAmount, setPaidAmount] = useState('0');
@@ -56,6 +85,20 @@ export default function VoucherEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sélecteur de produit : recherche + vignettes + zoom, même système que le Catalogue.
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerResults, setPickerResults] = useState<PickerProduct[]>([]);
+  const [viewTier, setViewTier] = useState('');
+  const [lightboxProduct, setLightboxProduct] = useState<PickerProduct | null>(null);
+  const [addingProduct, setAddingProduct] = useState<PickerProduct | null>(null);
+  const [modalQty, setModalQty] = useState('1');
+  const [modalUnitsPerPackage, setModalUnitsPerPackage] = useState('');
+  const [modalPieces, setModalPieces] = useState('');
+  const [modalUnitPrice, setModalUnitPrice] = useState('');
+  const [modalDiscount, setModalDiscount] = useState('0');
+  const [modalDiscountPercent, setModalDiscountPercent] = useState('0');
 
   function reload() {
     api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
@@ -68,12 +111,38 @@ export default function VoucherEditorPage() {
   }
 
   useEffect(() => {
-    if (token) {
-      reload();
-      api.get<{ items: ProductOption[] }>('/products?pageSize=200', token).then((r) => setProducts(r.items));
-    }
+    if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  useEffect(() => {
+    if (!token || !showPicker) return;
+    const timeout = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (pickerQuery) params.set('search', pickerQuery);
+      params.set('pageSize', '24');
+      api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token).then((res) => setPickerResults(res.items));
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [token, showPicker, pickerQuery]);
+
+  const availableTiers = Array.from(
+    new Map(pickerResults.flatMap((p) => p.prices.map((pr) => [pr.tierKey, pr.label] as const))).entries(),
+  ).map(([tierKey, label]) => ({ tierKey, label }));
+
+  useEffect(() => {
+    if (availableTiers.length === 0) return;
+    if (!availableTiers.some((tr) => tr.tierKey === viewTier)) {
+      const preferred = ['wholesale', 'retail'].find((key) => availableTiers.some((tr) => tr.tierKey === key));
+      setViewTier(preferred ?? availableTiers[0].tierKey);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableTiers]);
+
+  function priceForView(p: PickerProduct): Price | undefined {
+    if (viewTier) return p.prices.find((pr) => pr.tierKey === viewTier) ?? p.prices[0];
+    return p.prices[0];
+  }
 
   const isDraft = voucher?.status === 'DRAFT';
 
@@ -94,12 +163,109 @@ export default function VoucherEditorPage() {
     [id, token, basePath],
   );
 
-  function addItem() {
-    if (!voucher || !selectedProductId) return;
+  function openAddModal(p: PickerProduct) {
+    const price = priceForView(p)?.price ?? 0;
+    setAddingProduct(p);
+    setModalQty('1');
+    setModalUnitsPerPackage(String(p.unitsPerPackage));
+    setModalPieces(String(p.unitsPerPackage));
+    setModalUnitPrice(String(price));
+    setModalDiscount('0');
+    setModalDiscountPercent('0');
+  }
+
+  /** Sous-total plein (cartons catalogue × prix catalogue) — base de calcul du %. */
+  function modalStandard(): number {
+    if (!addingProduct) return 0;
+    const catalogPrice = priceForView(addingProduct)?.price ?? 0;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    return qty * addingProduct.unitsPerPackage * catalogPrice;
+  }
+
+  function onModalDiscountChange(v: string) {
+    const clean = onlyDecimal(v);
+    setModalDiscount(clean);
+    const standard = modalStandard();
+    setModalDiscountPercent(standard > 0 ? String(Math.round(((Number(clean) || 0) / standard) * 10000) / 100) : '0');
+  }
+
+  function onModalDiscountPercentChange(v: string) {
+    const clean = onlyDecimal(v);
+    setModalDiscountPercent(clean);
+    const standard = modalStandard();
+    const pct = Math.max(0, Number(clean) || 0);
+    setModalDiscount(String(Math.round(standard * (pct / 100) * 100) / 100));
+  }
+
+  function onModalQtyChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalQty(clean);
+    const qty = Math.max(0, Number(clean) || 0);
+    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    setModalPieces(String(qty * upp));
+  }
+
+  function onModalUnitsPerPackageChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalUnitsPerPackage(clean);
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const upp = Math.max(0, Number(clean) || 0);
+    setModalPieces(String(qty * upp));
+  }
+
+  function onModalPiecesChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalPieces(clean);
+    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    if (upp <= 0) return;
+    const pieces = Math.max(0, Number(clean) || 0);
+    setModalQty(String(Math.max(1, Math.ceil(pieces / upp))));
+  }
+
+  // Suggère automatiquement une remise = écart entre le prix catalogue plein
+  // (cartons entiers) et ce que le vendeur indique réellement livrer/facturer —
+  // utile quand un carton reçu est incomplet. Reste modifiable manuellement.
+  useEffect(() => {
+    if (!addingProduct) return;
+    const catalogPrice = priceForView(addingProduct)?.price ?? 0;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    const unitPrice = Math.max(0, Number(modalUnitPrice) || 0);
+    const standard = qty * addingProduct.unitsPerPackage * catalogPrice;
+    const actual = pieces * unitPrice;
+    const suggested = Math.max(0, Math.round((standard - actual) * 100) / 100);
+    setModalDiscount(String(suggested));
+    setModalDiscountPercent(standard > 0 ? String(Math.round((suggested / standard) * 10000) / 100) : '0');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalQty, modalPieces, modalUnitPrice, addingProduct]);
+
+  // Le bon ne connaît que quantityPackages/remise globale — pas d'ajustement
+  // pièces/carton par ligne. On rend l'écart traçable dans les observations,
+  // avec le même marqueur ⚠ que le panier du Catalogue.
+  function confirmAddToVoucher() {
+    if (!voucher || !addingProduct) return;
+    const qty = Math.max(1, Number(modalQty) || 1);
+    const discountAmt = Math.max(0, Number(modalDiscount) || 0);
+    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    const isNominal = upp === addingProduct.unitsPerPackage && pieces === qty * upp;
+
     const existingItems = voucher.items.map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages }));
-    autoSave({ items: [...existingItems, { productId: selectedProductId, quantityPackages: Number(quantity) }] });
-    setSelectedProductId('');
-    setQuantity('1');
+    const newItems = [...existingItems, { productId: addingProduct.id, quantityPackages: qty }];
+    const newDiscount = Math.round((Number(discount) + discountAmt) * 100) / 100;
+
+    let newNotes = notes;
+    if (!isNominal) {
+      const prefix = `⚠ ${tCatalog('adjustedWarning')} : `;
+      const line = `${localizedName(addingProduct, locale)} : ${pieces} ${tCatalog('pieces')} (${upp}/${tCatalog('pieces')} × ${qty}) — remise ${discountAmt.toLocaleString()} DA`;
+      newNotes = notes.startsWith(prefix) ? `${notes} | ${line}` : notes ? `${notes} | ${prefix}${line}` : `${prefix}${line}`;
+    }
+
+    setDiscount(String(newDiscount));
+    setNotes(newNotes);
+    autoSave({ items: newItems, discount: newDiscount, notes: newNotes || undefined });
+    setAddingProduct(null);
+    setPickerQuery('');
   }
 
   function removeItem(productId: string) {
@@ -167,29 +333,89 @@ export default function VoucherEditorPage() {
       </div>
 
       {isDraft && (
-        <div className="flex gap-2">
-          <select
-            value={selectedProductId}
-            onChange={(e) => setSelectedProductId(e.target.value)}
-            className="flex-1 rounded border border-line bg-panel px-3 py-2 text-sm"
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setShowPicker((v) => !v)}
+            className="w-fit rounded bg-accent px-3 py-2 text-sm font-medium text-white"
           >
-            <option value="">{t('product')}</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nameFr} ({p.packagingUnit.label})
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            className="w-24 rounded border border-line bg-panel px-3 py-2 text-sm"
-          />
-          <button onClick={addItem} className="rounded bg-accent px-3 py-2 text-sm font-medium text-white">
-            {t('addProduct')}
+            {showPicker ? tCommon('cancel') : t('addProduct')}
           </button>
+
+          {showPicker && (
+            <div className="rounded-lg border border-line bg-panel p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  value={pickerQuery}
+                  onChange={(e) => setPickerQuery(e.target.value)}
+                  placeholder={tCommon('search')}
+                  className="min-w-0 flex-1 rounded border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+                />
+                {availableTiers.length > 1 && (
+                  <select
+                    value={viewTier}
+                    onChange={(e) => setViewTier(e.target.value)}
+                    className="rounded border border-line bg-paper px-2 py-2 text-sm"
+                  >
+                    {availableTiers.map((tr) => (
+                      <option key={tr.tierKey} value={tr.tierKey}>
+                        {tCatalog('viewPricesAs')}: {tr.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="mt-3 flex max-h-80 flex-col gap-1.5 overflow-y-auto">
+                {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
+                {pickerResults.map((p) => {
+                  const price = priceForView(p);
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
+                      className={`flex items-center gap-3 rounded border border-line p-2 ${
+                        p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
+                      }`}
+                    >
+                      <div
+                        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted ${
+                          p.images.length > 0 ? 'cursor-zoom-in' : ''
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (p.images.length > 0) setLightboxProduct(p);
+                        }}
+                      >
+                        {p.images[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-lg">📦</span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{localizedName(p, locale)}</p>
+                        <p className="truncate text-xs text-muted">
+                          {localizedName(p.category, locale)} ·{' '}
+                          {tCatalog('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0 text-end">
+                        {price ? (
+                          <span className="font-mono text-sm font-semibold text-ink">{price.price} DA</span>
+                        ) : (
+                          <span className="text-xs text-muted">—</span>
+                        )}
+                        {p.availability !== 'IN_STOCK' && (
+                          <p className="text-[10px] text-red-600">{tCatalog('outOfStock')}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -285,6 +511,120 @@ export default function VoucherEditorPage() {
       {voucher.status === 'CANCELLED' && (
         <p className="text-sm text-red-600">{voucher.cancelReason}</p>
       )}
+
+      {addingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setAddingProduct(null)}>
+          <div className="w-full max-w-sm rounded-lg bg-panel p-4" onClick={(e) => e.stopPropagation()}>
+            <h2 className="mb-1 text-sm font-semibold text-ink">{localizedName(addingProduct, locale)}</h2>
+            <p className="mb-3 text-xs font-medium text-accent">
+              {tCatalog('piecesPerPackage', { count: addingProduct.unitsPerPackage, unit: addingProduct.packagingUnit.label })}
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{tCatalog('quantityCartons')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalQty}
+                  onChange={(e) => onModalQtyChange(e.target.value)}
+                  className="rounded border border-line bg-paper px-2 py-2"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{tCatalog('unitsPerPackage')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalUnitsPerPackage}
+                  onChange={(e) => onModalUnitsPerPackageChange(e.target.value)}
+                  className={`rounded border bg-paper px-2 py-2 ${
+                    Number(modalUnitsPerPackage) !== addingProduct.unitsPerPackage ? 'border-amber-500 text-amber-600' : 'border-line'
+                  }`}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{tCatalog('totalPieces')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalPieces}
+                  onChange={(e) => onModalPiecesChange(e.target.value)}
+                  className={`rounded border bg-paper px-2 py-2 ${
+                    Number(modalPieces) !== Math.max(0, Number(modalQty) || 0) * Math.max(0, Number(modalUnitsPerPackage) || 0)
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-line'
+                  }`}
+                />
+              </label>
+            </div>
+            {(Number(modalUnitsPerPackage) !== addingProduct.unitsPerPackage ||
+              Number(modalPieces) !== Math.max(0, Number(modalQty) || 0) * Math.max(0, Number(modalUnitsPerPackage) || 0)) && (
+              <p className="mt-1 text-[11px] font-medium text-amber-600">{tCatalog('adjustedWarning')}</p>
+            )}
+            <p className="mt-1 text-[11px] text-muted">{tCatalog('piecesHint')}</p>
+
+            <label className="mt-3 flex flex-col gap-1 text-sm">
+              <span className="text-muted">{tCatalog('unitPrice')}</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={modalUnitPrice}
+                onChange={(e) => setModalUnitPrice(onlyDecimal(e.target.value))}
+                className="rounded border border-line bg-paper px-3 py-2"
+              />
+            </label>
+
+            {(() => {
+              const catalogPrice = priceForView(addingProduct)?.price;
+              const qty = Math.max(0, Number(modalQty) || 0);
+              const discountAmt = Math.max(0, Number(modalDiscount) || 0);
+              const standard = catalogPrice != null ? qty * addingProduct.unitsPerPackage * catalogPrice : undefined;
+              const actual = Math.max(0, Number(modalPieces) || 0) * Math.max(0, Number(modalUnitPrice) || 0);
+              const lineTotal = standard != null ? Math.max(0, standard - discountAmt) : actual;
+              return (
+                <div className="mt-3 flex flex-col gap-1.5 text-sm">
+                  {standard != null && <ModalRow label={tCatalog('subtotal')} value={`${standard.toLocaleString()} DA`} />}
+                  <div className="flex items-center justify-between gap-2 text-muted">
+                    <span>{tCatalog('discount')}</span>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={modalDiscountPercent}
+                        onChange={(e) => onModalDiscountPercentChange(e.target.value)}
+                        className="w-16 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
+                      />
+                      <span className="text-xs">%</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={modalDiscount}
+                        onChange={(e) => onModalDiscountChange(e.target.value)}
+                        className="w-20 rounded border border-line bg-paper px-2 py-1 text-end text-ink"
+                      />
+                      <span className="text-xs">DA</span>
+                    </div>
+                  </div>
+                  <ModalRow label={tCatalog('total')} value={`${lineTotal.toLocaleString()} DA`} bold />
+                </div>
+              );
+            })()}
+
+            <button onClick={confirmAddToVoucher} className="mt-4 w-full rounded bg-accent px-3 py-2 text-sm font-medium text-white">
+              {tCatalog('confirmAdd')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {lightboxProduct && (
+        <ImageLightbox
+          images={lightboxProduct.images}
+          title={localizedName(lightboxProduct, locale)}
+          onClose={() => setLightboxProduct(null)}
+        />
+      )}
     </div>
   );
 }
@@ -309,6 +649,15 @@ function Row({ label, value, bold }: { label: string; value: number; bold?: bool
     <div className={`flex justify-between py-1 ${bold ? 'font-semibold text-ink' : 'text-muted'}`}>
       <span>{label}</span>
       <span className="tabular">{value.toLocaleString()} DA</span>
+    </div>
+  );
+}
+
+function ModalRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <div className={`flex justify-between ${bold ? 'font-semibold text-ink' : 'text-muted'}`}>
+      <span>{label}</span>
+      <span className="tabular">{value}</span>
     </div>
   );
 }
