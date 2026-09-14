@@ -249,6 +249,8 @@
   "customers": {
     "title": "Clients",
     "addCustomer": "Nouveau client",
+    "searchPlaceholder": "Rechercher un client...",
+    "deleteConfirm": "Supprimer ce client ? Son compte sera aussi désactivé.",
     "columns": {
       "name": "Nom",
       "business": "Commerce",
@@ -541,7 +543,8 @@
       "Category": "Catégorie",
       "Manufacturer": "Fabricant",
       "Notification": "Notification",
-      "Besoin": "Besoin"
+      "Besoin": "Besoin",
+      "Customer": "Client"
     }
   },
   "besoins": {

@@ -249,6 +249,8 @@
   "customers": {
     "title": "العملاء",
     "addCustomer": "عميل جديد",
+    "searchPlaceholder": "البحث عن عميل...",
+    "deleteConfirm": "حذف هذا العميل؟ سيتم أيضًا تعطيل حسابه.",
     "columns": {
       "name": "الاسم",
       "business": "المحل",
@@ -541,7 +543,8 @@
       "Category": "فئة",
       "Manufacturer": "مصنّع",
       "Notification": "إشعار",
-      "Besoin": "احتياج"
+      "Besoin": "احتياج",
+      "Customer": "زبون"
     }
   },
   "besoins": {

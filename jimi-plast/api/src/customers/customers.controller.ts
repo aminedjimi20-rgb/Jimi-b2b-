@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -38,6 +38,12 @@ export class CustomersController {
   @RequirePermissions('customers.manage')
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto, @CurrentUser() user: AuthenticatedUser) {
     return this.customersService.update(id, dto, user.id);
+  }
+
+  @Delete(':id')
+  @RequirePermissions('customers.manage')
+  remove(@Param('id') id: string, @Query('reason') reason: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.customersService.remove(id, user.id, reason);
   }
 
   @Post(':id/payments')

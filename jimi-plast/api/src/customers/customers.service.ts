@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { TrashService } from '../common/services/trash.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from './dto/add-ledger-entry.dto';
@@ -13,6 +14,7 @@ export class CustomersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
+    private readonly trash: TrashService,
   ) {}
 
   private async balanceOf(customerId: string): Promise<number> {
@@ -34,8 +36,10 @@ export class CustomersService {
     return customers.map((c, i) => ({
       id: c.id,
       businessName: c.businessName,
+      address: c.address,
       wilaya: c.wilaya,
       creditLimit: Number(c.creditLimit),
+      createdAt: c.createdAt,
       user: c.user,
       balance: balances[i],
     }));
@@ -122,7 +126,21 @@ export class CustomersService {
     const existing = await this.prisma.customer.findFirst({ where: { id, deletedAt: null } });
     if (!existing) throw new NotFoundException('Client introuvable');
 
-    const updated = await this.prisma.customer.update({ where: { id }, data: dto });
+    const { fullName, phone, ...customerFields } = dto;
+
+    await this.prisma.$transaction(async (tx) => {
+      if (fullName !== undefined || phone !== undefined) {
+        await tx.user.update({
+          where: { id: existing.userId },
+          data: {
+            ...(fullName !== undefined ? { fullName } : {}),
+            ...(phone !== undefined ? { phone } : {}),
+          },
+        });
+      }
+      await tx.customer.update({ where: { id }, data: customerFields });
+    });
+
     await this.auditLog.record({
       entityType: 'Customer',
       entityId: id,
@@ -131,7 +149,30 @@ export class CustomersService {
       newValue: dto,
       actorId,
     });
-    return updated;
+    return this.getById(id);
+  }
+
+  async remove(id: string, actorId: string, reason?: string) {
+    const customer = await this.prisma.customer.findFirst({
+      where: { id, deletedAt: null },
+      include: { user: true },
+    });
+    if (!customer) throw new NotFoundException('Client introuvable');
+
+    await this.prisma.$transaction([
+      this.prisma.customer.update({ where: { id }, data: { deletedAt: new Date() } }),
+      this.prisma.user.update({ where: { id: customer.userId }, data: { deletedAt: new Date() } }),
+    ]);
+
+    await this.trash.moveToTrash({
+      entityType: 'Customer',
+      entityId: id,
+      snapshot: customer as unknown as Record<string, unknown>,
+      deletedById: actorId,
+      reason,
+    });
+
+    return { id };
   }
 
   async addPayment(customerId: string, dto: AddPaymentDto, actorId: string) {
