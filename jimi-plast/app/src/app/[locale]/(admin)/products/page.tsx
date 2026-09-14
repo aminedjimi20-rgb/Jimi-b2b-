@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
+import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Category {
   id: string;
@@ -51,6 +52,7 @@ interface FullProduct {
   isNew: boolean;
   isFeatured: boolean;
   isActive: boolean;
+  createdAt: string;
   category: { nameFr: string };
   manufacturer: { name: string } | null;
   images: { id: string; url: string; isPrimary: boolean }[];
@@ -98,6 +100,7 @@ export default function ProductsAdminPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [manufacturerFilter, setManufacturerFilter] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
   const [lastChanges, setLastChanges] = useState<Record<string, LastChange | null>>({});
 
   function reloadProducts() {
@@ -246,16 +249,30 @@ export default function ProductsAdminPage() {
 
   const editingProduct = products.find((p) => p.id === editingId);
 
-  const filteredProducts = products.filter((p) => {
-    if (categoryFilter && p.categoryId !== categoryFilter) return false;
-    if (manufacturerFilter && p.manufacturerId !== manufacturerFilter) return false;
-    if (search) {
-      const needle = search.toLowerCase();
-      const haystack = `${p.sku} ${p.nameFr} ${p.nameAr ?? ''} ${p.nameEn ?? ''}`.toLowerCase();
-      if (!haystack.includes(needle)) return false;
-    }
-    return true;
-  });
+  const filteredProducts = products
+    .filter((p) => {
+      if (categoryFilter && p.categoryId !== categoryFilter) return false;
+      if (manufacturerFilter && p.manufacturerId !== manufacturerFilter) return false;
+      if (search) {
+        const needle = search.toLowerCase();
+        const haystack = `${p.sku} ${p.nameFr} ${p.nameAr ?? ''} ${p.nameEn ?? ''}`.toLowerCase();
+        if (!haystack.includes(needle)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sortMode) {
+        case 'name_asc':
+          return a.nameFr.localeCompare(b.nameFr);
+        case 'name_desc':
+          return b.nameFr.localeCompare(a.nameFr);
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'newest':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
 
   return (
     <div className="flex flex-col gap-6 xl:flex-row">
@@ -294,6 +311,7 @@ export default function ProductsAdminPage() {
               </option>
             ))}
           </select>
+          <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'name_asc', 'name_desc']} />
         </div>
 
         <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-panel">

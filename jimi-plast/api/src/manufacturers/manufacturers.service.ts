@@ -22,7 +22,11 @@ export class ManufacturersService {
   }
 
   async list() {
-    const manufacturers = await this.prisma.manufacturer.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' } });
+    const manufacturers = await this.prisma.manufacturer.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: 'asc' },
+      include: { _count: { select: { products: { where: { deletedAt: null } } } } },
+    });
     const balances = await Promise.all(manufacturers.map((m) => this.balanceOf(m.id)));
     return manufacturers.map((m, i) => ({ ...m, balance: balances[i] }));
   }

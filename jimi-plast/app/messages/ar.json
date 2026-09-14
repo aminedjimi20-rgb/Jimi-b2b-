@@ -148,7 +148,17 @@
     "empty": "لا توجد عناصر",
     "search": "بحث…",
     "loginToSeePrices": "سجّل الدخول لرؤية الأسعار",
-    "uploadPhoto": "من المعرض"
+    "uploadPhoto": "من المعرض",
+    "sort": {
+      "label": "ترتيب حسب",
+      "nameAsc": "الاسم (أ ← ي)",
+      "nameDesc": "الاسم (ي ← أ)",
+      "newest": "الأحدث أولاً",
+      "oldest": "الأقدم أولاً",
+      "countDesc": "عدد المنتجات (تنازلي)",
+      "countAsc": "عدد المنتجات (تصاعدي)",
+      "manual": "ترتيب يدوي"
+    }
   },
   "catalog": {
     "title": "الكتالوج",
@@ -332,7 +342,8 @@
       "company": "الشركة",
       "phone": "الهاتف",
       "wilaya": "الولاية",
-      "balance": "الدين"
+      "balance": "الدين",
+      "products": "المنتجات"
     },
     "form": {
       "name": "الاسم",

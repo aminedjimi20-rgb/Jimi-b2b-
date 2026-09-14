@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
+import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Category {
   id: string;
@@ -13,6 +14,7 @@ interface Category {
   nameEn: string | null;
   parentId: string | null;
   sortOrder: number;
+  createdAt: string;
   _count: { products: number };
 }
 
@@ -37,6 +39,7 @@ export default function CategoriesPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
   const [form, setForm] = useState(EMPTY_FORM);
   const [formType, setFormType] = useState<CategoryType>('root');
   const [slugTouched, setSlugTouched] = useState(false);
@@ -60,6 +63,32 @@ export default function CategoriesPage() {
         c.slug.toLowerCase().includes(q),
     );
   }, [categories, search]);
+
+  const sortedFiltered = useMemo(() => {
+    if (sortMode === 'manual') return filtered;
+    const arr = [...filtered];
+    switch (sortMode) {
+      case 'name_asc':
+        arr.sort((a, b) => a.nameFr.localeCompare(b.nameFr));
+        break;
+      case 'name_desc':
+        arr.sort((a, b) => b.nameFr.localeCompare(a.nameFr));
+        break;
+      case 'newest':
+        arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'count_desc':
+        arr.sort((a, b) => b._count.products - a._count.products);
+        break;
+      case 'count_asc':
+        arr.sort((a, b) => a._count.products - b._count.products);
+        break;
+    }
+    return arr;
+  }, [filtered, sortMode]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -123,8 +152,8 @@ export default function CategoriesPage() {
 
   async function move(index: number, direction: -1 | 1) {
     const otherIndex = index + direction;
-    if (otherIndex < 0 || otherIndex >= filtered.length) return;
-    const reordered = [...filtered];
+    if (otherIndex < 0 || otherIndex >= sortedFiltered.length) return;
+    const reordered = [...sortedFiltered];
     [reordered[index], reordered[otherIndex]] = [reordered[otherIndex], reordered[index]];
 
     await Promise.all(
@@ -149,19 +178,26 @@ export default function CategoriesPage() {
   }
 
   const nameOf = (c: Category) => c.nameFr;
-  const canReorder = search.trim() === '';
+  const canReorder = search.trim() === '' && sortMode === 'manual';
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="flex-1">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('searchPlaceholder')}
-            className="w-full max-w-xs rounded border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-accent"
-          />
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('searchPlaceholder')}
+              className="w-full max-w-xs rounded border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-accent"
+            />
+            <SortSelect
+              value={sortMode}
+              onChange={setSortMode}
+              options={['newest', 'oldest', 'name_asc', 'name_desc', 'count_desc', 'count_asc', 'manual']}
+            />
+          </div>
         </div>
         <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full min-w-[600px] text-sm">
@@ -176,7 +212,7 @@ export default function CategoriesPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c, index) => (
+              {sortedFiltered.map((c, index) => (
                 <tr key={c.id} className="border-t border-line">
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-1">
@@ -192,7 +228,7 @@ export default function CategoriesPage() {
                       <button
                         type="button"
                         onClick={() => move(index, 1)}
-                        disabled={!canReorder || index === filtered.length - 1}
+                        disabled={!canReorder || index === sortedFiltered.length - 1}
                         title={t('moveDown')}
                         className="rounded px-1 text-muted hover:text-accent disabled:opacity-20"
                       >

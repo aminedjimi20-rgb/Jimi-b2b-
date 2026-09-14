@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
+import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Manufacturer {
   id: string;
@@ -14,6 +15,8 @@ interface Manufacturer {
   phone: string | null;
   wilaya: string | null;
   balance: number;
+  createdAt: string;
+  _count: { products: number };
 }
 
 const EMPTY = {
@@ -36,6 +39,7 @@ export default function ManufacturersPage() {
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
 
   function reload() {
     api.get<Manufacturer[]>('/manufacturers', token).then(setItems);
@@ -61,13 +65,45 @@ export default function ManufacturersPage() {
     reload();
   }
 
+  const sortedItems = useMemo(() => {
+    const arr = [...items];
+    switch (sortMode) {
+      case 'name_asc':
+        arr.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name_desc':
+        arr.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'newest':
+        arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'count_desc':
+        arr.sort((a, b) => b._count.products - a._count.products);
+        break;
+      case 'count_asc':
+        arr.sort((a, b) => a._count.products - b._count.products);
+        break;
+    }
+    return arr;
+  }, [items, sortMode]);
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
-        <button onClick={() => setShowForm((v) => !v)} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
-          {t('add')}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <SortSelect
+            value={sortMode}
+            onChange={setSortMode}
+            options={['newest', 'oldest', 'name_asc', 'name_desc', 'count_desc', 'count_asc']}
+          />
+          <button onClick={() => setShowForm((v) => !v)} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
+            {t('add')}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -109,12 +145,13 @@ export default function ManufacturersPage() {
               <th className="px-4 py-2 text-start">{t('columns.name')}</th>
               <th className="px-4 py-2 text-start">{t('columns.company')}</th>
               <th className="px-4 py-2 text-start">{t('columns.phone')}</th>
+              <th className="px-4 py-2 text-start">{t('columns.products')}</th>
               <th className="px-4 py-2 text-start">{t('columns.balance')}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {items.map((m) => (
+            {sortedItems.map((m) => (
               <tr key={m.id} className="border-t border-line">
                 <td className="px-4 py-2 font-medium text-ink">
                   <div className="flex items-center gap-2">
@@ -131,6 +168,7 @@ export default function ManufacturersPage() {
                 </td>
                 <td className="px-4 py-2 text-muted">{m.company}</td>
                 <td className="px-4 py-2 font-mono text-xs">{m.phone}</td>
+                <td className="px-4 py-2 tabular">{m._count.products}</td>
                 <td className={`px-4 py-2 tabular font-medium ${m.balance > 0 ? 'text-accent' : 'text-teal'}`}>
                   {m.balance.toLocaleString()} DA
                 </td>

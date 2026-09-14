@@ -148,7 +148,17 @@
     "empty": "Aucun élément",
     "search": "Rechercher…",
     "loginToSeePrices": "Connectez-vous pour voir les prix",
-    "uploadPhoto": "Depuis la galerie"
+    "uploadPhoto": "Depuis la galerie",
+    "sort": {
+      "label": "Trier par",
+      "nameAsc": "Nom (A → Z)",
+      "nameDesc": "Nom (Z → A)",
+      "newest": "Plus récents d'abord",
+      "oldest": "Plus anciens d'abord",
+      "countDesc": "Nb produits (décroissant)",
+      "countAsc": "Nb produits (croissant)",
+      "manual": "Ordre manuel"
+    }
   },
   "catalog": {
     "title": "Catalogue",
@@ -332,7 +342,8 @@
       "company": "Société",
       "phone": "Téléphone",
       "wilaya": "Wilaya",
-      "balance": "Dette"
+      "balance": "Dette",
+      "products": "Produits"
     },
     "form": {
       "name": "Nom",

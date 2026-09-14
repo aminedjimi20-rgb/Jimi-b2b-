@@ -148,7 +148,17 @@
     "empty": "No items",
     "search": "Search…",
     "loginToSeePrices": "Sign in to see prices",
-    "uploadPhoto": "From gallery"
+    "uploadPhoto": "From gallery",
+    "sort": {
+      "label": "Sort by",
+      "nameAsc": "Name (A → Z)",
+      "nameDesc": "Name (Z → A)",
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "countDesc": "Product count (high to low)",
+      "countAsc": "Product count (low to high)",
+      "manual": "Manual order"
+    }
   },
   "catalog": {
     "title": "Catalog",
@@ -332,7 +342,8 @@
       "company": "Company",
       "phone": "Phone",
       "wilaya": "Province",
-      "balance": "Debt"
+      "balance": "Debt",
+      "products": "Products"
     },
     "form": {
       "name": "Name",
