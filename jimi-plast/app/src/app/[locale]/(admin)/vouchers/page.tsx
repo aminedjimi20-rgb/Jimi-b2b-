@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Customer {
   id: string;
@@ -32,6 +33,7 @@ export default function VouchersPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
   const [newCustomerId, setNewCustomerId] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
 
   function reload() {
     const params = new URLSearchParams();
@@ -57,6 +59,26 @@ export default function VouchersPage() {
 
   const total = (v: VoucherRow) =>
     v.items.reduce((s, i) => s + Number(i.lineTotal), 0) - Number(v.discount) + Number(v.transportCost);
+
+  const sortedVouchers = useMemo(() => {
+    const arr = [...vouchers];
+    switch (sortMode) {
+      case 'oldest':
+        arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'price_desc':
+        arr.sort((a, b) => total(b) - total(a));
+        break;
+      case 'price_asc':
+        arr.sort((a, b) => total(a) - total(b));
+        break;
+      case 'newest':
+      default:
+        arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    return arr;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vouchers, sortMode]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -102,6 +124,7 @@ export default function VouchersPage() {
             </option>
           ))}
         </select>
+        <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'price_desc', 'price_asc']} />
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
@@ -116,7 +139,7 @@ export default function VouchersPage() {
             </tr>
           </thead>
           <tbody>
-            {vouchers.map((v) => (
+            {sortedVouchers.map((v) => (
               <tr
                 key={v.id}
                 onClick={() => router.push(`/${locale}/vouchers/${v.id}`)}

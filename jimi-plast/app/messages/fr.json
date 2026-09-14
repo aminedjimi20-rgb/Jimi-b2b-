@@ -157,6 +157,8 @@
       "oldest": "Plus anciens d'abord",
       "countDesc": "Nb produits (décroissant)",
       "countAsc": "Nb produits (croissant)",
+      "priceDesc": "Prix (décroissant)",
+      "priceAsc": "Prix (croissant)",
       "manual": "Ordre manuel"
     }
   },

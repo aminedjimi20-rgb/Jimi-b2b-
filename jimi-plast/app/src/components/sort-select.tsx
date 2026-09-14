@@ -2,7 +2,16 @@
 
 import { useTranslations } from 'next-intl';
 
-export type SortMode = 'name_asc' | 'name_desc' | 'newest' | 'oldest' | 'count_desc' | 'count_asc' | 'manual';
+export type SortMode =
+  | 'name_asc'
+  | 'name_desc'
+  | 'newest'
+  | 'oldest'
+  | 'count_desc'
+  | 'count_asc'
+  | 'price_desc'
+  | 'price_asc'
+  | 'manual';
 
 const LABEL_KEYS: Record<SortMode, string> = {
   name_asc: 'nameAsc',
@@ -11,6 +20,8 @@ const LABEL_KEYS: Record<SortMode, string> = {
   oldest: 'oldest',
   count_desc: 'countDesc',
   count_asc: 'countAsc',
+  price_desc: 'priceDesc',
+  price_asc: 'priceAsc',
   manual: 'manual',
 };
 
