@@ -7,6 +7,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertVoucherDto } from './dto/upsert-voucher.dto';
 import { CancelVoucherDto } from './dto/cancel-voucher.dto';
+import { AddVoucherAttachmentDto } from './dto/add-attachment.dto';
 
 @Controller('vouchers')
 @RequirePermissions('vouchers.create')
@@ -51,6 +52,22 @@ export class VouchersController {
     return this.vouchersService.updateMine(user.id, id, dto);
   }
 
+  @Post('mine/:id/attachments')
+  @RequirePermissions()
+  addAttachmentMine(@Param('id') id: string, @Body() dto: AddVoucherAttachmentDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.addAttachmentMine(user.id, id, dto.url);
+  }
+
+  @Delete('mine/:id/attachments/:attachmentId')
+  @RequirePermissions()
+  removeAttachmentMine(
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.vouchersService.removeAttachmentMine(user.id, id, attachmentId);
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.vouchersService.getById(id);
@@ -73,6 +90,16 @@ export class VouchersController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpsertVoucherDto, @CurrentUser() user: AuthenticatedUser) {
     return this.vouchersService.update(id, dto, user.id);
+  }
+
+  @Post(':id/attachments')
+  addAttachment(@Param('id') id: string, @Body() dto: AddVoucherAttachmentDto) {
+    return this.vouchersService.addAttachment(id, dto.url);
+  }
+
+  @Delete(':id/attachments/:attachmentId')
+  removeAttachment(@Param('id') id: string, @Param('attachmentId') attachmentId: string) {
+    return this.vouchersService.removeAttachment(id, attachmentId);
   }
 
   @Post(':id/confirm')

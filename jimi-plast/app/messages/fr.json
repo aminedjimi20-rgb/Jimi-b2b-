@@ -336,7 +336,10 @@
     "deleteConfirm": "Supprimer ce brouillon ?",
     "backToCatalog": "Retour au catalogue",
     "waitingForStaffConfirmation": "Votre commande est en attente de confirmation par notre équipe.",
-    "noOrders": "Aucune commande pour le moment"
+    "noOrders": "Aucune commande pour le moment",
+    "attachments": "Photos jointes",
+    "addAttachment": "Ajouter une photo",
+    "deleteAttachmentConfirm": "Supprimer cette photo ?"
   },
   "manufacturers": {
     "title": "Fabricants",

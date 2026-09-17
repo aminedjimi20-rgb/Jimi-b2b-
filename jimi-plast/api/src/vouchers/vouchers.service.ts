@@ -68,10 +68,35 @@ export class VouchersService {
         customer: { include: { user: { select: { id: true, fullName: true, phone: true } } } },
         seller: { select: { fullName: true } },
         items: { include: { product: true, priceTierType: true, packagingUnit: true } },
+        attachments: { orderBy: { createdAt: 'desc' } },
       },
     });
     if (!voucher) throw new NotFoundException('Bon introuvable');
     return voucher;
+  }
+
+  async addAttachment(voucherId: string, url: string) {
+    const voucher = await this.prisma.salesVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
+    if (!voucher) throw new NotFoundException('Bon introuvable');
+    await this.prisma.voucherAttachment.create({ data: { voucherId, url } });
+    return this.getById(voucherId);
+  }
+
+  async removeAttachment(voucherId: string, attachmentId: string) {
+    const attachment = await this.prisma.voucherAttachment.findFirst({ where: { id: attachmentId, voucherId } });
+    if (!attachment) throw new NotFoundException('Pièce jointe introuvable');
+    await this.prisma.voucherAttachment.delete({ where: { id: attachmentId } });
+    return this.getById(voucherId);
+  }
+
+  async addAttachmentMine(userId: string, voucherId: string, url: string) {
+    await this.assertOwnVoucher(userId, voucherId);
+    return this.addAttachment(voucherId, url);
+  }
+
+  async removeAttachmentMine(userId: string, voucherId: string, attachmentId: string) {
+    await this.assertOwnVoucher(userId, voucherId);
+    return this.removeAttachment(voucherId, attachmentId);
   }
 
   async createDraft(customerId: string, sellerId: string) {

@@ -336,7 +336,10 @@
     "deleteConfirm": "Delete this draft?",
     "backToCatalog": "Back to catalog",
     "waitingForStaffConfirmation": "Your order is awaiting confirmation from our team.",
-    "noOrders": "No orders yet"
+    "noOrders": "No orders yet",
+    "attachments": "Attached photos",
+    "addAttachment": "Add a photo",
+    "deleteAttachmentConfirm": "Delete this photo?"
   },
   "manufacturers": {
     "title": "Manufacturers",

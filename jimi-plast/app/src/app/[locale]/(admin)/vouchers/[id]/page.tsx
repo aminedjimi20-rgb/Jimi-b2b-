@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageLightbox } from '@/components/image-lightbox';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface Price {
   tierKey: string;
@@ -46,6 +47,7 @@ interface Voucher {
   notes: string | null;
   cancelReason: string | null;
   items: VoucherItem[];
+  attachments: { id: string; url: string; createdAt: string }[];
 }
 
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
@@ -99,6 +101,8 @@ export default function VoucherEditorPage() {
   const [modalUnitPrice, setModalUnitPrice] = useState('');
   const [modalDiscount, setModalDiscount] = useState('0');
   const [modalDiscountPercent, setModalDiscountPercent] = useState('0');
+  const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
 
   function reload() {
     api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
@@ -251,7 +255,13 @@ export default function VoucherEditorPage() {
     const isNominal = upp === addingProduct.unitsPerPackage && pieces === qty * upp;
 
     const existingItems = voucher.items.map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages }));
-    const newItems = [...existingItems, { productId: addingProduct.id, quantityPackages: qty }];
+    const existingIndex = existingItems.findIndex((i) => i.productId === addingProduct.id);
+    const newItems =
+      existingIndex >= 0
+        ? existingItems.map((i, idx) =>
+            idx === existingIndex ? { ...i, quantityPackages: i.quantityPackages + qty } : i,
+          )
+        : [...existingItems, { productId: addingProduct.id, quantityPackages: qty }];
     const newDiscount = Math.round((Number(discount) + discountAmt) * 100) / 100;
 
     let newNotes = notes;
@@ -274,6 +284,22 @@ export default function VoucherEditorPage() {
       .filter((i) => i.product.id !== productId)
       .map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages }));
     autoSave({ items });
+  }
+
+  async function addAttachment(url: string) {
+    setUploadingAttachment(true);
+    try {
+      await api.post(`${basePath}/${id}/attachments`, { url }, token);
+      reload();
+    } finally {
+      setUploadingAttachment(false);
+    }
+  }
+
+  async function removeAttachment(attachmentId: string) {
+    if (!window.confirm(t('deleteAttachmentConfirm'))) return;
+    await api.delete(`${basePath}/${id}/attachments/${attachmentId}`, token);
+    reload();
   }
 
   async function confirmVoucher() {
@@ -476,6 +502,35 @@ export default function VoucherEditorPage() {
         <Row label={t('total')} value={total} bold />
       </div>
 
+      <div>
+        <p className="mb-2 text-sm font-semibold text-ink">{t('attachments')}</p>
+        <div className="flex flex-wrap gap-3">
+          {voucher.attachments.map((att, index) => (
+            <div key={att.id} className="group relative h-20 w-20 overflow-hidden rounded border border-line">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={att.url}
+                alt=""
+                onClick={() => setLightboxAttachmentIndex(index)}
+                className="h-full w-full cursor-zoom-in object-cover"
+              />
+              <button
+                onClick={() => removeAttachment(att.id)}
+                className="absolute end-1 top-1 hidden h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white group-hover:flex"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          <ImageUploadButton
+            folder="vouchers"
+            label={uploadingAttachment ? '…' : `+ ${t('addAttachment')}`}
+            onUploaded={addAttachment}
+            className="flex h-20 w-20 items-center justify-center rounded border border-dashed border-line text-center text-xs text-muted hover:bg-line/20"
+          />
+        </div>
+      </div>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {isDraft && canManage && (
@@ -623,6 +678,15 @@ export default function VoucherEditorPage() {
           images={lightboxProduct.images}
           title={localizedName(lightboxProduct, locale)}
           onClose={() => setLightboxProduct(null)}
+        />
+      )}
+
+      {lightboxAttachmentIndex !== null && (
+        <ImageLightbox
+          images={voucher.attachments}
+          startIndex={lightboxAttachmentIndex}
+          title={t('attachments')}
+          onClose={() => setLightboxAttachmentIndex(null)}
         />
       )}
     </div>

@@ -336,7 +336,10 @@
     "deleteConfirm": "حذف هذه المسودة؟",
     "backToCatalog": "العودة إلى الكاتالوڤ",
     "waitingForStaffConfirmation": "طلبيتك في انتظار تأكيد فريقنا.",
-    "noOrders": "لا توجد طلبيات بعد"
+    "noOrders": "لا توجد طلبيات بعد",
+    "attachments": "الصور المرفقة",
+    "addAttachment": "إضافة صورة",
+    "deleteAttachmentConfirm": "حذف هذه الصورة؟"
   },
   "manufacturers": {
     "title": "المصانع",

@@ -468,14 +468,29 @@ model SalesVoucher {
   deliveredAt DateTime?
   deletedAt   DateTime?
 
-  customer Customer           @relation(fields: [customerId], references: [id])
-  seller   User               @relation(fields: [sellerId], references: [id])
-  items    SalesVoucherItem[]
-  delivery Delivery?
+  customer    Customer            @relation(fields: [customerId], references: [id])
+  seller      User                @relation(fields: [sellerId], references: [id])
+  items       SalesVoucherItem[]
+  delivery    Delivery?
+  attachments VoucherAttachment[]
 
   @@index([customerId])
   @@index([status])
   @@map("sales_vouchers")
+}
+
+// Photos jointes à un bon (marchandise livrée, bon papier imprimé et
+// signé...) — libre, sans lien avec les lignes du bon.
+model VoucherAttachment {
+  id        String   @id @default(cuid())
+  voucherId String
+  url       String
+  createdAt DateTime @default(now())
+
+  voucher SalesVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+
+  @@index([voucherId])
+  @@map("voucher_attachments")
 }
 
 model SalesVoucherItem {
