@@ -607,18 +607,12 @@ export default function VoucherEditorPage() {
                 </td>
                 <td className="px-4 py-2 text-ink">{item.product.nameFr}</td>
                 <td className="px-4 py-2 text-xs text-muted">
-                  {item.actualTotalUnits != null && item.actualTotalUnits !== item.totalUnits ? (
-                    <>
-                      {item.quantityPackages} {item.packagingUnit.label} × {item.unitsPerPackageSnapshot} = {item.totalUnits} {t('pieces')}
-                      <span className="text-amber-600">
-                        {' '}
-                        ({tCatalog('minus')} {item.totalUnits - item.actualTotalUnits} {t('pieces')} = {item.actualTotalUnits} {t('pieces')})
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {t('pieces')}
-                    </>
+                  {item.quantityPackages} {item.packagingUnit.label} × {item.unitsPerPackageSnapshot} = {item.totalUnits} {t('pieces')}
+                  {item.actualTotalUnits != null && item.actualTotalUnits !== item.totalUnits && (
+                    <span className="text-amber-600">
+                      {' '}
+                      ({tCatalog('minus')} {item.totalUnits - item.actualTotalUnits} {t('pieces')} = {item.actualTotalUnits} {t('pieces')})
+                    </span>
                   )}
                 </td>
                 <td className="px-4 py-2 tabular">{item.unitPrice} DA</td>
