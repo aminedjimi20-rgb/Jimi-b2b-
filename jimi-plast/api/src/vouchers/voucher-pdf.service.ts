@@ -18,6 +18,7 @@ interface VoucherForPdf {
     quantityPackages: number;
     unitsPerPackageSnapshot: number;
     totalUnits: number;
+    actualTotalUnits: number | null;
     unitPrice: unknown;
     lineTotal: unknown;
   }[];
@@ -79,7 +80,7 @@ export class VoucherPdfService {
     for (const item of voucher.items) {
       d.text(item.product.nameFr, 40, y, { width: 210 });
       d.text(`${item.quantityPackages} ${item.packagingUnit.label}`, 260, y, { width: 70 });
-      d.text(`${item.totalUnits}`, 330, y, { width: 50, align: 'right' });
+      d.text(`${item.actualTotalUnits ?? item.totalUnits}`, 330, y, { width: 50, align: 'right' });
       d.text(`${num(item.unitPrice).toFixed(2)}`, 385, y, { width: 60, align: 'right' });
       d.text(`${num(item.lineTotal).toFixed(2)}`, 480, y, { width: 75, align: 'right' });
       y += 18;

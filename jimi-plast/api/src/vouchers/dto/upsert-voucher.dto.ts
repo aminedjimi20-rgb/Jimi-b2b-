@@ -8,6 +8,11 @@ export class VoucherItemInputDto {
   @IsInt()
   @Min(1)
   quantityPackages!: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  actualTotalUnits?: number;
 }
 
 export class UpsertVoucherDto {

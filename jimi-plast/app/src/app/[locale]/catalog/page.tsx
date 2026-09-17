@@ -63,7 +63,7 @@ interface CustomerOption {
 interface DraftVoucher {
   id: string;
   notes: string | null;
-  items: { product: { id: string }; quantityPackages: number }[];
+  items: { product: { id: string }; quantityPackages: number; actualTotalUnits: number | null }[];
 }
 
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
@@ -195,7 +195,8 @@ export default function CatalogPage() {
     if (!product) return sum;
     const price = priceForView(product)?.price;
     if (price == null) return sum;
-    const standard = price * line.quantityPackages * product.unitsPerPackage;
+    const pieces = line.totalPieces ?? line.quantityPackages * product.unitsPerPackage;
+    const standard = price * pieces;
     return sum + Math.max(0, standard - (line.discount || 0));
   }, 0);
 
@@ -210,12 +211,12 @@ export default function CatalogPage() {
     setModalDiscountPercent('0');
   }
 
-  /** Sous-total plein (cartons catalogue × prix catalogue) — base de calcul du %. */
+  /** Sous-total plein (pièces réelles × prix catalogue) — base de calcul du %. */
   function modalStandard(): number {
     if (!addingProduct) return 0;
     const catalogPrice = priceForView(addingProduct)?.price ?? 0;
-    const qty = Math.max(0, Number(modalQty) || 0);
-    return qty * addingProduct.unitsPerPackage * catalogPrice;
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    return pieces * catalogPrice;
   }
 
   function onModalDiscountChange(v: string) {
@@ -265,21 +266,22 @@ export default function CatalogPage() {
   }
 
   // Suggère automatiquement une remise = écart entre le prix catalogue plein
-  // (cartons entiers) et ce que le vendeur indique réellement livrer/facturer —
-  // utile quand un carton reçu est incomplet. Reste modifiable manuellement.
+  // et le prix unitaire que le vendeur indique réellement facturer. Le nombre
+  // de pièces réel est désormais facturé tel quel (actualTotalUnits) — la
+  // remise ne compense donc plus que l'écart de PRIX, pas l'écart de
+  // quantité. Reste modifiable manuellement.
   useEffect(() => {
     if (!addingProduct) return;
     const catalogPrice = priceForView(addingProduct)?.price ?? 0;
-    const qty = Math.max(0, Number(modalQty) || 0);
     const pieces = Math.max(0, Number(modalPieces) || 0);
     const unitPrice = Math.max(0, Number(modalUnitPrice) || 0);
-    const standard = qty * addingProduct.unitsPerPackage * catalogPrice;
+    const standard = pieces * catalogPrice;
     const actual = pieces * unitPrice;
     const suggested = Math.max(0, Math.round((standard - actual) * 100) / 100);
     setModalDiscount(String(suggested));
     setModalDiscountPercent(standard > 0 ? String(Math.round((suggested / standard) * 10000) / 100) : '0');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modalQty, modalPieces, modalUnitPrice, addingProduct]);
+  }, [modalPieces, modalUnitPrice, addingProduct]);
 
   function confirmAdd() {
     if (!addingProduct) return;
@@ -325,7 +327,20 @@ export default function CatalogPage() {
     setCheckingOut(true);
     setCheckoutError(null);
     try {
-      const payloadItems = cartLines.map((l) => ({ productId: l.productId, quantityPackages: l.quantityPackages }));
+      // Le nombre de pièces réel de chaque ligne (line.totalPieces) doit être
+      // reporté tel quel sur le bon (actualTotalUnits) pour que la colonne
+      // Quantité affiche le vrai chiffre, pas le nominal cartons×catalogue.
+      const actualUnitsFor = (line: (typeof cartLines)[number]): number | undefined => {
+        const product = catalogIndex.get(line.productId);
+        if (!product) return undefined;
+        const nominal = line.quantityPackages * product.unitsPerPackage;
+        return line.totalPieces != null && line.totalPieces !== nominal ? line.totalPieces : undefined;
+      };
+      const payloadItems = cartLines.map((l) => ({
+        productId: l.productId,
+        quantityPackages: l.quantityPackages,
+        actualTotalUnits: actualUnitsFor(l),
+      }));
       const totalDiscount = cartLines.reduce((s, l) => s + (l.discount || 0), 0);
       const adjustmentNote = buildAdjustmentNote();
 
@@ -336,11 +351,29 @@ export default function CatalogPage() {
         router.push(`/${locale}/vouchers/${voucher.id}`);
       } else {
         const voucher = await api.post<DraftVoucher>('/vouchers/mine/draft', undefined, token);
-        const merged = new Map(voucher.items.map((i) => [i.product.id, i.quantityPackages]));
+        const merged = new Map(
+          voucher.items.map((i) => [i.product.id, { quantityPackages: i.quantityPackages, actualTotalUnits: i.actualTotalUnits ?? undefined }]),
+        );
         for (const line of cartLines) {
-          merged.set(line.productId, (merged.get(line.productId) ?? 0) + line.quantityPackages);
+          const product = catalogIndex.get(line.productId);
+          const addedUnits = actualUnitsFor(line);
+          const prev = merged.get(line.productId);
+          if (prev) {
+            const mergedQty = prev.quantityPackages + line.quantityPackages;
+            const prevUnits = prev.actualTotalUnits ?? (product ? prev.quantityPackages * product.unitsPerPackage : mergedQty);
+            const addedTotal = addedUnits ?? (product ? line.quantityPackages * product.unitsPerPackage : 0);
+            const mergedUnits = prevUnits + addedTotal;
+            const nominalMerged = product ? mergedQty * product.unitsPerPackage : mergedQty;
+            merged.set(line.productId, { quantityPackages: mergedQty, actualTotalUnits: mergedUnits !== nominalMerged ? mergedUnits : undefined });
+          } else {
+            merged.set(line.productId, { quantityPackages: line.quantityPackages, actualTotalUnits: addedUnits });
+          }
         }
-        const mergedItems = Array.from(merged.entries()).map(([productId, quantityPackages]) => ({ productId, quantityPackages }));
+        const mergedItems = Array.from(merged.entries()).map(([productId, v]) => ({
+          productId,
+          quantityPackages: v.quantityPackages,
+          actualTotalUnits: v.actualTotalUnits,
+        }));
         const combinedNotes = [voucher.notes, adjustmentNote].filter(Boolean).join(' | ') || undefined;
         await api.put(`/vouchers/mine/${voucher.id}`, { items: mergedItems, discount: totalDiscount, notes: combinedNotes }, token);
         cart.closeSession(activeId);
@@ -684,8 +717,7 @@ export default function CatalogPage() {
                   const effectiveUpp = line.unitsPerPackage ?? product?.unitsPerPackage;
                   const nominalPieces = effectiveUpp != null ? line.quantityPackages * effectiveUpp : undefined;
                   const totalPieces = line.totalPieces ?? nominalPieces;
-                  const lineStandard =
-                    unitPrice != null && product ? unitPrice * line.quantityPackages * product.unitsPerPackage : undefined;
+                  const lineStandard = unitPrice != null && totalPieces != null ? unitPrice * totalPieces : undefined;
                   const lineTotal = lineStandard != null ? Math.max(0, lineStandard - (line.discount || 0)) : undefined;
                   const isAdjusted =
                     (product && line.unitsPerPackage != null && line.unitsPerPackage !== product.unitsPerPackage) ||
@@ -865,9 +897,8 @@ export default function CatalogPage() {
 
             {(() => {
               const catalogPrice = priceForView(addingProduct)?.price;
-              const qty = Math.max(0, Number(modalQty) || 0);
               const discount = Math.max(0, Number(modalDiscount) || 0);
-              const standard = catalogPrice != null ? qty * addingProduct.unitsPerPackage * catalogPrice : undefined;
+              const standard = catalogPrice != null ? modalStandard() : undefined;
               const actual = Math.max(0, Number(modalPieces) || 0) * Math.max(0, Number(modalUnitPrice) || 0);
               const total = standard != null ? Math.max(0, standard - discount) : actual;
               return (

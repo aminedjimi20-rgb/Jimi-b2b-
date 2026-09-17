@@ -240,6 +240,9 @@ export class VouchersService {
 
           const totalUnits = item.quantityPackages * product.unitsPerPackage;
           const unitPrice = Number(price.price);
+          const actualTotalUnits =
+            item.actualTotalUnits != null && item.actualTotalUnits !== totalUnits ? item.actualTotalUnits : null;
+          const billedUnits = actualTotalUnits ?? totalUnits;
 
           await tx.salesVoucherItem.create({
             data: {
@@ -250,8 +253,9 @@ export class VouchersService {
               quantityPackages: item.quantityPackages,
               unitsPerPackageSnapshot: product.unitsPerPackage,
               totalUnits,
+              actualTotalUnits,
               unitPrice,
-              lineTotal: totalUnits * unitPrice,
+              lineTotal: billedUnits * unitPrice,
             },
           });
         }

@@ -31,6 +31,7 @@ interface VoucherItem {
   packagingUnit: { label: string };
   quantityPackages: number;
   totalUnits: number;
+  actualTotalUnits: number | null;
   unitPrice: string;
   lineTotal: string;
   isLoaded: boolean;
@@ -199,8 +200,8 @@ export default function VoucherEditorPage() {
   function modalStandard(): number {
     if (!addingProduct) return 0;
     const catalogPrice = priceForView(addingProduct)?.price ?? 0;
-    const qty = Math.max(0, Number(modalQty) || 0);
-    return qty * addingProduct.unitsPerPackage * catalogPrice;
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    return pieces * catalogPrice;
   }
 
   function onModalDiscountChange(v: string) {
@@ -250,47 +251,67 @@ export default function VoucherEditorPage() {
   }
 
   // Suggère automatiquement une remise = écart entre le prix catalogue plein
-  // (cartons entiers) et ce que le vendeur indique réellement livrer/facturer —
-  // utile quand un carton reçu est incomplet. Reste modifiable manuellement.
+  // et le prix unitaire que le vendeur indique réellement facturer. Le nombre
+  // de pièces réel est désormais facturé tel quel (actualTotalUnits) — la
+  // remise ne compense donc plus que l'écart de PRIX, pas l'écart de
+  // quantité. Reste modifiable manuellement.
   useEffect(() => {
     if (!addingProduct) return;
     const catalogPrice = priceForView(addingProduct)?.price ?? 0;
-    const qty = Math.max(0, Number(modalQty) || 0);
     const pieces = Math.max(0, Number(modalPieces) || 0);
     const unitPrice = Math.max(0, Number(modalUnitPrice) || 0);
-    const standard = qty * addingProduct.unitsPerPackage * catalogPrice;
+    const standard = pieces * catalogPrice;
     const actual = pieces * unitPrice;
     const suggested = Math.max(0, Math.round((standard - actual) * 100) / 100);
     setModalDiscount(String(suggested));
     setModalDiscountPercent(standard > 0 ? String(Math.round((suggested / standard) * 10000) / 100) : '0');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modalQty, modalPieces, modalUnitPrice, addingProduct]);
+  }, [modalPieces, modalUnitPrice, addingProduct]);
 
-  // Le bon ne connaît que quantityPackages/remise globale — pas d'ajustement
-  // pièces/carton par ligne. On rend l'écart traçable dans les observations,
-  // avec le même marqueur ⚠ que le panier du Catalogue.
+  // Le nombre de pièces réel tapé par le vendeur est désormais envoyé tel
+  // quel au bon (actualTotalUnits) : la colonne Quantité affiche ce chiffre
+  // directement (ex: 796) au lieu du nominal cartons×catalogue (8×100=800).
+  // La remise ne sert plus qu'à compenser un écart de PRIX unitaire, pas de
+  // quantité — elle reste traçable dans les observations avec le marqueur ⚠.
   function confirmAddToVoucher() {
     if (!voucher || !addingProduct) return;
     const qty = Math.max(1, Number(modalQty) || 1);
     const discountAmt = Math.max(0, Number(modalDiscount) || 0);
-    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
     const pieces = Math.max(0, Number(modalPieces) || 0);
-    const isNominal = upp === addingProduct.unitsPerPackage && pieces === qty * upp;
+    const nominalUnits = qty * addingProduct.unitsPerPackage;
+    const hasCustomPieces = pieces > 0 && pieces !== nominalUnits;
+    const addedUnits = hasCustomPieces ? pieces : nominalUnits;
 
-    const existingItems = voucher.items.map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages }));
+    const existingItems = voucher.items.map((i) => ({
+      productId: i.product.id,
+      quantityPackages: i.quantityPackages,
+      actualTotalUnits: i.actualTotalUnits ?? undefined,
+    }));
     const existingIndex = existingItems.findIndex((i) => i.productId === addingProduct.id);
     const newItems =
       existingIndex >= 0
-        ? existingItems.map((i, idx) =>
-            idx === existingIndex ? { ...i, quantityPackages: i.quantityPackages + qty } : i,
-          )
-        : [...existingItems, { productId: addingProduct.id, quantityPackages: qty }];
+        ? existingItems.map((i, idx) => {
+            if (idx !== existingIndex) return i;
+            const mergedQty = i.quantityPackages + qty;
+            const prevUnits = i.actualTotalUnits ?? i.quantityPackages * addingProduct.unitsPerPackage;
+            const mergedUnits = prevUnits + addedUnits;
+            return {
+              productId: i.productId,
+              quantityPackages: mergedQty,
+              actualTotalUnits: mergedUnits !== mergedQty * addingProduct.unitsPerPackage ? mergedUnits : undefined,
+            };
+          })
+        : [...existingItems, { productId: addingProduct.id, quantityPackages: qty, actualTotalUnits: hasCustomPieces ? pieces : undefined }];
     const newDiscount = Math.round((Number(discount) + discountAmt) * 100) / 100;
 
     let newNotes = notes;
-    if (!isNominal) {
+    if (hasCustomPieces || discountAmt > 0) {
       const prefix = `⚠ ${tCatalog('adjustedWarning')} : `;
-      const line = `${localizedName(addingProduct, locale)} : ${pieces} ${tCatalog('pieces')} (${upp}/${tCatalog('pieces')} × ${qty}) — remise ${discountAmt.toLocaleString()} DA`;
+      const qtyDetail = hasCustomPieces
+        ? `${pieces} ${tCatalog('pieces')} (${qty} × ${addingProduct.unitsPerPackage})`
+        : `${pieces} ${tCatalog('pieces')}`;
+      const discountDetail = discountAmt > 0 ? ` — remise ${discountAmt.toLocaleString()} DA` : '';
+      const line = `${localizedName(addingProduct, locale)} : ${qtyDetail}${discountDetail}`;
       newNotes = notes.startsWith(prefix) ? `${notes} | ${line}` : notes ? `${notes} | ${prefix}${line}` : `${prefix}${line}`;
     }
 
@@ -567,7 +588,16 @@ export default function VoucherEditorPage() {
                 </td>
                 <td className="px-4 py-2 text-ink">{item.product.nameFr}</td>
                 <td className="px-4 py-2 text-xs text-muted">
-                  {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {t('pieces')}
+                  {item.actualTotalUnits != null && item.actualTotalUnits !== item.totalUnits ? (
+                    <>
+                      {item.actualTotalUnits} {t('pieces')}
+                      <span className="text-muted/70"> ({item.quantityPackages} {item.packagingUnit.label})</span>
+                    </>
+                  ) : (
+                    <>
+                      {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {t('pieces')}
+                    </>
+                  )}
                 </td>
                 <td className="px-4 py-2 tabular">{item.unitPrice} DA</td>
                 <td className="px-4 py-2 text-end tabular">{item.lineTotal} DA</td>
@@ -749,9 +779,8 @@ export default function VoucherEditorPage() {
 
             {(() => {
               const catalogPrice = priceForView(addingProduct)?.price;
-              const qty = Math.max(0, Number(modalQty) || 0);
               const discountAmt = Math.max(0, Number(modalDiscount) || 0);
-              const standard = catalogPrice != null ? qty * addingProduct.unitsPerPackage * catalogPrice : undefined;
+              const standard = catalogPrice != null ? modalStandard() : undefined;
               const actual = Math.max(0, Number(modalPieces) || 0) * Math.max(0, Number(modalUnitPrice) || 0);
               const lineTotal = standard != null ? Math.max(0, standard - discountAmt) : actual;
               return (
