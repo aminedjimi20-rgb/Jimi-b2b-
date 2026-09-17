@@ -168,19 +168,6 @@ export default function VoucherEditorPage() {
     new Map(pickerResults.flatMap((p) => p.prices.map((pr) => [pr.tierKey, pr.label] as const))).entries(),
   ).map(([tierKey, label]) => ({ tierKey, label }));
 
-  // Avec un catalogue de 200+ produits, une liste plate devient inutilisable —
-  // on regroupe par catégorie (rayon) pour naviguer par sections.
-  const pickerCategoryGroups: [string, PickerProduct[]][] = Array.from(
-    pickerResults
-      .reduce((map, p) => {
-        const label = localizedName(p.category, locale);
-        if (!map.has(label)) map.set(label, []);
-        map.get(label)!.push(p);
-        return map;
-      }, new Map<string, PickerProduct[]>())
-      .entries(),
-  ).sort((a, b) => a[0].localeCompare(b[0]));
-
   useEffect(() => {
     if (availableTiers.length === 0) return;
     if (!availableTiers.some((tr) => tr.tierKey === viewTier)) {
@@ -509,18 +496,6 @@ export default function VoucherEditorPage() {
                   placeholder={tCommon('search')}
                   className="min-w-0 flex-1 rounded border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
                 />
-                <select
-                  value={pickerCategoryId}
-                  onChange={(e) => setPickerCategoryId(e.target.value)}
-                  className="rounded border border-line bg-paper px-2 py-2 text-sm"
-                >
-                  <option value="">{tCatalog('allCategories')}</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {localizedName(c, locale)}
-                    </option>
-                  ))}
-                </select>
                 {availableTiers.length > 1 && (
                   <select
                     value={viewTier}
@@ -536,63 +511,82 @@ export default function VoucherEditorPage() {
                 )}
               </div>
 
-              <div className="mt-3 flex max-h-96 flex-col gap-1.5 overflow-y-auto">
-                {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
-                {pickerCategoryGroups.map(([categoryLabel, products]) => (
-                  <div key={categoryLabel} className="flex flex-col gap-1.5">
-                    {pickerCategoryGroups.length > 1 && (
-                      <p className="sticky top-0 bg-panel px-1 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
-                        {categoryLabel}
-                      </p>
-                    )}
-                    {products.map((p) => {
-                      const price = priceForView(p);
-                      return (
+              <div className="mt-3 flex gap-2">
+                {/* Rayons : liste verticale sur le côté, indépendamment scrollable,
+                    pour filtrer la liste sans passer par un menu déroulant. */}
+                <div className="flex max-h-96 w-24 flex-shrink-0 flex-col gap-1 overflow-y-auto border-e border-line pe-2">
+                  <button
+                    type="button"
+                    onClick={() => setPickerCategoryId('')}
+                    className={`rounded px-2 py-1.5 text-start text-xs ${
+                      pickerCategoryId === '' ? 'bg-accent font-medium text-white' : 'text-muted hover:bg-line/20'
+                    }`}
+                  >
+                    {tCatalog('allCategories')}
+                  </button>
+                  {categories.map((c) => (
+                    <button
+                      type="button"
+                      key={c.id}
+                      onClick={() => setPickerCategoryId(c.id)}
+                      className={`rounded px-2 py-1.5 text-start text-xs ${
+                        pickerCategoryId === c.id ? 'bg-accent font-medium text-white' : 'text-muted hover:bg-line/20'
+                      }`}
+                    >
+                      {localizedName(c, locale)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex max-h-96 flex-1 flex-col gap-1.5 overflow-y-auto">
+                  {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
+                  {pickerResults.map((p) => {
+                    const price = priceForView(p);
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
+                        className={`flex items-center gap-3 rounded border border-line p-2 ${
+                          p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
+                        }`}
+                      >
                         <div
-                          key={p.id}
-                          onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
-                          className={`flex items-center gap-3 rounded border border-line p-2 ${
-                            p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
+                          className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted ${
+                            p.images.length > 0 ? 'cursor-zoom-in' : ''
                           }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (p.images.length > 0) setLightboxProduct(p);
+                          }}
                         >
-                          <div
-                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted ${
-                              p.images.length > 0 ? 'cursor-zoom-in' : ''
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (p.images.length > 0) setLightboxProduct(p);
-                            }}
-                          >
-                            {p.images[0] ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
-                            ) : (
-                              <span className="text-lg">📦</span>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-ink">{localizedName(p, locale)}</p>
-                            <p className="truncate text-xs text-muted">
-                              {localizedName(p.category, locale)} ·{' '}
-                              {tCatalog('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
-                            </p>
-                          </div>
-                          <div className="flex-shrink-0 text-end">
-                            {price ? (
-                              <span className="font-mono text-sm font-semibold text-ink">{price.price} DA</span>
-                            ) : (
-                              <span className="text-xs text-muted">—</span>
-                            )}
-                            {p.availability !== 'IN_STOCK' && (
-                              <p className="text-[10px] text-red-600">{tCatalog('outOfStock')}</p>
-                            )}
-                          </div>
+                          {p.images[0] ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
+                          ) : (
+                            <span className="text-lg">📦</span>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                ))}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-ink">{localizedName(p, locale)}</p>
+                          <p className="truncate text-xs text-muted">
+                            {localizedName(p.category, locale)} ·{' '}
+                            {tCatalog('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 text-end">
+                          {price ? (
+                            <span className="font-mono text-sm font-semibold text-ink">{price.price} DA</span>
+                          ) : (
+                            <span className="text-xs text-muted">—</span>
+                          )}
+                          {p.availability !== 'IN_STOCK' && (
+                            <p className="text-[10px] text-red-600">{tCatalog('outOfStock')}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
