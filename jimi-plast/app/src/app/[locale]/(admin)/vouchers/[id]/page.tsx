@@ -33,6 +33,7 @@ interface VoucherItem {
   totalUnits: number;
   unitPrice: string;
   lineTotal: string;
+  isLoaded: boolean;
 }
 interface Voucher {
   id: string;
@@ -46,8 +47,13 @@ interface Voucher {
   previousCredit: string | null;
   notes: string | null;
   cancelReason: string | null;
+  loadedById: string | null;
   items: VoucherItem[];
   attachments: { id: string; url: string; createdAt: string }[];
+}
+interface StaffOption {
+  id: string;
+  fullName: string;
 }
 
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
@@ -103,6 +109,7 @@ export default function VoucherEditorPage() {
   const [modalDiscountPercent, setModalDiscountPercent] = useState('0');
   const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [staff, setStaff] = useState<StaffOption[]>([]);
 
   function reload() {
     api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
@@ -118,6 +125,11 @@ export default function VoucherEditorPage() {
     if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  useEffect(() => {
+    if (token && canManage) api.get<StaffOption[]>('/vouchers/staff', token).then(setStaff).catch(() => setStaff([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, canManage]);
 
   useEffect(() => {
     if (!token || !showPicker) return;
@@ -302,6 +314,17 @@ export default function VoucherEditorPage() {
     reload();
   }
 
+  async function setLoadedBy(loadedById: string) {
+    await api.put(`/vouchers/${id}/loaded-by`, { loadedById: loadedById || undefined }, token);
+    reload();
+  }
+
+  async function toggleItemLoaded(item: VoucherItem) {
+    if (!item.isLoaded && !window.confirm(t('confirmLoadItem'))) return;
+    await api.put(`/vouchers/${id}/items/${item.id}/loaded`, { loaded: !item.isLoaded }, token);
+    reload();
+  }
+
   async function confirmVoucher() {
     setError(null);
     try {
@@ -449,6 +472,24 @@ export default function VoucherEditorPage() {
         </div>
       )}
 
+      {canManage && (
+        <label className="flex w-fit flex-col gap-1 text-sm">
+          <span className="text-muted">{t('loadedBy')}</span>
+          <select
+            value={voucher.loadedById ?? ''}
+            onChange={(e) => setLoadedBy(e.target.value)}
+            className="rounded border border-line bg-panel px-3 py-2"
+          >
+            <option value="">{t('notAssigned')}</option>
+            {staff.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.fullName}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
         <table className="w-full text-sm">
           <thead className="bg-line/30 text-xs uppercase text-muted">
@@ -457,6 +498,7 @@ export default function VoucherEditorPage() {
               <th className="px-4 py-2 text-start">{t('quantity')}</th>
               <th className="px-4 py-2 text-start">{t('unitPrice')}</th>
               <th className="px-4 py-2 text-end">{t('total')}</th>
+              {canManage && <th className="px-4 py-2 text-center">{t('loaded')}</th>}
               {isDraft && <th></th>}
             </tr>
           </thead>
@@ -469,6 +511,16 @@ export default function VoucherEditorPage() {
                 </td>
                 <td className="px-4 py-2 tabular">{item.unitPrice} DA</td>
                 <td className="px-4 py-2 text-end tabular">{item.lineTotal} DA</td>
+                {canManage && (
+                  <td className="px-4 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={item.isLoaded}
+                      onChange={() => toggleItemLoaded(item)}
+                      className="h-4 w-4 accent-teal"
+                    />
+                  </td>
+                )}
                 {isDraft && (
                   <td className="px-2 py-2 text-end">
                     <button onClick={() => removeItem(item.product.id)} className="text-xs text-red-600 hover:underline">

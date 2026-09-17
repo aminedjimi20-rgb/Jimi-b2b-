@@ -341,7 +341,11 @@
     "noOrders": "لا توجد طلبيات بعد",
     "attachments": "الصور المرفقة",
     "addAttachment": "إضافة صورة",
-    "deleteAttachmentConfirm": "حذف هذه الصورة؟"
+    "deleteAttachmentConfirm": "حذف هذه الصورة؟",
+    "loadedBy": "تم التحميل بواسطة",
+    "notAssigned": "— غير محدد —",
+    "loaded": "محمّل",
+    "confirmLoadItem": "تأكيد أن هذا المنتج تم تحميله فعلاً؟"
   },
   "manufacturers": {
     "title": "المصانع",

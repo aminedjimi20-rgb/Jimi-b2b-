@@ -8,6 +8,7 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertVoucherDto } from './dto/upsert-voucher.dto';
 import { CancelVoucherDto } from './dto/cancel-voucher.dto';
 import { AddVoucherAttachmentDto } from './dto/add-attachment.dto';
+import { SetLoadedByDto, SetItemLoadedDto } from './dto/set-loaded.dto';
 
 @Controller('vouchers')
 @RequirePermissions('vouchers.create')
@@ -68,6 +69,11 @@ export class VouchersController {
     return this.vouchersService.removeAttachmentMine(user.id, id, attachmentId);
   }
 
+  @Get('staff')
+  listStaff() {
+    return this.vouchersService.listStaff();
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.vouchersService.getById(id);
@@ -100,6 +106,16 @@ export class VouchersController {
   @Delete(':id/attachments/:attachmentId')
   removeAttachment(@Param('id') id: string, @Param('attachmentId') attachmentId: string) {
     return this.vouchersService.removeAttachment(id, attachmentId);
+  }
+
+  @Put(':id/loaded-by')
+  setLoadedBy(@Param('id') id: string, @Body() dto: SetLoadedByDto) {
+    return this.vouchersService.setLoadedBy(id, dto.loadedById || null);
+  }
+
+  @Put(':id/items/:itemId/loaded')
+  setItemLoaded(@Param('id') id: string, @Param('itemId') itemId: string, @Body() dto: SetItemLoadedDto) {
+    return this.vouchersService.setItemLoaded(id, itemId, dto.loaded);
   }
 
   @Post(':id/confirm')

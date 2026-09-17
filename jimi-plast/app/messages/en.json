@@ -341,7 +341,11 @@
     "noOrders": "No orders yet",
     "attachments": "Attached photos",
     "addAttachment": "Add a photo",
-    "deleteAttachmentConfirm": "Delete this photo?"
+    "deleteAttachmentConfirm": "Delete this photo?",
+    "loadedBy": "Loaded by",
+    "notAssigned": "— Not assigned —",
+    "loaded": "Loaded",
+    "confirmLoadItem": "Confirm this product has been loaded?"
   },
   "manufacturers": {
     "title": "Manufacturers",

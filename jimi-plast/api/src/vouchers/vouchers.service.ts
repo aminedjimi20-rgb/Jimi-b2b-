@@ -99,6 +99,30 @@ export class VouchersService {
     return this.removeAttachment(voucherId, attachmentId);
   }
 
+  /** Personnel pouvant être désigné responsable du chargement d'un bon (admin + employés). */
+  listStaff() {
+    return this.prisma.user.findMany({
+      where: { deletedAt: null, role: { key: { in: ['admin', 'employee'] } } },
+      select: { id: true, fullName: true },
+      orderBy: { fullName: 'asc' },
+    });
+  }
+
+  async setLoadedBy(voucherId: string, loadedById: string | null) {
+    const voucher = await this.prisma.salesVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
+    if (!voucher) throw new NotFoundException('Bon introuvable');
+    await this.prisma.salesVoucher.update({ where: { id: voucherId }, data: { loadedById } });
+    return this.getById(voucherId);
+  }
+
+  /** Coché par la personne qui charge le camion — checklist anti-oubli, indépendante du statut du bon. */
+  async setItemLoaded(voucherId: string, itemId: string, loaded: boolean) {
+    const item = await this.prisma.salesVoucherItem.findFirst({ where: { id: itemId, voucherId } });
+    if (!item) throw new NotFoundException('Ligne du bon introuvable');
+    await this.prisma.salesVoucherItem.update({ where: { id: itemId }, data: { isLoaded: loaded } });
+    return this.getById(voucherId);
+  }
+
   async createDraft(customerId: string, sellerId: string) {
     const customer = await this.prisma.customer.findFirst({ where: { id: customerId, deletedAt: null } });
     if (!customer) throw new BadRequestException('Client introuvable');
