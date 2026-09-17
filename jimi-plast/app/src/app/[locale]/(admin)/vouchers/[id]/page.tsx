@@ -30,6 +30,7 @@ interface VoucherItem {
   product: { id: string; nameFr: string; images: { url: string }[] };
   packagingUnit: { label: string };
   quantityPackages: number;
+  unitsPerPackageSnapshot: number;
   totalUnits: number;
   actualTotalUnits: number | null;
   unitPrice: string;
@@ -108,6 +109,7 @@ export default function VoucherEditorPage() {
   const [modalQty, setModalQty] = useState('1');
   const [modalUnitsPerPackage, setModalUnitsPerPackage] = useState('');
   const [modalPieces, setModalPieces] = useState('');
+  const [modalMissingPieces, setModalMissingPieces] = useState('0');
   const [modalUnitPrice, setModalUnitPrice] = useState('');
   const [modalDiscount, setModalDiscount] = useState('0');
   const [modalDiscountPercent, setModalDiscountPercent] = useState('0');
@@ -191,6 +193,7 @@ export default function VoucherEditorPage() {
     setModalQty('1');
     setModalUnitsPerPackage(String(p.unitsPerPackage));
     setModalPieces(String(p.unitsPerPackage));
+    setModalMissingPieces('0');
     setModalUnitPrice(String(price));
     setModalDiscount('0');
     setModalDiscountPercent('0');
@@ -225,7 +228,8 @@ export default function VoucherEditorPage() {
     if (!addingProduct) return;
     const qty = Math.max(0, Number(clean) || 0);
     const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
-    setModalPieces(String(qty * upp));
+    const missing = Math.max(0, Number(modalMissingPieces) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
   }
 
   function onModalUnitsPerPackageChange(v: string) {
@@ -233,7 +237,20 @@ export default function VoucherEditorPage() {
     setModalUnitsPerPackage(clean);
     const qty = Math.max(0, Number(modalQty) || 0);
     const upp = Math.max(0, Number(clean) || 0);
-    setModalPieces(String(qty * upp));
+    const missing = Math.max(0, Number(modalMissingPieces) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
+  }
+
+  // Champ dédié "Pièces manquantes" : évite au vendeur de calculer le total
+  // réel de tête (8 cartons de 100 dont un incomplet de 4 → il tape juste 4).
+  function onModalMissingPiecesChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalMissingPieces(clean);
+    if (!addingProduct) return;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
+    const missing = Math.max(0, Number(clean) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
   }
 
   // La quantité (cartons) facturée/déduite du stock doit toujours dériver
@@ -247,7 +264,9 @@ export default function VoucherEditorPage() {
     setModalPieces(clean);
     if (!addingProduct) return;
     const pieces = Math.max(0, Number(clean) || 0);
-    setModalQty(String(Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage))));
+    const qty = Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage));
+    setModalQty(String(qty));
+    setModalMissingPieces(String(Math.max(0, qty * addingProduct.unitsPerPackage - pieces)));
   }
 
   // Suggère automatiquement une remise = écart entre le prix catalogue plein
@@ -590,8 +609,11 @@ export default function VoucherEditorPage() {
                 <td className="px-4 py-2 text-xs text-muted">
                   {item.actualTotalUnits != null && item.actualTotalUnits !== item.totalUnits ? (
                     <>
-                      {item.actualTotalUnits} {t('pieces')}
-                      <span className="text-muted/70"> ({item.quantityPackages} {item.packagingUnit.label})</span>
+                      {item.quantityPackages} {item.packagingUnit.label} × {item.unitsPerPackageSnapshot} = {item.totalUnits} {t('pieces')}
+                      <span className="text-amber-600">
+                        {' '}
+                        ({tCatalog('minus')} {item.totalUnits - item.actualTotalUnits} {t('pieces')} = {item.actualTotalUnits} {t('pieces')})
+                      </span>
                     </>
                   ) : (
                     <>
@@ -765,6 +787,19 @@ export default function VoucherEditorPage() {
               <p className="mt-1 text-[11px] font-medium text-amber-600">{tCatalog('adjustedWarning')}</p>
             )}
             <p className="mt-1 text-[11px] text-muted">{tCatalog('piecesHint')}</p>
+
+            <label className="mt-2 flex flex-col gap-1 text-sm">
+              <span className="text-muted">{tCatalog('missingPieces')}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={modalMissingPieces}
+                onChange={(e) => onModalMissingPiecesChange(e.target.value)}
+                className={`rounded border bg-paper px-2 py-2 ${
+                  Number(modalMissingPieces) > 0 ? 'border-amber-500 text-amber-600' : 'border-line'
+                }`}
+              />
+            </label>
 
             <label className="mt-3 flex flex-col gap-1 text-sm">
               <span className="text-muted">{tCatalog('unitPrice')}</span>

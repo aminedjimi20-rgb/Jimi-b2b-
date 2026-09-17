@@ -204,12 +204,14 @@
     "total": "Total",
     "newProduct": "New product",
     "pieces": "pieces",
-    "piecesHint": "Adjust the piece count if a received carton is short — the discount is computed automatically.",
+    "piecesHint": "Enter the number of missing pieces if a received carton is short — the total and price recalculate automatically.",
     "stockCartons": "{count} cartons in stock",
     "unitsPerPackage": "Pieces / carton",
     "adjustedWarning": "Manual adjustment — differs from catalog values",
     "adjusted": "Adjusted",
-    "inCart": "In cart"
+    "inCart": "In cart",
+    "missingPieces": "Missing pieces",
+    "minus": "minus"
   },
   "products": {
     "title": "Products",

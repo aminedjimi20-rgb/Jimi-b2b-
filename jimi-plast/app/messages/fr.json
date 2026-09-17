@@ -204,12 +204,14 @@
     "total": "Total",
     "newProduct": "Nouveau produit",
     "pieces": "pièces",
-    "piecesHint": "Modifiez les pièces si un carton reçu est incomplet — la remise se calcule automatiquement.",
+    "piecesHint": "Indiquez le nombre de pièces manquantes si un carton reçu est incomplet — le total et le prix se recalculent automatiquement.",
     "stockCartons": "{count} cartons en stock",
     "unitsPerPackage": "Pièces / carton",
     "adjustedWarning": "Ajustement manuel — écart avec les valeurs catalogue",
     "adjusted": "Ajusté",
-    "inCart": "Dans le panier"
+    "inCart": "Dans le panier",
+    "missingPieces": "Pièces manquantes",
+    "minus": "moins"
   },
   "products": {
     "title": "Produits",

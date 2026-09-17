@@ -117,6 +117,7 @@ export default function CatalogPage() {
   const [modalQty, setModalQty] = useState('1');
   const [modalUnitsPerPackage, setModalUnitsPerPackage] = useState('');
   const [modalPieces, setModalPieces] = useState('');
+  const [modalMissingPieces, setModalMissingPieces] = useState('0');
   const [modalUnitPrice, setModalUnitPrice] = useState('');
   const [modalDiscount, setModalDiscount] = useState('0');
   const [modalDiscountPercent, setModalDiscountPercent] = useState('0');
@@ -206,6 +207,7 @@ export default function CatalogPage() {
     setModalQty('1');
     setModalUnitsPerPackage(String(p.unitsPerPackage));
     setModalPieces(String(p.unitsPerPackage));
+    setModalMissingPieces('0');
     setModalUnitPrice(String(price));
     setModalDiscount('0');
     setModalDiscountPercent('0');
@@ -240,7 +242,8 @@ export default function CatalogPage() {
     if (!addingProduct) return;
     const qty = Math.max(0, Number(clean) || 0);
     const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
-    setModalPieces(String(qty * upp));
+    const missing = Math.max(0, Number(modalMissingPieces) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
   }
 
   function onModalUnitsPerPackageChange(v: string) {
@@ -248,7 +251,20 @@ export default function CatalogPage() {
     setModalUnitsPerPackage(clean);
     const qty = Math.max(0, Number(modalQty) || 0);
     const upp = Math.max(0, Number(clean) || 0);
-    setModalPieces(String(qty * upp));
+    const missing = Math.max(0, Number(modalMissingPieces) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
+  }
+
+  // Champ dédié "Pièces manquantes" : évite au vendeur de calculer le total
+  // réel de tête (8 cartons de 100 dont un incomplet de 4 → il tape juste 4).
+  function onModalMissingPiecesChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalMissingPieces(clean);
+    if (!addingProduct) return;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
+    const missing = Math.max(0, Number(clean) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
   }
 
   // La quantité (cartons) facturée/déduite du stock doit toujours dériver
@@ -262,7 +278,9 @@ export default function CatalogPage() {
     setModalPieces(clean);
     if (!addingProduct) return;
     const pieces = Math.max(0, Number(clean) || 0);
-    setModalQty(String(Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage))));
+    const qty = Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage));
+    setModalQty(String(qty));
+    setModalMissingPieces(String(Math.max(0, qty * addingProduct.unitsPerPackage - pieces)));
   }
 
   // Suggère automatiquement une remise = écart entre le prix catalogue plein
@@ -883,6 +901,19 @@ export default function CatalogPage() {
               <p className="mt-1 text-[11px] font-medium text-amber-600">{t('adjustedWarning')}</p>
             )}
             <p className="mt-1 text-[11px] text-muted">{t('piecesHint')}</p>
+
+            <label className="mt-2 flex flex-col gap-1 text-sm">
+              <span className="text-muted">{t('missingPieces')}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={modalMissingPieces}
+                onChange={(e) => onModalMissingPiecesChange(e.target.value)}
+                className={`rounded border bg-paper px-2 py-2 ${
+                  Number(modalMissingPieces) > 0 ? 'border-amber-500 text-amber-600' : 'border-line'
+                }`}
+              />
+            </label>
 
             <label className="mt-3 flex flex-col gap-1 text-sm">
               <span className="text-muted">{t('unitPrice')}</span>
