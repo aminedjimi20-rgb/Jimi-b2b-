@@ -60,8 +60,6 @@ interface StaffOption {
   fullName: string;
 }
 
-const DEFAULT_DEPOTS = ['Dépôt 1', 'Dépôt 2', 'Dépôt 3'];
-
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
   if (locale === 'ar' && item.nameAr) return item.nameAr;
   if (locale === 'en' && item.nameEn) return item.nameEn;
@@ -372,11 +370,6 @@ export default function VoucherEditorPage() {
     reload();
   }
 
-  async function setDepot(depot: string) {
-    await api.put(`/vouchers/${id}/depot`, { depot: depot || undefined }, token);
-    reload();
-  }
-
   async function toggleItemLoaded(item: VoucherItem) {
     if (!item.isLoaded && !window.confirm(t('confirmLoadItem'))) return;
     await api.put(`/vouchers/${id}/items/${item.id}/loaded`, { loaded: !item.isLoaded }, token);
@@ -574,20 +567,6 @@ export default function VoucherEditorPage() {
                 </option>
               ))}
             </select>
-          </label>
-          <label className="flex w-fit flex-col gap-1 text-sm">
-            <span className="text-muted">{t('depot')}</span>
-            <input
-              list="depot-options"
-              value={voucher.depot ?? ''}
-              onChange={(e) => setDepot(e.target.value)}
-              className="rounded border border-line bg-panel px-3 py-2"
-            />
-            <datalist id="depot-options">
-              {DEFAULT_DEPOTS.map((d) => (
-                <option key={d} value={d} />
-              ))}
-            </datalist>
           </label>
         </div>
       )}
