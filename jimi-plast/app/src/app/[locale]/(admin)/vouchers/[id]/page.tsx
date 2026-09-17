@@ -14,12 +14,6 @@ interface Price {
   label: string;
   price: number;
 }
-interface Category {
-  id: string;
-  nameFr: string;
-  nameAr: string | null;
-  nameEn: string | null;
-}
 interface PickerProduct {
   id: string;
   nameFr: string;
@@ -107,9 +101,7 @@ export default function VoucherEditorPage() {
   // Sélecteur de produit : recherche + vignettes + zoom, même système que le Catalogue.
   const [showPicker, setShowPicker] = useState(false);
   const [pickerQuery, setPickerQuery] = useState('');
-  const [pickerCategoryId, setPickerCategoryId] = useState('');
   const [pickerResults, setPickerResults] = useState<PickerProduct[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [viewTier, setViewTier] = useState('');
   const [lightboxProduct, setLightboxProduct] = useState<PickerProduct | null>(null);
   const [addingProduct, setAddingProduct] = useState<PickerProduct | null>(null);
@@ -148,21 +140,15 @@ export default function VoucherEditorPage() {
   }, [token, canManage]);
 
   useEffect(() => {
-    if (showPicker) api.get<Category[]>('/categories').then(setCategories).catch(() => setCategories([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPicker]);
-
-  useEffect(() => {
     if (!token || !showPicker) return;
     const timeout = setTimeout(() => {
       const params = new URLSearchParams();
       if (pickerQuery) params.set('search', pickerQuery);
-      if (pickerCategoryId) params.set('categoryId', pickerCategoryId);
       params.set('pageSize', '100');
       api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token).then((res) => setPickerResults(res.items));
     }, 250);
     return () => clearTimeout(timeout);
-  }, [token, showPicker, pickerQuery, pickerCategoryId]);
+  }, [token, showPicker, pickerQuery]);
 
   const availableTiers = Array.from(
     new Map(pickerResults.flatMap((p) => p.prices.map((pr) => [pr.tierKey, pr.label] as const))).entries(),
@@ -511,54 +497,22 @@ export default function VoucherEditorPage() {
                 )}
               </div>
 
-              <div className="mt-3 flex gap-2">
-                {/* Rayons : liste verticale sur le côté, indépendamment scrollable,
-                    pour filtrer la liste sans passer par un menu déroulant. */}
-                <div className="flex max-h-96 w-24 flex-shrink-0 flex-col gap-1 overflow-y-auto border-e border-line pe-2">
-                  <button
-                    type="button"
-                    onClick={() => setPickerCategoryId('')}
-                    className={`rounded px-2 py-1.5 text-start text-xs ${
-                      pickerCategoryId === '' ? 'bg-accent font-medium text-white' : 'text-muted hover:bg-line/20'
-                    }`}
-                  >
-                    {tCatalog('allCategories')}
-                  </button>
-                  {categories.map((c) => (
-                    <button
-                      type="button"
-                      key={c.id}
-                      onClick={() => setPickerCategoryId(c.id)}
-                      className={`rounded px-2 py-1.5 text-start text-xs ${
-                        pickerCategoryId === c.id ? 'bg-accent font-medium text-white' : 'text-muted hover:bg-line/20'
-                      }`}
-                    >
-                      {localizedName(c, locale)}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex max-h-96 flex-1 flex-col gap-1.5 overflow-y-auto">
-                  {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
+              {/* 4 colonnes × 2 lignes visibles (8 produits) ; le reste se découvre
+                  en faisant défiler horizontalement, pas verticalement. */}
+              <div className="mt-3">
+                {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
+                <div className="grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto pb-2" style={{ gridAutoColumns: '5.5rem' }}>
                   {pickerResults.map((p) => {
                     const price = priceForView(p);
                     return (
                       <div
                         key={p.id}
                         onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
-                        className={`flex items-center gap-3 rounded border border-line p-2 ${
+                        className={`flex w-[5.5rem] flex-col items-center gap-1 rounded border border-line p-1.5 text-center ${
                           p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
                         }`}
                       >
-                        <div
-                          className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted ${
-                            p.images.length > 0 ? 'cursor-zoom-in' : ''
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (p.images.length > 0) setLightboxProduct(p);
-                          }}
-                        >
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted">
                           {p.images[0] ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
@@ -566,23 +520,15 @@ export default function VoucherEditorPage() {
                             <span className="text-lg">📦</span>
                           )}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-ink">{localizedName(p, locale)}</p>
-                          <p className="truncate text-xs text-muted">
-                            {localizedName(p.category, locale)} ·{' '}
-                            {tCatalog('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0 text-end">
-                          {price ? (
-                            <span className="font-mono text-sm font-semibold text-ink">{price.price} DA</span>
-                          ) : (
-                            <span className="text-xs text-muted">—</span>
-                          )}
-                          {p.availability !== 'IN_STOCK' && (
-                            <p className="text-[10px] text-red-600">{tCatalog('outOfStock')}</p>
-                          )}
-                        </div>
+                        <p className="line-clamp-2 w-full text-[11px] font-medium leading-tight text-ink">
+                          {localizedName(p, locale)}
+                        </p>
+                        {price ? (
+                          <span className="font-mono text-[11px] font-semibold text-ink">{price.price} DA</span>
+                        ) : (
+                          <span className="text-[10px] text-muted">—</span>
+                        )}
+                        {p.availability !== 'IN_STOCK' && <p className="text-[9px] text-red-600">{tCatalog('outOfStock')}</p>}
                       </div>
                     );
                   })}
