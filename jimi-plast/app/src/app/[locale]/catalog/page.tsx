@@ -236,8 +236,9 @@ export default function CatalogPage() {
   function onModalQtyChange(v: string) {
     const clean = onlyDigits(v);
     setModalQty(clean);
+    if (!addingProduct) return;
     const qty = Math.max(0, Number(clean) || 0);
-    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
+    const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
     setModalPieces(String(qty * upp));
   }
 
@@ -249,13 +250,18 @@ export default function CatalogPage() {
     setModalPieces(String(qty * upp));
   }
 
+  // La quantité (cartons) facturée/déduite du stock doit toujours dériver
+  // du conditionnement catalogue (fixe), jamais du champ "Pièces / carton"
+  // ci-dessus : celui-ci est éditable/effaçable par l'utilisateur pour noter
+  // un carton reçu incomplet, mais s'il est vide ou différent, on ne doit
+  // jamais perdre le nombre de pièces réellement tapé ici — sinon la
+  // quantité retombe silencieusement sur 1 carton par défaut à la confirmation.
   function onModalPiecesChange(v: string) {
     const clean = onlyDigits(v);
     setModalPieces(clean);
-    const upp = Math.max(0, Number(modalUnitsPerPackage) || 0);
-    if (upp <= 0) return;
+    if (!addingProduct) return;
     const pieces = Math.max(0, Number(clean) || 0);
-    setModalQty(String(Math.max(1, Math.ceil(pieces / upp))));
+    setModalQty(String(Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage))));
   }
 
   // Suggère automatiquement une remise = écart entre le prix catalogue plein
