@@ -326,6 +326,10 @@ export default function VoucherEditorPage() {
 
   if (!voucher) return <p className="text-muted">{tCommon('loading')}</p>;
 
+  // Tolère un back-end pas encore redéployé (nouvelle migration Render en
+  // attente de déploiement manuel) où ce champ n'existe pas encore.
+  const attachments = voucher.attachments ?? [];
+
   const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
   const total = subtotal - Number(discount) + Number(transportCost);
 
@@ -505,7 +509,7 @@ export default function VoucherEditorPage() {
       <div>
         <p className="mb-2 text-sm font-semibold text-ink">{t('attachments')}</p>
         <div className="flex flex-wrap gap-3">
-          {voucher.attachments.map((att, index) => (
+          {attachments.map((att, index) => (
             <div key={att.id} className="group relative h-20 w-20 overflow-hidden rounded border border-line">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -683,7 +687,7 @@ export default function VoucherEditorPage() {
 
       {lightboxAttachmentIndex !== null && (
         <ImageLightbox
-          images={voucher.attachments}
+          images={attachments}
           startIndex={lightboxAttachmentIndex}
           title={t('attachments')}
           onClose={() => setLightboxAttachmentIndex(null)}
