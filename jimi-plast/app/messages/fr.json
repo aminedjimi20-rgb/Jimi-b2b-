@@ -161,6 +161,8 @@
       "countAsc": "Nb produits (croissant)",
       "priceDesc": "Prix (décroissant)",
       "priceAsc": "Prix (croissant)",
+      "qtyDesc": "Quantité (décroissant)",
+      "qtyAsc": "Quantité (croissant)",
       "manual": "Ordre manuel"
     }
   },
@@ -304,7 +306,8 @@
       "customer": "Client",
       "date": "Date",
       "total": "Total",
-      "status": "Statut"
+      "status": "Statut",
+      "depot": "Dépôt"
     },
     "status": {
       "DRAFT": "Brouillon",
@@ -345,7 +348,11 @@
     "loadedBy": "Chargé par",
     "notAssigned": "— Non assigné —",
     "loaded": "Chargé",
-    "confirmLoadItem": "Confirmer que ce produit a bien été chargé ?"
+    "confirmLoadItem": "Confirmer que ce produit a bien été chargé ?",
+    "depot": "Dépôt",
+    "allDepots": "Tous les dépôts",
+    "itemSearchPlaceholder": "Rechercher un produit dans ce bon...",
+    "viewPhoto": "Voir la photo"
   },
   "manufacturers": {
     "title": "Fabricants",

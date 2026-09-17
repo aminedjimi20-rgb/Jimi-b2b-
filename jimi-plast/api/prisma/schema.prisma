@@ -462,6 +462,7 @@ model SalesVoucher {
   hidden         Boolean       @default(false)
   cancelReason   String?
   loadedById     String? // employé (ou l'auteur lui-même) chargé de préparer/charger ce bon
+  depot          String? // dépôt d'où ce bon est préparé/chargé (ex: "Dépôt 1") — libre, pas de table dédiée
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

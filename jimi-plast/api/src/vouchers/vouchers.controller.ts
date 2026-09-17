@@ -8,7 +8,7 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertVoucherDto } from './dto/upsert-voucher.dto';
 import { CancelVoucherDto } from './dto/cancel-voucher.dto';
 import { AddVoucherAttachmentDto } from './dto/add-attachment.dto';
-import { SetLoadedByDto, SetItemLoadedDto } from './dto/set-loaded.dto';
+import { SetLoadedByDto, SetItemLoadedDto, SetDepotDto } from './dto/set-loaded.dto';
 
 @Controller('vouchers')
 @RequirePermissions('vouchers.create')
@@ -25,8 +25,9 @@ export class VouchersController {
     @Query('hidden') hidden?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('depot') depot?: string,
   ) {
-    return this.vouchersService.list({ status, customerId, hidden: hidden === 'true', dateFrom, dateTo });
+    return this.vouchersService.list({ status, customerId, hidden: hidden === 'true', dateFrom, dateTo, depot });
   }
 
   @Get('mine')
@@ -116,6 +117,11 @@ export class VouchersController {
   @Put(':id/items/:itemId/loaded')
   setItemLoaded(@Param('id') id: string, @Param('itemId') itemId: string, @Body() dto: SetItemLoadedDto) {
     return this.vouchersService.setItemLoaded(id, itemId, dto.loaded);
+  }
+
+  @Put(':id/depot')
+  setDepot(@Param('id') id: string, @Body() dto: SetDepotDto) {
+    return this.vouchersService.setDepot(id, dto.depot || null);
   }
 
   @Post(':id/confirm')

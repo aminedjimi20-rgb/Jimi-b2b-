@@ -18,9 +18,12 @@ interface VoucherRow {
   createdAt: string;
   discount: string;
   transportCost: string;
+  depot: string | null;
   customer: { businessName: string | null; user: { fullName: string } };
-  items: { lineTotal: string }[];
+  items: { lineTotal: string; totalUnits: number }[];
 }
+
+const DEFAULT_DEPOTS = ['Dépôt 1', 'Dépôt 2', 'Dépôt 3'];
 
 export default function VouchersPage() {
   const t = useTranslations('vouchers');
@@ -32,6 +35,7 @@ export default function VouchersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
+  const [depotFilter, setDepotFilter] = useState('');
   const [newCustomerId, setNewCustomerId] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
 
@@ -39,6 +43,7 @@ export default function VouchersPage() {
     const params = new URLSearchParams();
     if (statusFilter) params.set('status', statusFilter);
     if (customerFilter) params.set('customerId', customerFilter);
+    if (depotFilter) params.set('depot', depotFilter);
     api.get<VoucherRow[]>(`/vouchers?${params.toString()}`, token).then(setVouchers);
   }
 
@@ -49,7 +54,7 @@ export default function VouchersPage() {
   useEffect(() => {
     if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, statusFilter, customerFilter]);
+  }, [token, statusFilter, customerFilter, depotFilter]);
 
   async function createVoucher() {
     if (!newCustomerId) return;
@@ -59,6 +64,7 @@ export default function VouchersPage() {
 
   const total = (v: VoucherRow) =>
     v.items.reduce((s, i) => s + Number(i.lineTotal), 0) - Number(v.discount) + Number(v.transportCost);
+  const totalQty = (v: VoucherRow) => v.items.reduce((s, i) => s + i.totalUnits, 0);
 
   const sortedVouchers = useMemo(() => {
     const arr = [...vouchers];
@@ -72,6 +78,18 @@ export default function VouchersPage() {
       case 'price_asc':
         arr.sort((a, b) => total(a) - total(b));
         break;
+      case 'qty_desc':
+        arr.sort((a, b) => totalQty(b) - totalQty(a));
+        break;
+      case 'qty_asc':
+        arr.sort((a, b) => totalQty(a) - totalQty(b));
+        break;
+      case 'name_asc':
+        arr.sort((a, b) => a.customer.user.fullName.localeCompare(b.customer.user.fullName));
+        break;
+      case 'name_desc':
+        arr.sort((a, b) => b.customer.user.fullName.localeCompare(a.customer.user.fullName));
+        break;
       case 'newest':
       default:
         arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -79,6 +97,11 @@ export default function VouchersPage() {
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vouchers, sortMode]);
+
+  const depotOptions = useMemo(() => {
+    const used = vouchers.map((v) => v.depot).filter((d): d is string => Boolean(d));
+    return Array.from(new Set([...DEFAULT_DEPOTS, ...used]));
+  }, [vouchers]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -124,7 +147,19 @@ export default function VouchersPage() {
             </option>
           ))}
         </select>
-        <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'price_desc', 'price_asc']} />
+        <select value={depotFilter} onChange={(e) => setDepotFilter(e.target.value)} className="rounded border border-line bg-panel px-3 py-2 text-sm">
+          <option value="">{t('allDepots')}</option>
+          {depotOptions.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+        <SortSelect
+          value={sortMode}
+          onChange={setSortMode}
+          options={['newest', 'oldest', 'price_desc', 'price_asc', 'qty_desc', 'qty_asc', 'name_asc', 'name_desc']}
+        />
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
@@ -136,6 +171,7 @@ export default function VouchersPage() {
               <th className="px-4 py-2 text-start">{t('columns.date')}</th>
               <th className="px-4 py-2 text-start">{t('columns.total')}</th>
               <th className="px-4 py-2 text-start">{t('columns.status')}</th>
+              <th className="px-4 py-2 text-start">{t('columns.depot')}</th>
             </tr>
           </thead>
           <tbody>
@@ -152,6 +188,7 @@ export default function VouchersPage() {
                 <td className="px-4 py-2">
                   <StatusPill status={v.status} label={t(`status.${v.status}` as never)} />
                 </td>
+                <td className="px-4 py-2 text-xs text-muted">{v.depot ?? '—'}</td>
               </tr>
             ))}
           </tbody>

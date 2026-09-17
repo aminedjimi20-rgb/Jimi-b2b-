@@ -10,3 +10,9 @@ export class SetItemLoadedDto {
   @IsBoolean()
   loaded!: boolean;
 }
+
+export class SetDepotDto {
+  @IsOptional()
+  @IsString()
+  depot?: string;
+}

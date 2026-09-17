@@ -27,7 +27,7 @@ interface PickerProduct {
 }
 interface VoucherItem {
   id: string;
-  product: { id: string; nameFr: string };
+  product: { id: string; nameFr: string; images: { url: string }[] };
   packagingUnit: { label: string };
   quantityPackages: number;
   totalUnits: number;
@@ -48,6 +48,7 @@ interface Voucher {
   notes: string | null;
   cancelReason: string | null;
   loadedById: string | null;
+  depot: string | null;
   items: VoucherItem[];
   attachments: { id: string; url: string; createdAt: string }[];
 }
@@ -55,6 +56,8 @@ interface StaffOption {
   id: string;
   fullName: string;
 }
+
+const DEFAULT_DEPOTS = ['Dépôt 1', 'Dépôt 2', 'Dépôt 3'];
 
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
   if (locale === 'ar' && item.nameAr) return item.nameAr;
@@ -110,6 +113,8 @@ export default function VoucherEditorPage() {
   const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [staff, setStaff] = useState<StaffOption[]>([]);
+  const [itemSearch, setItemSearch] = useState('');
+  const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
 
   function reload() {
     api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
@@ -319,6 +324,11 @@ export default function VoucherEditorPage() {
     reload();
   }
 
+  async function setDepot(depot: string) {
+    await api.put(`/vouchers/${id}/depot`, { depot: depot || undefined }, token);
+    reload();
+  }
+
   async function toggleItemLoaded(item: VoucherItem) {
     if (!item.isLoaded && !window.confirm(t('confirmLoadItem'))) return;
     await api.put(`/vouchers/${id}/items/${item.id}/loaded`, { loaded: !item.isLoaded }, token);
@@ -355,6 +365,11 @@ export default function VoucherEditorPage() {
 
   const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
   const total = subtotal - Number(discount) + Number(transportCost);
+
+  const itemSearchQuery = itemSearch.trim().toLowerCase();
+  const filteredItems = itemSearchQuery
+    ? voucher.items.filter((i) => i.product.nameFr.toLowerCase().includes(itemSearchQuery))
+    : voucher.items;
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -473,27 +488,51 @@ export default function VoucherEditorPage() {
       )}
 
       {canManage && (
-        <label className="flex w-fit flex-col gap-1 text-sm">
-          <span className="text-muted">{t('loadedBy')}</span>
-          <select
-            value={voucher.loadedById ?? ''}
-            onChange={(e) => setLoadedBy(e.target.value)}
-            className="rounded border border-line bg-panel px-3 py-2"
-          >
-            <option value="">{t('notAssigned')}</option>
-            {staff.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.fullName}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-wrap gap-4">
+          <label className="flex w-fit flex-col gap-1 text-sm">
+            <span className="text-muted">{t('loadedBy')}</span>
+            <select
+              value={voucher.loadedById ?? ''}
+              onChange={(e) => setLoadedBy(e.target.value)}
+              className="rounded border border-line bg-panel px-3 py-2"
+            >
+              <option value="">{t('notAssigned')}</option>
+              {staff.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.fullName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex w-fit flex-col gap-1 text-sm">
+            <span className="text-muted">{t('depot')}</span>
+            <input
+              list="depot-options"
+              value={voucher.depot ?? ''}
+              onChange={(e) => setDepot(e.target.value)}
+              className="rounded border border-line bg-panel px-3 py-2"
+            />
+            <datalist id="depot-options">
+              {DEFAULT_DEPOTS.map((d) => (
+                <option key={d} value={d} />
+              ))}
+            </datalist>
+          </label>
+        </div>
       )}
+
+      <input
+        value={itemSearch}
+        onChange={(e) => setItemSearch(e.target.value)}
+        placeholder={t('itemSearchPlaceholder')}
+        className="w-full max-w-xs rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
+      />
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
         <table className="w-full text-sm">
           <thead className="bg-line/30 text-xs uppercase text-muted">
             <tr>
+              <th className="px-4 py-2 text-start"></th>
               <th className="px-4 py-2 text-start">{t('product')}</th>
               <th className="px-4 py-2 text-start">{t('quantity')}</th>
               <th className="px-4 py-2 text-start">{t('unitPrice')}</th>
@@ -503,8 +542,23 @@ export default function VoucherEditorPage() {
             </tr>
           </thead>
           <tbody>
-            {voucher.items.map((item) => (
+            {filteredItems.map((item) => {
+              const itemImages = item.product.images ?? [];
+              return (
               <tr key={item.id} className="border-t border-line">
+                <td className="px-2 py-2">
+                  {itemImages.length > 0 && (
+                    <button
+                      type="button"
+                      title={t('viewPhoto')}
+                      onClick={() => setViewingItemImages({ images: itemImages, title: item.product.nameFr })}
+                      className="flex h-8 w-8 items-center justify-center overflow-hidden rounded border border-line hover:opacity-80"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={itemImages[0].url} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-ink">{item.product.nameFr}</td>
                 <td className="px-4 py-2 text-xs text-muted">
                   {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {t('pieces')}
@@ -529,7 +583,8 @@ export default function VoucherEditorPage() {
                   </td>
                 )}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -743,6 +798,14 @@ export default function VoucherEditorPage() {
           startIndex={lightboxAttachmentIndex}
           title={t('attachments')}
           onClose={() => setLightboxAttachmentIndex(null)}
+        />
+      )}
+
+      {viewingItemImages && (
+        <ImageLightbox
+          images={viewingItemImages.images}
+          title={viewingItemImages.title}
+          onClose={() => setViewingItemImages(null)}
         />
       )}
     </div>

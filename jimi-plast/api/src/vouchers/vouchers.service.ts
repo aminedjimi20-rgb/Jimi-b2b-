@@ -18,6 +18,7 @@ export interface VoucherListFilters {
   hidden?: boolean;
   dateFrom?: string;
   dateTo?: string;
+  depot?: string;
 }
 
 @Injectable()
@@ -40,6 +41,7 @@ export class VouchersService {
       hidden: filters.hidden ?? false,
       ...(filters.status ? { status: filters.status as never } : {}),
       ...(filters.customerId ? { customerId: filters.customerId } : {}),
+      ...(filters.depot ? { depot: filters.depot } : {}),
       ...(filters.dateFrom || filters.dateTo
         ? {
             createdAt: {
@@ -67,7 +69,13 @@ export class VouchersService {
       include: {
         customer: { include: { user: { select: { id: true, fullName: true, phone: true } } } },
         seller: { select: { fullName: true } },
-        items: { include: { product: true, priceTierType: true, packagingUnit: true } },
+        items: {
+          include: {
+            product: { include: { images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] } } },
+            priceTierType: true,
+            packagingUnit: true,
+          },
+        },
         attachments: { orderBy: { createdAt: 'desc' } },
       },
     });
@@ -112,6 +120,13 @@ export class VouchersService {
     const voucher = await this.prisma.salesVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
     if (!voucher) throw new NotFoundException('Bon introuvable');
     await this.prisma.salesVoucher.update({ where: { id: voucherId }, data: { loadedById } });
+    return this.getById(voucherId);
+  }
+
+  async setDepot(voucherId: string, depot: string | null) {
+    const voucher = await this.prisma.salesVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
+    if (!voucher) throw new NotFoundException('Bon introuvable');
+    await this.prisma.salesVoucher.update({ where: { id: voucherId }, data: { depot } });
     return this.getById(voucherId);
   }
 
