@@ -118,6 +118,20 @@ export default function VoucherEditorPage() {
   const [itemSearch, setItemSearch] = useState('');
   const [itemSort, setItemSort] = useState<SortMode>('manual');
   const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
+  const [loadingPdf, setLoadingPdf] = useState(false);
+
+  async function viewPdf() {
+    setLoadingPdf(true);
+    try {
+      const blob = await api.getBlob(`/vouchers/${id}/pdf`, token);
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch {
+      setError(tCommon('error'));
+    } finally {
+      setLoadingPdf(false);
+    }
+  }
 
   function reload() {
     api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
@@ -452,14 +466,13 @@ export default function VoucherEditorPage() {
         <div className="flex items-center gap-2">
           {isDraft && savedAt && <span className="text-xs text-muted">{t('autoSaved')} {savedAt.toLocaleTimeString()}</span>}
           {canManage && (
-            <a
-              href={`${process.env.NEXT_PUBLIC_API_URL}/vouchers/${id}/pdf`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
+            <button
+              onClick={viewPdf}
+              disabled={loadingPdf}
+              className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50"
             >
-              {t('viewPdf')}
-            </a>
+              {loadingPdf ? tCommon('loading') : t('viewPdf')}
+            </button>
           )}
         </div>
       </div>

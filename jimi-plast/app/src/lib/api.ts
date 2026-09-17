@@ -122,6 +122,31 @@ async function request<T>(
   }
 }
 
+/**
+ * Un lien <a href> direct vers l'API ne peut pas porter le token JWT
+ * (le navigateur n'envoie que des cookies lors d'une navigation) — d'où le
+ * "401 Unauthorized" quand on cliquait "Voir le PDF". On récupère donc le
+ * PDF via fetch (avec l'en-tête Authorization), puis on l'ouvre depuis un
+ * blob local.
+ */
+async function requestBlob(path: string, token?: string | null, retried = false): Promise<Blob> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (res.status === 401 && token && !retried) {
+    const newToken = await refreshAccessToken();
+    if (newToken) return requestBlob(path, newToken, true);
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: res.statusText }));
+    throw new ApiError(res.status, body.message ?? 'Erreur réseau');
+  }
+
+  return res.blob();
+}
+
 export const api = {
   get: <T>(path: string, token?: string | null) => request<T>(path, { method: 'GET' }, token),
   post: <T>(path: string, body?: unknown, token?: string | null) =>
@@ -129,4 +154,5 @@ export const api = {
   put: <T>(path: string, body?: unknown, token?: string | null) =>
     request<T>(path, { method: 'PUT', body: body ? JSON.stringify(body) : undefined }, token),
   delete: <T>(path: string, token?: string | null) => request<T>(path, { method: 'DELETE' }, token),
+  getBlob: requestBlob,
 };
