@@ -149,6 +149,8 @@
     "search": "Search…",
     "loginToSeePrices": "Sign in to see prices",
     "uploadPhoto": "From gallery",
+    "camera": "Camera",
+    "gallery": "Gallery",
     "sort": {
       "label": "Sort by",
       "nameAsc": "Name (A → Z)",

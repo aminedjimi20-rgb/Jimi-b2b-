@@ -149,6 +149,8 @@
     "search": "Rechercher…",
     "loginToSeePrices": "Connectez-vous pour voir les prix",
     "uploadPhoto": "Depuis la galerie",
+    "camera": "Caméra",
+    "gallery": "Galerie",
     "sort": {
       "label": "Trier par",
       "nameAsc": "Nom (A → Z)",
