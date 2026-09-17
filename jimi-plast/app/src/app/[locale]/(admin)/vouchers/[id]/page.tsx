@@ -14,12 +14,18 @@ interface Price {
   label: string;
   price: number;
 }
+interface Category {
+  id: string;
+  nameFr: string;
+  nameAr: string | null;
+  nameEn: string | null;
+}
 interface PickerProduct {
   id: string;
   nameFr: string;
   nameAr: string | null;
   nameEn: string | null;
-  category: { nameFr: string; nameAr: string | null; nameEn: string | null };
+  category: { id: string; nameFr: string; nameAr: string | null; nameEn: string | null };
   packagingUnit: { label: string };
   unitsPerPackage: number;
   images: { url: string }[];
@@ -101,7 +107,9 @@ export default function VoucherEditorPage() {
   // Sélecteur de produit : recherche + vignettes + zoom, même système que le Catalogue.
   const [showPicker, setShowPicker] = useState(false);
   const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerCategoryId, setPickerCategoryId] = useState('');
   const [pickerResults, setPickerResults] = useState<PickerProduct[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [viewTier, setViewTier] = useState('');
   const [lightboxProduct, setLightboxProduct] = useState<PickerProduct | null>(null);
   const [addingProduct, setAddingProduct] = useState<PickerProduct | null>(null);
@@ -140,19 +148,38 @@ export default function VoucherEditorPage() {
   }, [token, canManage]);
 
   useEffect(() => {
+    if (showPicker) api.get<Category[]>('/categories').then(setCategories).catch(() => setCategories([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPicker]);
+
+  useEffect(() => {
     if (!token || !showPicker) return;
     const timeout = setTimeout(() => {
       const params = new URLSearchParams();
       if (pickerQuery) params.set('search', pickerQuery);
-      params.set('pageSize', '24');
+      if (pickerCategoryId) params.set('categoryId', pickerCategoryId);
+      params.set('pageSize', '100');
       api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token).then((res) => setPickerResults(res.items));
     }, 250);
     return () => clearTimeout(timeout);
-  }, [token, showPicker, pickerQuery]);
+  }, [token, showPicker, pickerQuery, pickerCategoryId]);
 
   const availableTiers = Array.from(
     new Map(pickerResults.flatMap((p) => p.prices.map((pr) => [pr.tierKey, pr.label] as const))).entries(),
   ).map(([tierKey, label]) => ({ tierKey, label }));
+
+  // Avec un catalogue de 200+ produits, une liste plate devient inutilisable —
+  // on regroupe par catégorie (rayon) pour naviguer par sections.
+  const pickerCategoryGroups: [string, PickerProduct[]][] = Array.from(
+    pickerResults
+      .reduce((map, p) => {
+        const label = localizedName(p.category, locale);
+        if (!map.has(label)) map.set(label, []);
+        map.get(label)!.push(p);
+        return map;
+      }, new Map<string, PickerProduct[]>())
+      .entries(),
+  ).sort((a, b) => a[0].localeCompare(b[0]));
 
   useEffect(() => {
     if (availableTiers.length === 0) return;
@@ -482,6 +509,18 @@ export default function VoucherEditorPage() {
                   placeholder={tCommon('search')}
                   className="min-w-0 flex-1 rounded border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
                 />
+                <select
+                  value={pickerCategoryId}
+                  onChange={(e) => setPickerCategoryId(e.target.value)}
+                  className="rounded border border-line bg-paper px-2 py-2 text-sm"
+                >
+                  <option value="">{tCatalog('allCategories')}</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {localizedName(c, locale)}
+                    </option>
+                  ))}
+                </select>
                 {availableTiers.length > 1 && (
                   <select
                     value={viewTier}
@@ -497,54 +536,63 @@ export default function VoucherEditorPage() {
                 )}
               </div>
 
-              <div className="mt-3 flex max-h-80 flex-col gap-1.5 overflow-y-auto">
+              <div className="mt-3 flex max-h-96 flex-col gap-1.5 overflow-y-auto">
                 {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
-                {pickerResults.map((p) => {
-                  const price = priceForView(p);
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
-                      className={`flex items-center gap-3 rounded border border-line p-2 ${
-                        p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
-                      }`}
-                    >
-                      <div
-                        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted ${
-                          p.images.length > 0 ? 'cursor-zoom-in' : ''
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (p.images.length > 0) setLightboxProduct(p);
-                        }}
-                      >
-                        {p.images[0] ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="text-lg">📦</span>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-ink">{localizedName(p, locale)}</p>
-                        <p className="truncate text-xs text-muted">
-                          {localizedName(p.category, locale)} ·{' '}
-                          {tCatalog('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 text-end">
-                        {price ? (
-                          <span className="font-mono text-sm font-semibold text-ink">{price.price} DA</span>
-                        ) : (
-                          <span className="text-xs text-muted">—</span>
-                        )}
-                        {p.availability !== 'IN_STOCK' && (
-                          <p className="text-[10px] text-red-600">{tCatalog('outOfStock')}</p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {pickerCategoryGroups.map(([categoryLabel, products]) => (
+                  <div key={categoryLabel} className="flex flex-col gap-1.5">
+                    {pickerCategoryGroups.length > 1 && (
+                      <p className="sticky top-0 bg-panel px-1 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
+                        {categoryLabel}
+                      </p>
+                    )}
+                    {products.map((p) => {
+                      const price = priceForView(p);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
+                          className={`flex items-center gap-3 rounded border border-line p-2 ${
+                            p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
+                          }`}
+                        >
+                          <div
+                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted ${
+                              p.images.length > 0 ? 'cursor-zoom-in' : ''
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (p.images.length > 0) setLightboxProduct(p);
+                            }}
+                          >
+                            {p.images[0] ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="text-lg">📦</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-ink">{localizedName(p, locale)}</p>
+                            <p className="truncate text-xs text-muted">
+                              {localizedName(p.category, locale)} ·{' '}
+                              {tCatalog('piecesPerPackage', { count: p.unitsPerPackage, unit: p.packagingUnit.label })}
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0 text-end">
+                            {price ? (
+                              <span className="font-mono text-sm font-semibold text-ink">{price.price} DA</span>
+                            ) : (
+                              <span className="text-xs text-muted">—</span>
+                            )}
+                            {p.availability !== 'IN_STOCK' && (
+                              <p className="text-[10px] text-red-600">{tCatalog('outOfStock')}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
           )}
