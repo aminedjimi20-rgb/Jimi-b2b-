@@ -62,6 +62,10 @@ export class UpsertProductDto {
   @IsObject()
   attributes?: Record<string, unknown>;
 
+  @IsOptional()
+  @IsString()
+  depot?: string;
+
   @IsString()
   packagingUnitId!: string;
 

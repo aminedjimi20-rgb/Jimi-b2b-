@@ -304,6 +304,7 @@ model Product {
   packagingUnitId  String
   unitsPerPackage  Int     @default(1) // ex: 10 pièces / carton
   costPrice        Decimal? @db.Decimal(12, 2) // prix d'achat — visible seulement via costs.view
+  depot            String? // dépôt physique où ce produit est stocké (ex: "Dépôt 1") — sert à trier/organiser le chargement
 
   currentStock Int     @default(0)
   stockMin     Int     @default(0)

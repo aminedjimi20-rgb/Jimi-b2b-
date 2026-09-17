@@ -163,7 +163,9 @@
       "priceAsc": "Prix (croissant)",
       "qtyDesc": "Quantité (décroissant)",
       "qtyAsc": "Quantité (croissant)",
-      "manual": "Ordre manuel"
+      "manual": "Ordre manuel",
+      "depotAsc": "Dépôt (A → Z)",
+      "depotDesc": "Dépôt (Z → A)"
     }
   },
   "catalog": {
@@ -246,7 +248,8 @@
       "images": "Photos (URL)",
       "addImage": "Ajouter une photo",
       "manufacturer": "Fabricant",
-      "noManufacturer": "— Aucun fabricant —"
+      "noManufacturer": "— Aucun fabricant —",
+      "depot": "Dépôt"
     },
     "active": "Actif",
     "inactive": "Inactif",

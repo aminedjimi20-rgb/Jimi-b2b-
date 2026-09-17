@@ -46,6 +46,7 @@ interface FullProduct {
   brand: string | null;
   packagingUnitId: string;
   unitsPerPackage: number;
+  depot: string | null;
   costPrice: string | null;
   currentStock: number;
   stockMin: number;
@@ -59,6 +60,8 @@ interface FullProduct {
   prices: { priceTierType: PriceTierType; price: string }[];
 }
 
+const DEFAULT_DEPOTS = ['Dépôt 1', 'Dépôt 2', 'Dépôt 3'];
+
 const EMPTY_FORM = {
   sku: '',
   categoryId: '',
@@ -69,6 +72,7 @@ const EMPTY_FORM = {
   brand: '',
   packagingUnitId: '',
   unitsPerPackage: '1',
+  depot: '',
   costPrice: '',
   currentStock: '0',
   stockMin: '0',
@@ -167,6 +171,7 @@ export default function ProductsAdminPage() {
       brand: form.brand || undefined,
       packagingUnitId: form.packagingUnitId,
       unitsPerPackage: Number(form.unitsPerPackage) || 1,
+      depot: form.depot || undefined,
       costPrice: form.costPrice ? Number(form.costPrice) : undefined,
       currentStock: Number(form.currentStock) || 0,
       stockMin: Number(form.stockMin) || 0,
@@ -209,6 +214,7 @@ export default function ProductsAdminPage() {
       brand: p.brand ?? '',
       packagingUnitId: p.packagingUnitId,
       unitsPerPackage: String(p.unitsPerPackage),
+      depot: p.depot ?? '',
       costPrice: p.costPrice ?? '',
       currentStock: String(p.currentStock),
       stockMin: String(p.stockMin),
@@ -440,6 +446,21 @@ export default function ProductsAdminPage() {
             value={form.unitsPerPackage}
             onChange={(v) => setForm({ ...form, unitsPerPackage: v })}
           />
+
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-muted">{t('form.depot')}</span>
+            <input
+              list="product-depot-options"
+              value={form.depot}
+              onChange={(e) => setForm({ ...form, depot: e.target.value })}
+              className="rounded border border-line bg-paper px-3 py-2"
+            />
+            <datalist id="product-depot-options">
+              {DEFAULT_DEPOTS.map((d) => (
+                <option key={d} value={d} />
+              ))}
+            </datalist>
+          </label>
 
           <div className="grid grid-cols-3 gap-2">
             <Field

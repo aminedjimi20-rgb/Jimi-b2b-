@@ -13,6 +13,8 @@ export type SortMode =
   | 'price_asc'
   | 'qty_desc'
   | 'qty_asc'
+  | 'depot_asc'
+  | 'depot_desc'
   | 'manual';
 
 const LABEL_KEYS: Record<SortMode, string> = {
@@ -26,6 +28,8 @@ const LABEL_KEYS: Record<SortMode, string> = {
   price_asc: 'priceAsc',
   qty_desc: 'qtyDesc',
   qty_asc: 'qtyAsc',
+  depot_asc: 'depotAsc',
+  depot_desc: 'depotDesc',
   manual: 'manual',
 };
 

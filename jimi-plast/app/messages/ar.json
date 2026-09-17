@@ -163,7 +163,9 @@
       "priceAsc": "السعر (تصاعدي)",
       "qtyDesc": "الكمية (تنازلي)",
       "qtyAsc": "الكمية (تصاعدي)",
-      "manual": "ترتيب يدوي"
+      "manual": "ترتيب يدوي",
+      "depotAsc": "الديبو (أ ← ي)",
+      "depotDesc": "الديبو (ي ← أ)"
     }
   },
   "catalog": {
@@ -246,7 +248,8 @@
       "images": "الصور (رابط)",
       "addImage": "إضافة صورة",
       "manufacturer": "الصانع",
-      "noManufacturer": "— بدون صانع —"
+      "noManufacturer": "— بدون صانع —",
+      "depot": "الديبو"
     },
     "active": "نشط",
     "inactive": "غير نشط",

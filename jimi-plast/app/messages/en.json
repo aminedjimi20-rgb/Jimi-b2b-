@@ -163,7 +163,9 @@
       "priceAsc": "Price (low to high)",
       "qtyDesc": "Quantity (high to low)",
       "qtyAsc": "Quantity (low to high)",
-      "manual": "Manual order"
+      "manual": "Manual order",
+      "depotAsc": "Depot (A → Z)",
+      "depotDesc": "Depot (Z → A)"
     }
   },
   "catalog": {
@@ -246,7 +248,8 @@
       "images": "Photos (URL)",
       "addImage": "Add a photo",
       "manufacturer": "Manufacturer",
-      "noManufacturer": "— No manufacturer —"
+      "noManufacturer": "— No manufacturer —",
+      "depot": "Depot"
     },
     "active": "Active",
     "inactive": "Inactive",

@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { ImageUploadButton } from '@/components/image-upload-button';
+import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Price {
   tierKey: string;
@@ -27,7 +28,7 @@ interface PickerProduct {
 }
 interface VoucherItem {
   id: string;
-  product: { id: string; nameFr: string; images: { url: string }[] };
+  product: { id: string; nameFr: string; depot: string | null; images: { url: string }[] };
   packagingUnit: { label: string };
   quantityPackages: number;
   unitsPerPackageSnapshot: number;
@@ -117,6 +118,7 @@ export default function VoucherEditorPage() {
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [staff, setStaff] = useState<StaffOption[]>([]);
   const [itemSearch, setItemSearch] = useState('');
+  const [itemSort, setItemSort] = useState<SortMode>('manual');
   const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
 
   function reload() {
@@ -417,6 +419,29 @@ export default function VoucherEditorPage() {
     ? voucher.items.filter((i) => i.product.nameFr.toLowerCase().includes(itemSearchQuery))
     : voucher.items;
 
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    switch (itemSort) {
+      case 'name_asc':
+        return a.product.nameFr.localeCompare(b.product.nameFr);
+      case 'name_desc':
+        return b.product.nameFr.localeCompare(a.product.nameFr);
+      case 'price_asc':
+        return Number(a.unitPrice) - Number(b.unitPrice);
+      case 'price_desc':
+        return Number(b.unitPrice) - Number(a.unitPrice);
+      case 'qty_asc':
+        return (a.actualTotalUnits ?? a.totalUnits) - (b.actualTotalUnits ?? b.totalUnits);
+      case 'qty_desc':
+        return (b.actualTotalUnits ?? b.totalUnits) - (a.actualTotalUnits ?? a.totalUnits);
+      case 'depot_asc':
+        return (a.product.depot ?? '').localeCompare(b.product.depot ?? '');
+      case 'depot_desc':
+        return (b.product.depot ?? '').localeCompare(a.product.depot ?? '');
+      default:
+        return 0;
+    }
+  });
+
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <button
@@ -567,12 +592,19 @@ export default function VoucherEditorPage() {
         </div>
       )}
 
-      <input
-        value={itemSearch}
-        onChange={(e) => setItemSearch(e.target.value)}
-        placeholder={t('itemSearchPlaceholder')}
-        className="w-full max-w-xs rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          value={itemSearch}
+          onChange={(e) => setItemSearch(e.target.value)}
+          placeholder={t('itemSearchPlaceholder')}
+          className="w-full max-w-xs rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
+        />
+        <SortSelect
+          value={itemSort}
+          onChange={setItemSort}
+          options={['manual', 'name_asc', 'name_desc', 'price_desc', 'price_asc', 'qty_desc', 'qty_asc', 'depot_asc', 'depot_desc']}
+        />
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
         <table className="w-full text-sm">
@@ -588,7 +620,7 @@ export default function VoucherEditorPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredItems.map((item) => {
+            {sortedItems.map((item) => {
               const itemImages = item.product.images ?? [];
               return (
               <tr key={item.id} className="border-t border-line">
