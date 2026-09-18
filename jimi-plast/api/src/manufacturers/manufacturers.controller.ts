@@ -27,6 +27,12 @@ export class ManufacturersController {
     return this.manufacturersService.getByUserId(user.id);
   }
 
+  @Get('me/catalog')
+  @RequirePermissions()
+  myCatalog(@CurrentUser() user: AuthenticatedUser) {
+    return this.manufacturersService.getMyCatalog(user.id);
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.manufacturersService.getById(id);

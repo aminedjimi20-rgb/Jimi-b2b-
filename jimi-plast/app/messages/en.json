@@ -406,7 +406,8 @@
       "logo": "Logo",
       "email": "Email",
       "address": "Address",
-      "notes": "Notes"
+      "notes": "Notes",
+      "canViewCatalog": "Allow viewing the catalog (own products only)"
     },
     "searchPlaceholder": "Search a manufacturer...",
     "deleteReasonPrompt": "Reason for deletion (the other party must approve if an account exists):",
@@ -431,6 +432,13 @@
     "myAccount": {
       "title": "My manufacturer account",
       "noHistory": "No operations yet"
+    },
+    "canViewCatalogOn": "Can view their catalog",
+    "canViewCatalogOff": "Cannot view their catalog yet",
+    "myCatalog": {
+      "title": "My catalog",
+      "denied": "Catalog access is not yet enabled — contact the administrator.",
+      "empty": "No products linked to your manufacturer record yet."
     }
   },
   "purchases": {

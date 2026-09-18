@@ -615,6 +615,7 @@ model Manufacturer {
   contactName   String?
   paymentTerms  String?
   notes         String?
+  canViewCatalog Boolean @default(false) // autorisation admin : le fabricant peut voir le catalogue (ses produits seulement) depuis son propre compte
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   deletedAt     DateTime?

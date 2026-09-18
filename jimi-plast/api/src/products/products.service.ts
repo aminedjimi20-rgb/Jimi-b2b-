@@ -10,6 +10,7 @@ import { AddImageDto } from './dto/add-image.dto';
 
 export interface ProductListFilters {
   categoryId?: string;
+  manufacturerId?: string;
   search?: string;
   isNew?: boolean;
   isFeatured?: boolean;
@@ -67,6 +68,7 @@ export class ProductsService {
       deletedAt: null,
       isActive: true,
       ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+      ...(filters.manufacturerId ? { manufacturerId: filters.manufacturerId } : {}),
       ...(filters.isNew !== undefined ? { isNew: filters.isNew } : {}),
       ...(filters.isFeatured !== undefined ? { isFeatured: filters.isFeatured } : {}),
       ...(filters.isSeasonal !== undefined ? { isSeasonal: filters.isSeasonal } : {}),

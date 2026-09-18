@@ -406,7 +406,8 @@
       "logo": "Logo",
       "email": "Email",
       "address": "Adresse",
-      "notes": "Notes"
+      "notes": "Notes",
+      "canViewCatalog": "Autoriser à voir le catalogue (ses produits uniquement)"
     },
     "searchPlaceholder": "Rechercher un fabricant...",
     "deleteReasonPrompt": "Raison de la suppression (l'autre partie devra approuver si un compte existe) :",
@@ -431,6 +432,13 @@
     "myAccount": {
       "title": "Mon compte fabricant",
       "noHistory": "Aucune opération pour le moment"
+    },
+    "canViewCatalogOn": "Peut voir son catalogue",
+    "canViewCatalogOff": "Ne peut pas encore voir son catalogue",
+    "myCatalog": {
+      "title": "Mon catalogue",
+      "denied": "L'accès au catalogue n'est pas encore autorisé — contactez l'administrateur.",
+      "empty": "Aucun produit associé à votre fiche fabricant pour le moment."
     }
   },
   "purchases": {

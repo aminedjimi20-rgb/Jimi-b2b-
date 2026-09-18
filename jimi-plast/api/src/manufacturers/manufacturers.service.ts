@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
 import { TrashService } from '../common/services/trash.service';
+import { ProductsService } from '../products/products.service';
 import { UpsertManufacturerDto } from './dto/upsert-manufacturer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from '../customers/dto/add-ledger-entry.dto';
 
@@ -11,6 +12,7 @@ export class ManufacturersService {
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
     private readonly trash: TrashService,
+    private readonly productsService: ProductsService,
   ) {}
 
   private async balanceOf(manufacturerId: string) {
@@ -70,6 +72,17 @@ export class ManufacturersService {
     const manufacturer = await this.prisma.manufacturer.findUnique({ where: { userId } });
     if (!manufacturer) return null;
     return this.getById(manufacturer.id);
+  }
+
+  // Vue en lecture seule, réservée au fabricant lui-même — ne montre que
+  // ses propres produits, et seulement si l'admin l'y a autorisé.
+  async getMyCatalog(userId: string) {
+    const manufacturer = await this.prisma.manufacturer.findUnique({ where: { userId } });
+    if (!manufacturer) throw new NotFoundException('Aucune fiche fabricant liée à ce compte');
+    if (!manufacturer.canViewCatalog) {
+      throw new ForbiddenException("L'accès au catalogue n'est pas encore autorisé pour ce compte");
+    }
+    return this.productsService.list({ manufacturerId: manufacturer.id, pageSize: 100 }, []);
   }
 
   async create(dto: UpsertManufacturerDto, actorId: string) {

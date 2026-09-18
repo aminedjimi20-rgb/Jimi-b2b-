@@ -35,6 +35,7 @@ interface ManufacturerDetail {
   notes: string | null;
   balance: number;
   userId: string | null;
+  canViewCatalog: boolean;
   user: { id: string; email: string | null; phone: string | null } | null;
   entries: LedgerEntry[];
   pendingDeletions: PendingDeletion[];
@@ -52,6 +53,7 @@ export default function ManufacturerDetailPage() {
   const [manufacturer, setManufacturer] = useState<ManufacturerDetail | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
+  const [canViewCatalog, setCanViewCatalog] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustReason, setAdjustReason] = useState('');
@@ -80,13 +82,14 @@ export default function ManufacturerDetailPage() {
       paymentTerms: manufacturer.paymentTerms ?? '',
       notes: manufacturer.notes ?? '',
     });
+    setCanViewCatalog(manufacturer.canViewCatalog);
     setEditMode(true);
   }
 
   async function saveEdit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      await api.put(`/manufacturers/${id}`, form, token);
+      await api.put(`/manufacturers/${id}`, { ...form, canViewCatalog }, token);
       setEditMode(false);
       reload();
     } catch (err) {
@@ -168,6 +171,11 @@ export default function ManufacturerDetailPage() {
           ) : (
             <p className="mt-1 text-xs text-muted">{t('noAccount')}</p>
           )}
+          {manufacturer.userId && (
+            <p className={`mt-0.5 text-xs ${manufacturer.canViewCatalog ? 'text-teal' : 'text-muted'}`}>
+              {manufacturer.canViewCatalog ? t('canViewCatalogOn') : t('canViewCatalogOff')}
+            </p>
+          )}
         </div>
         {!editMode && !isPending && (
           <div className="flex gap-2">
@@ -204,6 +212,12 @@ export default function ManufacturerDetailPage() {
               )}
             </label>
           ))}
+          {manufacturer.userId && (
+            <label className="flex items-center gap-2 text-sm sm:col-span-3">
+              <input type="checkbox" checked={canViewCatalog} onChange={(e) => setCanViewCatalog(e.target.checked)} />
+              <span className="text-ink">{t('form.canViewCatalog')}</span>
+            </label>
+          )}
           <div className="flex gap-2 sm:col-span-3">
             <button type="submit" className="flex-1 rounded bg-accent px-3 py-2 text-sm font-medium text-white">
               {tCommon('save')}

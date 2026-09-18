@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UpsertManufacturerDto {
   @IsString()
@@ -44,4 +44,8 @@ export class UpsertManufacturerDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  canViewCatalog?: boolean;
 }
