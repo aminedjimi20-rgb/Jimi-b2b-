@@ -5,7 +5,7 @@
   "login": {
     "title": "Sign in",
     "subtitle": "Access your JIMI PLAST workspace",
-    "email": "Email address",
+    "email": "Email or phone",
     "password": "Password",
     "submit": "Sign in",
     "noAccount": "No account yet?",
@@ -27,7 +27,11 @@
     "notes": "Additional information",
     "submit": "Send request",
     "success": "Your request has been sent. An administrator will review it.",
-    "backToLogin": "Back to sign in"
+    "backToLogin": "Back to sign in",
+    "roleManufacturer": "Manufacturer",
+    "password": "Password (optional)",
+    "emailOrPhoneHint": "Provide at least an email or a phone number.",
+    "emailOrPhoneRequired": "Provide at least an email or a phone number"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -399,7 +403,34 @@
       "wilaya": "Province",
       "contactName": "Main contact",
       "paymentTerms": "Payment terms",
-      "logo": "Logo"
+      "logo": "Logo",
+      "email": "Email",
+      "address": "Address",
+      "notes": "Notes"
+    },
+    "searchPlaceholder": "Search a manufacturer...",
+    "deleteReasonPrompt": "Reason for deletion (the other party must approve if an account exists):",
+    "pendingDeletion": "Pending approval",
+    "hasAccount": "Active account",
+    "noAccount": "No linked account",
+    "detail": {
+      "back": "Back to manufacturers",
+      "balance": "Current debt",
+      "addPayment": "Record a payment",
+      "addAdjustment": "Manual adjustment",
+      "amount": "Amount",
+      "reason": "Reason",
+      "history": "History",
+      "deleted": "Deleted"
+    },
+    "entryTypes": {
+      "PURCHASE_VOUCHER": "Purchase voucher",
+      "PAYMENT": "Payment",
+      "ADJUSTMENT": "Adjustment"
+    },
+    "myAccount": {
+      "title": "My manufacturer account",
+      "noHistory": "No operations yet"
     }
   },
   "purchases": {
@@ -622,6 +653,9 @@
     "viewVoucher": "View voucher",
     "resolved": "Response history",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "supplierLedgerEntry": "Deletion of a manufacturer entry ({type})",
+    "manufacturer": "Deletion of manufacturer {name}",
+    "viewManufacturer": "View manufacturer"
   }
 }

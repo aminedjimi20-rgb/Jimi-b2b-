@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -12,6 +12,7 @@ import { LoginDto } from './dto/login.dto';
 
 const REFRESH_TOKEN_TTL_DAYS = 30;
 const ACCESS_TOKEN_TTL = '15m';
+const PASSWORD_SALT_ROUNDS = 12;
 
 @Injectable()
 export class AuthService {
@@ -25,12 +26,18 @@ export class AuthService {
   ) {}
 
   async submitRegistrationRequest(dto: RegisterRequestDto) {
-    const request = await this.prisma.registrationRequest.create({ data: dto });
+    if (!dto.email && !dto.phone) {
+      throw new BadRequestException('Indiquez au moins un email ou un numéro de téléphone');
+    }
+
+    const { password, ...rest } = dto;
+    const passwordHash = password ? await bcrypt.hash(password, PASSWORD_SALT_ROUNDS) : undefined;
+    const request = await this.prisma.registrationRequest.create({ data: { ...rest, passwordHash } });
 
     await this.notifications.notify({
       type: 'registration.new',
       title: 'Nouvelle demande d’inscription',
-      body: `${dto.fullName} (${dto.phone}) demande à rejoindre JIMI PLAST.`,
+      body: `${dto.fullName} (${dto.phone ?? dto.email}) demande à rejoindre JIMI PLAST.`,
       data: { requestId: request.id },
     });
 
@@ -38,8 +45,8 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, meta: { userAgent?: string; ip?: string }) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    const user = await this.prisma.user.findFirst({
+      where: { OR: [{ email: dto.email }, { phone: dto.email }] },
       include: { role: true },
     });
 
@@ -125,7 +132,7 @@ export class AuthService {
     };
   }
 
-  private async issueTokens(userId: string, email: string, meta: { userAgent?: string; ip?: string }) {
+  private async issueTokens(userId: string, email: string | null, meta: { userAgent?: string; ip?: string }) {
     const accessToken = await this.jwt.signAsync(
       { sub: userId, email },
       { secret: this.config.getOrThrow('JWT_ACCESS_SECRET'), expiresIn: ACCESS_TOKEN_TTL },

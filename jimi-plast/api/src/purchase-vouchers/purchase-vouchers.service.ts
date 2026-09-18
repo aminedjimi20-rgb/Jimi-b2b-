@@ -16,7 +16,7 @@ export class PurchaseVouchersService {
   ) {}
 
   private async debtOf(manufacturerId: string) {
-    const agg = await this.prisma.supplierLedgerEntry.aggregate({ where: { manufacturerId }, _sum: { amount: true } });
+    const agg = await this.prisma.supplierLedgerEntry.aggregate({ where: { manufacturerId, voidedAt: null }, _sum: { amount: true } });
     return Number(agg._sum.amount ?? 0);
   }
 

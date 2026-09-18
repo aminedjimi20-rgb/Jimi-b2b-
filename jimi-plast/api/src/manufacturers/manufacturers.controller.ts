@@ -5,15 +5,26 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertManufacturerDto } from './dto/upsert-manufacturer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from '../customers/dto/add-ledger-entry.dto';
+import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
+import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
 
 @Controller('manufacturers')
 @RequirePermissions('suppliers.view')
 export class ManufacturersController {
-  constructor(private readonly manufacturersService: ManufacturersService) {}
+  constructor(
+    private readonly manufacturersService: ManufacturersService,
+    private readonly pendingDeletions: PendingDeletionsService,
+  ) {}
 
   @Get()
-  list() {
-    return this.manufacturersService.list();
+  list(@Query('search') search?: string) {
+    return this.manufacturersService.list(search);
+  }
+
+  @Get('me')
+  @RequirePermissions()
+  me(@CurrentUser() user: AuthenticatedUser) {
+    return this.manufacturersService.getByUserId(user.id);
   }
 
   @Get(':id')
@@ -34,6 +45,16 @@ export class ManufacturersController {
   @Delete(':id')
   remove(@Param('id') id: string, @Query('reason') reason: string, @CurrentUser() user: AuthenticatedUser) {
     return this.manufacturersService.remove(id, user.id, reason);
+  }
+
+  @Post(':id/request-deletion')
+  requestDeletion(@Param('id') id: string, @Body() dto: RequestDeletionDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.pendingDeletions.requestManufacturerDeletion(id, dto.reason, user.id);
+  }
+
+  @Post('entries/:entryId/request-deletion')
+  requestEntryDeletion(@Param('entryId') entryId: string, @Body() dto: RequestDeletionDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.pendingDeletions.requestSupplierLedgerEntryDeletion(entryId, dto.reason, user.id);
   }
 
   @Post(':id/payments')

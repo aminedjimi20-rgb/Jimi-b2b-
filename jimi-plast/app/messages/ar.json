@@ -5,7 +5,7 @@
   "login": {
     "title": "تسجيل الدخول",
     "subtitle": "ادخل إلى مساحة عمل جيمي بلاست",
-    "email": "البريد الإلكتروني",
+    "email": "البريد الإلكتروني أو الهاتف",
     "password": "كلمة المرور",
     "submit": "دخول",
     "noAccount": "ليس لديك حساب؟",
@@ -27,7 +27,11 @@
     "notes": "معلومات إضافية",
     "submit": "إرسال الطلب",
     "success": "تم إرسال طلبك. سيقوم أحد المسؤولين بمراجعته.",
-    "backToLogin": "العودة لتسجيل الدخول"
+    "backToLogin": "العودة لتسجيل الدخول",
+    "roleManufacturer": "فابريكان",
+    "password": "كلمة المرور (اختياري)",
+    "emailOrPhoneHint": "أدخل البريد الإلكتروني أو رقم الهاتف على الأقل.",
+    "emailOrPhoneRequired": "أدخل البريد الإلكتروني أو رقم الهاتف على الأقل"
   },
   "nav": {
     "dashboard": "لوحة التحكم",
@@ -399,7 +403,34 @@
       "wilaya": "الولاية",
       "contactName": "جهة الاتصال",
       "paymentTerms": "شروط الدفع",
-      "logo": "الشعار"
+      "logo": "الشعار",
+      "email": "البريد الإلكتروني",
+      "address": "العنوان",
+      "notes": "ملاحظات"
+    },
+    "searchPlaceholder": "البحث عن فابريكان...",
+    "deleteReasonPrompt": "سبب الحذف (الطرف الآخر يوافق إذا عندو حساب) :",
+    "pendingDeletion": "في انتظار الموافقة",
+    "hasAccount": "حساب نشط",
+    "noAccount": "بلا حساب",
+    "detail": {
+      "back": "الرجوع إلى الفابريكانات",
+      "balance": "الدين الحالي",
+      "addPayment": "تسجيل دفعة",
+      "addAdjustment": "تعديل يدوي",
+      "amount": "المبلغ",
+      "reason": "السبب",
+      "history": "السجل",
+      "deleted": "محذوف"
+    },
+    "entryTypes": {
+      "PURCHASE_VOUCHER": "وصل شراء",
+      "PAYMENT": "دفعة",
+      "ADJUSTMENT": "تعديل"
+    },
+    "myAccount": {
+      "title": "حسابي كفابريكان",
+      "noHistory": "لا توجد عمليات حالياً"
     }
   },
   "purchases": {
@@ -622,6 +653,9 @@
     "viewVoucher": "شوف البون",
     "resolved": "تاريخ الردود",
     "approved": "موافق عليه",
-    "rejected": "مرفوض"
+    "rejected": "مرفوض",
+    "supplierLedgerEntry": "حذف سطر فابريكان ({type})",
+    "manufacturer": "حذف الفابريكان {name}",
+    "viewManufacturer": "عرض الفابريكان"
   }
 }

@@ -1,6 +1,6 @@
 export interface AuthenticatedUser {
   id: string;
-  email: string;
+  email: string | null;
   fullName: string;
   roleId: string;
   roleKey: string;
@@ -10,5 +10,5 @@ export interface AuthenticatedUser {
 
 export interface JwtPayload {
   sub: string; // userId
-  email: string;
+  email: string | null;
 }

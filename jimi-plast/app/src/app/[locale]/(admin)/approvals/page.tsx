@@ -13,8 +13,10 @@ interface PendingDeletion {
   createdAt: string;
   respondedAt: string | null;
   customer?: { businessName: string | null; user: { fullName: string } };
+  manufacturer?: { id: string; name: string } | null;
   ledgerEntry: { id: string; type: string; amount: string; note: string | null } | null;
   salesVoucher: { id: string; number: string | null } | null;
+  supplierLedgerEntry: { id: string; type: string; amount: string; note: string | null } | null;
   requestedBy: { fullName: string } | null;
   respondedBy: { fullName: string } | null;
 }
@@ -58,9 +60,16 @@ export default function ApprovalsPage() {
           <div key={item.id} className="rounded-lg border border-amber-400 bg-amber-500/10 p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-ink">
-                {item.ledgerEntry ? t('ledgerEntry', { type: item.ledgerEntry.type }) : t('voucher', { number: item.salesVoucher?.number ?? '' })}
+                {item.ledgerEntry
+                  ? t('ledgerEntry', { type: item.ledgerEntry.type })
+                  : item.supplierLedgerEntry
+                    ? t('supplierLedgerEntry', { type: item.supplierLedgerEntry.type })
+                    : item.salesVoucher
+                      ? t('voucher', { number: item.salesVoucher.number ?? '' })
+                      : t('manufacturer', { name: item.manufacturer?.name ?? '' })}
               </p>
               {isStaff && item.customer && <p className="text-xs text-muted">{item.customer.user.fullName}</p>}
+              {isStaff && item.manufacturer && <p className="text-xs text-muted">{item.manufacturer.name}</p>}
             </div>
             <p className="mt-1 text-xs text-muted">
               {t('requestedBy')} : {item.requestedBy?.fullName ?? tCommon('loading')} — {new Date(item.createdAt).toLocaleString()}
@@ -79,6 +88,14 @@ export default function ApprovalsPage() {
                   className="ms-auto text-sm text-accent hover:underline"
                 >
                   {t('viewVoucher')}
+                </button>
+              )}
+              {isStaff && item.manufacturer && (
+                <button
+                  onClick={() => router.push(`/${locale}/manufacturers/${item.manufacturer!.id}`)}
+                  className="ms-auto text-sm text-accent hover:underline"
+                >
+                  {t('viewManufacturer')}
                 </button>
               )}
             </div>

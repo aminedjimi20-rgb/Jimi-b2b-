@@ -16,11 +16,13 @@ export class RegistrationRequestsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  list(status?: RegistrationStatus) {
-    return this.prisma.registrationRequest.findMany({
+  async list(status?: RegistrationStatus) {
+    const requests = await this.prisma.registrationRequest.findMany({
       where: status ? { status } : undefined,
       orderBy: { createdAt: 'desc' },
     });
+    // Ne jamais renvoyer le hash, même à l'admin.
+    return requests.map(({ passwordHash, ...rest }) => rest);
   }
 
   private async findOrThrow(id: string) {
@@ -39,10 +41,22 @@ export class RegistrationRequestsService {
     if (!role) throw new BadRequestException(`Rôle "${dto.roleKey}" inconnu`);
     if (role.key === 'admin') throw new BadRequestException('Impossible de créer un ADMIN depuis une demande');
 
-    const existingUser = await this.prisma.user.findUnique({ where: { email: request.email } });
-    if (existingUser) throw new ConflictException('Un compte existe déjà avec cet email');
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          ...(request.email ? [{ email: request.email }] : []),
+          ...(request.phone ? [{ phone: request.phone }] : []),
+        ],
+      },
+    });
+    if (existingUser) throw new ConflictException('Un compte existe déjà avec cet email ou ce téléphone');
 
-    const passwordHash = await bcrypt.hash(dto.initialPassword, PASSWORD_SALT_ROUNDS);
+    // Le demandeur a pu choisir son propre mot de passe à l'inscription
+    // (auto-inscription) — sinon l'admin doit en fournir un ici.
+    if (!request.passwordHash && !dto.initialPassword) {
+      throw new BadRequestException('Un mot de passe initial est requis pour ce compte');
+    }
+    const passwordHash = request.passwordHash ?? (await bcrypt.hash(dto.initialPassword as string, PASSWORD_SALT_ROUNDS));
 
     const user = await this.prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
@@ -67,9 +81,23 @@ export class RegistrationRequestsService {
         },
       });
 
-      // Rôle commercial (tout sauf admin/employee) => dossier client créé
+      // Rôle fabricant => fiche fabricant créée et liée au compte ; tout
+      // autre rôle commercial (sauf admin/employee) => dossier client créé
       // automatiquement avec les informations déjà fournies dans la demande.
-      if (role.key !== 'employee') {
+      if (role.key === 'manufacturer') {
+        await tx.manufacturer.create({
+          data: {
+            userId: created.id,
+            name: request.businessName || request.fullName,
+            company: request.businessName,
+            contactName: request.fullName,
+            phone: request.phone,
+            email: request.email,
+            address: request.address,
+            wilaya: request.wilaya,
+          },
+        });
+      } else if (role.key !== 'employee') {
         await tx.customer.create({
           data: {
             userId: created.id,

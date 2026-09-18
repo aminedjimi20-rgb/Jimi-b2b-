@@ -60,6 +60,7 @@ const BASE_ROLES = [
     isSystem: true,
     permissions: ['prices.view_retail', 'orders.create', 'credits.view'],
   },
+  { key: 'manufacturer', name: 'Fabricant', isSystem: true, permissions: [] as string[] },
 ];
 
 const TRANSLATIONS: Record<string, { fr: string; ar: string; en: string }> = {

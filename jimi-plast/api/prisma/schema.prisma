@@ -76,8 +76,8 @@ model UserPermission {
 
 model User {
   id           String     @id @default(cuid())
-  email        String     @unique
-  phone        String?
+  email        String?    @unique
+  phone        String?    @unique
   passwordHash String
   fullName     String
   avatarUrl    String?
@@ -96,6 +96,7 @@ model User {
   auditLogs       AuditLog[]       @relation("AuditLogActor")
   reviewedRequests RegistrationRequest[] @relation("ReviewedBy")
   customer        Customer?
+  manufacturer    Manufacturer?
   salesVouchers   SalesVoucher[]
   purchaseVouchers PurchaseVoucher[]
   notifications   Notification[]
@@ -138,12 +139,13 @@ enum RegistrationStatus {
 model RegistrationRequest {
   id                  String             @id @default(cuid())
   fullName            String
-  phone               String
-  email               String
+  phone               String?
+  email               String?
+  passwordHash        String? // renseigné quand le demandeur choisit son mot de passe à l'inscription (auto-inscription) plutôt que d'attendre que l'admin lui en fixe un à l'acceptation
   address             String?
   wilaya              String?
   businessName        String?
-  requestedRoleKey    String? // suggestion du client: "wholesaler" | "retailer" | ...
+  requestedRoleKey    String? // suggestion du client: "wholesaler" | "retailer" | "manufacturer" | ...
   notes               String?
   status              RegistrationStatus @default(NEW)
   reviewNote          String?
@@ -449,31 +451,40 @@ enum PendingDeletionStatus {
   REJECTED
 }
 
-// Une suppression de ligne de crédit (ajustement/paiement) ou de bon ne
-// s'applique jamais tout de suite : elle attend l'approbation de l'autre
-// partie (client ↔ personnel). La ligne visée reste toujours visible,
-// barrée, avec la raison — jamais supprimée pour de vrai côté affichage.
+// Une suppression de ligne de crédit (ajustement/paiement), de bon ou de
+// fiche fabricant ne s'applique jamais tout de suite : elle attend
+// l'approbation de l'autre partie (client/fabricant ↔ personnel). La ligne
+// visée reste toujours visible, barrée, avec la raison — jamais supprimée
+// pour de vrai côté affichage. Exactement un des champs
+// customerId/manufacturerId est renseigné selon la partie concernée
+// (appliqué au niveau applicatif, Prisma ne peut pas exprimer un XOR).
 model PendingDeletion {
-  id             String                @id @default(cuid())
-  ledgerEntryId  String?
-  salesVoucherId String?
-  customerId     String
-  reason         String
-  status         PendingDeletionStatus @default(PENDING)
-  requestedById  String?
-  respondedById  String?
-  respondedAt    DateTime?
-  createdAt      DateTime              @default(now())
+  id                    String                @id @default(cuid())
+  ledgerEntryId         String?
+  salesVoucherId        String?
+  supplierLedgerEntryId String?
+  customerId            String?
+  manufacturerId        String?
+  reason                String
+  status                PendingDeletionStatus @default(PENDING)
+  requestedById         String?
+  respondedById         String?
+  respondedAt           DateTime?
+  createdAt             DateTime              @default(now())
 
-  ledgerEntry  LedgerEntry?  @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
-  salesVoucher SalesVoucher? @relation(fields: [salesVoucherId], references: [id], onDelete: Cascade)
-  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  requestedBy  User?         @relation("PendingDeletionRequestedBy", fields: [requestedById], references: [id])
-  respondedBy  User?         @relation("PendingDeletionRespondedBy", fields: [respondedById], references: [id])
+  ledgerEntry         LedgerEntry?         @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
+  salesVoucher        SalesVoucher?        @relation(fields: [salesVoucherId], references: [id], onDelete: Cascade)
+  supplierLedgerEntry SupplierLedgerEntry? @relation(fields: [supplierLedgerEntryId], references: [id], onDelete: Cascade)
+  customer            Customer?            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  manufacturer        Manufacturer?        @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  requestedBy         User?                @relation("PendingDeletionRequestedBy", fields: [requestedById], references: [id])
+  respondedBy          User?               @relation("PendingDeletionRespondedBy", fields: [respondedById], references: [id])
 
   @@index([customerId])
+  @@index([manufacturerId])
   @@index([ledgerEntryId])
   @@index([salesVoucherId])
+  @@index([supplierLedgerEntryId])
   @@map("pending_deletions")
 }
 
@@ -592,6 +603,7 @@ model StockMovement {
 
 model Manufacturer {
   id            String   @id @default(cuid())
+  userId        String?  @unique // renseigné si le fabricant s'est inscrit et dispose de son propre compte
   name          String
   logoUrl       String?
   company       String?
@@ -607,10 +619,12 @@ model Manufacturer {
   updatedAt     DateTime @updatedAt
   deletedAt     DateTime?
 
+  user             User?                  @relation(fields: [userId], references: [id])
   entries          SupplierLedgerEntry[]
   purchaseVouchers PurchaseVoucher[]
   returns          Return[]
   products         Product[]
+  pendingDeletions PendingDeletion[]
 
   @@map("manufacturers")
 }
@@ -631,8 +645,10 @@ model SupplierLedgerEntry {
   note           String?
   createdById    String?
   createdAt      DateTime                @default(now())
+  voidedAt       DateTime? // renseigné quand une demande de suppression a été approuvée — exclu du solde, mais la ligne reste visible (barrée) dans l'historique
 
-  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  manufacturer     Manufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  pendingDeletions PendingDeletion[]
 
   @@index([manufacturerId])
   @@map("supplier_ledger_entries")

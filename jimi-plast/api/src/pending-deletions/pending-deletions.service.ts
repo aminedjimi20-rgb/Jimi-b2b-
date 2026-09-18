@@ -2,14 +2,19 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { TrashService } from '../common/services/trash.service';
 
 /**
- * Une suppression de ligne de crédit (ajustement/paiement) ou de bon
- * n'efface jamais rien tout de suite : elle crée une demande que l'AUTRE
- * partie (client ↔ personnel) doit approuver. Tant qu'elle n'est pas
- * approuvée, les chiffres (solde, stock) ne bougent pas — et même après
- * approbation, la ligne visée reste affichée (barrée, avec la raison),
- * jamais retirée de l'écran.
+ * Une suppression de ligne de crédit (ajustement/paiement), de bon ou de
+ * fiche fabricant n'efface jamais rien tout de suite : elle crée une
+ * demande que l'AUTRE partie (client/fabricant ↔ personnel) doit
+ * approuver. Tant qu'elle n'est pas approuvée, les chiffres (solde,
+ * stock) ne bougent pas — et même après approbation, la ligne visée reste
+ * affichée (barrée, avec la raison), jamais retirée de l'écran.
+ *
+ * Quand la partie visée (client ou fabricant) n'a pas encore son propre
+ * compte, il n'y a personne pour approuver en face : la suppression
+ * s'applique alors immédiatement (sans PendingDeletion).
  */
 @Injectable()
 export class PendingDeletionsService {
@@ -17,6 +22,7 @@ export class PendingDeletionsService {
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
     private readonly notifications: NotificationsService,
+    private readonly trash: TrashService,
   ) {}
 
   private listStaff() {
@@ -32,9 +38,9 @@ export class PendingDeletionsService {
     return actor?.fullName ?? 'Un utilisateur';
   }
 
-  private async notifyBoth(customerUserId: string, type: string, title: string, body: string, data: Record<string, unknown> = {}) {
+  private async notifyBoth(partyUserId: string, type: string, title: string, body: string, data: Record<string, unknown> = {}) {
     const staff = await this.listStaff();
-    const recipientIds = [customerUserId, ...staff.map((s) => s.id)];
+    const recipientIds = [partyUserId, ...staff.map((s) => s.id)];
     await Promise.all(
       recipientIds.map((userId) => this.notifications.notify({ type, title, body, data: { ...data, userId } })),
     );
@@ -93,14 +99,106 @@ export class PendingDeletionsService {
     return pending;
   }
 
+  async requestManufacturerDeletion(manufacturerId: string, reason: string, requestedById: string) {
+    const manufacturer = await this.prisma.manufacturer.findFirst({
+      where: { id: manufacturerId, deletedAt: null },
+      include: { user: { select: { id: true, fullName: true } } },
+    });
+    if (!manufacturer) throw new NotFoundException('Fabricant introuvable');
+
+    if (!manufacturer.user) {
+      // Pas de compte fabricant lié : personne d'autre à approuver en face.
+      await this.prisma.manufacturer.update({ where: { id: manufacturerId }, data: { deletedAt: new Date() } });
+      await this.trash.moveToTrash({
+        entityType: 'Manufacturer',
+        entityId: manufacturerId,
+        snapshot: manufacturer as unknown as Record<string, unknown>,
+        deletedById: requestedById,
+        reason,
+      });
+      return { immediate: true };
+    }
+
+    const existing = await this.prisma.pendingDeletion.findFirst({
+      where: { manufacturerId, supplierLedgerEntryId: null, status: 'PENDING' },
+    });
+    if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour ce fabricant');
+
+    const pending = await this.prisma.pendingDeletion.create({
+      data: { manufacturerId, reason, requestedById },
+    });
+
+    const actorName = await this.actorName(requestedById);
+    await this.notifyBoth(
+      manufacturer.user.id,
+      'pending_deletion.requested',
+      'Demande de suppression',
+      `${actorName} demande la suppression du fabricant ${manufacturer.name} : ${reason}. Une approbation est nécessaire.`,
+      { pendingDeletionId: pending.id },
+    );
+
+    return pending;
+  }
+
+  async requestSupplierLedgerEntryDeletion(entryId: string, reason: string, requestedById: string) {
+    const entry = await this.prisma.supplierLedgerEntry.findUnique({
+      where: { id: entryId },
+      include: { manufacturer: { include: { user: { select: { id: true, fullName: true } } } } },
+    });
+    if (!entry) throw new NotFoundException('Ligne introuvable');
+    if (entry.voidedAt) throw new BadRequestException('Cette ligne est déjà supprimée');
+
+    const existing = await this.prisma.pendingDeletion.findFirst({ where: { supplierLedgerEntryId: entryId, status: 'PENDING' } });
+    if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour cette ligne');
+
+    if (!entry.manufacturer.user) {
+      // Pas de compte fabricant lié : suppression immédiate, rien à approuver en face.
+      await this.prisma.supplierLedgerEntry.update({ where: { id: entryId }, data: { voidedAt: new Date() } });
+      await this.auditLog.record({
+        entityType: 'SupplierLedgerEntry',
+        entityId: entryId,
+        action: 'DELETE',
+        reason,
+        actorId: requestedById,
+      });
+      return { immediate: true };
+    }
+
+    const pending = await this.prisma.pendingDeletion.create({
+      data: { supplierLedgerEntryId: entryId, manufacturerId: entry.manufacturerId, reason, requestedById },
+    });
+
+    const actorName = await this.actorName(requestedById);
+    await this.notifyBoth(
+      entry.manufacturer.user.id,
+      'pending_deletion.requested',
+      'Demande de suppression',
+      `${actorName} demande la suppression d'une ligne (${entry.type}) : ${reason}. Une approbation est nécessaire.`,
+      { pendingDeletionId: pending.id },
+    );
+
+    return pending;
+  }
+
   async listMine(userId: string) {
-    const customer = await this.prisma.customer.findUnique({ where: { userId } });
-    if (!customer) return [];
+    const [customer, manufacturer] = await Promise.all([
+      this.prisma.customer.findUnique({ where: { userId } }),
+      this.prisma.manufacturer.findUnique({ where: { userId } }),
+    ]);
+    if (!customer && !manufacturer) return [];
+
     return this.prisma.pendingDeletion.findMany({
-      where: { customerId: customer.id },
+      where: {
+        OR: [
+          ...(customer ? [{ customerId: customer.id }] : []),
+          ...(manufacturer ? [{ manufacturerId: manufacturer.id }] : []),
+        ],
+      },
       include: {
         ledgerEntry: true,
         salesVoucher: { select: { id: true, number: true } },
+        supplierLedgerEntry: true,
+        manufacturer: { select: { id: true, name: true } },
         requestedBy: { select: { fullName: true } },
         respondedBy: { select: { fullName: true } },
       },
@@ -112,8 +210,10 @@ export class PendingDeletionsService {
     return this.prisma.pendingDeletion.findMany({
       include: {
         customer: { include: { user: { select: { fullName: true } } } },
+        manufacturer: { select: { id: true, name: true } },
         ledgerEntry: true,
         salesVoucher: { select: { id: true, number: true } },
+        supplierLedgerEntry: true,
         requestedBy: { select: { fullName: true } },
         respondedBy: { select: { fullName: true } },
       },
@@ -126,8 +226,10 @@ export class PendingDeletionsService {
       where: { id },
       include: {
         customer: { include: { user: { select: { id: true, fullName: true } } } },
+        manufacturer: { include: { user: { select: { id: true, fullName: true } } } },
         ledgerEntry: true,
         salesVoucher: { include: { items: true } },
+        supplierLedgerEntry: true,
       },
     });
     if (!pending) throw new NotFoundException('Demande introuvable');
@@ -136,10 +238,13 @@ export class PendingDeletionsService {
       throw new ForbiddenException("Vous ne pouvez pas approuver votre propre demande — l'autre partie doit répondre");
     }
 
+    const partyUserId = pending.customer?.user.id ?? pending.manufacturer?.user?.id;
+    if (!partyUserId) throw new NotFoundException('Partie concernée introuvable');
+
     const responder = await this.prisma.user.findUnique({ where: { id: responderId }, select: { role: { select: { key: true } } } });
     const isStaff = responder ? ['admin', 'employee'].includes(responder.role.key) : false;
-    const isOwningCustomer = pending.customer.user.id === responderId;
-    if (!isStaff && !isOwningCustomer) {
+    const isOwningParty = partyUserId === responderId;
+    if (!isStaff && !isOwningParty) {
       throw new ForbiddenException("Vous n'êtes pas autorisé à répondre à cette demande");
     }
 
@@ -147,6 +252,14 @@ export class PendingDeletionsService {
       await this.prisma.$transaction(async (tx) => {
         if (pending.ledgerEntry) {
           await tx.ledgerEntry.update({ where: { id: pending.ledgerEntry.id }, data: { voidedAt: new Date() } });
+        }
+
+        if (pending.supplierLedgerEntry) {
+          await tx.supplierLedgerEntry.update({ where: { id: pending.supplierLedgerEntry.id }, data: { voidedAt: new Date() } });
+        }
+
+        if (pending.manufacturerId && !pending.supplierLedgerEntryId) {
+          await tx.manufacturer.update({ where: { id: pending.manufacturerId }, data: { deletedAt: new Date() } });
         }
 
         if (pending.salesVoucher && (pending.salesVoucher.status === 'CONFIRMED' || pending.salesVoucher.status === 'DELIVERED')) {
@@ -181,6 +294,16 @@ export class PendingDeletionsService {
           });
         }
       });
+
+      if (pending.manufacturerId && !pending.supplierLedgerEntryId && pending.manufacturer) {
+        await this.trash.moveToTrash({
+          entityType: 'Manufacturer',
+          entityId: pending.manufacturerId,
+          snapshot: pending.manufacturer as unknown as Record<string, unknown>,
+          deletedById: responderId,
+          reason: pending.reason,
+        });
+      }
     }
 
     const updated = await this.prisma.pendingDeletion.update({
@@ -189,10 +312,24 @@ export class PendingDeletionsService {
     });
 
     const responderName = await this.actorName(responderId);
-    const entityLabel = pending.ledgerEntry ? 'la ligne de crédit' : `le bon ${pending.salesVoucher?.number ?? ''}`;
+    const entityLabel = pending.ledgerEntry
+      ? 'la ligne de crédit'
+      : pending.supplierLedgerEntry
+        ? 'la ligne du fabricant'
+        : pending.salesVoucher
+          ? `le bon ${pending.salesVoucher.number ?? ''}`
+          : `le fabricant ${pending.manufacturer?.name ?? ''}`;
+    const entityType = pending.ledgerEntry
+      ? 'LedgerEntry'
+      : pending.supplierLedgerEntry
+        ? 'SupplierLedgerEntry'
+        : pending.salesVoucher
+          ? 'SalesVoucher'
+          : 'Manufacturer';
+    const entityId = pending.ledgerEntryId ?? pending.supplierLedgerEntryId ?? pending.salesVoucherId ?? (pending.manufacturerId as string);
     await this.auditLog.record({
-      entityType: pending.ledgerEntry ? 'LedgerEntry' : 'SalesVoucher',
-      entityId: pending.ledgerEntry ? pending.ledgerEntry.id : (pending.salesVoucherId as string),
+      entityType,
+      entityId,
       action: 'UPDATE',
       field: 'pendingDeletion',
       newValue: decision,
@@ -204,7 +341,7 @@ export class PendingDeletionsService {
     });
 
     await this.notifyBoth(
-      pending.customer.user.id,
+      partyUserId,
       decision === 'APPROVED' ? 'pending_deletion.approved' : 'pending_deletion.rejected',
       decision === 'APPROVED' ? 'Suppression approuvée' : 'Suppression refusée',
       decision === 'APPROVED'

@@ -60,7 +60,7 @@ export default function LoginPage() {
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">{t('email')}</span>
             <input
-              type="email"
+              type="text"
               required
               id="login-email"
               value={email}

@@ -11,6 +11,7 @@ interface FormState {
   fullName: string;
   phone: string;
   email: string;
+  password: string;
   address: string;
   wilaya: string;
   businessName: string;
@@ -22,6 +23,7 @@ const EMPTY_FORM: FormState = {
   fullName: '',
   phone: '',
   email: '',
+  password: '',
   address: '',
   wilaya: '',
   businessName: '',
@@ -45,9 +47,18 @@ export default function RegisterPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!form.email && !form.phone) {
+      setError(t('emailOrPhoneRequired'));
+      return;
+    }
     setSubmitting(true);
     try {
-      await api.post('/auth/register-request', form);
+      await api.post('/auth/register-request', {
+        ...form,
+        email: form.email || undefined,
+        phone: form.phone || undefined,
+        password: form.password || undefined,
+      });
       setSubmitted(true);
     } catch {
       setError('Erreur lors de l’envoi de la demande');
@@ -78,13 +89,14 @@ export default function RegisterPage() {
 
             <form onSubmit={onSubmit} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label={t('fullName')} value={form.fullName} onChange={(v) => update('fullName', v)} required />
-              <Field label={t('phone')} value={form.phone} onChange={(v) => update('phone', v)} required />
+              <Field label={t('phone')} value={form.phone} onChange={(v) => update('phone', v)} />
+              <Field label={t('email')} type="email" value={form.email} onChange={(v) => update('email', v)} />
+              <p className="-mt-2 text-xs text-muted sm:col-span-2">{t('emailOrPhoneHint')}</p>
               <Field
-                label={t('email')}
-                type="email"
-                value={form.email}
-                onChange={(v) => update('email', v)}
-                required
+                label={t('password')}
+                type="password"
+                value={form.password}
+                onChange={(v) => update('password', v)}
               />
               <Field label={t('wilaya')} value={form.wilaya} onChange={(v) => update('wilaya', v)} />
               <Field
@@ -109,6 +121,7 @@ export default function RegisterPage() {
                 >
                   <option value="wholesaler">{t('roleWholesaler')}</option>
                   <option value="retailer">{t('roleRetailer')}</option>
+                  <option value="manufacturer">{t('roleManufacturer')}</option>
                 </select>
               </label>
 

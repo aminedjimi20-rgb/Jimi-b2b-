@@ -15,32 +15,61 @@ export class ManufacturersService {
 
   private async balanceOf(manufacturerId: string) {
     const agg = await this.prisma.supplierLedgerEntry.aggregate({
-      where: { manufacturerId },
+      where: { manufacturerId, voidedAt: null },
       _sum: { amount: true },
     });
     return Number(agg._sum.amount ?? 0);
   }
 
-  async list() {
+  async list(search?: string) {
     const manufacturers = await this.prisma.manufacturer.findMany({
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { company: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
       orderBy: { name: 'asc' },
-      include: { _count: { select: { products: { where: { deletedAt: null } } } } },
+      include: { _count: { select: { products: { where: { deletedAt: null } } } }, pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
     const balances = await Promise.all(manufacturers.map((m) => this.balanceOf(m.id)));
     return manufacturers.map((m, i) => ({ ...m, balance: balances[i] }));
   }
 
   async getById(id: string) {
-    const manufacturer = await this.prisma.manufacturer.findFirst({ where: { id, deletedAt: null } });
+    const manufacturer = await this.prisma.manufacturer.findFirst({
+      where: { id, deletedAt: null },
+      include: {
+        user: { select: { id: true, email: true, phone: true } },
+        pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1, include: { requestedBy: { select: { fullName: true } } } },
+      },
+    });
     if (!manufacturer) throw new NotFoundException('Fabricant introuvable');
 
     const entries = await this.prisma.supplierLedgerEntry.findMany({
       where: { manufacturerId: id },
       orderBy: { createdAt: 'desc' },
+      include: { pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1, include: { requestedBy: { select: { fullName: true } } } } },
     });
 
-    return { ...manufacturer, balance: entries.reduce((s, e) => s + Number(e.amount), 0), entries };
+    return {
+      ...manufacturer,
+      balance: entries.filter((e) => !e.voidedAt).reduce((s, e) => s + Number(e.amount), 0),
+      entries,
+    };
+  }
+
+  async getByUserId(userId: string) {
+    const manufacturer = await this.prisma.manufacturer.findUnique({ where: { userId } });
+    if (!manufacturer) return null;
+    return this.getById(manufacturer.id);
   }
 
   async create(dto: UpsertManufacturerDto, actorId: string) {

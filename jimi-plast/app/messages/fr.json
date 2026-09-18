@@ -5,7 +5,7 @@
   "login": {
     "title": "Connexion",
     "subtitle": "Accédez à votre espace JIMI PLAST",
-    "email": "Adresse email",
+    "email": "Email ou téléphone",
     "password": "Mot de passe",
     "submit": "Se connecter",
     "noAccount": "Pas encore de compte ?",
@@ -27,7 +27,11 @@
     "notes": "Informations complémentaires",
     "submit": "Envoyer la demande",
     "success": "Votre demande a été envoyée. Un administrateur va l'examiner.",
-    "backToLogin": "Retour à la connexion"
+    "backToLogin": "Retour à la connexion",
+    "roleManufacturer": "Fabricant",
+    "password": "Mot de passe (optionnel)",
+    "emailOrPhoneHint": "Indiquez au moins un email ou un numéro de téléphone.",
+    "emailOrPhoneRequired": "Indiquez au moins un email ou un numéro de téléphone"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -399,7 +403,34 @@
       "wilaya": "Wilaya",
       "contactName": "Contact principal",
       "paymentTerms": "Conditions de paiement",
-      "logo": "Logo"
+      "logo": "Logo",
+      "email": "Email",
+      "address": "Adresse",
+      "notes": "Notes"
+    },
+    "searchPlaceholder": "Rechercher un fabricant...",
+    "deleteReasonPrompt": "Raison de la suppression (l'autre partie devra approuver si un compte existe) :",
+    "pendingDeletion": "En attente d'approbation",
+    "hasAccount": "Compte actif",
+    "noAccount": "Aucun compte lié",
+    "detail": {
+      "back": "Retour aux fabricants",
+      "balance": "Dette actuelle",
+      "addPayment": "Enregistrer un paiement",
+      "addAdjustment": "Ajustement manuel",
+      "amount": "Montant",
+      "reason": "Raison",
+      "history": "Historique",
+      "deleted": "Supprimé"
+    },
+    "entryTypes": {
+      "PURCHASE_VOUCHER": "Bon d'achat",
+      "PAYMENT": "Paiement",
+      "ADJUSTMENT": "Ajustement"
+    },
+    "myAccount": {
+      "title": "Mon compte fabricant",
+      "noHistory": "Aucune opération pour le moment"
     }
   },
   "purchases": {
@@ -622,6 +653,9 @@
     "viewVoucher": "Voir le bon",
     "resolved": "Historique des réponses",
     "approved": "Approuvé",
-    "rejected": "Refusé"
+    "rejected": "Refusé",
+    "supplierLedgerEntry": "Suppression d'une ligne fabricant ({type})",
+    "manufacturer": "Suppression du fabricant {name}",
+    "viewManufacturer": "Voir le fabricant"
   }
 }
