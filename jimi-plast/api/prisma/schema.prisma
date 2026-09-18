@@ -701,6 +701,7 @@ model PurchaseVoucherItem {
   quantityPackages        Int
   unitsPerPackageSnapshot Int
   totalUnits              Int
+  actualTotalUnits        Int? // total réel de pièces si différent du nominal (ex: carton incomplet à la réception) — sert à l'affichage et au calcul du lineTotal quand renseigné
   unitCost                Decimal @db.Decimal(12, 2)
   lineTotal               Decimal @db.Decimal(12, 2)
   modifiedAt              DateTime? // renseigné quand la ligne a été ajoutée/modifiée après confirmation — sert à la surligner dans la liste

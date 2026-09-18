@@ -6,10 +6,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 
-interface ProductOption {
+interface PickerProduct {
   id: string;
   nameFr: string;
+  nameAr: string | null;
+  nameEn: string | null;
+  category: { id: string; nameFr: string; nameAr: string | null; nameEn: string | null };
   packagingUnit: { label: string };
+  unitsPerPackage: number;
+  images: { url: string }[];
+  availability: 'IN_STOCK' | 'OUT_OF_STOCK';
+  currentStock: number | null;
 }
 interface PurchaseItem {
   id: string;
@@ -17,6 +24,7 @@ interface PurchaseItem {
   packagingUnit: { label: string };
   quantityPackages: number;
   totalUnits: number;
+  actualTotalUnits: number | null;
   unitCost: string;
   lineTotal: string;
   modifiedAt: string | null;
@@ -48,19 +56,33 @@ interface Purchase {
   pendingDeletions: PendingDeletion[];
 }
 
+const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
+  if (locale === 'ar' && item.nameAr) return item.nameAr;
+  if (locale === 'en' && item.nameEn) return item.nameEn;
+  return item.nameFr;
+};
+
+// Champs numériques en type="text" + inputMode plutôt que type="number" : les
+// inputs number contrôlés perdent des frappes sur mobile — même bug que sur
+// le bon de vente, même solution.
+const onlyDigits = (v: string) => v.replace(/[^0-9]/g, '');
+const onlyDecimal = (v: string) => {
+  const cleaned = v.replace(/[^0-9.]/g, '');
+  const firstDot = cleaned.indexOf('.');
+  if (firstDot === -1) return cleaned;
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+};
+
 export default function PurchaseEditorPage() {
   const t = useTranslations('purchases');
   const tVoucher = useTranslations('vouchers');
+  const tCatalog = useTranslations('catalog');
   const tCommon = useTranslations('common');
   const { token } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
 
   const [purchase, setPurchase] = useState<Purchase | null>(null);
-  const [products, setProducts] = useState<ProductOption[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState('');
-  const [quantity, setQuantity] = useState('1');
-  const [unitCost, setUnitCost] = useState('');
   const [transportCost, setTransportCost] = useState('0');
   const [paidAmount, setPaidAmount] = useState('0');
   const [cancelReason, setCancelReason] = useState('');
@@ -69,6 +91,17 @@ export default function PurchaseEditorPage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loadingPdf, setLoadingPdf] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sélecteur de produit : recherche + vignettes, même système que le bon de vente.
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerResults, setPickerResults] = useState<PickerProduct[]>([]);
+  const [addingProduct, setAddingProduct] = useState<PickerProduct | null>(null);
+  const [modalQty, setModalQty] = useState('1');
+  const [modalUnitsPerPackage, setModalUnitsPerPackage] = useState('');
+  const [modalPieces, setModalPieces] = useState('');
+  const [modalMissingPieces, setModalMissingPieces] = useState('0');
+  const [modalUnitCost, setModalUnitCost] = useState('');
 
   function reload() {
     api.get<Purchase>(`/purchase-vouchers/${id}`, token).then((p) => {
@@ -80,12 +113,20 @@ export default function PurchaseEditorPage() {
   }
 
   useEffect(() => {
-    if (token) {
-      reload();
-      api.get<{ items: ProductOption[] }>('/products?pageSize=200', token).then((r) => setProducts(r.items));
-    }
+    if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  useEffect(() => {
+    if (!token || !showPicker) return;
+    const timeout = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (pickerQuery) params.set('search', pickerQuery);
+      params.set('pageSize', '100');
+      api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token).then((res) => setPickerResults(res.items));
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [token, showPicker, pickerQuery]);
 
   const isDraft = purchase?.status === 'DRAFT';
   const canReopen = purchase?.status === 'CONFIRMED';
@@ -98,26 +139,113 @@ export default function PurchaseEditorPage() {
     (patch: Record<string, unknown>) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
-        await api.put(`/purchase-vouchers/${id}`, patch, token);
-        reload();
+        try {
+          await api.put(`/purchase-vouchers/${id}`, patch, token);
+          reload();
+        } catch {
+          setError(tCommon('error'));
+        }
       }, 500);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [id, token],
   );
 
-  function addItem() {
-    if (!purchase || !selectedProductId || !unitCost) return;
-    const existing = purchase.items.map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages, unitCost: Number(i.unitCost) }));
-    autoSave({ items: [...existing, { productId: selectedProductId, quantityPackages: Number(quantity), unitCost: Number(unitCost) }] });
-    setSelectedProductId('');
-    setQuantity('1');
-    setUnitCost('');
+  function openAddModal(p: PickerProduct) {
+    setAddingProduct(p);
+    setModalQty('1');
+    setModalUnitsPerPackage(String(p.unitsPerPackage));
+    setModalPieces(String(p.unitsPerPackage));
+    setModalMissingPieces('0');
+    setModalUnitCost('');
+  }
+
+  function onModalQtyChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalQty(clean);
+    if (!addingProduct) return;
+    const qty = Math.max(0, Number(clean) || 0);
+    const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
+    const missing = Math.max(0, Number(modalMissingPieces) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
+  }
+
+  function onModalUnitsPerPackageChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalUnitsPerPackage(clean);
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const upp = Math.max(0, Number(clean) || 0);
+    const missing = Math.max(0, Number(modalMissingPieces) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
+  }
+
+  // Champ dédié "Pièces manquantes" : évite de calculer le total réel de tête
+  // (8 cartons de 100 dont un incomplet de 4 → on tape juste 4).
+  function onModalMissingPiecesChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalMissingPieces(clean);
+    if (!addingProduct) return;
+    const qty = Math.max(0, Number(modalQty) || 0);
+    const upp = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
+    const missing = Math.max(0, Number(clean) || 0);
+    setModalPieces(String(Math.max(0, qty * upp - missing)));
+  }
+
+  // La quantité (cartons) déduite/ajoutée au stock dérive toujours du
+  // conditionnement catalogue (fixe) ; ce champ ne sert qu'à noter un carton
+  // reçu incomplet — jamais à perdre le nombre de pièces réellement tapé.
+  function onModalPiecesChange(v: string) {
+    const clean = onlyDigits(v);
+    setModalPieces(clean);
+    if (!addingProduct) return;
+    const pieces = Math.max(0, Number(clean) || 0);
+    const qty = Math.max(1, Math.ceil(pieces / addingProduct.unitsPerPackage));
+    setModalQty(String(qty));
+    setModalMissingPieces(String(Math.max(0, qty * addingProduct.unitsPerPackage - pieces)));
+  }
+
+  function confirmAddToPurchase() {
+    if (!purchase || !addingProduct) return;
+    const qty = Math.max(1, Number(modalQty) || 1);
+    const cost = Math.max(0, Number(modalUnitCost) || 0);
+    const pieces = Math.max(0, Number(modalPieces) || 0);
+    const nominalUnits = qty * addingProduct.unitsPerPackage;
+    const hasCustomPieces = pieces > 0 && pieces !== nominalUnits;
+    const addedUnits = hasCustomPieces ? pieces : nominalUnits;
+
+    const existingItems = purchase.items.map((i) => ({
+      productId: i.product.id,
+      quantityPackages: i.quantityPackages,
+      unitCost: Number(i.unitCost),
+      actualTotalUnits: i.actualTotalUnits ?? undefined,
+    }));
+    const existingIndex = existingItems.findIndex((i) => i.productId === addingProduct.id);
+    const newItems =
+      existingIndex >= 0
+        ? existingItems.map((i, idx) => {
+            if (idx !== existingIndex) return i;
+            const mergedQty = i.quantityPackages + qty;
+            const prevUnits = i.actualTotalUnits ?? i.quantityPackages * addingProduct.unitsPerPackage;
+            const mergedUnits = prevUnits + addedUnits;
+            return {
+              productId: i.productId,
+              quantityPackages: mergedQty,
+              unitCost: cost,
+              actualTotalUnits: mergedUnits !== mergedQty * addingProduct.unitsPerPackage ? mergedUnits : undefined,
+            };
+          })
+        : [...existingItems, { productId: addingProduct.id, quantityPackages: qty, unitCost: cost, actualTotalUnits: hasCustomPieces ? pieces : undefined }];
+
+    autoSave({ items: newItems });
+    setAddingProduct(null);
+    setPickerQuery('');
   }
 
   function removeItem(productId: string) {
     if (!purchase) return;
-    const items = purchase.items.filter((i) => i.product.id !== productId).map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages, unitCost: Number(i.unitCost) }));
+    const items = purchase.items
+      .filter((i) => i.product.id !== productId)
+      .map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages, unitCost: Number(i.unitCost), actualTotalUnits: i.actualTotalUnits ?? undefined }));
     autoSave({ items });
   }
 
@@ -227,20 +355,49 @@ export default function PurchaseEditorPage() {
       {editMode && <p className="rounded border border-teal/40 bg-teal/10 px-3 py-2 text-xs text-teal">{tVoucher('editModeWarning')}</p>}
 
       {editable && (
-        <div className="flex flex-wrap gap-2">
-          <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} className="flex-1 rounded border border-line bg-panel px-3 py-2 text-sm">
-            <option value="">{tVoucher('product')}</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nameFr} ({p.packagingUnit.label})
-              </option>
-            ))}
-          </select>
-          <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} className="w-20 rounded border border-line bg-panel px-3 py-2 text-sm" />
-          <input type="number" placeholder={t('unitCost')} value={unitCost} onChange={(e) => setUnitCost(e.target.value)} className="w-28 rounded border border-line bg-panel px-3 py-2 text-sm" />
-          <button onClick={addItem} className="rounded bg-accent px-3 py-2 text-sm font-medium text-white">
-            {tVoucher('addProduct')}
+        <div className="flex flex-col gap-3">
+          <button onClick={() => setShowPicker((v) => !v)} className="w-fit rounded bg-accent px-3 py-2 text-sm font-medium text-white">
+            {showPicker ? tCommon('cancel') : tVoucher('addProduct')}
           </button>
+
+          {showPicker && (
+            <div className="rounded-lg border border-line bg-panel p-3">
+              <input
+                value={pickerQuery}
+                onChange={(e) => setPickerQuery(e.target.value)}
+                placeholder={tCommon('search')}
+                className="w-full rounded border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+              />
+
+              <div className="mt-3">
+                {pickerResults.length === 0 && <p className="py-4 text-center text-xs text-muted">{tCatalog('noResults')}</p>}
+                <div className="grid grid-flow-col grid-rows-2 gap-2 overflow-x-auto pb-2" style={{ gridAutoColumns: '5.5rem' }}>
+                  {pickerResults.map((p) => (
+                    <div
+                      key={p.id}
+                      onClick={() => openAddModal(p)}
+                      className="flex w-[5.5rem] flex-col items-center gap-1 rounded border border-line p-1.5 text-center cursor-pointer hover:bg-line/20"
+                    >
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted">
+                        {p.images[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.images[0].url} alt={localizedName(p, locale)} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-lg">📦</span>
+                        )}
+                      </div>
+                      <p className="line-clamp-2 w-full text-[11px] font-medium leading-tight text-ink">{localizedName(p, locale)}</p>
+                      <span
+                        className={`text-[9px] ${p.availability === 'IN_STOCK' ? 'text-teal' : 'text-red-600'}`}
+                      >
+                        {p.availability === 'IN_STOCK' ? tCatalog('inStock') : tCatalog('outOfStock')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -261,6 +418,12 @@ export default function PurchaseEditorPage() {
                 <td className="px-4 py-2 text-ink">{item.product.nameFr}</td>
                 <td className="px-4 py-2 text-xs text-muted">
                   {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {tVoucher('pieces')}
+                  {item.actualTotalUnits != null && item.actualTotalUnits !== item.totalUnits && (
+                    <span className="text-amber-600">
+                      {' '}
+                      ({tCatalog('minus')} {item.totalUnits - item.actualTotalUnits} {tVoucher('pieces')} = {item.actualTotalUnits} {tVoucher('pieces')})
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-2 tabular">{item.unitCost} DA</td>
                 <td className="px-4 py-2 text-end tabular">{item.lineTotal} DA</td>
@@ -335,6 +498,96 @@ export default function PurchaseEditorPage() {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {addingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setAddingProduct(null)}>
+          <div className="w-full max-w-sm rounded-lg bg-panel p-4" onClick={(e) => e.stopPropagation()}>
+            <h2 className="mb-1 text-sm font-semibold text-ink">{localizedName(addingProduct, locale)}</h2>
+            <p className="mb-3 text-xs font-medium text-accent">
+              {tCatalog('piecesPerPackage', { count: addingProduct.unitsPerPackage, unit: addingProduct.packagingUnit.label })}
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{tCatalog('quantityCartons')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalQty}
+                  onChange={(e) => onModalQtyChange(e.target.value)}
+                  className="rounded border border-line bg-paper px-2 py-2"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{tCatalog('unitsPerPackage')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalUnitsPerPackage}
+                  onChange={(e) => onModalUnitsPerPackageChange(e.target.value)}
+                  className={`rounded border bg-paper px-2 py-2 ${
+                    Number(modalUnitsPerPackage) !== addingProduct.unitsPerPackage ? 'border-amber-500 text-amber-600' : 'border-line'
+                  }`}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{tCatalog('totalPieces')}</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={modalPieces}
+                  onChange={(e) => onModalPiecesChange(e.target.value)}
+                  className={`rounded border bg-paper px-2 py-2 ${
+                    Number(modalPieces) !== Math.max(0, Number(modalQty) || 0) * Math.max(0, Number(modalUnitsPerPackage) || 0)
+                      ? 'border-amber-500 text-amber-600'
+                      : 'border-line'
+                  }`}
+                />
+              </label>
+            </div>
+            {(Number(modalUnitsPerPackage) !== addingProduct.unitsPerPackage ||
+              Number(modalPieces) !== Math.max(0, Number(modalQty) || 0) * Math.max(0, Number(modalUnitsPerPackage) || 0)) && (
+              <p className="mt-1 text-[11px] font-medium text-amber-600">{tCatalog('adjustedWarning')}</p>
+            )}
+            <p className="mt-1 text-[11px] text-muted">{tCatalog('piecesHint')}</p>
+
+            <label className="mt-2 flex flex-col gap-1 text-sm">
+              <span className="text-muted">{tCatalog('missingPieces')}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={modalMissingPieces}
+                onChange={(e) => onModalMissingPiecesChange(e.target.value)}
+                className={`rounded border bg-paper px-2 py-2 ${
+                  Number(modalMissingPieces) > 0 ? 'border-amber-500 text-amber-600' : 'border-line'
+                }`}
+              />
+            </label>
+
+            <label className="mt-3 flex flex-col gap-1 text-sm">
+              <span className="text-muted">{t('unitCost')}</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={modalUnitCost}
+                onChange={(e) => setModalUnitCost(onlyDecimal(e.target.value))}
+                className="rounded border border-line bg-paper px-3 py-2"
+              />
+            </label>
+
+            <div className="mt-3 flex justify-between text-sm font-semibold text-ink">
+              <span>{tVoucher('total')}</span>
+              <span className="tabular">
+                {(Math.max(0, Number(modalPieces) || 0) * Math.max(0, Number(modalUnitCost) || 0)).toLocaleString()} DA
+              </span>
+            </div>
+
+            <button onClick={confirmAddToPurchase} className="mt-4 w-full rounded bg-accent px-3 py-2 text-sm font-medium text-white">
+              {tCatalog('confirmAdd')}
+            </button>
+          </div>
         </div>
       )}
     </div>

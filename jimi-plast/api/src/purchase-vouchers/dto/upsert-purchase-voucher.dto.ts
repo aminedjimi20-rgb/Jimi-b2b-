@@ -12,6 +12,11 @@ export class PurchaseItemInputDto {
   @IsNumber()
   @Min(0)
   unitCost!: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  actualTotalUnits?: number;
 }
 
 export class UpsertPurchaseVoucherDto {

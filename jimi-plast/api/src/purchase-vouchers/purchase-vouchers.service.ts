@@ -110,6 +110,8 @@ export class PurchaseVouchersService {
           if (!product) throw new BadRequestException(`Produit ${item.productId} introuvable`);
 
           const totalUnits = item.quantityPackages * product.unitsPerPackage;
+          const actualTotalUnits = item.actualTotalUnits != null && item.actualTotalUnits !== totalUnits ? item.actualTotalUnits : null;
+          const billedUnits = actualTotalUnits ?? totalUnits;
           await tx.purchaseVoucherItem.create({
             data: {
               voucherId: id,
@@ -118,8 +120,9 @@ export class PurchaseVouchersService {
               quantityPackages: item.quantityPackages,
               unitsPerPackageSnapshot: product.unitsPerPackage,
               totalUnits,
+              actualTotalUnits,
               unitCost: item.unitCost,
-              lineTotal: totalUnits * item.unitCost,
+              lineTotal: billedUnits * item.unitCost,
             },
           });
         }
@@ -180,10 +183,15 @@ export class PurchaseVouchersService {
           if (!product) throw new BadRequestException(`Produit ${item.productId} introuvable`);
 
           const totalUnits = item.quantityPackages * product.unitsPerPackage;
+          const actualTotalUnits = item.actualTotalUnits != null && item.actualTotalUnits !== totalUnits ? item.actualTotalUnits : null;
+          const billedUnits = actualTotalUnits ?? totalUnits;
           const old = existingByProduct.get(item.productId);
+          // Le stock déplacé suit toujours le nombre nominal de cartons reçus
+          // (le carton lui-même a bien été ajouté au stock) — seule la
+          // facturation (lineTotal) reflète le nombre réel de pièces dedans.
           const delta = totalUnits - (old?.totalUnits ?? 0);
           const isNew = !old;
-          const isChanged = !!old && (Number(old.unitCost) !== item.unitCost || old.totalUnits !== totalUnits);
+          const isChanged = !!old && (Number(old.unitCost) !== item.unitCost || (old.actualTotalUnits ?? old.totalUnits) !== billedUnits);
 
           if (delta !== 0) {
             await tx.product.update({ where: { id: product.id }, data: { currentStock: { increment: delta }, costPrice: item.unitCost } });
@@ -200,8 +208,8 @@ export class PurchaseVouchersService {
             });
           }
 
-          if (isNew) changes.push(`Produit ajouté : ${product.nameFr} (${totalUnits} pièces)`);
-          else if (isChanged) changes.push(`${product.nameFr} : ${old.totalUnits} → ${totalUnits} pièces, ${old.unitCost} → ${item.unitCost} DA`);
+          if (isNew) changes.push(`Produit ajouté : ${product.nameFr} (${billedUnits} pièces)`);
+          else if (isChanged) changes.push(`${product.nameFr} : ${old.actualTotalUnits ?? old.totalUnits} → ${billedUnits} pièces, ${old.unitCost} → ${item.unitCost} DA`);
 
           await tx.purchaseVoucherItem.create({
             data: {
@@ -211,8 +219,9 @@ export class PurchaseVouchersService {
               quantityPackages: item.quantityPackages,
               unitsPerPackageSnapshot: product.unitsPerPackage,
               totalUnits,
+              actualTotalUnits,
               unitCost: item.unitCost,
-              lineTotal: totalUnits * item.unitCost,
+              lineTotal: billedUnits * item.unitCost,
               modifiedAt: isNew || isChanged ? new Date() : old?.modifiedAt ?? null,
             },
           });

@@ -18,6 +18,7 @@ interface PurchaseVoucherForPdf {
     quantityPackages: number;
     unitsPerPackageSnapshot: number;
     totalUnits: number;
+    actualTotalUnits: number | null;
     unitCost: unknown;
     lineTotal: unknown;
   }[];
@@ -63,7 +64,7 @@ export class PurchaseVoucherPdfService {
     const total = subtotal - num(voucher.discount) + num(voucher.transportCost);
     const newDebt = num(voucher.previousDebt) + total - num(voucher.paidAmount);
     const totalColis = voucher.items.reduce((s, i) => s + i.quantityPackages, 0);
-    const totalQte = voucher.items.reduce((s, i) => s + i.totalUnits, 0);
+    const totalQte = voucher.items.reduce((s, i) => s + (i.actualTotalUnits ?? i.totalUnits), 0);
 
     const cell = (col: { x: number; w: number }, text: string, y: number, align: 'left' | 'right' = 'left') => {
       d.text(text, col.x + 3, y, { width: col.w - 6, align });
@@ -141,7 +142,7 @@ export class PurchaseVoucherPdfService {
       d.fillColor(INK);
       cell(COLS.colis, String(item.quantityPackages), y + 5, 'right');
       cell(COLS.colissage, String(item.unitsPerPackageSnapshot), y + 5, 'right');
-      cell(COLS.qte, String(item.totalUnits), y + 5, 'right');
+      cell(COLS.qte, String(item.actualTotalUnits ?? item.totalUnits), y + 5, 'right');
       cell(COLS.designation, item.product.nameFr, y + 5, 'left');
       cell(COLS.pu, num(item.unitCost).toFixed(2), y + 5, 'right');
       cell(COLS.pht, num(item.lineTotal).toFixed(2), y + 5, 'right');
