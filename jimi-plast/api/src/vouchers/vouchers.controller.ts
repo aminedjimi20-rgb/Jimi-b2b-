@@ -85,6 +85,8 @@ export class VouchersController {
     const voucher = await this.vouchersService.getById(id);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${voucher.number ?? voucher.id}.pdf"`);
+    // Le bon contient des données client/prix — jamais indexable par les moteurs de recherche.
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     const doc = this.pdfService.generate(voucher);
     doc.pipe(res);
   }

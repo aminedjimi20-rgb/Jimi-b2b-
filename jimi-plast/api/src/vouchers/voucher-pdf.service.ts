@@ -29,23 +29,28 @@ const ACCENT = '#d9641f';
 const INK = '#201d1a';
 const MUTED = '#78705f';
 const LINE = '#e1dbca';
+const BORDER = '#3a352d';
 
-const PAGE_BOTTOM = 760;
 const TABLE_LEFT = 40;
 const TABLE_RIGHT = 555;
+const PAGE_BOTTOM = 770;
+const HEAD_H = 16;
+const ROW_H = 18;
 
 // Colonnes dans l'ordre du bon papier de référence : case à cocher, nombre
 // de colis, colissage (pièces/colis), quantité réelle, désignation, prix
-// unitaire, total HT.
+// unitaire, total HT. Les bornes de chaque colonne se touchent — ce sont
+// aussi les abscisses des traits verticaux de la grille.
 const COLS = {
   check: { x: 40, w: 16 },
-  colis: { x: 58, w: 35 },
-  colissage: { x: 96, w: 48 },
-  qte: { x: 148, w: 45 },
-  designation: { x: 197, w: 188 },
-  pu: { x: 390, w: 60 },
-  pht: { x: 455, w: 100 },
+  colis: { x: 56, w: 37 },
+  colissage: { x: 93, w: 48 },
+  qte: { x: 141, w: 48 },
+  designation: { x: 189, w: 191 },
+  pu: { x: 380, w: 60 },
+  pht: { x: 440, w: 115 },
 };
+const GRID_X = [40, 56, 93, 141, 189, 380, 440, 555];
 
 /**
  * Génère le bon en PDF côté serveur pour un rendu identique quel que soit
@@ -62,6 +67,10 @@ export class VoucherPdfService {
     const newCredit = num(voucher.previousCredit) + total - num(voucher.paidAmount);
     const totalColis = voucher.items.reduce((s, i) => s + i.quantityPackages, 0);
     const totalQte = voucher.items.reduce((s, i) => s + (i.actualTotalUnits ?? i.totalUnits), 0);
+
+    const cell = (col: { x: number; w: number }, text: string, y: number, align: 'left' | 'right' = 'left') => {
+      d.text(text, col.x + 3, y, { width: col.w - 6, align });
+    };
 
     const drawHeader = () => {
       d.fillColor(ACCENT).fontSize(20).font('Helvetica-Bold').text('JIMI PLAST', 40, 40);
@@ -87,56 +96,82 @@ export class VoucherPdfService {
         .text(voucher.customer.user.phone ?? '', 40, 156);
     };
 
-    const drawTableHead = (y: number) => {
+    const drawHeadRow = (y: number) => {
       d.fontSize(8).font('Helvetica-Bold').fillColor(MUTED);
-      d.text('N.colis', COLS.colis.x, y, { width: COLS.colis.w, align: 'right' });
-      d.text('Colissage', COLS.colissage.x, y, { width: COLS.colissage.w, align: 'right' });
-      d.text('Qté', COLS.qte.x, y, { width: COLS.qte.w, align: 'right' });
-      d.text('Désignation', COLS.designation.x, y, { width: COLS.designation.w });
-      d.text('P.U', COLS.pu.x, y, { width: COLS.pu.w, align: 'right' });
-      d.text('P.HT', COLS.pht.x, y, { width: COLS.pht.w, align: 'right' });
-      const lineY = y + 12;
-      d.moveTo(TABLE_LEFT, lineY).lineTo(TABLE_RIGHT, lineY).strokeColor(LINE).stroke();
-      return lineY + 6;
+      cell(COLS.colis, 'N.colis', y + 4, 'right');
+      cell(COLS.colissage, 'Colissage', y + 4, 'right');
+      cell(COLS.qte, 'Qté', y + 4, 'right');
+      cell(COLS.designation, 'Désignation', y + 4, 'left');
+      cell(COLS.pu, 'P.U', y + 4, 'right');
+      cell(COLS.pht, 'P.HT', y + 4, 'right');
+    };
+
+    // Dessine la grille (bordure + lignes verticales/horizontales) d'un
+    // segment de tableau — un segment par page, puisqu'on ne peut pas tracer
+    // de trait continu d'une page à l'autre.
+    const drawGrid = (top: number, rowBoundaries: number[]) => {
+      const bottom = rowBoundaries[rowBoundaries.length - 1];
+      d.lineWidth(0.75).strokeColor(BORDER);
+      for (const by of rowBoundaries) {
+        d.moveTo(TABLE_LEFT, by).lineTo(TABLE_RIGHT, by).stroke();
+      }
+      for (const gx of GRID_X) {
+        d.moveTo(gx, top).lineTo(gx, bottom).stroke();
+      }
+      d.lineWidth(1);
     };
 
     drawHeader();
-    let y = 190;
-    y = drawTableHead(y);
+
+    let y = 188;
+    let segmentTop = y;
+    let boundaries = [y];
+    drawHeadRow(y);
+    y += HEAD_H;
+    boundaries.push(y);
 
     d.font('Helvetica').fontSize(9).fillColor(INK);
     for (const item of voucher.items) {
-      if (y > PAGE_BOTTOM) {
+      if (y + ROW_H > PAGE_BOTTOM) {
+        drawGrid(segmentTop, boundaries);
         d.addPage();
-        y = drawTableHead(40);
+        y = 40;
+        segmentTop = y;
+        boundaries = [y];
+        drawHeadRow(y);
+        y += HEAD_H;
+        boundaries.push(y);
         d.font('Helvetica').fontSize(9).fillColor(INK);
       }
 
       // Case à cocher — cochée si déjà marquée "chargée" dans l'appli,
       // sinon vide pour être cochée à la main lors du chargement physique.
-      d.rect(COLS.check.x, y - 1, 9, 9).strokeColor(MUTED).stroke();
+      const boxY = y + 5;
+      d.lineWidth(0.75).rect(COLS.check.x + 4, boxY, 8, 8).strokeColor(MUTED).stroke();
       if (item.isLoaded) {
-        d.moveTo(COLS.check.x + 1, y + 3.5).lineTo(COLS.check.x + 4, y + 7).lineTo(COLS.check.x + 8, y).strokeColor(INK).stroke();
+        d.moveTo(COLS.check.x + 5, boxY + 4).lineTo(COLS.check.x + 7.5, boxY + 7.5).lineTo(COLS.check.x + 11, boxY + 1).strokeColor(INK).stroke();
       }
+      d.lineWidth(1);
 
       d.fillColor(INK);
-      d.text(String(item.quantityPackages), COLS.colis.x, y, { width: COLS.colis.w, align: 'right' });
-      d.text(String(item.unitsPerPackageSnapshot), COLS.colissage.x, y, { width: COLS.colissage.w, align: 'right' });
-      d.text(String(item.actualTotalUnits ?? item.totalUnits), COLS.qte.x, y, { width: COLS.qte.w, align: 'right' });
-      d.text(item.product.nameFr, COLS.designation.x, y, { width: COLS.designation.w });
-      d.text(num(item.unitPrice).toFixed(2), COLS.pu.x, y, { width: COLS.pu.w, align: 'right' });
-      d.text(num(item.lineTotal).toFixed(2), COLS.pht.x, y, { width: COLS.pht.w, align: 'right' });
-      y += 18;
-    }
+      cell(COLS.colis, String(item.quantityPackages), y + 5, 'right');
+      cell(COLS.colissage, String(item.unitsPerPackageSnapshot), y + 5, 'right');
+      cell(COLS.qte, String(item.actualTotalUnits ?? item.totalUnits), y + 5, 'right');
+      cell(COLS.designation, item.product.nameFr, y + 5, 'left');
+      cell(COLS.pu, num(item.unitPrice).toFixed(2), y + 5, 'right');
+      cell(COLS.pht, num(item.lineTotal).toFixed(2), y + 5, 'right');
 
-    if (y > PAGE_BOTTOM - 120) {
+      y += ROW_H;
+      boundaries.push(y);
+    }
+    drawGrid(segmentTop, boundaries);
+
+    if (y > PAGE_BOTTOM - 130) {
       d.addPage();
       y = 40;
     }
 
-    y += 6;
-    d.moveTo(320, y).lineTo(555, y).strokeColor(LINE).stroke();
-    y += 10;
+    y += 16;
 
     const row = (label: string, value: string, bold = false) => {
       d.font(bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor(INK);

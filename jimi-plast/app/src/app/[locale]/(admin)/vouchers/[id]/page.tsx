@@ -121,12 +121,24 @@ export default function VoucherEditorPage() {
   const [loadingPdf, setLoadingPdf] = useState(false);
 
   async function viewPdf() {
+    // window.open doit être appelé de façon synchrone dans le gestionnaire de
+    // clic — sinon Safari/iOS et la plupart des bloqueurs de popups le
+    // bloquent une fois passé le premier "await". On ouvre donc un onglet
+    // vide tout de suite, puis on le redirige vers le PDF une fois prêt :
+    // le visualiseur PDF natif du navigateur s'ouvre directement, sans page
+    // intermédiaire visible.
+    const win = window.open('', '_blank');
     setLoadingPdf(true);
     try {
       const blob = await api.getBlob(`/vouchers/${id}/pdf`, token);
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      if (win) {
+        win.location.href = url;
+      } else {
+        window.location.href = url;
+      }
     } catch {
+      win?.close();
       setError(tCommon('error'));
     } finally {
       setLoadingPdf(false);
