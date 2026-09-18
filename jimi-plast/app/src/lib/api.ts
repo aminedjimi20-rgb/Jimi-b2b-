@@ -4,7 +4,11 @@ export const TOKEN_KEY = 'jimiplast_access_token';
 export const REFRESH_KEY = 'jimiplast_refresh_token';
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+    public details?: unknown,
+  ) {
     super(message);
   }
 }
@@ -101,7 +105,7 @@ async function request<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(res.status, body.message ?? 'Erreur réseau');
+    throw new ApiError(res.status, body.message ?? 'Erreur réseau', body);
   }
 
   if (res.status === 204) return undefined as T;

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { SortSelect, type SortMode } from '@/components/sort-select';
@@ -37,6 +37,16 @@ interface VoucherItem {
   unitPrice: string;
   lineTotal: string;
   isLoaded: boolean;
+  modifiedAt: string | null;
+}
+interface HistoryEntry {
+  id: string;
+  action: string;
+  field: string | null;
+  newValue: string | null;
+  reason: string | null;
+  createdAt: string;
+  actor: { fullName: string } | null;
 }
 interface Voucher {
   id: string;
@@ -119,6 +129,8 @@ export default function VoucherEditorPage() {
   const [itemSort, setItemSort] = useState<SortMode>('manual');
   const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
   const [loadingPdf, setLoadingPdf] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   async function viewPdf() {
     // window.open doit être appelé de façon synchrone dans le gestionnaire de
@@ -153,6 +165,7 @@ export default function VoucherEditorPage() {
       setPaidAmount(v.paidAmount);
       setNotes(v.notes ?? '');
     });
+    if (canManage) api.get<HistoryEntry[]>(`/vouchers/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
   }
 
   useEffect(() => {
@@ -195,6 +208,10 @@ export default function VoucherEditorPage() {
   }
 
   const isDraft = voucher?.status === 'DRAFT';
+  // "Modifier" ouvre l'édition d'un bon déjà confirmé/livré : le backend
+  // ajuste alors le stock du delta exact et journalise chaque changement.
+  const canReopen = canManage && (voucher?.status === 'CONFIRMED' || voucher?.status === 'DELIVERED');
+  const editable = isDraft || editMode;
 
   const autoSave = useCallback(
     (patch: Record<string, unknown>) => {
@@ -371,7 +388,7 @@ export default function VoucherEditorPage() {
     if (!voucher) return;
     const items = voucher.items
       .filter((i) => i.product.id !== productId)
-      .map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages }));
+      .map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages, actualTotalUnits: i.actualTotalUnits ?? undefined }));
     autoSave({ items });
   }
 
@@ -402,12 +419,21 @@ export default function VoucherEditorPage() {
     reload();
   }
 
-  async function confirmVoucher() {
+  async function confirmVoucher(force = false) {
     setError(null);
     try {
-      await api.post(`/vouchers/${id}/confirm`, undefined, token);
+      await api.post(`/vouchers/${id}/confirm`, force ? { force: true } : undefined, token);
       reload();
     } catch (e) {
+      const details = e instanceof ApiError ? (e.details as { code?: string; shortfalls?: { name: string; available: number; requested: number }[] } | undefined) : undefined;
+      if (details?.code === 'INSUFFICIENT_STOCK' && details.shortfalls) {
+        const lines = details.shortfalls.map((s) => `${s.name} : ${t('stockAvailable')} ${s.available}, ${t('stockRequested')} ${s.requested}`).join('\n');
+        if (window.confirm(`${t('insufficientStockConfirm')}\n\n${lines}`)) {
+          await confirmVoucher(true);
+          return;
+        }
+        return;
+      }
       setError(e instanceof Error ? e.message : tCommon('error'));
     }
   }
@@ -421,6 +447,12 @@ export default function VoucherEditorPage() {
     if (!cancelReason) return;
     await api.post(`/vouchers/${id}/cancel`, { reason: cancelReason }, token);
     setCancelReason('');
+    reload();
+  }
+
+  async function revertCancelVoucher() {
+    if (!window.confirm(t('revertCancelConfirm'))) return;
+    await api.post(`/vouchers/${id}/revert-cancel`, undefined, token);
     reload();
   }
 
@@ -476,7 +508,15 @@ export default function VoucherEditorPage() {
           <p className="text-sm text-muted">{voucher.customer.user.fullName}</p>
         </div>
         <div className="flex items-center gap-2">
-          {isDraft && savedAt && <span className="text-xs text-muted">{t('autoSaved')} {savedAt.toLocaleTimeString()}</span>}
+          {editable && savedAt && <span className="text-xs text-muted">{t('autoSaved')} {savedAt.toLocaleTimeString()}</span>}
+          {canReopen && (
+            <button
+              onClick={() => setEditMode((v) => !v)}
+              className={`rounded border px-3 py-1.5 text-sm ${editMode ? 'border-teal bg-teal/10 text-teal' : 'border-line text-ink hover:bg-line/30'}`}
+            >
+              {editMode ? tCommon('done') : t('modify')}
+            </button>
+          )}
           {canManage && (
             <button
               onClick={viewPdf}
@@ -489,7 +529,11 @@ export default function VoucherEditorPage() {
         </div>
       </div>
 
-      {isDraft && (
+      {editMode && (
+        <p className="rounded border border-teal/40 bg-teal/10 px-3 py-2 text-xs text-teal">{t('editModeWarning')}</p>
+      )}
+
+      {editable && (
         <div className="flex flex-col gap-3">
           <button
             onClick={() => setShowPicker((v) => !v)}
@@ -532,10 +576,8 @@ export default function VoucherEditorPage() {
                     return (
                       <div
                         key={p.id}
-                        onClick={() => p.availability === 'IN_STOCK' && openAddModal(p)}
-                        className={`flex w-[5.5rem] flex-col items-center gap-1 rounded border border-line p-1.5 text-center ${
-                          p.availability === 'IN_STOCK' ? 'cursor-pointer hover:bg-line/20' : 'opacity-50'
-                        }`}
+                        onClick={() => openAddModal(p)}
+                        className="flex w-[5.5rem] flex-col items-center gap-1 rounded border border-line p-1.5 text-center cursor-pointer hover:bg-line/20"
                       >
                         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded bg-paper text-muted">
                           {p.images[0] ? (
@@ -608,14 +650,14 @@ export default function VoucherEditorPage() {
               <th className="px-4 py-2 text-start">{t('unitPrice')}</th>
               <th className="px-4 py-2 text-end">{t('total')}</th>
               {canManage && <th className="px-4 py-2 text-center">{t('loaded')}</th>}
-              {isDraft && <th></th>}
+              {editable && <th></th>}
             </tr>
           </thead>
           <tbody>
             {sortedItems.map((item) => {
               const itemImages = item.product.images ?? [];
               return (
-              <tr key={item.id} className="border-t border-line">
+              <tr key={item.id} className={`border-t border-line ${item.modifiedAt ? 'bg-amber-500/10' : ''}`}>
                 <td className="px-2 py-2">
                   {itemImages.length > 0 && (
                     <button
@@ -651,7 +693,7 @@ export default function VoucherEditorPage() {
                     />
                   </td>
                 )}
-                {isDraft && (
+                {editable && (
                   <td className="px-2 py-2 text-end">
                     <button onClick={() => removeItem(item.product.id)} className="text-xs text-red-600 hover:underline">
                       {t('removeItem')}
@@ -666,16 +708,16 @@ export default function VoucherEditorPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <NumField label={t('discount')} value={discount} disabled={!isDraft} onChange={(v) => { setDiscount(v); autoSave({ discount: Number(v) }); }} />
-        <NumField label={t('transport')} value={transportCost} disabled={!isDraft} onChange={(v) => { setTransportCost(v); autoSave({ transportCost: Number(v) }); }} />
-        <NumField label={t('paidAmount')} value={paidAmount} disabled={!isDraft} onChange={(v) => { setPaidAmount(v); autoSave({ paidAmount: Number(v) }); }} />
+        <NumField label={t('discount')} value={discount} disabled={!editable} onChange={(v) => { setDiscount(v); autoSave({ discount: Number(v) }); }} />
+        <NumField label={t('transport')} value={transportCost} disabled={!editable} onChange={(v) => { setTransportCost(v); autoSave({ transportCost: Number(v) }); }} />
+        <NumField label={t('paidAmount')} value={paidAmount} disabled={!editable} onChange={(v) => { setPaidAmount(v); autoSave({ paidAmount: Number(v) }); }} />
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">{t('notes')}</span>
         <textarea
           value={notes}
-          disabled={!isDraft}
+          disabled={!editable}
           onChange={(e) => { setNotes(e.target.value); autoSave({ notes: e.target.value }); }}
           rows={2}
           className={`rounded border px-3 py-2 ${
@@ -723,7 +765,7 @@ export default function VoucherEditorPage() {
       {isDraft && canManage && (
         <div>
           <p className="mb-2 text-xs text-muted">{t('confirmWarning')}</p>
-          <button onClick={confirmVoucher} className="rounded bg-teal px-4 py-2 text-sm font-medium text-white">
+          <button onClick={() => confirmVoucher()} className="rounded bg-teal px-4 py-2 text-sm font-medium text-white">
             {t('confirm')}
           </button>
         </div>
@@ -751,7 +793,31 @@ export default function VoucherEditorPage() {
       )}
 
       {voucher.status === 'CANCELLED' && (
-        <p className="text-sm text-red-600">{voucher.cancelReason}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-red-600">{voucher.cancelReason}</p>
+          {canManage && (
+            <button onClick={revertCancelVoucher} className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30">
+              {t('revertCancel')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {canManage && history.length > 0 && (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-ink">{t('history')}</h2>
+          <ul className="flex flex-col gap-1.5 rounded-lg border border-line bg-panel p-3 text-xs">
+            {history.map((h) => (
+              <li key={h.id} className="border-b border-line/50 pb-1.5 last:border-0 last:pb-0">
+                <span className="text-muted">{new Date(h.createdAt).toLocaleString('fr-FR')}</span>
+                {' — '}
+                <span className="font-medium text-ink">{h.actor?.fullName ?? t('system')}</span>
+                {' : '}
+                <span className="text-ink">{h.reason ?? `${h.field ?? ''} → ${h.newValue ?? ''}`}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {addingProduct && (

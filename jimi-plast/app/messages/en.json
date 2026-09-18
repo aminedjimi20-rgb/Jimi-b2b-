@@ -166,7 +166,8 @@
       "manual": "Manual order",
       "depotAsc": "Depot (A → Z)",
       "depotDesc": "Depot (Z → A)"
-    }
+    },
+    "done": "Done"
   },
   "catalog": {
     "title": "Catalog",
@@ -333,7 +334,7 @@
     "subtotal": "Subtotal",
     "total": "Total",
     "confirm": "Confirm voucher",
-    "confirmWarning": "Once confirmed, the voucher can no longer be edited.",
+    "confirmWarning": "Once confirmed, any change goes through the \"Modify\" button and is recorded in the history.",
     "deliver": "Mark as delivered",
     "cancel": "Cancel voucher",
     "cancelReason": "Cancellation reason",
@@ -357,7 +358,16 @@
     "depot": "Depot",
     "allDepots": "All depots",
     "itemSearchPlaceholder": "Search a product in this order...",
-    "viewPhoto": "View photo"
+    "viewPhoto": "View photo",
+    "modify": "Modify",
+    "editModeWarning": "Editing a confirmed voucher: every change adjusts stock and is recorded in the history below, visible to you and the customer.",
+    "revertCancel": "Undo cancellation",
+    "revertCancelConfirm": "Reactivate this cancelled voucher? It becomes confirmed again and stock is deducted once more.",
+    "insufficientStockConfirm": "Insufficient stock to proceed — stock will go negative if you confirm anyway:",
+    "stockAvailable": "available",
+    "stockRequested": "requested",
+    "history": "History",
+    "system": "System"
   },
   "manufacturers": {
     "title": "Manufacturers",

@@ -107,8 +107,13 @@ export class VouchersController {
   }
 
   @Delete(':id/attachments/:attachmentId')
-  removeAttachment(@Param('id') id: string, @Param('attachmentId') attachmentId: string) {
-    return this.vouchersService.removeAttachment(id, attachmentId);
+  removeAttachment(@Param('id') id: string, @Param('attachmentId') attachmentId: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.removeAttachment(id, attachmentId, user.id);
+  }
+
+  @Get(':id/history')
+  history(@Param('id') id: string) {
+    return this.vouchersService.history(id);
   }
 
   @Put(':id/loaded-by')
@@ -128,8 +133,8 @@ export class VouchersController {
 
   @Post(':id/confirm')
   @RequirePermissions('vouchers.edit')
-  confirm(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
-    return this.vouchersService.confirm(id, user.id);
+  confirm(@Param('id') id: string, @Body('force') force: boolean, @CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.confirm(id, user.id, force === true);
   }
 
   @Post(':id/deliver')
@@ -142,6 +147,12 @@ export class VouchersController {
   @RequirePermissions('vouchers.edit')
   cancel(@Param('id') id: string, @Body() dto: CancelVoucherDto, @CurrentUser() user: AuthenticatedUser) {
     return this.vouchersService.cancel(id, dto, user.id);
+  }
+
+  @Post(':id/revert-cancel')
+  @RequirePermissions('vouchers.edit')
+  revertCancel(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.vouchersService.revertCancel(id, user.id);
   }
 
   @Put(':id/hidden')

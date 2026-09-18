@@ -166,7 +166,8 @@
       "manual": "Ordre manuel",
       "depotAsc": "Dépôt (A → Z)",
       "depotDesc": "Dépôt (Z → A)"
-    }
+    },
+    "done": "Terminer"
   },
   "catalog": {
     "title": "Catalogue",
@@ -333,7 +334,7 @@
     "subtotal": "Sous-total",
     "total": "Total",
     "confirm": "Confirmer le bon",
-    "confirmWarning": "Une fois confirmé, le bon ne peut plus être modifié.",
+    "confirmWarning": "Une fois confirmé, toute modification passera par le bouton « Modifier » et sera enregistrée dans l’historique.",
     "deliver": "Marquer comme livré",
     "cancel": "Annuler le bon",
     "cancelReason": "Raison de l'annulation",
@@ -357,7 +358,16 @@
     "depot": "Dépôt",
     "allDepots": "Tous les dépôts",
     "itemSearchPlaceholder": "Rechercher un produit dans ce bon...",
-    "viewPhoto": "Voir la photo"
+    "viewPhoto": "Voir la photo",
+    "modify": "Modifier",
+    "editModeWarning": "Modification d’un bon confirmé : chaque changement ajuste le stock et reste enregistré dans l’historique ci-dessous, visible par vous et le client.",
+    "revertCancel": "Annuler l’annulation",
+    "revertCancelConfirm": "Réactiver ce bon annulé ? Il redevient confirmé et le stock est à nouveau déduit.",
+    "insufficientStockConfirm": "Stock insuffisant pour continuer — le stock deviendra négatif si vous confirmez malgré tout :",
+    "stockAvailable": "disponible",
+    "stockRequested": "demandé",
+    "history": "Historique",
+    "system": "Système"
   },
   "manufacturers": {
     "title": "Fabricants",
