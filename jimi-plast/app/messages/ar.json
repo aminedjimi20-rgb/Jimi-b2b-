@@ -49,7 +49,8 @@
     "logout": "تسجيل الخروج",
     "trash": "سلة المهملات",
     "besoins": "الاحتياجات",
-    "myOrders": "طلباتي"
+    "myOrders": "طلباتي",
+    "approvals": "الموافقات"
   },
   "dashboard": {
     "welcome": "مرحبًا {name}",
@@ -135,7 +136,10 @@
     "title": "الإشعارات",
     "empty": "لا توجد إشعارات",
     "markAllRead": "تحديد الكل كمقروء",
-    "delete": "حذف"
+    "delete": "حذف",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "confirmApprove": "تأكيد : الأرقام (ستوك، صولد) راح تتبدل نهائيا."
   },
   "common": {
     "loading": "جارٍ التحميل…",
@@ -290,7 +294,10 @@
       "amount": "المبلغ",
       "note": "ملاحظة",
       "reason": "السبب",
-      "back": "العودة إلى العملاء"
+      "back": "العودة إلى العملاء",
+      "deleteReasonPrompt": "علاش تحب تمحي (الزبون خاصو يوافق) :",
+      "deleted": "محذوف",
+      "pendingDeletion": "فالانتظار للموافقة"
     },
     "entryTypes": {
       "SALE_VOUCHER": "بون بيع",
@@ -367,7 +374,11 @@
     "stockAvailable": "موجود",
     "stockRequested": "مطلوب",
     "history": "التاريخ",
-    "system": "النظام"
+    "system": "النظام",
+    "deleteVoucher": "حذف البون",
+    "deleteReasonPrompt": "علاش تحب تمحي (الزبون خاصو يوافق) :",
+    "detailDeleted": "محذوف",
+    "detailPendingDeletion": "فالانتظار للموافقة"
   },
   "manufacturers": {
     "title": "المصانع",
@@ -598,5 +609,19 @@
     "unhide": "إظهار",
     "delete": "حذف",
     "deleteConfirm": "حذف هذا الاحتياج؟ سيتم نقله إلى سلة المهملات."
+  },
+  "approvals": {
+    "title": "طلبات الموافقة",
+    "noPending": "ماكاش طلبات فالانتظار.",
+    "ledgerEntry": "حذف خانة كريدي ({type})",
+    "voucher": "حذف البون {number}",
+    "requestedBy": "طلبها",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "confirmApprove": "تأكيد : الأرقام (ستوك، صولد) راح تتبدل نهائيا.",
+    "viewVoucher": "شوف البون",
+    "resolved": "تاريخ الردود",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض"
   }
 }

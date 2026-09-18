@@ -6,10 +6,15 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from './dto/add-ledger-entry.dto';
+import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
+import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
 
 @Controller('customers')
 export class CustomersController {
-  constructor(private readonly customersService: CustomersService) {}
+  constructor(
+    private readonly customersService: CustomersService,
+    private readonly pendingDeletions: PendingDeletionsService,
+  ) {}
 
   @Get()
   @RequirePermissions('customers.manage')
@@ -56,5 +61,11 @@ export class CustomersController {
   @RequirePermissions('credits.manage')
   addAdjustment(@Param('id') id: string, @Body() dto: AddAdjustmentDto, @CurrentUser() user: AuthenticatedUser) {
     return this.customersService.addAdjustment(id, dto, user.id);
+  }
+
+  @Post('entries/:entryId/request-deletion')
+  @RequirePermissions('credits.manage')
+  requestEntryDeletion(@Param('entryId') entryId: string, @Body() dto: RequestDeletionDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.pendingDeletions.requestLedgerEntryDeletion(entryId, dto.reason, user.id);
   }
 }

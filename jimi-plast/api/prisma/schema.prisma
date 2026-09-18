@@ -101,6 +101,8 @@ model User {
   notifications   Notification[]
   besoins         Besoin[]         @relation("BesoinAuthor")
   besoinsAnswered Besoin[]         @relation("BesoinRespondedBy")
+  requestedDeletions PendingDeletion[] @relation("PendingDeletionRequestedBy")
+  respondedDeletions PendingDeletion[] @relation("PendingDeletionRespondedBy")
 
   @@map("users")
 }
@@ -409,6 +411,7 @@ model Customer {
   returns         Return[]
   productRequests ProductRequest[]
   negotiations    Negotiation[]
+  pendingDeletions PendingDeletion[]
 
   @@map("customers")
 }
@@ -431,11 +434,47 @@ model LedgerEntry {
   note        String?
   createdById String?
   createdAt   DateTime        @default(now())
+  voidedAt    DateTime? // renseigné quand une demande de suppression a été approuvée — exclu du solde, mais la ligne reste visible (barrée) dans l'historique
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  pendingDeletions PendingDeletion[]
 
   @@index([customerId])
   @@map("ledger_entries")
+}
+
+enum PendingDeletionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Une suppression de ligne de crédit (ajustement/paiement) ou de bon ne
+// s'applique jamais tout de suite : elle attend l'approbation de l'autre
+// partie (client ↔ personnel). La ligne visée reste toujours visible,
+// barrée, avec la raison — jamais supprimée pour de vrai côté affichage.
+model PendingDeletion {
+  id             String                @id @default(cuid())
+  ledgerEntryId  String?
+  salesVoucherId String?
+  customerId     String
+  reason         String
+  status         PendingDeletionStatus @default(PENDING)
+  requestedById  String?
+  respondedById  String?
+  respondedAt    DateTime?
+  createdAt      DateTime              @default(now())
+
+  ledgerEntry  LedgerEntry?  @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
+  salesVoucher SalesVoucher? @relation(fields: [salesVoucherId], references: [id], onDelete: Cascade)
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  requestedBy  User?         @relation("PendingDeletionRequestedBy", fields: [requestedById], references: [id])
+  respondedBy  User?         @relation("PendingDeletionRespondedBy", fields: [respondedById], references: [id])
+
+  @@index([customerId])
+  @@index([ledgerEntryId])
+  @@index([salesVoucherId])
+  @@map("pending_deletions")
 }
 
 // ---------------------------------------------------------------------------
@@ -476,6 +515,7 @@ model SalesVoucher {
   items       SalesVoucherItem[]
   delivery    Delivery?
   attachments VoucherAttachment[]
+  pendingDeletions PendingDeletion[]
 
   @@index([customerId])
   @@index([status])

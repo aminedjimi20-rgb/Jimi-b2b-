@@ -97,7 +97,7 @@ export class StatsService {
 
   async credits() {
     const [customerEntries, supplierEntries] = await Promise.all([
-      this.prisma.ledgerEntry.groupBy({ by: ['customerId'], _sum: { amount: true } }),
+      this.prisma.ledgerEntry.groupBy({ by: ['customerId'], where: { voidedAt: null }, _sum: { amount: true } }),
       this.prisma.supplierLedgerEntry.groupBy({ by: ['manufacturerId'], _sum: { amount: true } }),
     ]);
 

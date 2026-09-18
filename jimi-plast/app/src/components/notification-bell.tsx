@@ -12,6 +12,7 @@ interface Notification {
   body: string;
   readAt: string | null;
   createdAt: string;
+  data: { pendingDeletionId?: string } | null;
 }
 
 export function NotificationBell() {
@@ -53,6 +54,12 @@ export function NotificationBell() {
     reload();
   }
 
+  async function respond(pendingDeletionId: string, decision: 'APPROVED' | 'REJECTED') {
+    if (decision === 'APPROVED' && !window.confirm(t('confirmApprove'))) return;
+    await api.post(`/pending-deletions/${pendingDeletionId}/respond`, { decision }, token);
+    reload();
+  }
+
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen((v) => !v)} className="relative rounded p-1.5 text-ink hover:bg-line/30">
@@ -84,6 +91,22 @@ export function NotificationBell() {
                   <p className="text-sm font-medium text-ink">{n.title}</p>
                   <p className="text-xs text-muted">{n.body}</p>
                   <p className="mt-0.5 text-[10px] text-muted">{new Date(n.createdAt).toLocaleString()}</p>
+                  {n.type === 'pending_deletion.requested' && n.data?.pendingDeletionId && (
+                    <div className="mt-1.5 flex gap-2">
+                      <button
+                        onClick={() => respond(n.data!.pendingDeletionId!, 'APPROVED')}
+                        className="rounded bg-teal px-2 py-1 text-[11px] font-medium text-white"
+                      >
+                        {t('approve')}
+                      </button>
+                      <button
+                        onClick={() => respond(n.data!.pendingDeletionId!, 'REJECTED')}
+                        className="rounded border border-red-300 px-2 py-1 text-[11px] text-red-600 hover:bg-red-50"
+                      >
+                        {t('reject')}
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={() => remove(n.id)}

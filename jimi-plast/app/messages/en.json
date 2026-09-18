@@ -49,7 +49,8 @@
     "logout": "Sign out",
     "trash": "Trash",
     "besoins": "Needs",
-    "myOrders": "My orders"
+    "myOrders": "My orders",
+    "approvals": "Approvals"
   },
   "dashboard": {
     "welcome": "Hello {name}",
@@ -135,7 +136,10 @@
     "title": "Notifications",
     "empty": "No notifications",
     "markAllRead": "Mark all as read",
-    "delete": "Delete"
+    "delete": "Delete",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmApprove": "Confirm: the numbers (stock, balance) will change permanently."
   },
   "common": {
     "loading": "Loading…",
@@ -290,7 +294,10 @@
       "amount": "Amount",
       "note": "Note",
       "reason": "Reason",
-      "back": "Back to customers"
+      "back": "Back to customers",
+      "deleteReasonPrompt": "Reason for deletion (the customer will need to approve):",
+      "deleted": "Deleted",
+      "pendingDeletion": "Awaiting approval"
     },
     "entryTypes": {
       "SALE_VOUCHER": "Sales voucher",
@@ -367,7 +374,11 @@
     "stockAvailable": "available",
     "stockRequested": "requested",
     "history": "History",
-    "system": "System"
+    "system": "System",
+    "deleteVoucher": "Delete voucher",
+    "deleteReasonPrompt": "Reason for deletion (the customer will need to approve):",
+    "detailDeleted": "Deleted",
+    "detailPendingDeletion": "Awaiting approval"
   },
   "manufacturers": {
     "title": "Manufacturers",
@@ -598,5 +609,19 @@
     "unhide": "Unhide",
     "delete": "Delete",
     "deleteConfirm": "Delete this need? It will be moved to the trash."
+  },
+  "approvals": {
+    "title": "Approval requests",
+    "noPending": "No pending requests.",
+    "ledgerEntry": "Deletion of a ledger entry ({type})",
+    "voucher": "Deletion of voucher {number}",
+    "requestedBy": "Requested by",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmApprove": "Confirm: the numbers (stock, balance) will change permanently.",
+    "viewVoucher": "View voucher",
+    "resolved": "Response history",
+    "approved": "Approved",
+    "rejected": "Rejected"
   }
 }

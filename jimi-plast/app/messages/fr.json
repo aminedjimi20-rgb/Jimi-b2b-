@@ -49,7 +49,8 @@
     "logout": "Déconnexion",
     "trash": "Corbeille",
     "besoins": "Besoins",
-    "myOrders": "Mes commandes"
+    "myOrders": "Mes commandes",
+    "approvals": "Approbations"
   },
   "dashboard": {
     "welcome": "Bonjour {name}",
@@ -135,7 +136,10 @@
     "title": "Notifications",
     "empty": "Aucune notification",
     "markAllRead": "Tout marquer comme lu",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "confirmApprove": "Confirmer : les chiffres (stock, solde) vont changer définitivement."
   },
   "common": {
     "loading": "Chargement…",
@@ -290,7 +294,10 @@
       "amount": "Montant",
       "note": "Note",
       "reason": "Raison",
-      "back": "Retour aux clients"
+      "back": "Retour aux clients",
+      "deleteReasonPrompt": "Raison de la suppression (le client devra approuver) :",
+      "deleted": "Supprimé",
+      "pendingDeletion": "En attente d'approbation"
     },
     "entryTypes": {
       "SALE_VOUCHER": "Bon de vente",
@@ -367,7 +374,11 @@
     "stockAvailable": "disponible",
     "stockRequested": "demandé",
     "history": "Historique",
-    "system": "Système"
+    "system": "Système",
+    "deleteVoucher": "Supprimer le bon",
+    "deleteReasonPrompt": "Raison de la suppression (le client devra approuver) :",
+    "detailDeleted": "Supprimé",
+    "detailPendingDeletion": "En attente d'approbation"
   },
   "manufacturers": {
     "title": "Fabricants",
@@ -598,5 +609,19 @@
     "unhide": "Afficher",
     "delete": "Supprimer",
     "deleteConfirm": "Supprimer ce besoin ? Il sera déplacé vers la corbeille."
+  },
+  "approvals": {
+    "title": "Demandes d'approbation",
+    "noPending": "Aucune demande en attente.",
+    "ledgerEntry": "Suppression d’une ligne de crédit ({type})",
+    "voucher": "Suppression du bon {number}",
+    "requestedBy": "Demandé par",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "confirmApprove": "Confirmer : les chiffres (stock, solde) vont changer définitivement.",
+    "viewVoucher": "Voir le bon",
+    "resolved": "Historique des réponses",
+    "approved": "Approuvé",
+    "rejected": "Refusé"
   }
 }

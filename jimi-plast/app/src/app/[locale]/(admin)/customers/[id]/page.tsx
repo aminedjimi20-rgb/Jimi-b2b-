@@ -6,12 +6,20 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 
+interface PendingDeletion {
+  id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reason: string;
+  requestedBy: { fullName: string } | null;
+}
 interface LedgerEntry {
   id: string;
   type: 'SALE_VOUCHER' | 'PAYMENT' | 'RETURN_CREDIT' | 'ADJUSTMENT';
   amount: string;
   note: string | null;
   createdAt: string;
+  voidedAt: string | null;
+  pendingDeletions: PendingDeletion[];
 }
 interface CustomerDetail {
   id: string;
@@ -59,6 +67,15 @@ export default function CustomerDetailPage() {
     await api.post(`/customers/${id}/adjustments`, { amount: Number(adjustAmount), reason: adjustReason }, token);
     setAdjustAmount('');
     setAdjustReason('');
+    reload();
+  }
+
+  // La suppression ne s'applique jamais tout de suite : elle attend
+  // l'approbation du client, et la ligne reste affichée (barrée) pour de bon.
+  async function requestEntryDeletion(entryId: string) {
+    const reason = window.prompt(t('detail.deleteReasonPrompt'));
+    if (!reason) return;
+    await api.post(`/customers/entries/${entryId}/request-deletion`, { reason }, token);
     reload();
   }
 
@@ -149,21 +166,44 @@ export default function CustomerDetailPage() {
         <div className="overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full text-sm">
             <tbody>
-              {customer.entries.map((e) => (
-                <tr key={e.id} className="border-t border-line first:border-t-0">
-                  <td className="px-4 py-2 font-mono text-xs text-muted">
-                    {new Date(e.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 text-xs">{t(`entryTypes.${e.type}`)}</td>
-                  <td className="px-4 py-2 text-xs text-muted">{e.note}</td>
-                  <td
-                    className={`px-4 py-2 text-end font-mono tabular ${Number(e.amount) > 0 ? 'text-accent' : 'text-teal'}`}
-                  >
-                    {Number(e.amount) > 0 ? '+' : ''}
-                    {Number(e.amount).toLocaleString()} DA
-                  </td>
-                </tr>
-              ))}
+              {customer.entries.map((e) => {
+                const latest = e.pendingDeletions[0];
+                const isVoided = !!e.voidedAt;
+                const isPending = latest?.status === 'PENDING';
+                const struckThrough = isVoided || isPending;
+                const canRequestDelete = e.type !== 'SALE_VOUCHER' && !isVoided && !isPending;
+                return (
+                  <tr key={e.id} className={`border-t border-line first:border-t-0 ${isPending ? 'bg-amber-500/10' : ''}`}>
+                    <td className="px-4 py-2 font-mono text-xs text-muted">
+                      {new Date(e.createdAt).toLocaleString()}
+                    </td>
+                    <td className={`px-4 py-2 text-xs ${struckThrough ? 'line-through text-muted' : ''}`}>
+                      {t(`entryTypes.${e.type}`)}
+                    </td>
+                    <td className={`px-4 py-2 text-xs text-muted ${struckThrough ? 'line-through' : ''}`}>
+                      {e.note}
+                      {latest && (isVoided || isPending) && (
+                        <p className={`mt-0.5 text-[11px] ${isVoided ? 'text-red-600' : 'text-amber-600'}`}>
+                          {isVoided ? t('detail.deleted') : t('detail.pendingDeletion')} : {latest.reason}
+                        </p>
+                      )}
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-end font-mono tabular ${struckThrough ? 'line-through text-muted' : Number(e.amount) > 0 ? 'text-accent' : 'text-teal'}`}
+                    >
+                      {Number(e.amount) > 0 ? '+' : ''}
+                      {Number(e.amount).toLocaleString()} DA
+                    </td>
+                    <td className="px-2 py-2 text-end">
+                      {canRequestDelete && (
+                        <button onClick={() => requestEntryDeletion(e.id)} className="text-xs text-red-600 hover:underline">
+                          {tCommon('delete')}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

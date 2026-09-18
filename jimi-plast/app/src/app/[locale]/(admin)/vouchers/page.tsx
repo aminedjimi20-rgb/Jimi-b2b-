@@ -21,6 +21,7 @@ interface VoucherRow {
   depot: string | null;
   customer: { businessName: string | null; user: { fullName: string } };
   items: { lineTotal: string; totalUnits: number }[];
+  pendingDeletions: { status: 'PENDING' | 'APPROVED' | 'REJECTED'; reason: string }[];
 }
 
 const DEFAULT_DEPOTS = ['Dépôt 1', 'Dépôt 2', 'Dépôt 3'];
@@ -175,11 +176,14 @@ export default function VouchersPage() {
             </tr>
           </thead>
           <tbody>
-            {sortedVouchers.map((v) => (
+            {sortedVouchers.map((v) => {
+              const deletion = v.pendingDeletions[0];
+              const struckThrough = deletion?.status === 'PENDING' || deletion?.status === 'APPROVED';
+              return (
               <tr
                 key={v.id}
                 onClick={() => router.push(`/${locale}/vouchers/${v.id}`)}
-                className="cursor-pointer border-t border-line hover:bg-line/20"
+                className={`cursor-pointer border-t border-line hover:bg-line/20 ${struckThrough ? 'line-through opacity-60' : ''}`}
               >
                 <td className="px-4 py-2 font-mono text-xs">{v.number ?? '(brouillon)'}</td>
                 <td className="px-4 py-2 text-ink">{v.customer.user.fullName}</td>
@@ -190,7 +194,8 @@ export default function VouchersPage() {
                 </td>
                 <td className="px-4 py-2 text-xs text-muted">{v.depot ?? '—'}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

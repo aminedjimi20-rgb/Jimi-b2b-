@@ -9,6 +9,8 @@ import { UpsertVoucherDto } from './dto/upsert-voucher.dto';
 import { CancelVoucherDto } from './dto/cancel-voucher.dto';
 import { AddVoucherAttachmentDto } from './dto/add-attachment.dto';
 import { SetLoadedByDto, SetItemLoadedDto, SetDepotDto } from './dto/set-loaded.dto';
+import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
+import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
 
 @Controller('vouchers')
 @RequirePermissions('vouchers.create')
@@ -16,6 +18,7 @@ export class VouchersController {
   constructor(
     private readonly vouchersService: VouchersService,
     private readonly pdfService: VoucherPdfService,
+    private readonly pendingDeletions: PendingDeletionsService,
   ) {}
 
   @Get()
@@ -153,6 +156,12 @@ export class VouchersController {
   @RequirePermissions('vouchers.edit')
   revertCancel(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.vouchersService.revertCancel(id, user.id);
+  }
+
+  @Post(':id/request-deletion')
+  @RequirePermissions('vouchers.edit')
+  requestDeletion(@Param('id') id: string, @Body() dto: RequestDeletionDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.pendingDeletions.requestVoucherDeletion(id, dto.reason, user.id);
   }
 
   @Put(':id/hidden')

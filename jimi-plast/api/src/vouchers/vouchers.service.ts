@@ -31,7 +31,7 @@ export class VouchersService {
   ) {}
 
   private async balanceOf(customerId: string): Promise<number> {
-    const agg = await this.prisma.ledgerEntry.aggregate({ where: { customerId }, _sum: { amount: true } });
+    const agg = await this.prisma.ledgerEntry.aggregate({ where: { customerId, voidedAt: null }, _sum: { amount: true } });
     return Number(agg._sum.amount ?? 0);
   }
 
@@ -58,6 +58,7 @@ export class VouchersService {
         customer: { include: { user: { select: { fullName: true } } } },
         seller: { select: { fullName: true } },
         items: true,
+        pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -77,6 +78,11 @@ export class VouchersService {
           },
         },
         attachments: { orderBy: { createdAt: 'desc' } },
+        pendingDeletions: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          include: { requestedBy: { select: { fullName: true } } },
+        },
       },
     });
     if (!voucher) throw new NotFoundException('Bon introuvable');

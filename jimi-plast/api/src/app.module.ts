@@ -23,6 +23,7 @@ import { ReturnsModule } from './returns/returns.module';
 import { DeliveriesModule } from './deliveries/deliveries.module';
 import { ProductRequestsModule } from './product-requests/product-requests.module';
 import { NegotiationsModule } from './negotiations/negotiations.module';
+import { PendingDeletionsModule } from './pending-deletions/pending-deletions.module';
 import { StatsModule } from './stats/stats.module';
 import { TrashModule } from './trash/trash.module';
 import { BesoinsModule } from './besoins/besoins.module';
@@ -54,6 +55,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     DeliveriesModule,
     ProductRequestsModule,
     NegotiationsModule,
+    PendingDeletionsModule,
     StatsModule,
     TrashModule,
     BesoinsModule,

@@ -19,7 +19,7 @@ export class CustomersService {
 
   private async balanceOf(customerId: string): Promise<number> {
     const agg = await this.prisma.ledgerEntry.aggregate({
-      where: { customerId },
+      where: { customerId, voidedAt: null },
       _sum: { amount: true },
     });
     return Number(agg._sum.amount ?? 0);
@@ -52,9 +52,19 @@ export class CustomersService {
     });
     if (!customer) throw new NotFoundException('Client introuvable');
 
+    // On récupère toutes les lignes, y compris celles avec une suppression
+    // en attente/approuvée : elles doivent rester affichées (barrées), seul
+    // le solde exclut celles réellement approuvées (voidedAt renseigné).
     const entries = await this.prisma.ledgerEntry.findMany({
       where: { customerId: id },
       orderBy: { createdAt: 'desc' },
+      include: {
+        pendingDeletions: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          include: { requestedBy: { select: { fullName: true } } },
+        },
+      },
     });
 
     return {
@@ -65,7 +75,7 @@ export class CustomersService {
       creditLimit: Number(customer.creditLimit),
       notes: customer.notes,
       user: customer.user,
-      balance: entries.reduce((sum, e) => sum + Number(e.amount), 0),
+      balance: entries.filter((e) => !e.voidedAt).reduce((sum, e) => sum + Number(e.amount), 0),
       entries,
     };
   }

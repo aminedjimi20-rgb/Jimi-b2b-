@@ -64,6 +64,7 @@ interface Voucher {
   depot: string | null;
   items: VoucherItem[];
   attachments: { id: string; url: string; createdAt: string }[];
+  pendingDeletions: { id: string; status: 'PENDING' | 'APPROVED' | 'REJECTED'; reason: string }[];
 }
 interface StaffOption {
   id: string;
@@ -212,6 +213,7 @@ export default function VoucherEditorPage() {
   // ajuste alors le stock du delta exact et journalise chaque changement.
   const canReopen = canManage && (voucher?.status === 'CONFIRMED' || voucher?.status === 'DELIVERED');
   const editable = isDraft || editMode;
+  const voucherDeletion = voucher?.pendingDeletions[0];
 
   const autoSave = useCallback(
     (patch: Record<string, unknown>) => {
@@ -456,6 +458,15 @@ export default function VoucherEditorPage() {
     reload();
   }
 
+  // La suppression du bon n'efface rien tout de suite : elle attend
+  // l'approbation du client, et le bon reste affiché (barré) pour de bon.
+  async function requestVoucherDeletion() {
+    const reason = window.prompt(t('deleteReasonPrompt'));
+    if (!reason) return;
+    await api.post(`/vouchers/${id}/request-deletion`, { reason }, token);
+    reload();
+  }
+
   if (!voucher) return <p className="text-muted">{tCommon('loading')}</p>;
 
   // Tolère un back-end pas encore redéployé (nouvelle migration Render en
@@ -526,8 +537,19 @@ export default function VoucherEditorPage() {
               {loadingPdf ? tCommon('loading') : t('viewPdf')}
             </button>
           )}
+          {canManage && voucherDeletion?.status !== 'PENDING' && voucherDeletion?.status !== 'APPROVED' && (
+            <button onClick={requestVoucherDeletion} className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50">
+              {t('deleteVoucher')}
+            </button>
+          )}
         </div>
       </div>
+
+      {voucherDeletion && (voucherDeletion.status === 'PENDING' || voucherDeletion.status === 'APPROVED') && (
+        <p className={`rounded border px-3 py-2 text-xs ${voucherDeletion.status === 'APPROVED' ? 'border-red-300 bg-red-50 text-red-600' : 'border-amber-400 bg-amber-500/10 text-amber-700'}`}>
+          {voucherDeletion.status === 'APPROVED' ? t('detailDeleted') : t('detailPendingDeletion')} : {voucherDeletion.reason}
+        </p>
+      )}
 
       {editMode && (
         <p className="rounded border border-teal/40 bg-teal/10 px-3 py-2 text-xs text-teal">{t('editModeWarning')}</p>

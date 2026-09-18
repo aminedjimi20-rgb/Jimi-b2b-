@@ -35,6 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: `/${locale}/dashboard`, label: t('dashboard') },
     { href: `/${locale}/catalog`, label: t('catalog') },
     { href: `/${locale}/besoins`, label: t('besoins') },
+    { href: `/${locale}/approvals`, label: t('approvals') },
     ...(user.permissions.includes('catalog.manage')
       ? [
           { href: `/${locale}/products`, label: t('products') },
