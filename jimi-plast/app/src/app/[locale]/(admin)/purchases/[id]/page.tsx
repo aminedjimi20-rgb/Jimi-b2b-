@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 interface ProductOption {
   id: string;
@@ -19,6 +19,21 @@ interface PurchaseItem {
   totalUnits: number;
   unitCost: string;
   lineTotal: string;
+  modifiedAt: string | null;
+}
+interface HistoryEntry {
+  id: string;
+  action: string;
+  field: string | null;
+  newValue: string | null;
+  reason: string | null;
+  createdAt: string;
+  actor: { fullName: string } | null;
+}
+interface PendingDeletion {
+  id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reason: string;
 }
 interface Purchase {
   id: string;
@@ -30,6 +45,7 @@ interface Purchase {
   paidAmount: string;
   cancelReason: string | null;
   items: PurchaseItem[];
+  pendingDeletions: PendingDeletion[];
 }
 
 export default function PurchaseEditorPage() {
@@ -49,6 +65,9 @@ export default function PurchaseEditorPage() {
   const [paidAmount, setPaidAmount] = useState('0');
   const [cancelReason, setCancelReason] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [loadingPdf, setLoadingPdf] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function reload() {
@@ -57,6 +76,7 @@ export default function PurchaseEditorPage() {
       setTransportCost(p.transportCost);
       setPaidAmount(p.paidAmount);
     });
+    api.get<HistoryEntry[]>(`/purchase-vouchers/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
   }
 
   useEffect(() => {
@@ -68,6 +88,11 @@ export default function PurchaseEditorPage() {
   }, [token, id]);
 
   const isDraft = purchase?.status === 'DRAFT';
+  const canReopen = purchase?.status === 'CONFIRMED';
+  const editable = isDraft || editMode;
+  const deletion = purchase?.pendingDeletions[0];
+  const isPending = deletion?.status === 'PENDING';
+  const isApproved = deletion?.status === 'APPROVED';
 
   const autoSave = useCallback(
     (patch: Record<string, unknown>) => {
@@ -96,6 +121,24 @@ export default function PurchaseEditorPage() {
     autoSave({ items });
   }
 
+  async function viewPdf() {
+    // window.open synchrone dans le gestionnaire de clic — sinon les
+    // bloqueurs de popups (Safari/iOS) le bloquent après le premier "await".
+    const win = window.open('', '_blank');
+    setLoadingPdf(true);
+    try {
+      const blob = await api.getBlob(`/purchase-vouchers/${id}/pdf`, token);
+      const url = URL.createObjectURL(blob);
+      if (win) win.location.href = url;
+      else window.location.href = url;
+    } catch {
+      win?.close();
+      setError(tCommon('error'));
+    } finally {
+      setLoadingPdf(false);
+    }
+  }
+
   async function confirm() {
     setError(null);
     try {
@@ -113,6 +156,26 @@ export default function PurchaseEditorPage() {
     reload();
   }
 
+  async function revertCancel() {
+    if (!window.confirm(tVoucher('revertCancelConfirm'))) return;
+    await api.post(`/purchase-vouchers/${id}/revert-cancel`, undefined, token);
+    reload();
+  }
+
+  // Comme pour un bon de vente : la suppression n'efface rien tout de suite
+  // — elle attend l'approbation du fabricant (s'il a son propre compte), et
+  // le bon reste affiché (barré) pour de bon.
+  async function requestDeletion() {
+    const reason = window.prompt(tVoucher('deleteReasonPrompt'));
+    if (!reason) return;
+    try {
+      await api.post(`/purchase-vouchers/${id}/request-deletion`, { reason }, token);
+      reload();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : tCommon('error'));
+    }
+  }
+
   if (!purchase) return <p className="text-muted">{tCommon('loading')}</p>;
 
   const subtotal = purchase.items.reduce((s, i) => s + Number(i.lineTotal), 0);
@@ -124,12 +187,46 @@ export default function PurchaseEditorPage() {
         ← {tVoucher('back')}
       </button>
 
-      <div>
-        <h1 className="text-2xl font-bold text-ink">{purchase.number ?? tVoucher('status.DRAFT')}</h1>
-        <p className="text-sm text-muted">{purchase.manufacturer.name}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-ink">{purchase.number ?? tVoucher('status.DRAFT')}</h1>
+          <p className="text-sm text-muted">{purchase.manufacturer.name}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {canReopen && (
+            <button
+              onClick={() => setEditMode((v) => !v)}
+              className={`rounded border px-3 py-1.5 text-sm ${editMode ? 'border-teal bg-teal/10 text-teal' : 'border-line text-ink hover:bg-line/30'}`}
+            >
+              {editMode ? tCommon('done') : tVoucher('modify')}
+            </button>
+          )}
+          {!isDraft && (
+            <button
+              onClick={viewPdf}
+              disabled={loadingPdf}
+              className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50"
+            >
+              {loadingPdf ? tCommon('loading') : tVoucher('viewPdf')}
+            </button>
+          )}
+          {!isDraft && !isPending && !isApproved && (
+            <button onClick={requestDeletion} className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50">
+              {tVoucher('deleteVoucher')}
+            </button>
+          )}
+        </div>
       </div>
 
-      {isDraft && (
+      {deletion && (isPending || isApproved) && (
+        <p className={`rounded border px-3 py-2 text-xs ${isApproved ? 'border-red-300 bg-red-50 text-red-600' : 'border-amber-400 bg-amber-500/10 text-amber-700'}`}>
+          {isApproved ? tVoucher('detailDeleted') : tVoucher('detailPendingDeletion')} : {deletion.reason}
+        </p>
+      )}
+
+      {editMode && <p className="rounded border border-teal/40 bg-teal/10 px-3 py-2 text-xs text-teal">{tVoucher('editModeWarning')}</p>}
+
+      {editable && (
         <div className="flex flex-wrap gap-2">
           <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} className="flex-1 rounded border border-line bg-panel px-3 py-2 text-sm">
             <option value="">{tVoucher('product')}</option>
@@ -155,19 +252,19 @@ export default function PurchaseEditorPage() {
               <th className="px-4 py-2 text-start">{tVoucher('quantity')}</th>
               <th className="px-4 py-2 text-start">{t('unitCost')}</th>
               <th className="px-4 py-2 text-end">{tVoucher('total')}</th>
-              {isDraft && <th></th>}
+              {editable && <th></th>}
             </tr>
           </thead>
           <tbody>
             {purchase.items.map((item) => (
-              <tr key={item.id} className="border-t border-line">
+              <tr key={item.id} className={`border-t border-line ${item.modifiedAt ? 'bg-amber-500/10' : ''}`}>
                 <td className="px-4 py-2 text-ink">{item.product.nameFr}</td>
                 <td className="px-4 py-2 text-xs text-muted">
                   {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {tVoucher('pieces')}
                 </td>
                 <td className="px-4 py-2 tabular">{item.unitCost} DA</td>
                 <td className="px-4 py-2 text-end tabular">{item.lineTotal} DA</td>
-                {isDraft && (
+                {editable && (
                   <td className="px-2 py-2 text-end">
                     <button onClick={() => removeItem(item.product.id)} className="text-xs text-red-600 hover:underline">
                       {tVoucher('removeItem')}
@@ -183,11 +280,11 @@ export default function PurchaseEditorPage() {
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{tVoucher('transport')}</span>
-          <input type="number" value={transportCost} disabled={!isDraft} onChange={(e) => { setTransportCost(e.target.value); autoSave({ transportCost: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
+          <input type="number" value={transportCost} disabled={!editable} onChange={(e) => { setTransportCost(e.target.value); autoSave({ transportCost: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{tVoucher('paidAmount')}</span>
-          <input type="number" value={paidAmount} disabled={!isDraft} onChange={(e) => { setPaidAmount(e.target.value); autoSave({ paidAmount: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
+          <input type="number" value={paidAmount} disabled={!editable} onChange={(e) => { setPaidAmount(e.target.value); autoSave({ paidAmount: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
         </label>
       </div>
 
@@ -215,7 +312,31 @@ export default function PurchaseEditorPage() {
         </div>
       )}
 
-      {purchase.status === 'CANCELLED' && <p className="text-sm text-red-600">{purchase.cancelReason}</p>}
+      {purchase.status === 'CANCELLED' && (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-red-600">{purchase.cancelReason}</p>
+          <button onClick={revertCancel} className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30">
+            {tVoucher('revertCancel')}
+          </button>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold text-ink">{tVoucher('history')}</h2>
+          <ul className="flex flex-col gap-1.5 rounded-lg border border-line bg-panel p-3 text-xs">
+            {history.map((h) => (
+              <li key={h.id} className="border-b border-line/50 pb-1.5 last:border-0 last:pb-0">
+                <span className="text-muted">{new Date(h.createdAt).toLocaleString('fr-FR')}</span>
+                {' — '}
+                <span className="font-medium text-ink">{h.actor?.fullName ?? tVoucher('system')}</span>
+                {' : '}
+                <span className="text-ink">{h.reason ?? `${h.field ?? ''} → ${h.newValue ?? ''}`}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

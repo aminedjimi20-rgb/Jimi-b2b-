@@ -664,6 +664,8 @@
     "rejected": "Rejected",
     "supplierLedgerEntry": "Deletion of a manufacturer entry ({type})",
     "manufacturer": "Deletion of manufacturer {name}",
-    "viewManufacturer": "View manufacturer"
+    "viewManufacturer": "View manufacturer",
+    "purchaseVoucher": "Deletion of purchase voucher {number}",
+    "viewPurchaseVoucher": "View purchase voucher"
   }
 }

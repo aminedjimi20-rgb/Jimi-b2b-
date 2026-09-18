@@ -16,6 +16,7 @@ interface PendingDeletion {
   manufacturer?: { id: string; name: string } | null;
   ledgerEntry: { id: string; type: string; amount: string; note: string | null } | null;
   salesVoucher: { id: string; number: string | null } | null;
+  purchaseVoucher: { id: string; number: string | null } | null;
   supplierLedgerEntry: { id: string; type: string; amount: string; note: string | null } | null;
   requestedBy: { fullName: string } | null;
   respondedBy: { fullName: string } | null;
@@ -66,7 +67,9 @@ export default function ApprovalsPage() {
                     ? t('supplierLedgerEntry', { type: item.supplierLedgerEntry.type })
                     : item.salesVoucher
                       ? t('voucher', { number: item.salesVoucher.number ?? '' })
-                      : t('manufacturer', { name: item.manufacturer?.name ?? '' })}
+                      : item.purchaseVoucher
+                        ? t('purchaseVoucher', { number: item.purchaseVoucher.number ?? '' })
+                        : t('manufacturer', { name: item.manufacturer?.name ?? '' })}
               </p>
               {isStaff && item.customer && <p className="text-xs text-muted">{item.customer.user.fullName}</p>}
               {isStaff && item.manufacturer && <p className="text-xs text-muted">{item.manufacturer.name}</p>}
@@ -90,7 +93,15 @@ export default function ApprovalsPage() {
                   {t('viewVoucher')}
                 </button>
               )}
-              {isStaff && item.manufacturer && (
+              {isStaff && item.purchaseVoucher && (
+                <button
+                  onClick={() => router.push(`/${locale}/purchases/${item.purchaseVoucher!.id}`)}
+                  className="ms-auto text-sm text-accent hover:underline"
+                >
+                  {t('viewPurchaseVoucher')}
+                </button>
+              )}
+              {isStaff && item.manufacturer && !item.purchaseVoucher && (
                 <button
                   onClick={() => router.push(`/${locale}/manufacturers/${item.manufacturer!.id}`)}
                   className="ms-auto text-sm text-accent hover:underline"

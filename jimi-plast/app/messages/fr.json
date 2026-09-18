@@ -664,6 +664,8 @@
     "rejected": "Refusé",
     "supplierLedgerEntry": "Suppression d'une ligne fabricant ({type})",
     "manufacturer": "Suppression du fabricant {name}",
-    "viewManufacturer": "Voir le fabricant"
+    "viewManufacturer": "Voir le fabricant",
+    "purchaseVoucher": "Suppression du bon d'achat {number}",
+    "viewPurchaseVoucher": "Voir le bon d'achat"
   }
 }

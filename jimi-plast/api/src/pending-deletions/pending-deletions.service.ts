@@ -99,6 +99,78 @@ export class PendingDeletionsService {
     return pending;
   }
 
+  async requestPurchaseVoucherDeletion(voucherId: string, reason: string, requestedById: string) {
+    const voucher = await this.prisma.purchaseVoucher.findFirst({
+      where: { id: voucherId, deletedAt: null },
+      include: { manufacturer: { include: { user: { select: { id: true, fullName: true } } } } },
+    });
+    if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
+
+    const existing = await this.prisma.pendingDeletion.findFirst({ where: { purchaseVoucherId: voucherId, status: 'PENDING' } });
+    if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour ce bon');
+
+    if (!voucher.manufacturer.user) {
+      // Pas de compte fabricant lié : rien à approuver en face, on applique directement.
+      return this.applyPurchaseVoucherDeletion(voucher.id, reason, requestedById);
+    }
+
+    const pending = await this.prisma.pendingDeletion.create({
+      data: { purchaseVoucherId: voucherId, manufacturerId: voucher.manufacturerId, reason, requestedById },
+    });
+
+    const actorName = await this.actorName(requestedById);
+    await this.notifyBoth(
+      voucher.manufacturer.user.id,
+      'pending_deletion.requested',
+      'Demande de suppression',
+      `${actorName} demande la suppression du bon d'achat ${voucher.number ?? ''} : ${reason}. Une approbation est nécessaire.`,
+      { pendingDeletionId: pending.id },
+    );
+
+    return pending;
+  }
+
+  private async applyPurchaseVoucherDeletion(voucherId: string, reason: string, actorId: string) {
+    const voucher = await this.prisma.purchaseVoucher.findUnique({ where: { id: voucherId }, include: { items: true } });
+    if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
+
+    if (voucher.status === 'CONFIRMED') {
+      await this.prisma.$transaction(async (tx) => {
+        for (const item of voucher.items) {
+          await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+          await tx.stockMovement.create({
+            data: {
+              productId: item.productId,
+              type: 'ADJUSTMENT',
+              quantity: -item.totalUnits,
+              referenceType: 'PurchaseVoucher',
+              referenceId: voucher.id,
+              reason: `Suppression approuvée du bon ${voucher.number ?? ''} : ${reason}`,
+              createdById: actorId,
+            },
+          });
+        }
+
+        const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+        const total = subtotal - Number(voucher.discount) + Number(voucher.transportCost);
+        const netDebt = total - Number(voucher.paidAmount);
+        await tx.supplierLedgerEntry.create({
+          data: {
+            manufacturerId: voucher.manufacturerId,
+            type: 'ADJUSTMENT',
+            amount: -netDebt,
+            reference: voucher.number,
+            note: `Suppression approuvée du bon ${voucher.number ?? ''} : ${reason}`,
+            createdById: actorId,
+          },
+        });
+      });
+    }
+
+    await this.auditLog.record({ entityType: 'PurchaseVoucher', entityId: voucherId, action: 'DELETE', reason, actorId });
+    return { immediate: true };
+  }
+
   async requestManufacturerDeletion(manufacturerId: string, reason: string, requestedById: string) {
     const manufacturer = await this.prisma.manufacturer.findFirst({
       where: { id: manufacturerId, deletedAt: null },
@@ -197,6 +269,7 @@ export class PendingDeletionsService {
       include: {
         ledgerEntry: true,
         salesVoucher: { select: { id: true, number: true } },
+        purchaseVoucher: { select: { id: true, number: true } },
         supplierLedgerEntry: true,
         manufacturer: { select: { id: true, name: true } },
         requestedBy: { select: { fullName: true } },
@@ -213,6 +286,7 @@ export class PendingDeletionsService {
         manufacturer: { select: { id: true, name: true } },
         ledgerEntry: true,
         salesVoucher: { select: { id: true, number: true } },
+        purchaseVoucher: { select: { id: true, number: true } },
         supplierLedgerEntry: true,
         requestedBy: { select: { fullName: true } },
         respondedBy: { select: { fullName: true } },
@@ -229,6 +303,7 @@ export class PendingDeletionsService {
         manufacturer: { include: { user: { select: { id: true, fullName: true } } } },
         ledgerEntry: true,
         salesVoucher: { include: { items: true } },
+        purchaseVoucher: { include: { items: true } },
         supplierLedgerEntry: true,
       },
     });
@@ -258,8 +333,40 @@ export class PendingDeletionsService {
           await tx.supplierLedgerEntry.update({ where: { id: pending.supplierLedgerEntry.id }, data: { voidedAt: new Date() } });
         }
 
-        if (pending.manufacturerId && !pending.supplierLedgerEntryId) {
+        if (pending.manufacturerId && !pending.supplierLedgerEntryId && !pending.purchaseVoucherId) {
           await tx.manufacturer.update({ where: { id: pending.manufacturerId }, data: { deletedAt: new Date() } });
+        }
+
+        if (pending.purchaseVoucher && pending.purchaseVoucher.status === 'CONFIRMED') {
+          const voucher = pending.purchaseVoucher;
+          for (const item of voucher.items) {
+            await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+            await tx.stockMovement.create({
+              data: {
+                productId: item.productId,
+                type: 'ADJUSTMENT',
+                quantity: -item.totalUnits,
+                referenceType: 'PurchaseVoucher',
+                referenceId: voucher.id,
+                reason: `Suppression approuvée du bon ${voucher.number ?? ''} : ${pending.reason}`,
+                createdById: responderId,
+              },
+            });
+          }
+
+          const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+          const total = subtotal - Number(voucher.discount) + Number(voucher.transportCost);
+          const netDebt = total - Number(voucher.paidAmount);
+          await tx.supplierLedgerEntry.create({
+            data: {
+              manufacturerId: voucher.manufacturerId,
+              type: 'ADJUSTMENT',
+              amount: -netDebt,
+              reference: voucher.number,
+              note: `Suppression approuvée du bon ${voucher.number ?? ''} : ${pending.reason}`,
+              createdById: responderId,
+            },
+          });
         }
 
         if (pending.salesVoucher && (pending.salesVoucher.status === 'CONFIRMED' || pending.salesVoucher.status === 'DELIVERED')) {
@@ -295,7 +402,7 @@ export class PendingDeletionsService {
         }
       });
 
-      if (pending.manufacturerId && !pending.supplierLedgerEntryId && pending.manufacturer) {
+      if (pending.manufacturerId && !pending.supplierLedgerEntryId && !pending.purchaseVoucherId && pending.manufacturer) {
         await this.trash.moveToTrash({
           entityType: 'Manufacturer',
           entityId: pending.manufacturerId,
@@ -318,15 +425,20 @@ export class PendingDeletionsService {
         ? 'la ligne du fabricant'
         : pending.salesVoucher
           ? `le bon ${pending.salesVoucher.number ?? ''}`
-          : `le fabricant ${pending.manufacturer?.name ?? ''}`;
+          : pending.purchaseVoucher
+            ? `le bon d'achat ${pending.purchaseVoucher.number ?? ''}`
+            : `le fabricant ${pending.manufacturer?.name ?? ''}`;
     const entityType = pending.ledgerEntry
       ? 'LedgerEntry'
       : pending.supplierLedgerEntry
         ? 'SupplierLedgerEntry'
         : pending.salesVoucher
           ? 'SalesVoucher'
-          : 'Manufacturer';
-    const entityId = pending.ledgerEntryId ?? pending.supplierLedgerEntryId ?? pending.salesVoucherId ?? (pending.manufacturerId as string);
+          : pending.purchaseVoucher
+            ? 'PurchaseVoucher'
+            : 'Manufacturer';
+    const entityId =
+      pending.ledgerEntryId ?? pending.supplierLedgerEntryId ?? pending.salesVoucherId ?? pending.purchaseVoucherId ?? (pending.manufacturerId as string);
     await this.auditLog.record({
       entityType,
       entityId,

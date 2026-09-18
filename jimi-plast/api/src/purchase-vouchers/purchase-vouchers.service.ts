@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
 import { NumberSequenceService } from '../common/services/number-sequence.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UpsertPurchaseVoucherDto } from './dto/upsert-purchase-voucher.dto';
 import { CancelVoucherDto } from '../vouchers/dto/cancel-voucher.dto';
 
@@ -13,11 +14,38 @@ export class PurchaseVouchersService {
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
     private readonly numberSequence: NumberSequenceService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private async debtOf(manufacturerId: string) {
     const agg = await this.prisma.supplierLedgerEntry.aggregate({ where: { manufacturerId, voidedAt: null }, _sum: { amount: true } });
     return Number(agg._sum.amount ?? 0);
+  }
+
+  private listStaff() {
+    return this.prisma.user.findMany({
+      where: { deletedAt: null, role: { key: { in: ['admin', 'employee'] } } },
+      select: { id: true },
+    });
+  }
+
+  private async actorName(actorId?: string | null): Promise<string> {
+    if (!actorId) return 'Un utilisateur';
+    const actor = await this.prisma.user.findUnique({ where: { id: actorId }, select: { fullName: true } });
+    return actor?.fullName ?? 'Un utilisateur';
+  }
+
+  // Prévient le personnel ET le fabricant (s'il a son propre compte) à
+  // chaque action, pour que chacun voit ce que l'autre a fait.
+  private async notifyBoth(manufacturerId: string, type: string, title: string, body: string, data: Record<string, unknown> = {}) {
+    const [staff, manufacturer] = await Promise.all([
+      this.listStaff(),
+      this.prisma.manufacturer.findUnique({ where: { id: manufacturerId }, select: { userId: true } }),
+    ]);
+    const recipientIds = [...staff.map((s) => s.id), ...(manufacturer?.userId ? [manufacturer.userId] : [])];
+    await Promise.all(
+      recipientIds.map((userId) => this.notifications.notify({ type, title, body, data: { ...data, userId } })),
+    );
   }
 
   list(filters: { status?: string; manufacturerId?: string }) {
@@ -28,7 +56,12 @@ export class PurchaseVouchersService {
     };
     return this.prisma.purchaseVoucher.findMany({
       where,
-      include: { manufacturer: true, buyer: { select: { fullName: true } }, items: true },
+      include: {
+        manufacturer: true,
+        buyer: { select: { fullName: true } },
+        items: true,
+        pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1 },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -40,10 +73,15 @@ export class PurchaseVouchersService {
         manufacturer: true,
         buyer: { select: { fullName: true } },
         items: { include: { product: true, packagingUnit: true } },
+        pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1, include: { requestedBy: { select: { fullName: true } } } },
       },
     });
     if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
     return voucher;
+  }
+
+  history(id: string) {
+    return this.auditLog.history('PurchaseVoucher', id);
   }
 
   async createDraft(manufacturerId: string, buyerId: string) {
@@ -57,8 +95,13 @@ export class PurchaseVouchersService {
   async update(id: string, dto: UpsertPurchaseVoucherDto, actorId: string) {
     const voucher = await this.prisma.purchaseVoucher.findFirst({ where: { id, deletedAt: null } });
     if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
-    if (voucher.status !== 'DRAFT') throw new BadRequestException('Seul un brouillon peut être modifié');
+    if (voucher.status === 'CANCELLED') throw new BadRequestException('Un bon annulé ne peut pas être modifié');
 
+    if (voucher.status === 'DRAFT') return this.updateDraft(id, dto);
+    return this.updateConfirmed(id, dto, actorId, voucher.manufacturerId);
+  }
+
+  private async updateDraft(id: string, dto: UpsertPurchaseVoucherDto) {
     await this.prisma.$transaction(async (tx) => {
       if (dto.items) {
         await tx.purchaseVoucherItem.deleteMany({ where: { voucherId: id } });
@@ -97,6 +140,113 @@ export class PurchaseVouchersService {
     return this.getById(id);
   }
 
+  // Modification après confirmation : chaque changement (produit ajouté,
+  // retiré, quantité/coût modifiés) recalcule le stock et la dette, se
+  // consigne dans l'historique (immuable) et surligne la ligne concernée —
+  // même logique que pour un bon de vente confirmé.
+  private async updateConfirmed(id: string, dto: UpsertPurchaseVoucherDto, actorId: string, manufacturerIdFallback: string) {
+    const manufacturerId = dto.manufacturerId ?? manufacturerIdFallback;
+    const actorName = await this.actorName(actorId);
+    const changes: string[] = [];
+
+    await this.prisma.$transaction(async (tx) => {
+      if (dto.items) {
+        const existingItems = await tx.purchaseVoucherItem.findMany({ where: { voucherId: id }, include: { product: { select: { nameFr: true } } } });
+        const existingByProduct = new Map(existingItems.map((i) => [i.productId, i]));
+        const newProductIds = new Set(dto.items.map((i) => i.productId));
+
+        for (const old of existingItems) {
+          if (!newProductIds.has(old.productId)) {
+            await tx.product.update({ where: { id: old.productId }, data: { currentStock: { decrement: old.totalUnits } } });
+            await tx.stockMovement.create({
+              data: {
+                productId: old.productId,
+                type: 'ADJUSTMENT',
+                quantity: -old.totalUnits,
+                referenceType: 'PurchaseVoucher',
+                referenceId: id,
+                reason: `Retiré du bon d'achat après confirmation par ${actorName}`,
+                createdById: actorId,
+              },
+            });
+            changes.push(`Produit retiré : ${old.product.nameFr} (${old.totalUnits} pièces)`);
+          }
+        }
+
+        await tx.purchaseVoucherItem.deleteMany({ where: { voucherId: id } });
+
+        for (const item of dto.items) {
+          const product = await tx.product.findFirst({ where: { id: item.productId, deletedAt: null } });
+          if (!product) throw new BadRequestException(`Produit ${item.productId} introuvable`);
+
+          const totalUnits = item.quantityPackages * product.unitsPerPackage;
+          const old = existingByProduct.get(item.productId);
+          const delta = totalUnits - (old?.totalUnits ?? 0);
+          const isNew = !old;
+          const isChanged = !!old && (Number(old.unitCost) !== item.unitCost || old.totalUnits !== totalUnits);
+
+          if (delta !== 0) {
+            await tx.product.update({ where: { id: product.id }, data: { currentStock: { increment: delta }, costPrice: item.unitCost } });
+            await tx.stockMovement.create({
+              data: {
+                productId: product.id,
+                type: 'ADJUSTMENT',
+                quantity: delta,
+                referenceType: 'PurchaseVoucher',
+                referenceId: id,
+                reason: `Modifié après confirmation par ${actorName}`,
+                createdById: actorId,
+              },
+            });
+          }
+
+          if (isNew) changes.push(`Produit ajouté : ${product.nameFr} (${totalUnits} pièces)`);
+          else if (isChanged) changes.push(`${product.nameFr} : ${old.totalUnits} → ${totalUnits} pièces, ${old.unitCost} → ${item.unitCost} DA`);
+
+          await tx.purchaseVoucherItem.create({
+            data: {
+              voucherId: id,
+              productId: product.id,
+              packagingUnitId: product.packagingUnitId,
+              quantityPackages: item.quantityPackages,
+              unitsPerPackageSnapshot: product.unitsPerPackage,
+              totalUnits,
+              unitCost: item.unitCost,
+              lineTotal: totalUnits * item.unitCost,
+              modifiedAt: isNew || isChanged ? new Date() : old?.modifiedAt ?? null,
+            },
+          });
+        }
+      }
+
+      await tx.purchaseVoucher.update({
+        where: { id },
+        data: { manufacturerId, discount: dto.discount, transportCost: dto.transportCost, paidAmount: dto.paidAmount, notes: dto.notes },
+      });
+    });
+
+    if (changes.length > 0) {
+      await this.auditLog.record({
+        entityType: 'PurchaseVoucher',
+        entityId: id,
+        action: 'UPDATE',
+        field: 'items',
+        reason: `Modifié après confirmation par ${actorName} : ${changes.join(' | ')}`,
+        actorId,
+      });
+      const updated = await this.getById(id);
+      await this.notifyBoth(
+        manufacturerId,
+        'purchase.modified_after_confirm',
+        'Bon d’achat modifié',
+        `${actorName} a modifié le bon ${updated.number ?? ''} après confirmation : ${changes.join(' | ')}`,
+        { purchaseVoucherId: id },
+      );
+    }
+
+    return this.getById(id);
+  }
+
   private computeTotal(voucher: { items: { lineTotal: Prisma.Decimal }[]; discount: Prisma.Decimal; transportCost: Prisma.Decimal }) {
     const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
     return subtotal - Number(voucher.discount) + Number(voucher.transportCost);
@@ -110,6 +260,7 @@ export class PurchaseVouchersService {
     const total = this.computeTotal(voucher);
     const previousDebt = await this.debtOf(voucher.manufacturerId);
     const number = await this.numberSequence.next('ACH');
+    const actorName = await this.actorName(actorId);
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of voucher.items) {
@@ -149,7 +300,22 @@ export class PurchaseVouchersService {
       await tx.purchaseVoucher.update({ where: { id }, data: { status: 'CONFIRMED', number, confirmedAt: new Date(), previousDebt } });
     });
 
-    await this.auditLog.record({ entityType: 'PurchaseVoucher', entityId: id, action: 'UPDATE', field: 'status', newValue: 'CONFIRMED', actorId });
+    await this.auditLog.record({
+      entityType: 'PurchaseVoucher',
+      entityId: id,
+      action: 'UPDATE',
+      field: 'status',
+      newValue: 'CONFIRMED',
+      reason: `Confirmé par ${actorName}`,
+      actorId,
+    });
+    await this.notifyBoth(
+      voucher.manufacturerId,
+      'purchase.confirmed',
+      'Bon d’achat confirmé',
+      `${actorName} a confirmé le bon d'achat ${number}.`,
+      { purchaseVoucherId: id },
+    );
     return this.getById(id);
   }
 
@@ -158,6 +324,7 @@ export class PurchaseVouchersService {
     if (voucher.status === 'CANCELLED') throw new BadRequestException('Ce bon est déjà annulé');
 
     const wasConfirmed = voucher.status === 'CONFIRMED';
+    const actorName = await this.actorName(actorId);
 
     await this.prisma.$transaction(async (tx) => {
       if (wasConfirmed) {
@@ -170,7 +337,7 @@ export class PurchaseVouchersService {
               quantity: -item.totalUnits,
               referenceType: 'PurchaseVoucher',
               referenceId: voucher.id,
-              reason: `Annulation bon d'achat : ${dto.reason}`,
+              reason: `Annulation bon d'achat par ${actorName} : ${dto.reason}`,
               createdById: actorId,
             },
           });
@@ -193,14 +360,90 @@ export class PurchaseVouchersService {
       await tx.purchaseVoucher.update({ where: { id }, data: { status: 'CANCELLED', cancelReason: dto.reason } });
     });
 
-    await this.auditLog.record({ entityType: 'PurchaseVoucher', entityId: id, action: 'UPDATE', field: 'status', newValue: 'CANCELLED', reason: dto.reason, actorId });
+    await this.auditLog.record({
+      entityType: 'PurchaseVoucher',
+      entityId: id,
+      action: 'UPDATE',
+      field: 'status',
+      newValue: 'CANCELLED',
+      reason: `Annulé par ${actorName} : ${dto.reason}`,
+      actorId,
+    });
+    await this.notifyBoth(
+      voucher.manufacturerId,
+      'purchase.cancelled',
+      'Bon d’achat annulé',
+      `${actorName} a annulé le bon ${voucher.number ?? ''} : ${dto.reason}`,
+      { purchaseVoucherId: id },
+    );
+    return this.getById(id);
+  }
+
+  // Symétrique de cancel() : réapplique le stock et la dette, sans jamais
+  // effacer la trace de l'annulation d'origine — la raison d'annulation
+  // reste visible, un nouvel historique consigne le retour en confirmé.
+  async revertCancel(id: string, actorId: string) {
+    const voucher = await this.getById(id);
+    if (voucher.status !== 'CANCELLED') throw new BadRequestException("Seul un bon annulé peut être ré-activé");
+    if (!voucher.confirmedAt) throw new BadRequestException("Ce bon n'avait jamais été confirmé");
+
+    const actorName = await this.actorName(actorId);
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of voucher.items) {
+        await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
+        await tx.stockMovement.create({
+          data: {
+            productId: item.productId,
+            type: 'PURCHASE',
+            quantity: item.totalUnits,
+            referenceType: 'PurchaseVoucher',
+            referenceId: voucher.id,
+            reason: `Annulation du bon d'achat annulée par ${actorName}`,
+            createdById: actorId,
+          },
+        });
+      }
+
+      const total = this.computeTotal(voucher);
+      const netDebt = total - Number(voucher.paidAmount);
+      await tx.supplierLedgerEntry.create({
+        data: {
+          manufacturerId: voucher.manufacturerId,
+          type: 'ADJUSTMENT',
+          amount: netDebt,
+          reference: voucher.number,
+          note: `Annulation du bon ${voucher.number} annulée par ${actorName} — le bon redevient confirmé`,
+          createdById: actorId,
+        },
+      });
+
+      await tx.purchaseVoucher.update({ where: { id }, data: { status: 'CONFIRMED' } });
+    });
+
+    await this.auditLog.record({
+      entityType: 'PurchaseVoucher',
+      entityId: id,
+      action: 'UPDATE',
+      field: 'status',
+      newValue: 'CONFIRMED',
+      reason: `Annulation annulée par ${actorName} — le bon redevient confirmé`,
+      actorId,
+    });
+    await this.notifyBoth(
+      voucher.manufacturerId,
+      'purchase.cancel_reverted',
+      'Annulation annulée',
+      `${actorName} a annulé l'annulation du bon ${voucher.number ?? ''} — il redevient confirmé.`,
+      { purchaseVoucherId: id },
+    );
     return this.getById(id);
   }
 
   async remove(id: string, actorId: string) {
     const voucher = await this.prisma.purchaseVoucher.findFirst({ where: { id, deletedAt: null } });
     if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
-    if (voucher.status !== 'DRAFT') throw new BadRequestException('Seul un brouillon peut être supprimé');
+    if (voucher.status !== 'DRAFT') throw new BadRequestException('Seul un brouillon peut être supprimé directement — utilisez la demande de suppression pour un bon confirmé');
 
     await this.prisma.purchaseVoucher.update({ where: { id }, data: { deletedAt: new Date() } });
     await this.auditLog.record({ entityType: 'PurchaseVoucher', entityId: id, action: 'DELETE', actorId });

@@ -664,6 +664,8 @@
     "rejected": "مرفوض",
     "supplierLedgerEntry": "حذف سطر فابريكان ({type})",
     "manufacturer": "حذف الفابريكان {name}",
-    "viewManufacturer": "عرض الفابريكان"
+    "viewManufacturer": "عرض الفابريكان",
+    "purchaseVoucher": "حذف وصل الشراء {number}",
+    "viewPurchaseVoucher": "عرض وصل الشراء"
   }
 }

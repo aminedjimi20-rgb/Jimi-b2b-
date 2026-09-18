@@ -19,6 +19,7 @@ interface PurchaseRow {
   transportCost: string;
   manufacturer: { name: string };
   items: { lineTotal: string }[];
+  pendingDeletions: { status: 'PENDING' | 'APPROVED' | 'REJECTED' }[];
 }
 
 export default function PurchasesPage() {
@@ -82,15 +83,23 @@ export default function PurchasesPage() {
             </tr>
           </thead>
           <tbody>
-            {purchases.map((p) => (
-              <tr key={p.id} onClick={() => router.push(`/${locale}/purchases/${p.id}`)} className="cursor-pointer border-t border-line hover:bg-line/20">
-                <td className="px-4 py-2 font-mono text-xs">{p.number ?? '(brouillon)'}</td>
-                <td className="px-4 py-2 text-ink">{p.manufacturer.name}</td>
-                <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(p.createdAt).toLocaleDateString()}</td>
-                <td className="px-4 py-2 tabular">{total(p).toLocaleString()} DA</td>
-                <td className="px-4 py-2 text-xs">{tVoucher(`status.${p.status}` as never)}</td>
-              </tr>
-            ))}
+            {purchases.map((p) => {
+              const deletion = p.pendingDeletions[0];
+              const struckThrough = deletion?.status === 'PENDING' || deletion?.status === 'APPROVED';
+              return (
+                <tr
+                  key={p.id}
+                  onClick={() => router.push(`/${locale}/purchases/${p.id}`)}
+                  className={`cursor-pointer border-t border-line hover:bg-line/20 ${struckThrough ? 'line-through opacity-60' : ''}`}
+                >
+                  <td className="px-4 py-2 font-mono text-xs">{p.number ?? '(brouillon)'}</td>
+                  <td className="px-4 py-2 text-ink">{p.manufacturer.name}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(p.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-2 tabular">{total(p).toLocaleString()} DA</td>
+                  <td className="px-4 py-2 text-xs">{tVoucher(`status.${p.status}` as never)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

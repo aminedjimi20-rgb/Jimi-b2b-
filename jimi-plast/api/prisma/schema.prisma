@@ -462,6 +462,7 @@ model PendingDeletion {
   id                    String                @id @default(cuid())
   ledgerEntryId         String?
   salesVoucherId        String?
+  purchaseVoucherId     String?
   supplierLedgerEntryId String?
   customerId            String?
   manufacturerId        String?
@@ -474,6 +475,7 @@ model PendingDeletion {
 
   ledgerEntry         LedgerEntry?         @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
   salesVoucher        SalesVoucher?        @relation(fields: [salesVoucherId], references: [id], onDelete: Cascade)
+  purchaseVoucher     PurchaseVoucher?     @relation(fields: [purchaseVoucherId], references: [id], onDelete: Cascade)
   supplierLedgerEntry SupplierLedgerEntry? @relation(fields: [supplierLedgerEntryId], references: [id], onDelete: Cascade)
   customer            Customer?            @relation(fields: [customerId], references: [id], onDelete: Cascade)
   manufacturer        Manufacturer?        @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
@@ -484,6 +486,7 @@ model PendingDeletion {
   @@index([manufacturerId])
   @@index([ledgerEntryId])
   @@index([salesVoucherId])
+  @@index([purchaseVoucherId])
   @@index([supplierLedgerEntryId])
   @@map("pending_deletions")
 }
@@ -683,6 +686,7 @@ model PurchaseVoucher {
   manufacturer Manufacturer          @relation(fields: [manufacturerId], references: [id])
   buyer        User                  @relation(fields: [buyerId], references: [id])
   items        PurchaseVoucherItem[]
+  pendingDeletions PendingDeletion[]
 
   @@index([manufacturerId])
   @@index([status])
@@ -699,6 +703,7 @@ model PurchaseVoucherItem {
   totalUnits              Int
   unitCost                Decimal @db.Decimal(12, 2)
   lineTotal               Decimal @db.Decimal(12, 2)
+  modifiedAt              DateTime? // renseigné quand la ligne a été ajoutée/modifiée après confirmation — sert à la surligner dans la liste
 
   voucher       PurchaseVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
   product       Product         @relation(fields: [productId], references: [id])
