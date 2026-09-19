@@ -10,13 +10,19 @@ Installation** (`web/`), un projet indépendant dédié à la rénovation de
 machines d'injection plastique, l'automatisation industrielle et
 l'intermédiation achat/vente de machines — voir [`web/README.md`](web/README.md).
 
+Enfin, `jimi-plast/` héberge **JIMI PLAST**, une plateforme de gestion
+commerciale distincte (catalogue, clients, fabricants, stock, bons, crédits,
+retours, transport, statistiques) — nouvelle base indépendante des deux
+projets ci-dessus, voir [`jimi-plast/README.md`](jimi-plast/README.md).
+
 ## Structure du monorepo
 
 ```
-backend/   API NestJS + Prisma + PostgreSQL (voir backend/README.md)
-mobile/    Application Flutter (Admin + Client, voir mobile/README.md)
-web/       Site Jimi Renovation & Installation — Next.js (voir web/README.md)
-docs/      Architecture, schéma de base de données, déploiement
+backend/     API NestJS + Prisma + PostgreSQL — JIMI B2B (voir backend/README.md)
+mobile/      Application Flutter — JIMI B2B (Admin + Client, voir mobile/README.md)
+web/         Site Jimi Renovation & Installation — Next.js (voir web/README.md)
+jimi-plast/  Plateforme JIMI PLAST — API NestJS + app Next.js (voir jimi-plast/README.md)
+docs/        Architecture, schéma de base de données, déploiement (JIMI B2B)
 ```
 
 ## État d'avancement
