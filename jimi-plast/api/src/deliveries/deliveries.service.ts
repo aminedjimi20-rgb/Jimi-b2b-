@@ -62,6 +62,16 @@ export class DeliveriesService {
       ? await this.prisma.delivery.update({ where: { id: existing.id }, data })
       : await this.prisma.delivery.create({ data: { ...key, ...data, createdById: actorId } });
 
+    // Le coût facturé à la partie (client/fabricant) sur la livraison EST le
+    // transport du bon — synchronisé côté serveur pour que ça reste vrai
+    // quel que soit l'écran d'où la livraison a été modifiée (Transport ou
+    // la fiche du bon elle-même), et qu'il entre bien dans le total.
+    if (type === 'sales') {
+      await this.prisma.salesVoucher.update({ where: { id: voucherId }, data: { transportCost: delivery.billedToCustomer } });
+    } else {
+      await this.prisma.purchaseVoucher.update({ where: { id: voucherId }, data: { transportCost: delivery.billedToManufacturer } });
+    }
+
     await this.auditLog.record({ entityType: 'Delivery', entityId: delivery.id, action: existing ? 'UPDATE' : 'CREATE', newValue: dto, actorId });
     return delivery;
   }
@@ -164,6 +174,14 @@ export class DeliveriesService {
       // La course n'a pas eu lieu — la dépense générale qu'elle avait
       // générée (le cas échéant) n'a plus lieu d'être.
       await tx.expense.updateMany({ where: { deliveryId: id, deletedAt: null }, data: { deletedAt: new Date() } });
+      // Idem pour le transport facturé sur le bon lié — plus de livraison,
+      // plus de frais de transport dans son total.
+      if (delivery.salesVoucherId) {
+        await tx.salesVoucher.update({ where: { id: delivery.salesVoucherId }, data: { transportCost: 0 } });
+      }
+      if (delivery.purchaseVoucherId) {
+        await tx.purchaseVoucher.update({ where: { id: delivery.purchaseVoucherId }, data: { transportCost: 0 } });
+      }
     });
 
     await this.auditLog.record({ entityType: 'Delivery', entityId: id, action: 'UPDATE', field: 'status', newValue: 'CANCELLED', reason: dto.reason, actorId });

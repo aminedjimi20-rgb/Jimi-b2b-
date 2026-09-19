@@ -389,7 +389,7 @@
     "deliveryCost": "Coût livreur",
     "removeDelivery": "Retirer",
     "removeDeliveryConfirm": "Retirer la livraison ? Elle sera annulée dans Transport.",
-    "deliveryHint": "Le livreur n'apparaît jamais sur le PDF du bon — visible seulement dans Transport.",
+    "deliveryHint": "Le livreur n'apparaît jamais sur le PDF du bon — visible seulement dans Transport. Le montant « Facturé au client » entre automatiquement dans le total du bon.",
     "subtotal": "Sous-total",
     "total": "Total",
     "confirm": "Confirmer le bon",

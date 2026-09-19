@@ -79,6 +79,7 @@ interface DeliveryInfo {
   driverId: string | null;
   driverName: string | null;
   cost: string;
+  billedToCustomer: string;
   status: string;
 }
 interface DriverOption {
@@ -154,6 +155,7 @@ export default function VoucherEditorPage() {
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [deliveryDriverId, setDeliveryDriverId] = useState('');
   const [deliveryCost, setDeliveryCost] = useState('');
+  const [deliveryBilledToCustomer, setDeliveryBilledToCustomer] = useState('');
 
   async function viewPdf() {
     // Sur mobile (partage de fichier supporté), on n'ouvre pas d'onglet —
@@ -202,7 +204,7 @@ export default function VoucherEditorPage() {
     await api.put(`/deliveries/voucher/${id}`, {
       driverId: deliveryDriverId || undefined,
       cost: deliveryCost === '' ? undefined : Number(deliveryCost),
-      billedToCustomer: Number(transportCost),
+      billedToCustomer: deliveryBilledToCustomer === '' ? undefined : Number(deliveryBilledToCustomer),
     }, token);
     setShowDeliveryForm(false);
     reload();
@@ -859,11 +861,11 @@ export default function VoucherEditorPage() {
           {delivery && delivery.status !== 'CANCELLED' ? (
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
               <span className="text-ink">
-                {delivery.driverName ?? t('noDriverAssigned')} — {Number(delivery.cost).toLocaleString()} DA — {tTransport(`status.${delivery.status}` as never)}
+                {delivery.driverName ?? t('noDriverAssigned')} — {tTransport('billedToCustomer')}: {Number(delivery.billedToCustomer).toLocaleString()} DA — {tTransport(`status.${delivery.status}` as never)}
               </span>
               <div className="flex gap-2">
                 <button
-                  onClick={() => { setDeliveryDriverId(delivery.driverId ?? ''); setDeliveryCost(delivery.cost); setShowDeliveryForm(true); }}
+                  onClick={() => { setDeliveryDriverId(delivery.driverId ?? ''); setDeliveryCost(delivery.cost); setDeliveryBilledToCustomer(delivery.billedToCustomer); setShowDeliveryForm(true); }}
                   className="text-xs text-accent hover:underline"
                 >
                   {tCommon('edit')}
@@ -876,7 +878,7 @@ export default function VoucherEditorPage() {
           ) : (
             !showDeliveryForm && (
               <button
-                onClick={() => { setDeliveryDriverId(''); setDeliveryCost(''); setShowDeliveryForm(true); }}
+                onClick={() => { setDeliveryDriverId(''); setDeliveryCost(''); setDeliveryBilledToCustomer(''); setShowDeliveryForm(true); }}
                 className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
               >
                 + {t('assignDriver')}
@@ -904,6 +906,15 @@ export default function VoucherEditorPage() {
                   type="number"
                   value={deliveryCost}
                   onChange={(e) => setDeliveryCost(e.target.value)}
+                  className="w-28 rounded border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="text-muted">{tTransport('billedToCustomer')}</span>
+                <input
+                  type="number"
+                  value={deliveryBilledToCustomer}
+                  onChange={(e) => setDeliveryBilledToCustomer(e.target.value)}
                   className="w-28 rounded border border-line bg-paper px-2 py-1.5 text-sm text-ink"
                 />
               </label>

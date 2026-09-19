@@ -389,7 +389,7 @@
     "deliveryCost": "Driver cost",
     "removeDelivery": "Remove",
     "removeDeliveryConfirm": "Remove the delivery? It will be cancelled in Transport.",
-    "deliveryHint": "The driver never appears on the voucher's PDF — visible only in Transport.",
+    "deliveryHint": "The driver never appears on the voucher's PDF — visible only in Transport. The \"Billed to customer\" amount automatically enters the voucher's total.",
     "subtotal": "Subtotal",
     "total": "Total",
     "confirm": "Confirm voucher",
