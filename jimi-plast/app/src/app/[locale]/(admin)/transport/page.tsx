@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
@@ -71,6 +72,8 @@ export default function TransportPage() {
   const t = useTranslations('transport');
   const tc = useTranslations('common');
   const { token } = useAuth();
+  const { locale } = useParams<{ locale: string }>();
+  const router = useRouter();
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [confirmedSalesVouchers, setConfirmedSalesVouchers] = useState<VoucherOption[]>([]);
@@ -426,14 +429,18 @@ export default function TransportPage() {
           <ul className="flex flex-col gap-1.5 text-sm">
             {filteredDrivers.map((d) => (
               <li key={d.id} className={`flex items-center justify-between gap-2 rounded border border-line bg-paper px-3 py-1.5 ${d.deletedAt ? 'line-through opacity-50' : ''}`}>
-                <span className="flex items-center gap-2 text-ink">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/${locale}/transport/drivers/${d.id}`)}
+                  className="flex items-center gap-2 text-start text-ink hover:underline"
+                >
                   {d.photoUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={d.photoUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
                   )}
                   {d.fullName} {d.phone && `— ${d.phone}`} {d.vehicle && `— ${d.vehicle}`}
                   {d.deletedAt && <span className="text-xs text-muted"> ({t('inactive')})</span>}
-                </span>
+                </button>
                 {!d.deletedAt && (
                   <span className="flex shrink-0 gap-2 text-xs">
                     <button onClick={() => editDriver(d)} className="text-accent hover:underline">{tc('edit')}</button>

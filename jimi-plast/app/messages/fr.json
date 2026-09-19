@@ -661,7 +661,19 @@
     "pickDriver": "Choisir un livreur",
     "noDriver": "Aucun livreur",
     "deleteDriverConfirm": "Désactiver ce livreur ?",
-    "inactive": "Inactif"
+    "inactive": "Inactif",
+    "driverDetail": {
+      "back": "Retour au transport",
+      "situationTitle": "Situation",
+      "from": "Du",
+      "to": "Au",
+      "print": "Imprimer sa situation",
+      "totalDeliveries": "Livraisons",
+      "totalOwed": "Montant dû",
+      "historyTitle": "Historique des courses",
+      "date": "Date",
+      "standalone": "Course sans bon"
+    }
   },
   "productRequests": {
     "title": "Demandes de produits",

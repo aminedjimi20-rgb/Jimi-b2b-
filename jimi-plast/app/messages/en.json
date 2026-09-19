@@ -661,7 +661,19 @@
     "pickDriver": "Choose a driver",
     "noDriver": "No driver",
     "deleteDriverConfirm": "Deactivate this driver?",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "driverDetail": {
+      "back": "Back to transport",
+      "situationTitle": "Situation",
+      "from": "From",
+      "to": "To",
+      "print": "Print statement",
+      "totalDeliveries": "Deliveries",
+      "totalOwed": "Amount owed",
+      "historyTitle": "Delivery history",
+      "date": "Date",
+      "standalone": "Standalone delivery"
+    }
   },
   "productRequests": {
     "title": "Product requests",

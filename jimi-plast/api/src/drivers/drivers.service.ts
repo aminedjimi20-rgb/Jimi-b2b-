@@ -17,6 +17,78 @@ export class DriversService {
     });
   }
 
+  async getById(id: string) {
+    const driver = await this.prisma.driver.findUnique({ where: { id } });
+    if (!driver) throw new NotFoundException('Livreur introuvable');
+    return driver;
+  }
+
+  // Historique complet des courses (y compris annulées, affichées barrées
+  // côté front) — pour que le livreur retrouve tout ce qui a été fait avec
+  // lui, indépendamment de la période choisie pour le compte.
+  async getDeliveries(id: string, from?: Date, to?: Date) {
+    await this.getById(id);
+    return this.prisma.delivery.findMany({
+      where: {
+        driverId: id,
+        ...(from || to ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      },
+      include: {
+        salesVoucher: { select: { number: true, customer: { include: { user: { select: { fullName: true } } } } } },
+        purchaseVoucher: { select: { number: true, manufacturer: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // Compte du livreur sur une période : ce qu'on lui doit pour les courses
+  // effectuées, hors courses annulées (rien n'est dû pour celles-ci). Sans
+  // suivi de paiement pour l'instant, la période se lit isolément — pas de
+  // solde reporté d'avant le "from", juste le total dû pour la période.
+  async getSituation(id: string, from?: Date, to?: Date) {
+    const driver = await this.getById(id);
+    const deliveries = await this.prisma.delivery.findMany({
+      where: {
+        driverId: id,
+        status: { not: 'CANCELLED' },
+        ...(from || to ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      },
+      include: {
+        salesVoucher: { select: { number: true, customer: { include: { user: { select: { fullName: true } } } } } },
+        purchaseVoucher: { select: { number: true, manufacturer: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    let running = 0;
+    const entries = deliveries.map((d) => {
+      running += Number(d.cost);
+      const label = d.salesVoucherId
+        ? `Bon de vente ${d.salesVoucher?.number ?? ''}`
+        : d.purchaseVoucherId
+          ? `Bon d'achat ${d.purchaseVoucher?.number ?? ''}`
+          : 'Course';
+      const party = d.salesVoucher?.customer?.user.fullName ?? d.purchaseVoucher?.manufacturer?.name ?? d.address ?? null;
+      return {
+        id: d.id,
+        createdAt: d.createdAt,
+        typeLabel: label,
+        note: party,
+        amount: Number(d.cost),
+        balanceAfter: running,
+      };
+    });
+
+    return {
+      driver,
+      from: from ?? null,
+      to: to ?? null,
+      totalDeliveries: entries.length,
+      totalCost: running,
+      entries,
+    };
+  }
+
   async create(dto: UpsertDriverDto, actorId: string) {
     const driver = await this.prisma.driver.create({ data: dto });
     await this.auditLog.record({ entityType: 'Driver', entityId: driver.id, action: 'CREATE', actorId });

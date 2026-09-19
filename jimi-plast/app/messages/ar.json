@@ -661,7 +661,19 @@
     "pickDriver": "اختر سائقاً",
     "noDriver": "لا يوجد سائق",
     "deleteDriverConfirm": "تعطيل هذا السائق؟",
-    "inactive": "غير نشط"
+    "inactive": "غير نشط",
+    "driverDetail": {
+      "back": "الرجوع للترونسبور",
+      "situationTitle": "الوضعية",
+      "from": "من",
+      "to": "إلى",
+      "print": "طباعة وضعيته",
+      "totalDeliveries": "عدد التوصيلات",
+      "totalOwed": "المبلغ المستحق",
+      "historyTitle": "تاريخ التوصيلات",
+      "date": "التاريخ",
+      "standalone": "توصيلة بدون وصل"
+    }
   },
   "productRequests": {
     "title": "طلبات المنتجات",
