@@ -7,6 +7,7 @@ import { PricingService, VisiblePrice } from '../pricing/pricing.service';
 import { UpsertProductDto } from './dto/upsert-product.dto';
 import { SetPriceDto } from './dto/set-price.dto';
 import { AddImageDto } from './dto/add-image.dto';
+import { UpsertPromotionDto } from './dto/upsert-promotion.dto';
 
 export interface ProductListFilters {
   categoryId?: string;
@@ -173,6 +174,7 @@ export class ProductsService {
         packagingUnit: true,
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
         prices: { include: { priceTierType: true } },
+        promotions: { include: { priceTierType: true }, orderBy: { startDate: 'desc' } },
       },
     });
   }
@@ -480,6 +482,47 @@ export class ProductsService {
   async removeImage(imageId: string) {
     await this.prisma.productImage.delete({ where: { id: imageId } });
     return { id: imageId };
+  }
+
+  async addPromotion(productId: string, dto: UpsertPromotionDto) {
+    const product = await this.prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
+    if (!product) throw new NotFoundException('Produit introuvable');
+
+    return this.prisma.promotion.create({
+      data: {
+        productId,
+        priceTierTypeId: dto.priceTierTypeId,
+        discountType: dto.discountType,
+        discountValue: dto.discountValue,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+        isActive: dto.isActive ?? true,
+      },
+      include: { priceTierType: true },
+    });
+  }
+
+  async updatePromotion(promotionId: string, dto: UpsertPromotionDto) {
+    const promotion = await this.prisma.promotion.findUnique({ where: { id: promotionId } });
+    if (!promotion) throw new NotFoundException('Promotion introuvable');
+
+    return this.prisma.promotion.update({
+      where: { id: promotionId },
+      data: {
+        priceTierTypeId: dto.priceTierTypeId,
+        discountType: dto.discountType,
+        discountValue: dto.discountValue,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+        isActive: dto.isActive ?? promotion.isActive,
+      },
+      include: { priceTierType: true },
+    });
+  }
+
+  async removePromotion(promotionId: string) {
+    await this.prisma.promotion.delete({ where: { id: promotionId } });
+    return { id: promotionId };
   }
 
   async remove(id: string, actorId: string, reason?: string) {

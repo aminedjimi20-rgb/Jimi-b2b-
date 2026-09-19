@@ -270,13 +270,30 @@
       "isSeasonal": "Saisonnier",
       "seasonStart": "Début de saison",
       "seasonEnd": "Fin de saison",
-      "isClearance": "Déstockage"
+      "isClearance": "Déstockage",
+      "stockPieces": "Pièces",
+      "stockCartons": "Cartons"
     },
     "active": "Actif",
     "inactive": "Inactif",
     "priceHistory": "Historique des prix",
     "deleteConfirm": "Supprimer ce produit ? Il sera déplacé vers la corbeille.",
-    "createdLabel": "Produit créé"
+    "createdLabel": "Produit créé",
+    "promotions": {
+      "title": "Promotions",
+      "priceTier": "Palier de prix",
+      "discountType": "Type de remise",
+      "percent": "Pourcentage",
+      "amount": "Montant fixe",
+      "value": "Valeur",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "active": "Active",
+      "add": "Ajouter une promotion",
+      "none": "Aucune promotion en cours",
+      "deleteConfirm": "Supprimer cette promotion ?",
+      "saveFirst": "Enregistrez d'abord le produit pour pouvoir ajouter une promotion."
+    }
   },
   "customers": {
     "title": "Clients",

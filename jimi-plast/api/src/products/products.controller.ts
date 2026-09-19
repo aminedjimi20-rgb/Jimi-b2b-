@@ -9,6 +9,7 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertProductDto } from './dto/upsert-product.dto';
 import { SetPriceDto } from './dto/set-price.dto';
 import { AddImageDto } from './dto/add-image.dto';
+import { UpsertPromotionDto } from './dto/upsert-promotion.dto';
 
 function toBool(v?: string): boolean | undefined {
   if (v === undefined) return undefined;
@@ -105,6 +106,24 @@ export class ProductsController {
   @RequirePermissions('catalog.manage')
   removeImage(@Param('imageId') imageId: string) {
     return this.productsService.removeImage(imageId);
+  }
+
+  @Post(':id/promotions')
+  @RequirePermissions('catalog.manage')
+  addPromotion(@Param('id') id: string, @Body() dto: UpsertPromotionDto) {
+    return this.productsService.addPromotion(id, dto);
+  }
+
+  @Put('promotions/:promotionId')
+  @RequirePermissions('catalog.manage')
+  updatePromotion(@Param('promotionId') promotionId: string, @Body() dto: UpsertPromotionDto) {
+    return this.productsService.updatePromotion(promotionId, dto);
+  }
+
+  @Delete('promotions/:promotionId')
+  @RequirePermissions('catalog.manage')
+  removePromotion(@Param('promotionId') promotionId: string) {
+    return this.productsService.removePromotion(promotionId);
   }
 
   @Delete(':id')

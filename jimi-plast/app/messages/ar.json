@@ -270,13 +270,30 @@
       "isSeasonal": "موسمي",
       "seasonStart": "بداية الموسم",
       "seasonEnd": "نهاية الموسم",
-      "isClearance": "تصفية مخزون"
+      "isClearance": "تصفية مخزون",
+      "stockPieces": "قطع",
+      "stockCartons": "كراتين"
     },
     "active": "نشط",
     "inactive": "غير نشط",
     "priceHistory": "سجل الأسعار",
     "deleteConfirm": "حذف هذا المنتج؟ سيُنقل إلى سلة المحذوفات.",
-    "createdLabel": "تم إنشاء المنتوج"
+    "createdLabel": "تم إنشاء المنتوج",
+    "promotions": {
+      "title": "العروض الترويجية",
+      "priceTier": "مستوى السعر",
+      "discountType": "نوع التخفيض",
+      "percent": "نسبة مئوية",
+      "amount": "مبلغ ثابت",
+      "value": "القيمة",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "active": "نشطة",
+      "add": "إضافة عرض ترويجي",
+      "none": "لا يوجد عرض حاليا",
+      "deleteConfirm": "حذف هذا العرض الترويجي؟",
+      "saveFirst": "سجل المنتج أولا باش تقدر تزيد عرض ترويجي."
+    }
   },
   "customers": {
     "title": "العملاء",

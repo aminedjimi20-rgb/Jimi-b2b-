@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
+import { ImageLightbox } from '@/components/image-lightbox';
 import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Category {
@@ -29,6 +30,15 @@ interface PriceTierType {
   id: string;
   key: string;
   label: string;
+}
+interface Promotion {
+  id: string;
+  priceTierType: PriceTierType;
+  discountType: 'PERCENT' | 'AMOUNT';
+  discountValue: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
 }
 interface LastChange {
   at: string;
@@ -66,6 +76,7 @@ interface FullProduct {
   manufacturer: { name: string } | null;
   images: { id: string; url: string; isPrimary: boolean }[];
   prices: { priceTierType: PriceTierType; price: string }[];
+  promotions: Promotion[];
 }
 
 const EMPTY_FORM = {
@@ -116,6 +127,10 @@ export default function ProductsAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [newProductImages, setNewProductImages] = useState<string[]>([]);
+  const [viewingImages, setViewingImages] = useState<{ images: { url: string }[]; startIndex: number } | null>(null);
+  const [stockUnit, setStockUnit] = useState<'pieces' | 'cartons'>('pieces');
+  const [promoForm, setPromoForm] = useState({ priceTierTypeId: '', discountType: 'PERCENT' as 'PERCENT' | 'AMOUNT', discountValue: '', startDate: '', endDate: '' });
   const [error, setError] = useState<string | null>(null);
   const [appliedEditParam, setAppliedEditParam] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -243,7 +258,11 @@ export default function ProductsAdminPage() {
           }
         }
       } else {
-        await api.post('/products', payload, token);
+        const created = await api.post<{ id: string }>('/products', payload, token);
+        for (const url of newProductImages) {
+          await api.post(`/products/${created.id}/images`, { url }, token);
+        }
+        setNewProductImages([]);
       }
       setForm(EMPTY_FORM);
       setEditingId(null);
@@ -255,6 +274,8 @@ export default function ProductsAdminPage() {
 
   function startEdit(p: FullProduct) {
     setEditingId(p.id);
+    setNewProductImages([]);
+    setPromoForm({ priceTierTypeId: '', discountType: 'PERCENT', discountValue: '', startDate: '', endDate: '' });
     const priceOf = (key: string) => p.prices.find((pr) => pr.priceTierType.key === key)?.price ?? '';
     setForm({
       sku: p.sku,
@@ -309,7 +330,63 @@ export default function ProductsAdminPage() {
     reloadProducts();
   }
 
+  function removeNewProductImage(index: number) {
+    setNewProductImages((imgs) => imgs.filter((_, i) => i !== index));
+  }
+
+  async function addPromotion() {
+    if (!editingId || !promoForm.priceTierTypeId || !promoForm.startDate || !promoForm.endDate) return;
+    try {
+      await api.post(
+        `/products/${editingId}/promotions`,
+        {
+          priceTierTypeId: promoForm.priceTierTypeId,
+          discountType: promoForm.discountType,
+          discountValue: Number(promoForm.discountValue) || 0,
+          startDate: promoForm.startDate,
+          endDate: promoForm.endDate,
+        },
+        token,
+      );
+      setPromoForm({ priceTierTypeId: '', discountType: 'PERCENT', discountValue: '', startDate: '', endDate: '' });
+      reloadProducts();
+    } catch {
+      setError(tCommon('error'));
+    }
+  }
+
+  async function togglePromotionActive(promo: Promotion) {
+    await api.put(
+      `/products/promotions/${promo.id}`,
+      {
+        priceTierTypeId: promo.priceTierType.id,
+        discountType: promo.discountType,
+        discountValue: Number(promo.discountValue),
+        startDate: promo.startDate,
+        endDate: promo.endDate,
+        isActive: !promo.isActive,
+      },
+      token,
+    );
+    reloadProducts();
+  }
+
+  async function removePromotion(promotionId: string) {
+    if (!window.confirm(t('promotions.deleteConfirm'))) return;
+    await api.delete(`/products/promotions/${promotionId}`, token);
+    reloadProducts();
+  }
+
   const editingProduct = products.find((p) => p.id === editingId);
+  const currentImages = editingId ? (editingProduct?.images ?? []) : newProductImages.map((url, i) => ({ id: `new-${i}`, url }));
+  const upp = Number(form.unitsPerPackage) || 1;
+  const stockDisplayValue = stockUnit === 'pieces' ? form.currentStock : upp > 0 ? String(Math.round(((Number(form.currentStock) || 0) / upp) * 100) / 100) : form.currentStock;
+
+  function onStockDisplayChange(v: string) {
+    const num = Number(v) || 0;
+    const pieces = stockUnit === 'cartons' ? Math.round(num * upp) : Math.round(num);
+    setForm((f) => ({ ...f, currentStock: String(pieces) }));
+  }
 
   const filteredProducts = products
     .filter((p) => {
@@ -398,6 +475,7 @@ export default function ProductsAdminPage() {
           <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-line/30 text-xs uppercase text-muted">
               <tr>
+                <th className="px-2 py-2"></th>
                 <th className="px-4 py-2 text-start">{t('columns.sku')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.name')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.category')}</th>
@@ -413,6 +491,14 @@ export default function ProductsAdminPage() {
                 const change = lastChanges[p.id];
                 return (
                   <tr key={p.id} className={`border-t border-line ${editingId === p.id ? 'bg-accent/5' : ''}`}>
+                    <td className="px-2 py-2">
+                      <div className="h-9 w-9 overflow-hidden rounded border border-line bg-paper">
+                        {p.images[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.images[0].url} alt="" className="h-full w-full object-cover" />
+                        ) : null}
+                      </div>
+                    </td>
                     <td className="px-4 py-2 font-mono text-xs">{p.sku}</td>
                     <td className="px-4 py-2 font-medium text-ink">{p.nameFr}</td>
                     <td className="px-4 py-2 text-xs text-muted">{p.category.nameFr}</td>
@@ -453,7 +539,7 @@ export default function ProductsAdminPage() {
               })}
               {visibleCount < filteredProducts.length && (
                 <tr ref={loadMoreRef}>
-                  <td colSpan={8} className="px-4 py-3 text-center text-xs text-muted">
+                  <td colSpan={9} className="px-4 py-3 text-center text-xs text-muted">
                     {tCommon('loading')}
                   </td>
                 </tr>
@@ -606,12 +692,33 @@ export default function ProductsAdminPage() {
             onChange={(v) => setForm({ ...form, costPrice: v })}
           />
           <div className="grid grid-cols-2 gap-2">
-            <Field
-              label={t('form.currentStock')}
-              type="number"
-              value={form.currentStock}
-              onChange={(v) => setForm({ ...form, currentStock: v })}
-            />
+            <label className="flex flex-col gap-1 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted">{t('form.currentStock')}</span>
+                <div className="flex overflow-hidden rounded border border-line text-[10px]">
+                  <button
+                    type="button"
+                    onClick={() => setStockUnit('pieces')}
+                    className={`px-1.5 py-0.5 ${stockUnit === 'pieces' ? 'bg-accent text-white' : 'text-muted'}`}
+                  >
+                    {t('form.stockPieces')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStockUnit('cartons')}
+                    className={`px-1.5 py-0.5 ${stockUnit === 'cartons' ? 'bg-accent text-white' : 'text-muted'}`}
+                  >
+                    {t('form.stockCartons')}
+                  </button>
+                </div>
+              </div>
+              <input
+                type="number"
+                value={stockDisplayValue}
+                onChange={(e) => onStockDisplayChange(e.target.value)}
+                className="rounded border border-line bg-paper px-3 py-2"
+              />
+            </label>
             <Field
               label={t('form.stockMin')}
               type="number"
@@ -682,43 +789,149 @@ export default function ProductsAdminPage() {
             </div>
           )}
 
-          {editingProduct && (
-            <div>
-              <p className="text-xs font-medium text-muted">{t('form.images')}</p>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {editingProduct.images.map((img) => (
-                  <div key={img.id} className="relative">
+          <div>
+            <p className="text-xs font-medium text-muted">{t('form.images')}</p>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {currentImages.map((img, index) => (
+                <div key={img.id} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setViewingImages({ images: currentImages, startIndex: index })}
+                    className="block h-14 w-14 overflow-hidden rounded border border-line"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="" className="h-14 w-14 rounded object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(img.id)}
-                      className="absolute -end-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] text-white"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 flex gap-2">
-                <input
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  placeholder="https://…"
-                  className="flex-1 rounded border border-line bg-paper px-2 py-1 text-xs"
-                />
-                <button type="button" onClick={addImage} className="rounded border border-line px-2 py-1 text-xs">
-                  {t('form.addImage')}
-                </button>
-                <ImageUploadButton
-                  folder="products"
-                  onUploaded={addImageFromUrl}
-                  label={tCommon('uploadPhoto')}
-                  className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-50"
-                />
-              </div>
+                    <img src={img.url} alt="" className="h-full w-full object-cover" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => (editingId ? removeImage(img.id) : removeNewProductImage(index))}
+                    className="absolute -end-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
-          )}
+            <div className="mt-2 flex gap-2">
+              {editingId && (
+                <>
+                  <input
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    placeholder="https://…"
+                    className="flex-1 rounded border border-line bg-paper px-2 py-1 text-xs"
+                  />
+                  <button type="button" onClick={addImage} className="rounded border border-line px-2 py-1 text-xs">
+                    {t('form.addImage')}
+                  </button>
+                </>
+              )}
+              <ImageUploadButton
+                folder="products"
+                onUploaded={editingId ? addImageFromUrl : (url) => setNewProductImages((imgs) => [...imgs, url])}
+                label={tCommon('uploadPhoto')}
+                className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-50"
+              />
+            </div>
+          </div>
+
+          <div className="rounded border border-line bg-paper p-3">
+            <p className="text-xs font-medium text-muted">{t('promotions.title')}</p>
+            {!editingId ? (
+              <p className="mt-2 text-xs text-muted">{t('promotions.saveFirst')}</p>
+            ) : (
+              <>
+                <ul className="mt-2 flex flex-col gap-2">
+                  {(editingProduct?.promotions ?? []).map((promo) => (
+                    <li key={promo.id} className="rounded border border-line bg-panel p-2 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-ink">
+                          {promo.priceTierType.label} —{' '}
+                          {promo.discountType === 'PERCENT' ? `${promo.discountValue} %` : `${promo.discountValue} DA`}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => togglePromotionActive(promo)}
+                            className={promo.isActive ? 'text-teal' : 'text-muted'}
+                          >
+                            {t('promotions.active')}
+                          </button>
+                          <button type="button" onClick={() => removePromotion(promo.id)} className="text-red-600 hover:underline">
+                            {tCommon('delete')}
+                          </button>
+                        </div>
+                      </div>
+                      <p className="mt-0.5 text-muted">
+                        {new Date(promo.startDate).toLocaleDateString()} → {new Date(promo.endDate).toLocaleDateString()}
+                      </p>
+                    </li>
+                  ))}
+                  {(editingProduct?.promotions ?? []).length === 0 && <p className="text-xs text-muted">{t('promotions.none')}</p>}
+                </ul>
+
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="text-muted">{t('promotions.priceTier')}</span>
+                    <select
+                      value={promoForm.priceTierTypeId}
+                      onChange={(e) => setPromoForm({ ...promoForm, priceTierTypeId: e.target.value })}
+                      className="rounded border border-line bg-panel px-2 py-1"
+                    >
+                      <option value=""></option>
+                      {priceTierTypes.map((pt) => (
+                        <option key={pt.id} value={pt.id}>
+                          {pt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="text-muted">{t('promotions.discountType')}</span>
+                    <select
+                      value={promoForm.discountType}
+                      onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value as 'PERCENT' | 'AMOUNT' })}
+                      className="rounded border border-line bg-panel px-2 py-1"
+                    >
+                      <option value="PERCENT">{t('promotions.percent')}</option>
+                      <option value="AMOUNT">{t('promotions.amount')}</option>
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="text-muted">{t('promotions.value')}</span>
+                    <input
+                      type="number"
+                      value={promoForm.discountValue}
+                      onChange={(e) => setPromoForm({ ...promoForm, discountValue: e.target.value })}
+                      className="rounded border border-line bg-panel px-2 py-1"
+                    />
+                  </label>
+                  <div />
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="text-muted">{t('promotions.startDate')}</span>
+                    <input
+                      type="date"
+                      value={promoForm.startDate}
+                      onChange={(e) => setPromoForm({ ...promoForm, startDate: e.target.value })}
+                      className="rounded border border-line bg-panel px-2 py-1"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs">
+                    <span className="text-muted">{t('promotions.endDate')}</span>
+                    <input
+                      type="date"
+                      value={promoForm.endDate}
+                      onChange={(e) => setPromoForm({ ...promoForm, endDate: e.target.value })}
+                      className="rounded border border-line bg-panel px-2 py-1"
+                    />
+                  </label>
+                </div>
+                <button type="button" onClick={addPromotion} className="mt-2 w-full rounded bg-accent px-2 py-1.5 text-xs font-medium text-white">
+                  {t('promotions.add')}
+                </button>
+              </>
+            )}
+          </div>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
 
@@ -732,6 +945,7 @@ export default function ProductsAdminPage() {
                 onClick={() => {
                   setEditingId(null);
                   setForm(EMPTY_FORM);
+                  setNewProductImages([]);
                 }}
                 className="rounded border border-line px-3 py-2 text-sm"
               >
@@ -741,6 +955,15 @@ export default function ProductsAdminPage() {
           </div>
         </div>
       </form>
+
+      {viewingImages && (
+        <ImageLightbox
+          images={viewingImages.images}
+          startIndex={viewingImages.startIndex}
+          title={t('form.images')}
+          onClose={() => setViewingImages(null)}
+        />
+      )}
     </div>
   );
 }
