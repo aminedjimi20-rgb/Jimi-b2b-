@@ -28,6 +28,7 @@ export class ProductsController {
   ) {
     const filters: ProductListFilters = {
       categoryId: query.categoryId,
+      manufacturerId: query.manufacturerId,
       search: query.search,
       isNew: toBool(query.isNew),
       isFeatured: toBool(query.isFeatured),

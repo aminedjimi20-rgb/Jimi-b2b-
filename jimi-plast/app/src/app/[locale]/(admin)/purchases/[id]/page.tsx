@@ -47,6 +47,7 @@ interface Purchase {
   id: string;
   number: string | null;
   status: 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
+  manufacturerId: string;
   manufacturer: { name: string };
   discount: string;
   transportCost: string;
@@ -117,16 +118,19 @@ export default function PurchaseEditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
 
+  // On n'achète que ce que fournit CE fabricant — le sélecteur ne doit
+  // montrer que ses propres produits, jamais le catalogue entier.
   useEffect(() => {
-    if (!token || !showPicker) return;
+    if (!token || !showPicker || !purchase) return;
     const timeout = setTimeout(() => {
       const params = new URLSearchParams();
       if (pickerQuery) params.set('search', pickerQuery);
+      params.set('manufacturerId', purchase.manufacturerId);
       params.set('pageSize', '100');
       api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token).then((res) => setPickerResults(res.items));
     }, 250);
     return () => clearTimeout(timeout);
-  }, [token, showPicker, pickerQuery]);
+  }, [token, showPicker, pickerQuery, purchase]);
 
   const isDraft = purchase?.status === 'DRAFT';
   const canReopen = purchase?.status === 'CONFIRMED';
