@@ -87,6 +87,7 @@ export default function PurchaseEditorPage() {
   const router = useRouter();
 
   const [purchase, setPurchase] = useState<Purchase | null>(null);
+  const [discount, setDiscount] = useState('0');
   const [transportCost, setTransportCost] = useState('0');
   const [paidAmount, setPaidAmount] = useState('0');
   const [cancelReason, setCancelReason] = useState('');
@@ -110,6 +111,7 @@ export default function PurchaseEditorPage() {
   function reload() {
     api.get<Purchase>(`/purchase-vouchers/${id}`, token).then((p) => {
       setPurchase(p);
+      setDiscount(p.discount);
       setTransportCost(p.transportCost);
       setPaidAmount(p.paidAmount);
     });
@@ -334,7 +336,7 @@ export default function PurchaseEditorPage() {
   if (!purchase) return <p className="text-muted">{tCommon('loading')}</p>;
 
   const subtotal = purchase.items.reduce((s, i) => s + Number(i.lineTotal), 0);
-  const total = subtotal - Number(purchase.discount) + Number(transportCost);
+  const total = subtotal - Number(discount) + Number(transportCost);
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -470,7 +472,11 @@ export default function PurchaseEditorPage() {
         </table>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">{tVoucher('discount')}</span>
+          <input type="number" value={discount} disabled={!editable} onChange={(e) => { setDiscount(e.target.value); autoSave({ discount: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
+        </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{tVoucher('transport')}</span>
           <input type="number" value={transportCost} disabled={!editable} onChange={(e) => { setTransportCost(e.target.value); autoSave({ transportCost: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
@@ -482,6 +488,10 @@ export default function PurchaseEditorPage() {
       </div>
 
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
+        <div className="flex justify-between py-1 text-muted">
+          <span>{tVoucher('subtotal')}</span>
+          <span className="tabular">{subtotal.toLocaleString()} DA</span>
+        </div>
         <div className="flex justify-between py-1 font-semibold text-ink">
           <span>{tVoucher('total')}</span>
           <span className="tabular">{total.toLocaleString()} DA</span>
