@@ -580,6 +580,13 @@
     "addItemPhoto": "Photographier",
     "history": "Historique",
     "system": "Système",
+    "edit": "Modifier",
+    "done": "Terminer",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce retour ? Si déjà validé, les mouvements de stock et de compte associés seront annulés.",
+    "notes": "Observation",
+    "notesPlaceholder": "Ajouter une observation…",
+    "addMoreItems": "Ajouter un article",
     "columns": {
       "number": "N°",
       "type": "Type",

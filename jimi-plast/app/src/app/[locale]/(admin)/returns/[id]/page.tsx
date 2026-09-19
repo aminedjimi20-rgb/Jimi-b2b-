@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -35,12 +35,24 @@ interface ReturnDetail {
   status: 'NEW' | 'VALIDATED' | 'REJECTED';
   decision: 'REFUND' | 'CREDIT_NOTE' | 'DEDUCT_NEXT' | 'REPLACEMENT' | null;
   totalValue: string;
+  notes: string | null;
   createdAt: string;
+  customerId?: string | null;
+  manufacturerId?: string | null;
   customer?: { user: { fullName: string } };
   manufacturer?: { name: string };
   items: ReturnItem[];
   attachments: { id: string; url: string; createdAt: string }[];
 }
+interface PickerProduct {
+  id: string;
+  sku: string;
+  nameFr: string;
+  costPrice: number | null;
+  images: { url: string }[];
+}
+
+const CONDITIONS: ReturnItem['condition'][] = ['DAMAGED', 'DEFECTIVE', 'OTHER'];
 
 export default function ReturnDetailPage() {
   const t = useTranslations('returns');
@@ -57,8 +69,25 @@ export default function ReturnDetailPage() {
   const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
   const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
 
+  const [notes, setNotes] = useState('');
+  const notesDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [editMode, setEditMode] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerQuery, setPickerQuery] = useState('');
+  const [pickerResults, setPickerResults] = useState<PickerProduct[]>([]);
+  const [addingProduct, setAddingProduct] = useState<PickerProduct | null>(null);
+  const [modalQty, setModalQty] = useState('1');
+  const [modalReason, setModalReason] = useState('');
+  const [modalCondition, setModalCondition] = useState<ReturnItem['condition']>('DAMAGED');
+  const [modalUnitPrice, setModalUnitPrice] = useState('');
+  const [addingItem, setAddingItem] = useState(false);
+
   function reload() {
-    api.get<ReturnDetail>(`/returns/${id}`, token).then(setRet);
+    api.get<ReturnDetail>(`/returns/${id}`, token).then((r) => {
+      setRet(r);
+      setNotes(r.notes ?? '');
+    });
     api.get<HistoryEntry[]>(`/returns/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
   }
 
@@ -66,6 +95,20 @@ export default function ReturnDetailPage() {
     if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  const partyId = ret?.type === 'SUPPLIER' ? ret.manufacturerId : undefined;
+
+  useEffect(() => {
+    if (!token || !showPicker) return;
+    const timeout = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (pickerQuery) params.set('search', pickerQuery);
+      if (partyId) params.set('manufacturerId', partyId);
+      params.set('pageSize', '100');
+      api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token).then((res) => setPickerResults(res.items));
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [token, showPicker, pickerQuery, partyId]);
 
   async function viewPdf() {
     const win = supportsPdfShare() ? null : window.open('', '_blank');
@@ -78,6 +121,14 @@ export default function ReturnDetailPage() {
     } finally {
       setLoadingPdf(false);
     }
+  }
+
+  function onNotesChange(v: string) {
+    setNotes(v);
+    if (notesDebounce.current) clearTimeout(notesDebounce.current);
+    notesDebounce.current = setTimeout(async () => {
+      await api.post(`/returns/${id}/notes`, { notes: v }, token);
+    }, 600);
   }
 
   async function addAttachment(url: string) {
@@ -107,6 +158,44 @@ export default function ReturnDetailPage() {
     reload();
   }
 
+  async function removeReturn() {
+    if (!window.confirm(t('deleteConfirm'))) return;
+    await api.delete(`/returns/${id}`, token);
+    router.push(`/${locale}/returns`);
+  }
+
+  function openAddModal(p: PickerProduct) {
+    setAddingProduct(p);
+    setModalQty('1');
+    setModalReason('');
+    setModalCondition('DAMAGED');
+    setModalUnitPrice(ret?.type === 'SUPPLIER' && p.costPrice != null ? String(p.costPrice) : '');
+  }
+
+  async function confirmAddItem() {
+    if (!addingProduct || !modalReason.trim() || Number(modalQty) < 1) return;
+    setAddingItem(true);
+    try {
+      await api.post(`/returns/${id}/items`, {
+        items: [
+          {
+            productId: addingProduct.id,
+            quantity: Number(modalQty),
+            reason: modalReason.trim(),
+            condition: modalCondition,
+            unitPrice: modalUnitPrice.trim() === '' ? undefined : Number(modalUnitPrice),
+          },
+        ],
+      }, token);
+      setAddingProduct(null);
+      setShowPicker(false);
+      setPickerQuery('');
+      reload();
+    } finally {
+      setAddingItem(false);
+    }
+  }
+
   if (!ret) return <p className="text-sm text-muted">{tCommon('loading')}</p>;
 
   const partyName = ret.customer?.user.fullName ?? ret.manufacturer?.name ?? '';
@@ -126,11 +215,20 @@ export default function ReturnDetailPage() {
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-line/40 px-2 py-1 text-xs text-ink">{t(`status.${ret.status}` as never)}</span>
           <button
+            onClick={() => setEditMode((v) => !v)}
+            className={`rounded border px-3 py-1.5 text-sm ${editMode ? 'border-accent bg-accent text-white' : 'border-line text-ink hover:bg-line/30'}`}
+          >
+            {editMode ? t('done') : t('edit')}
+          </button>
+          <button
             onClick={viewPdf}
             disabled={loadingPdf}
             className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50"
           >
             {loadingPdf ? tCommon('loading') : t('viewPdf')}
+          </button>
+          <button onClick={removeReturn} className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-500/10">
+            {t('delete')}
           </button>
         </div>
       </div>
@@ -187,12 +285,67 @@ export default function ReturnDetailPage() {
         </table>
       </div>
 
+      {editMode && (
+        <div className="rounded-lg border border-line bg-panel p-4">
+          <button
+            type="button"
+            onClick={() => setShowPicker((v) => !v)}
+            className="rounded border border-line bg-paper px-3 py-2 text-sm text-ink"
+          >
+            + {t('addMoreItems')}
+          </button>
+          {ret.type === 'SUPPLIER' && <p className="mt-1 text-xs text-muted">{t('supplierProductHint')}</p>}
+          {showPicker && (
+            <div className="mt-2 rounded border border-line bg-panel p-2">
+              <input
+                type="search"
+                autoFocus
+                value={pickerQuery}
+                onChange={(e) => setPickerQuery(e.target.value)}
+                placeholder={tCommon('search')}
+                className="w-full rounded border border-line bg-paper px-3 py-2 text-sm"
+              />
+              <div className="mt-2 grid max-h-64 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
+                {pickerResults.slice(0, 24).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => openAddModal(p)}
+                    className="flex flex-col items-center gap-1 rounded border border-line bg-paper p-2 text-center hover:border-accent"
+                  >
+                    <span className="h-12 w-12 overflow-hidden rounded border border-line bg-panel">
+                      {p.images[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.images[0].url} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </span>
+                    <span className="line-clamp-2 text-[10px] text-ink">{p.nameFr}</span>
+                  </button>
+                ))}
+                {pickerResults.length === 0 && <p className="col-span-full py-2 text-center text-xs text-muted">{tCommon('empty')}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
         <div className="flex justify-between font-semibold text-ink">
           <span>{t('columns.value')}</span>
           <span className="tabular">{Number(ret.totalValue).toLocaleString()} DA</span>
         </div>
       </div>
+
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="text-muted">{t('notes')}</span>
+        <textarea
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
+          placeholder={t('notesPlaceholder')}
+          rows={2}
+          className="rounded border border-line bg-paper px-3 py-2 text-ink"
+        />
+      </label>
 
       <div>
         <p className="mb-2 text-sm font-semibold text-ink">{t('attachments')}</p>
@@ -275,6 +428,71 @@ export default function ReturnDetailPage() {
       )}
       {viewingItemImages && (
         <ImageLightbox images={viewingItemImages.images} title={viewingItemImages.title} onClose={() => setViewingItemImages(null)} />
+      )}
+
+      {addingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setAddingProduct(null)}>
+          <div className="w-full max-w-sm rounded-lg bg-panel p-4" onClick={(e) => e.stopPropagation()}>
+            <p className="mb-3 text-sm font-semibold text-ink">{addingProduct.nameFr}</p>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-muted">
+                {t('quantity')}
+                <input
+                  type="number"
+                  min={1}
+                  value={modalQty}
+                  onChange={(e) => setModalQty(e.target.value)}
+                  className="mt-1 w-full rounded border border-line bg-paper px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="text-xs text-muted">
+                {t('condition')}
+                <select
+                  value={modalCondition}
+                  onChange={(e) => setModalCondition(e.target.value as never)}
+                  className="mt-1 w-full rounded border border-line bg-paper text-ink px-3 py-2 text-sm"
+                >
+                  {CONDITIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {t(`conditions.${c}` as never)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-muted">
+                {t('reason')}
+                <input
+                  value={modalReason}
+                  onChange={(e) => setModalReason(e.target.value)}
+                  className="mt-1 w-full rounded border border-line bg-paper px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="text-xs text-muted">
+                {t('unitPrice')}
+                <input
+                  type="number"
+                  min={0}
+                  value={modalUnitPrice}
+                  onChange={(e) => setModalUnitPrice(e.target.value)}
+                  placeholder={t('unitPriceHint')}
+                  className="mt-1 w-full rounded border border-line bg-paper px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setAddingProduct(null)} className="rounded border border-line px-3 py-2 text-sm text-ink">
+                {tCommon('cancel')}
+              </button>
+              <button
+                onClick={confirmAddItem}
+                disabled={!modalReason.trim() || Number(modalQty) < 1 || addingItem}
+                className="rounded bg-accent px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+              >
+                {t('addItem')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

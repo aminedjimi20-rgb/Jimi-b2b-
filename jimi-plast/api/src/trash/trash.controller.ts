@@ -17,6 +17,10 @@ const RESTORABLE_ENTITY_UPDATERS: Record<string, (prisma: PrismaService, entityI
   Category: (prisma, id) => prisma.category.update({ where: { id }, data: { deletedAt: null } }),
   Manufacturer: (prisma, id) => prisma.manufacturer.update({ where: { id }, data: { deletedAt: null } }),
   Notification: (prisma, id) => prisma.notification.update({ where: { id }, data: { deletedAt: null } }),
+  // Restauration simple : si le retour avait été validé (effets comptables
+  // déjà annulés à la suppression), les rejouer reste manuel — voir
+  // ReturnsService.remove().
+  Return: (prisma, id) => prisma.return.update({ where: { id }, data: { deletedAt: null } }),
 };
 
 @Controller('trash')

@@ -580,6 +580,13 @@
     "addItemPhoto": "تصوير",
     "history": "السجل",
     "system": "النظام",
+    "edit": "تعديل",
+    "done": "إنهاء",
+    "delete": "حذف",
+    "deleteConfirm": "حذف هذا المرتجع؟ إذا كان مصادقاً عليه، سيتم إلغاء حركات المخزون والحساب المرتبطة به.",
+    "notes": "ملاحظة",
+    "notesPlaceholder": "أضف ملاحظة…",
+    "addMoreItems": "إضافة مقال",
     "columns": {
       "number": "الرقم",
       "type": "النوع",

@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
 
-class ReturnItemInputDto {
+export class ReturnItemInputDto {
   @IsString()
   productId!: string;
 

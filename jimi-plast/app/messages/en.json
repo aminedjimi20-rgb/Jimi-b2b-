@@ -580,6 +580,13 @@
     "addItemPhoto": "Take a photo",
     "history": "History",
     "system": "System",
+    "edit": "Edit",
+    "done": "Done",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this return? If already validated, the related stock and account movements will be reversed.",
+    "notes": "Note",
+    "notesPlaceholder": "Add a note…",
+    "addMoreItems": "Add an item",
     "columns": {
       "number": "No.",
       "type": "Type",

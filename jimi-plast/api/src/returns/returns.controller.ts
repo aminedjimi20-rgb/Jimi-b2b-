@@ -8,6 +8,9 @@ import { AuthenticatedUser } from '../auth/auth.types';
 import { CreateReturnDto } from './dto/create-return.dto';
 import { ValidateReturnDto } from './dto/validate-return.dto';
 import { AddReturnAttachmentDto } from './dto/add-return-attachment.dto';
+import { AddReturnItemsDto } from './dto/add-return-items.dto';
+import { UpdateReturnNotesDto } from './dto/update-return-notes.dto';
+import { DeleteReturnDto } from './dto/delete-return.dto';
 
 @Controller('returns')
 @RequirePermissions('returns.manage')
@@ -55,6 +58,21 @@ export class ReturnsController {
   @Post(':id/reject')
   reject(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.returnsService.reject(id, user.id);
+  }
+
+  @Post(':id/items')
+  addItems(@Param('id') id: string, @Body() dto: AddReturnItemsDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.returnsService.addItems(id, dto.items, user.id);
+  }
+
+  @Post(':id/notes')
+  updateNotes(@Param('id') id: string, @Body() dto: UpdateReturnNotesDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.returnsService.updateNotes(id, dto.notes, user.id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @Body() dto: DeleteReturnDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.returnsService.remove(id, dto.reason, user.id);
   }
 
   @Post(':id/attachments')
