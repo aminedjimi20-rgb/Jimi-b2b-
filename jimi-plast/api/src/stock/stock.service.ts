@@ -18,7 +18,7 @@ export class StockService {
   movements(productId?: string) {
     return this.prisma.stockMovement.findMany({
       where: productId ? { productId } : undefined,
-      include: { product: { select: { nameFr: true, sku: true } } },
+      include: { product: { select: { nameFr: true, sku: true, unitsPerPackage: true } } },
       orderBy: { createdAt: 'desc' },
       take: 200,
     });

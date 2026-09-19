@@ -506,13 +506,15 @@
     "adjust": "Manual correction",
     "product": "Product",
     "currentStock": "Current stock",
-    "newStock": "New quantity (pieces)",
+    "newStock": "New quantity",
     "reason": "Reason",
     "columns": {
       "date": "Date",
       "product": "Product",
       "type": "Type",
-      "quantity": "Quantity"
+      "quantity": "Quantity (pieces)",
+      "cartons": "Cartons",
+      "reason": "Reason"
     },
     "movementTypes": {
       "SALE": "Sale",

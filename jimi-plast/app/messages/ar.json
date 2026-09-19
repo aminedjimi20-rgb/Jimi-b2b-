@@ -506,13 +506,15 @@
     "adjust": "تصحيح يدوي",
     "product": "المنتج",
     "currentStock": "المخزون الحالي",
-    "newStock": "الكمية الجديدة (قطعة)",
+    "newStock": "الكمية الجديدة",
     "reason": "السبب",
     "columns": {
       "date": "التاريخ",
       "product": "المنتج",
       "type": "النوع",
-      "quantity": "الكمية"
+      "quantity": "الكمية (قطعة)",
+      "cartons": "كرطون",
+      "reason": "السبب"
     },
     "movementTypes": {
       "SALE": "بيع",

@@ -17,7 +17,7 @@ interface Movement {
   quantity: number;
   reason: string | null;
   createdAt: string;
-  product: { nameFr: string; sku: string };
+  product: { nameFr: string; sku: string; unitsPerPackage: number };
 }
 interface ProductOption {
   id: string;
@@ -174,24 +174,22 @@ export default function StockPage() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted">{t('newStock')}</span>
-            <div className="flex overflow-hidden rounded border border-line text-[10px]">
-              <button
-                type="button"
-                onClick={() => setQuantityUnit('pieces')}
-                className={`px-1.5 py-0.5 ${quantityUnit === 'pieces' ? 'bg-accent text-white' : 'text-muted'}`}
-              >
-                {tProducts('form.stockPieces')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setQuantityUnit('cartons')}
-                className={`px-1.5 py-0.5 ${quantityUnit === 'cartons' ? 'bg-accent text-white' : 'text-muted'}`}
-              >
-                {tProducts('form.stockCartons')}
-              </button>
-            </div>
+          <span className="text-xs text-muted">{t('newStock')}</span>
+          <div className="mt-1 flex overflow-hidden rounded border border-line text-xs">
+            <button
+              type="button"
+              onClick={() => setQuantityUnit('pieces')}
+              className={`flex-1 px-2 py-1 ${quantityUnit === 'pieces' ? 'bg-accent text-white' : 'text-muted'}`}
+            >
+              {tProducts('form.stockPieces')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setQuantityUnit('cartons')}
+              className={`flex-1 px-2 py-1 ${quantityUnit === 'cartons' ? 'bg-accent text-white' : 'text-muted'}`}
+            >
+              {tProducts('form.stockCartons')}
+            </button>
           </div>
           <input
             type="number"
@@ -227,27 +225,38 @@ export default function StockPage() {
                 <th className="px-4 py-2 text-start">{t('columns.product')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.type')}</th>
                 <th className="px-4 py-2 text-end">{t('columns.quantity')}</th>
+                <th className="px-4 py-2 text-end">{t('columns.cartons')}</th>
+                <th className="px-4 py-2 text-start">{t('columns.reason')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredMovements.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-4 text-center text-sm text-muted">
+                  <td colSpan={6} className="px-4 py-4 text-center text-sm text-muted">
                     {tCommon('empty')}
                   </td>
                 </tr>
               )}
-              {filteredMovements.map((m) => (
-                <tr key={m.id} className="border-t border-line">
-                  <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
-                  <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
-                  <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
-                  <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
-                    {m.quantity > 0 ? '+' : ''}
-                    {m.quantity}
-                  </td>
-                </tr>
-              ))}
+              {filteredMovements.map((m) => {
+                const upp = m.product.unitsPerPackage || 1;
+                const cartons = Math.round((m.quantity / upp) * 100) / 100;
+                return (
+                  <tr key={m.id} className="border-t border-line">
+                    <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
+                    <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
+                    <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
+                    <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
+                      {m.quantity > 0 ? '+' : ''}
+                      {m.quantity}
+                    </td>
+                    <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
+                      {cartons > 0 ? '+' : ''}
+                      {cartons}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-muted">{m.reason ?? '—'}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
