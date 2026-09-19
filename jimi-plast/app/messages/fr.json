@@ -173,7 +173,9 @@
       "qtyAsc": "Quantité (croissant)",
       "manual": "Ordre manuel",
       "depotAsc": "Dépôt (A → Z)",
-      "depotDesc": "Dépôt (Z → A)"
+      "depotDesc": "Dépôt (Z → A)",
+      "modifiedDesc": "Dernière modification (récent)",
+      "modifiedAsc": "Dernière modification (ancien)"
     },
     "done": "Terminer",
     "close": "Fermer",
@@ -531,7 +533,18 @@
     "product": "Produit",
     "quantity": "Quantité (pièces)",
     "reason": "Raison",
+    "condition": "État",
+    "conditions": {
+      "DAMAGED": "Endommagé",
+      "DEFECTIVE": "Défectueux",
+      "OTHER": "Autre"
+    },
+    "unitPrice": "Prix unitaire (DA)",
+    "unitPriceHint": "Laisser vide pour le prix automatique",
     "addItem": "Ajouter",
+    "removeItem": "Retirer",
+    "noItems": "Aucun article ajouté",
+    "createReturn": "Créer le retour",
     "validate": "Valider",
     "reject": "Refuser",
     "decision": "Décision",
@@ -546,12 +559,32 @@
       "VALIDATED": "Validé",
       "REJECTED": "Refusé"
     },
+    "search": "Rechercher…",
+    "tabs": {
+      "all": "Tous",
+      "customers": "Retours clients",
+      "suppliers": "Retours fabricants"
+    },
+    "selectParty": "Choisir",
+    "pickProduct": "Choisir un produit",
+    "supplierProductHint": "Uniquement les produits de ce fabricant",
+    "back": "Retour aux retours",
+    "view": "Voir",
+    "viewPhoto": "Voir la photo",
+    "viewPdf": "Voir le PDF",
+    "attachments": "Photos du bon",
+    "addAttachment": "Ajouter une photo",
+    "itemPhotos": "Photos de l'article",
+    "addItemPhoto": "Photographier",
+    "history": "Historique",
+    "system": "Système",
     "columns": {
       "number": "N°",
       "type": "Type",
       "party": "Client/Fabricant",
       "value": "Valeur",
-      "status": "Statut"
+      "status": "Statut",
+      "date": "Date"
     }
   },
   "transport": {

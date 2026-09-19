@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
 
 class ReturnItemInputDto {
   @IsString()
@@ -16,6 +16,13 @@ class ReturnItemInputDto {
   @IsOptional()
   @IsIn(['DAMAGED', 'DEFECTIVE', 'OTHER'])
   condition?: 'DAMAGED' | 'DEFECTIVE' | 'OTHER';
+
+  // Permet de corriger le prix au retour — un fabricant peut retourner un
+  // article vendu il y a longtemps à un prix qui a changé depuis au catalogue.
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  unitPrice?: number;
 }
 
 export class CreateReturnDto {

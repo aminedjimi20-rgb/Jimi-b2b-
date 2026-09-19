@@ -173,7 +173,9 @@
       "qtyAsc": "الكمية (تصاعدي)",
       "manual": "ترتيب يدوي",
       "depotAsc": "الديبو (أ ← ي)",
-      "depotDesc": "الديبو (ي ← أ)"
+      "depotDesc": "الديبو (ي ← أ)",
+      "modifiedDesc": "آخر تعديل (الأحدث)",
+      "modifiedAsc": "آخر تعديل (الأقدم)"
     },
     "done": "انتهى",
     "close": "إغلاق",
@@ -531,7 +533,18 @@
     "product": "المنتج",
     "quantity": "الكمية (قطعة)",
     "reason": "السبب",
+    "condition": "الحالة",
+    "conditions": {
+      "DAMAGED": "تالف",
+      "DEFECTIVE": "معيب",
+      "OTHER": "أخرى"
+    },
+    "unitPrice": "سعر الوحدة (دج)",
+    "unitPriceHint": "اتركه فارغاً للسعر التلقائي",
     "addItem": "إضافة",
+    "removeItem": "إزالة",
+    "noItems": "لم تتم إضافة أي مقال",
+    "createReturn": "إنشاء المرتجع",
     "validate": "تحقق",
     "reject": "رفض",
     "decision": "القرار",
@@ -546,12 +559,32 @@
       "VALIDATED": "تم التحقق",
       "REJECTED": "مرفوض"
     },
+    "search": "بحث…",
+    "tabs": {
+      "all": "الكل",
+      "customers": "مرتجعات الزبائن",
+      "suppliers": "مرتجعات المصانع"
+    },
+    "selectParty": "اختر",
+    "pickProduct": "اختر منتجاً",
+    "supplierProductHint": "منتجات هذا المصنع فقط",
+    "back": "العودة إلى المرتجعات",
+    "view": "عرض",
+    "viewPhoto": "مشاهدة الصورة",
+    "viewPdf": "عرض PDF",
+    "attachments": "صور البون",
+    "addAttachment": "إضافة صورة",
+    "itemPhotos": "صور المقال",
+    "addItemPhoto": "تصوير",
+    "history": "السجل",
+    "system": "النظام",
     "columns": {
       "number": "الرقم",
       "type": "النوع",
       "party": "العميل/المصنع",
       "value": "القيمة",
-      "status": "الحالة"
+      "status": "الحالة",
+      "date": "التاريخ"
     }
   },
   "transport": {

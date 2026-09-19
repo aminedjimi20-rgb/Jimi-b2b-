@@ -25,7 +25,8 @@ export class ReturnsService {
       include: {
         customer: { include: { user: { select: { fullName: true } } } },
         manufacturer: true,
-        items: { include: { product: true } },
+        items: { include: { product: { include: { images: { take: 1 } } } } },
+        attachments: { orderBy: { createdAt: 'desc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -37,11 +38,16 @@ export class ReturnsService {
       include: {
         customer: { include: { user: { select: { fullName: true } } } },
         manufacturer: true,
-        items: { include: { product: true } },
+        items: { include: { product: { include: { images: { take: 1 } } }, images: { orderBy: { createdAt: 'desc' } } } },
+        attachments: { orderBy: { createdAt: 'desc' } },
       },
     });
     if (!ret) throw new NotFoundException('Retour introuvable');
     return ret;
+  }
+
+  history(id: string) {
+    return this.auditLog.history('Return', id);
   }
 
   async create(dto: CreateReturnDto, actorId: string) {
@@ -69,8 +75,10 @@ export class ReturnsService {
     }
 
     const items = dto.items.map((i) => {
-      const unitPrice = unitPriceByProduct.get(i.productId) ?? 0;
-      return { ...i, unitPrice, lineTotal: unitPrice * i.quantity };
+      // Un prix saisi manuellement (ex: fabricant retournant un article vendu
+      // à un ancien tarif) prime toujours sur le prix catalogue recalculé.
+      const unitPrice = i.unitPrice ?? unitPriceByProduct.get(i.productId) ?? 0;
+      return { productId: i.productId, quantity: i.quantity, reason: i.reason, condition: i.condition, unitPrice, lineTotal: unitPrice * i.quantity };
     });
     const totalValue = items.reduce((s, i) => s + i.lineTotal, 0);
 
@@ -85,7 +93,52 @@ export class ReturnsService {
       },
     });
 
+    await this.auditLog.record({ entityType: 'Return', entityId: ret.id, action: 'CREATE', actorId });
     return this.getById(ret.id);
+  }
+
+  async addAttachment(returnId: string, url: string) {
+    const ret = await this.prisma.return.findFirst({ where: { id: returnId, deletedAt: null } });
+    if (!ret) throw new NotFoundException('Retour introuvable');
+    await this.prisma.returnAttachment.create({ data: { returnId, url } });
+    return this.getById(returnId);
+  }
+
+  async removeAttachment(returnId: string, attachmentId: string, actorId?: string) {
+    const attachment = await this.prisma.returnAttachment.findFirst({ where: { id: attachmentId, returnId } });
+    if (!attachment) throw new NotFoundException('Pièce jointe introuvable');
+    await this.prisma.returnAttachment.delete({ where: { id: attachmentId } });
+    await this.auditLog.record({
+      entityType: 'Return',
+      entityId: returnId,
+      action: 'DELETE',
+      field: 'attachment',
+      oldValue: attachment.url,
+      actorId,
+    });
+    return this.getById(returnId);
+  }
+
+  async addItemImage(returnId: string, itemId: string, url: string) {
+    const item = await this.prisma.returnItem.findFirst({ where: { id: itemId, returnId } });
+    if (!item) throw new NotFoundException('Article introuvable');
+    await this.prisma.returnItemImage.create({ data: { returnItemId: itemId, url } });
+    return this.getById(returnId);
+  }
+
+  async removeItemImage(returnId: string, itemId: string, imageId: string, actorId?: string) {
+    const image = await this.prisma.returnItemImage.findFirst({ where: { id: imageId, returnItemId: itemId } });
+    if (!image) throw new NotFoundException('Photo introuvable');
+    await this.prisma.returnItemImage.delete({ where: { id: imageId } });
+    await this.auditLog.record({
+      entityType: 'Return',
+      entityId: returnId,
+      action: 'DELETE',
+      field: 'itemImage',
+      oldValue: image.url,
+      actorId,
+    });
+    return this.getById(returnId);
   }
 
   async validate(id: string, dto: ValidateReturnDto, actorId: string) {

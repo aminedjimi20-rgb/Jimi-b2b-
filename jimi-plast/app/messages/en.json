@@ -173,7 +173,9 @@
       "qtyAsc": "Quantity (low to high)",
       "manual": "Manual order",
       "depotAsc": "Depot (A → Z)",
-      "depotDesc": "Depot (Z → A)"
+      "depotDesc": "Depot (Z → A)",
+      "modifiedDesc": "Last modified (recent)",
+      "modifiedAsc": "Last modified (oldest)"
     },
     "done": "Done",
     "close": "Close",
@@ -531,7 +533,18 @@
     "product": "Product",
     "quantity": "Quantity (pieces)",
     "reason": "Reason",
+    "condition": "Condition",
+    "conditions": {
+      "DAMAGED": "Damaged",
+      "DEFECTIVE": "Defective",
+      "OTHER": "Other"
+    },
+    "unitPrice": "Unit price (DA)",
+    "unitPriceHint": "Leave empty for the automatic price",
     "addItem": "Add",
+    "removeItem": "Remove",
+    "noItems": "No items added",
+    "createReturn": "Create the return",
     "validate": "Validate",
     "reject": "Reject",
     "decision": "Decision",
@@ -546,12 +559,32 @@
       "VALIDATED": "Validated",
       "REJECTED": "Rejected"
     },
+    "search": "Search…",
+    "tabs": {
+      "all": "All",
+      "customers": "Customer returns",
+      "suppliers": "Manufacturer returns"
+    },
+    "selectParty": "Choose",
+    "pickProduct": "Choose a product",
+    "supplierProductHint": "Only this manufacturer's own products",
+    "back": "Back to returns",
+    "view": "View",
+    "viewPhoto": "View photo",
+    "viewPdf": "View PDF",
+    "attachments": "Voucher photos",
+    "addAttachment": "Add a photo",
+    "itemPhotos": "Item photos",
+    "addItemPhoto": "Take a photo",
+    "history": "History",
+    "system": "System",
     "columns": {
       "number": "No.",
       "type": "Type",
       "party": "Customer/Manufacturer",
       "value": "Value",
-      "status": "Status"
+      "status": "Status",
+      "date": "Date"
     }
   },
   "transport": {
