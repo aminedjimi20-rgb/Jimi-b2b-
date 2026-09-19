@@ -126,6 +126,7 @@ export default function ProductsAdminPage() {
   const loadMoreRef = useRef<HTMLTableRowElement>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newProductImages, setNewProductImages] = useState<string[]>([]);
   const [viewingImages, setViewingImages] = useState<{ images: { url: string }[]; startIndex: number } | null>(null);
@@ -204,7 +205,6 @@ export default function ProductsAdminPage() {
     if (!target) return;
     startEdit(target);
     setAppliedEditParam(editParam);
-    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, products, appliedEditParam]);
 
@@ -266,6 +266,7 @@ export default function ProductsAdminPage() {
       }
       setForm(EMPTY_FORM);
       setEditingId(null);
+      setShowFormModal(false);
       reloadProducts();
     } catch {
       setError(tCommon('error'));
@@ -275,7 +276,9 @@ export default function ProductsAdminPage() {
   function startEdit(p: FullProduct) {
     setEditingId(p.id);
     setNewProductImages([]);
+    setStockUnit('pieces');
     setPromoForm({ priceTierTypeId: '', discountType: 'PERCENT', discountValue: '', startDate: '', endDate: '' });
+    setShowFormModal(true);
     const priceOf = (key: string) => p.prices.find((pr) => pr.priceTierType.key === key)?.price ?? '';
     setForm({
       sku: p.sku,
@@ -304,12 +307,23 @@ export default function ProductsAdminPage() {
     });
   }
 
+  function openNewProductModal() {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setNewProductImages([]);
+    setStockUnit('pieces');
+    setPromoForm({ priceTierTypeId: '', discountType: 'PERCENT', discountValue: '', startDate: '', endDate: '' });
+    setError(null);
+    setShowFormModal(true);
+  }
+
   async function remove(p: FullProduct) {
     if (!window.confirm(t('deleteConfirm'))) return;
     await api.delete(`/products/${p.id}`, token);
     if (editingId === p.id) {
       setEditingId(null);
       setForm(EMPTY_FORM);
+      setShowFormModal(false);
     }
     reloadProducts();
   }
@@ -432,9 +446,14 @@ export default function ProductsAdminPage() {
   }, [token, filteredProducts, visibleCount]);
 
   return (
-    <div className="flex flex-col gap-6 xl:flex-row">
+    <div className="flex flex-col gap-6">
       <div className="flex-1">
-        <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+          <button type="button" onClick={openNewProductModal} className="rounded bg-accent px-3 py-2 text-sm font-medium text-white">
+            + {t('addProduct')}
+          </button>
+        </div>
 
         <div className="mt-4 flex flex-wrap gap-3">
           <input
@@ -471,6 +490,35 @@ export default function ProductsAdminPage() {
           <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'name_asc', 'name_desc']} />
         </div>
 
+        {search.trim() && (
+          <div className="mt-3 grid grid-cols-3 gap-2 rounded-lg border border-line bg-panel p-3 sm:grid-cols-4 md:grid-cols-6">
+            {filteredProducts.slice(0, 12).map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => startEdit(p)}
+                className="flex flex-col items-center gap-1 rounded border border-line bg-paper p-2 text-center hover:border-accent"
+              >
+                <div className="h-14 w-14 overflow-hidden rounded border border-line bg-panel">
+                  {p.images[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.images[0].url} alt="" className="h-full w-full object-cover" />
+                  ) : null}
+                </div>
+                <span className="line-clamp-2 text-[11px] text-ink">{p.nameFr}</span>
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[9px] ${
+                    p.isActive ? 'bg-teal/15 text-teal' : 'bg-line/40 text-muted'
+                  }`}
+                >
+                  {t('columns.stock')}: {p.currentStock}
+                </span>
+              </button>
+            ))}
+            {filteredProducts.length === 0 && <p className="col-span-full py-2 text-center text-xs text-muted">{tCommon('empty')}</p>}
+          </div>
+        )}
+
         <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-line/30 text-xs uppercase text-muted">
@@ -503,7 +551,15 @@ export default function ProductsAdminPage() {
                     <td className="px-4 py-2 font-medium text-ink">{p.nameFr}</td>
                     <td className="px-4 py-2 text-xs text-muted">{p.category.nameFr}</td>
                     <td className="px-4 py-2 text-xs text-muted">{p.manufacturer?.name ?? '—'}</td>
-                    <td className="px-4 py-2 tabular">{p.currentStock}</td>
+                    <td className="px-4 py-2 text-xs tabular">
+                      <p className="text-ink">
+                        {Math.floor(p.currentStock / p.unitsPerPackage)} {t('form.stockCartons')}
+                        {p.currentStock % p.unitsPerPackage > 0 && ` + ${p.currentStock % p.unitsPerPackage} ${t('form.stockPieces')}`}
+                      </p>
+                      <p className="text-muted">
+                        ({p.currentStock} {t('form.stockPieces')})
+                      </p>
+                    </td>
                     <td className="px-4 py-2">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs ${
@@ -550,7 +606,17 @@ export default function ProductsAdminPage() {
         </div>
       </div>
 
-      <form ref={formRef} onSubmit={onSubmit} className="w-full rounded-lg border border-line bg-panel p-4 xl:w-96">
+      {showFormModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4"
+          onClick={() => setShowFormModal(false)}
+        >
+      <form
+        ref={formRef}
+        onSubmit={onSubmit}
+        onClick={(e) => e.stopPropagation()}
+        className="my-8 w-full max-w-lg rounded-lg border border-line bg-panel p-4"
+      >
         <h2 className="text-sm font-semibold text-ink">{editingId ? t('editProduct') : t('addProduct')}</h2>
         <div className="mt-3 flex flex-col gap-3">
           <Field label={t('form.sku')} value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} />
@@ -939,22 +1005,23 @@ export default function ProductsAdminPage() {
             <button type="submit" className="flex-1 rounded bg-accent px-3 py-2 text-sm font-medium text-white">
               {tCommon('save')}
             </button>
-            {editingId && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null);
-                  setForm(EMPTY_FORM);
-                  setNewProductImages([]);
-                }}
-                className="rounded border border-line px-3 py-2 text-sm"
-              >
-                {tCommon('cancel')}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(null);
+                setForm(EMPTY_FORM);
+                setNewProductImages([]);
+                setShowFormModal(false);
+              }}
+              className="rounded border border-line px-3 py-2 text-sm"
+            >
+              {tCommon('cancel')}
+            </button>
           </div>
         </div>
       </form>
+        </div>
+      )}
 
       {viewingImages && (
         <ImageLightbox

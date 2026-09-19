@@ -35,6 +35,7 @@ export default function StockPage() {
   const [productId, setProductId] = useState('');
   const [newQuantity, setNewQuantity] = useState('');
   const [reason, setReason] = useState('');
+  const [movementSearch, setMovementSearch] = useState('');
 
   function reload() {
     api.get<ProductAlert[]>('/stock/alerts', token).then(setAlerts);
@@ -48,6 +49,15 @@ export default function StockPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const filteredMovements = movements.filter((m) => {
+    const q = movementSearch.trim().toLowerCase();
+    if (!q) return true;
+    const haystack = [m.product.nameFr, m.product.sku, t(`movementTypes.${m.type}` as never), m.reason ?? '', String(m.quantity)]
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(q);
+  });
 
   async function submitAdjust(e: React.FormEvent) {
     e.preventDefault();
@@ -64,7 +74,7 @@ export default function StockPage() {
       <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
 
       {alerts.length > 0 && (
-        <div className="rounded-lg border border-accent/30 bg-amber-50 p-4">
+        <div className="rounded-lg border border-accent/30 bg-amber-50 p-4 dark:bg-amber-950/20">
           <h3 className="text-sm font-semibold text-accent">{t('alerts')}</h3>
           <ul className="mt-2 flex flex-col gap-1 text-sm">
             {alerts.map((a) => (
@@ -94,7 +104,16 @@ export default function StockPage() {
       </form>
 
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-ink">{t('movements')}</h3>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-ink">{t('movements')}</h3>
+          <input
+            type="search"
+            value={movementSearch}
+            onChange={(e) => setMovementSearch(e.target.value)}
+            placeholder={tCommon('search')}
+            className="w-full max-w-xs rounded border border-line bg-panel px-3 py-1.5 text-sm"
+          />
+        </div>
         <div className="overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full text-sm">
             <thead className="bg-line/30 text-xs uppercase text-muted">
@@ -106,7 +125,14 @@ export default function StockPage() {
               </tr>
             </thead>
             <tbody>
-              {movements.map((m) => (
+              {filteredMovements.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-4 text-center text-sm text-muted">
+                    {tCommon('empty')}
+                  </td>
+                </tr>
+              )}
+              {filteredMovements.map((m) => (
                 <tr key={m.id} className="border-t border-line">
                   <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
                   <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
