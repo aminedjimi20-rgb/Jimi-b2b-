@@ -31,6 +31,7 @@ export default function ApprovalsPage() {
   const isStaff = hasPermission('customers.manage');
 
   const [items, setItems] = useState<PendingDeletion[]>([]);
+  const [search, setSearch] = useState('');
 
   function reload() {
     api.get<PendingDeletion[]>(isStaff ? '/pending-deletions' : '/pending-deletions/mine', token).then(setItems);
@@ -47,14 +48,46 @@ export default function ApprovalsPage() {
     reload();
   }
 
-  const pending = items.filter((i) => i.status === 'PENDING');
-  const resolved = items.filter((i) => i.status !== 'PENDING');
+  function matchesSearch(item: PendingDeletion): boolean {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const haystack = [
+      item.reason,
+      item.requestedBy?.fullName,
+      item.respondedBy?.fullName,
+      item.customer?.user.fullName,
+      item.customer?.businessName,
+      item.manufacturer?.name,
+      item.salesVoucher?.number,
+      item.purchaseVoucher?.number,
+      item.ledgerEntry?.type,
+      item.ledgerEntry?.note,
+      item.supplierLedgerEntry?.type,
+      item.supplierLedgerEntry?.note,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(q);
+  }
+
+  const filteredItems = items.filter(matchesSearch);
+  const pending = filteredItems.filter((i) => i.status === 'PENDING');
+  const resolved = filteredItems.filter((i) => i.status !== 'PENDING');
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
 
-      {pending.length === 0 && <p className="text-sm text-muted">{t('noPending')}</p>}
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={tCommon('search')}
+        className="w-full max-w-xs rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
+      />
+
+      {pending.length === 0 && <p className="text-sm text-muted">{search ? tCommon('empty') : t('noPending')}</p>}
 
       <div className="flex flex-col gap-3">
         {pending.map((item) => (
