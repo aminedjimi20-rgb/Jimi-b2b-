@@ -73,6 +73,7 @@ export class PurchaseVouchersService {
         manufacturer: true,
         buyer: { select: { fullName: true } },
         items: { include: { product: true, packagingUnit: true } },
+        attachments: { orderBy: { createdAt: 'desc' } },
         pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1, include: { requestedBy: { select: { fullName: true } } } },
       },
     });
@@ -82,6 +83,46 @@ export class PurchaseVouchersService {
 
   history(id: string) {
     return this.auditLog.history('PurchaseVoucher', id);
+  }
+
+  async addAttachment(voucherId: string, url: string) {
+    const voucher = await this.prisma.purchaseVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
+    if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
+    await this.prisma.purchaseVoucherAttachment.create({ data: { voucherId, url } });
+    return this.getById(voucherId);
+  }
+
+  // La suppression d'une photo laisse toujours une trace (audit + notification
+  // aux deux parties) — même logique que pour un bon de vente.
+  async removeAttachment(voucherId: string, attachmentId: string, actorId?: string) {
+    const attachment = await this.prisma.purchaseVoucherAttachment.findFirst({ where: { id: attachmentId, voucherId } });
+    if (!attachment) throw new NotFoundException('Pièce jointe introuvable');
+    await this.prisma.purchaseVoucherAttachment.delete({ where: { id: attachmentId } });
+
+    const voucher = await this.prisma.purchaseVoucher.findFirst({ where: { id: voucherId } });
+    const actorName = await this.actorName(actorId);
+    await this.auditLog.record({
+      entityType: 'PurchaseVoucher',
+      entityId: voucherId,
+      action: 'DELETE',
+      field: 'attachment',
+      oldValue: attachment.url,
+      reason: `Photo supprimée par ${actorName}`,
+      actorId,
+    });
+
+    const updated = await this.getById(voucherId);
+    if (voucher) {
+      await this.notifyBoth(
+        voucher.manufacturerId,
+        'purchase.attachment_removed',
+        'Photo supprimée',
+        `${actorName} a supprimé une photo jointe au bon ${updated.number ?? ''}.`,
+        { purchaseVoucherId: voucherId },
+      );
+    }
+
+    return updated;
   }
 
   async createDraft(manufacturerId: string, buyerId: string) {

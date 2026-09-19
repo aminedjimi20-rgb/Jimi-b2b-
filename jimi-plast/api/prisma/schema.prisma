@@ -700,11 +700,24 @@ model PurchaseVoucher {
   manufacturer Manufacturer          @relation(fields: [manufacturerId], references: [id])
   buyer        User                  @relation(fields: [buyerId], references: [id])
   items        PurchaseVoucherItem[]
+  attachments  PurchaseVoucherAttachment[]
   pendingDeletions PendingDeletion[]
 
   @@index([manufacturerId])
   @@index([status])
   @@map("purchase_vouchers")
+}
+
+model PurchaseVoucherAttachment {
+  id        String   @id @default(cuid())
+  voucherId String
+  url       String
+  createdAt DateTime @default(now())
+
+  voucher PurchaseVoucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+
+  @@index([voucherId])
+  @@map("purchase_voucher_attachments")
 }
 
 model PurchaseVoucherItem {

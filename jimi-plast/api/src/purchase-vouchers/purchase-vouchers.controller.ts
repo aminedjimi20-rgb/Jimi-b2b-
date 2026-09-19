@@ -6,6 +6,7 @@ import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertPurchaseVoucherDto } from './dto/upsert-purchase-voucher.dto';
+import { AddPurchaseAttachmentDto } from './dto/add-purchase-attachment.dto';
 import { CancelVoucherDto } from '../vouchers/dto/cancel-voucher.dto';
 import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
 import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
@@ -53,6 +54,16 @@ export class PurchaseVouchersController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpsertPurchaseVoucherDto, @CurrentUser() user: AuthenticatedUser) {
     return this.service.update(id, dto, user.id);
+  }
+
+  @Post(':id/attachments')
+  addAttachment(@Param('id') id: string, @Body() dto: AddPurchaseAttachmentDto) {
+    return this.service.addAttachment(id, dto.url);
+  }
+
+  @Delete(':id/attachments/:attachmentId')
+  removeAttachment(@Param('id') id: string, @Param('attachmentId') attachmentId: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.removeAttachment(id, attachmentId, user.id);
   }
 
   @Post(':id/confirm')

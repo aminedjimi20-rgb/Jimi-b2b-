@@ -105,6 +105,7 @@ export default function VoucherEditorPage() {
 
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [discount, setDiscount] = useState('0');
+  const [discountPercent, setDiscountPercent] = useState('0');
   const [transportCost, setTransportCost] = useState('0');
   const [paidAmount, setPaidAmount] = useState('0');
   const [notes, setNotes] = useState('');
@@ -159,6 +160,8 @@ export default function VoucherEditorPage() {
     api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
       setVoucher(v);
       setDiscount(v.discount);
+      const sub = v.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      setDiscountPercent(sub > 0 ? String(Math.round((Number(v.discount) / sub) * 10000) / 100) : '0');
       setTransportCost(v.transportCost);
       setPaidAmount(v.paidAmount);
       setNotes(v.notes ?? '');
@@ -282,6 +285,30 @@ export default function VoucherEditorPage() {
     setModalDiscount(String(Math.round(standard * (pct / 100) * 100) / 100));
   }
 
+  /** Sous-total du bon (avant remise/transport) — base de calcul de la remise en %. */
+  function voucherSubtotal(): number {
+    if (!voucher) return 0;
+    return voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+  }
+
+  function onDiscountChange(v: string) {
+    const clean = onlyDecimal(v);
+    setDiscount(clean);
+    const sub = voucherSubtotal();
+    setDiscountPercent(sub > 0 ? String(Math.round(((Number(clean) || 0) / sub) * 10000) / 100) : '0');
+    autoSave({ discount: Number(clean) || 0 });
+  }
+
+  function onDiscountPercentChange(v: string) {
+    const clean = onlyDecimal(v);
+    setDiscountPercent(clean);
+    const sub = voucherSubtotal();
+    const pct = Math.max(0, Number(clean) || 0);
+    const amt = Math.round(sub * (pct / 100) * 100) / 100;
+    setDiscount(String(amt));
+    autoSave({ discount: amt });
+  }
+
   function onModalQtyChange(v: string) {
     const clean = onlyDigits(v);
     setModalQty(clean);
@@ -395,6 +422,10 @@ export default function VoucherEditorPage() {
     }
 
     setDiscount(String(newDiscount));
+    // Pourcentage approximatif (sous-total avant ajout) — recalculé
+    // précisément par reload() une fois le nouveau total connu côté serveur.
+    const subBefore = voucherSubtotal();
+    setDiscountPercent(subBefore > 0 ? String(Math.round((newDiscount / subBefore) * 10000) / 100) : '0');
     setNotes(newNotes);
     autoSave({ items: newItems, discount: newDiscount, notes: newNotes || undefined });
     setAddingProduct(null);
@@ -748,7 +779,29 @@ export default function VoucherEditorPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <NumField label={t('discount')} value={discount} disabled={!editable} onChange={(v) => { setDiscount(v); autoSave({ discount: Number(v) }); }} />
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">{t('discount')}</span>
+          <div className="flex items-center gap-1">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={discountPercent}
+              disabled={!editable}
+              onChange={(e) => onDiscountPercentChange(e.target.value)}
+              className="w-0 min-w-0 flex-1 rounded border border-line bg-panel px-2 py-2 text-end disabled:opacity-60"
+            />
+            <span className="text-xs text-muted">%</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={discount}
+              disabled={!editable}
+              onChange={(e) => onDiscountChange(e.target.value)}
+              className="w-0 min-w-0 flex-1 rounded border border-line bg-panel px-2 py-2 text-end disabled:opacity-60"
+            />
+            <span className="text-xs text-muted">DA</span>
+          </div>
+        </label>
         <NumField label={t('transport')} value={transportCost} disabled={!editable} onChange={(v) => { setTransportCost(v); autoSave({ transportCost: Number(v) }); }} />
         <NumField label={t('paidAmount')} value={paidAmount} disabled={!editable} onChange={(v) => { setPaidAmount(v); autoSave({ paidAmount: Number(v) }); }} />
       </div>
@@ -768,6 +821,7 @@ export default function VoucherEditorPage() {
 
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
         <Row label={t('subtotal')} value={subtotal} />
+        {Number(discount) > 0 && <Row label={`${t('discount')} (${discountPercent} %)`} value={-Number(discount)} />}
         <Row label={t('total')} value={total} bold />
       </div>
 

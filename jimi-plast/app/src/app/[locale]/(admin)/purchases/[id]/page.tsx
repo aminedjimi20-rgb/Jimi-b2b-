@@ -7,6 +7,8 @@ import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
 import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
+import { ImageLightbox } from '@/components/image-lightbox';
+import { ImageUploadButton } from '@/components/image-upload-button';
 
 interface PickerProduct {
   id: string;
@@ -60,6 +62,7 @@ interface Purchase {
   paidAmount: string;
   cancelReason: string | null;
   items: PurchaseItem[];
+  attachments: { id: string; url: string; createdAt: string }[];
   pendingDeletions: PendingDeletion[];
 }
 
@@ -91,6 +94,7 @@ export default function PurchaseEditorPage() {
 
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [discount, setDiscount] = useState('0');
+  const [discountPercent, setDiscountPercent] = useState('0');
   const [transportCost, setTransportCost] = useState('0');
   const [paidAmount, setPaidAmount] = useState('0');
   const [cancelReason, setCancelReason] = useState('');
@@ -98,6 +102,8 @@ export default function PurchaseEditorPage() {
   const [editMode, setEditMode] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loadingPdf, setLoadingPdf] = useState(false);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sélecteur de produit : recherche + vignettes, même système que le bon de vente.
@@ -115,6 +121,8 @@ export default function PurchaseEditorPage() {
     api.get<Purchase>(`/purchase-vouchers/${id}`, token).then((p) => {
       setPurchase(p);
       setDiscount(p.discount);
+      const sub = p.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      setDiscountPercent(sub > 0 ? String(Math.round((Number(p.discount) / sub) * 10000) / 100) : '0');
       setTransportCost(p.transportCost);
       setPaidAmount(p.paidAmount);
     });
@@ -162,6 +170,30 @@ export default function PurchaseEditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [id, token],
   );
+
+  /** Sous-total du bon (avant remise/transport) — base de calcul de la remise en %. */
+  function purchaseSubtotal(): number {
+    if (!purchase) return 0;
+    return purchase.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+  }
+
+  function onDiscountChange(v: string) {
+    const clean = onlyDecimal(v);
+    setDiscount(clean);
+    const sub = purchaseSubtotal();
+    setDiscountPercent(sub > 0 ? String(Math.round(((Number(clean) || 0) / sub) * 10000) / 100) : '0');
+    autoSave({ discount: Number(clean) || 0 });
+  }
+
+  function onDiscountPercentChange(v: string) {
+    const clean = onlyDecimal(v);
+    setDiscountPercent(clean);
+    const sub = purchaseSubtotal();
+    const pct = Math.max(0, Number(clean) || 0);
+    const amt = Math.round(sub * (pct / 100) * 100) / 100;
+    setDiscount(String(amt));
+    autoSave({ discount: amt });
+  }
 
   function openAddModal(p: PickerProduct) {
     setAddingProduct(p);
@@ -352,6 +384,22 @@ export default function PurchaseEditorPage() {
     }
   }
 
+  async function addAttachment(url: string) {
+    setUploadingAttachment(true);
+    try {
+      await api.post(`/purchase-vouchers/${id}/attachments`, { url }, token);
+      reload();
+    } finally {
+      setUploadingAttachment(false);
+    }
+  }
+
+  async function removeAttachment(attachmentId: string) {
+    if (!window.confirm(tVoucher('deleteAttachmentConfirm'))) return;
+    await api.delete(`/purchase-vouchers/${id}/attachments/${attachmentId}`, token);
+    reload();
+  }
+
   if (!purchase) return <p className="text-muted">{tCommon('loading')}</p>;
 
   const subtotal = purchase.items.reduce((s, i) => s + Number(i.lineTotal), 0);
@@ -494,7 +542,26 @@ export default function PurchaseEditorPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{tVoucher('discount')}</span>
-          <input type="number" value={discount} disabled={!editable} onChange={(e) => { setDiscount(e.target.value); autoSave({ discount: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
+          <div className="flex items-center gap-1">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={discountPercent}
+              disabled={!editable}
+              onChange={(e) => onDiscountPercentChange(e.target.value)}
+              className="w-0 min-w-0 flex-1 rounded border border-line bg-panel px-2 py-2 text-end disabled:opacity-60"
+            />
+            <span className="text-xs text-muted">%</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={discount}
+              disabled={!editable}
+              onChange={(e) => onDiscountChange(e.target.value)}
+              className="w-0 min-w-0 flex-1 rounded border border-line bg-panel px-2 py-2 text-end disabled:opacity-60"
+            />
+            <span className="text-xs text-muted">DA</span>
+          </div>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{tVoucher('transport')}</span>
@@ -511,9 +578,46 @@ export default function PurchaseEditorPage() {
           <span>{tVoucher('subtotal')}</span>
           <span className="tabular">{subtotal.toLocaleString()} DA</span>
         </div>
+        {Number(discount) > 0 && (
+          <div className="flex justify-between py-1 text-muted">
+            <span>
+              {tVoucher('discount')} ({discountPercent} %)
+            </span>
+            <span className="tabular">-{Number(discount).toLocaleString()} DA</span>
+          </div>
+        )}
         <div className="flex justify-between py-1 font-semibold text-ink">
           <span>{tVoucher('total')}</span>
           <span className="tabular">{total.toLocaleString()} DA</span>
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-semibold text-ink">{tVoucher('attachments')}</p>
+        <div className="flex flex-wrap gap-3">
+          {purchase.attachments.map((att, index) => (
+            <div key={att.id} className="group relative h-20 w-20 overflow-hidden rounded border border-line">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={att.url}
+                alt=""
+                onClick={() => setLightboxAttachmentIndex(index)}
+                className="h-full w-full cursor-zoom-in object-cover"
+              />
+              <button
+                onClick={() => removeAttachment(att.id)}
+                className="absolute end-1 top-1 hidden h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white group-hover:flex"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          <ImageUploadButton
+            folder="purchases"
+            label={uploadingAttachment ? '…' : `+ ${tVoucher('addAttachment')}`}
+            onUploaded={addAttachment}
+            className="flex h-20 w-20 items-center justify-center rounded border border-dashed border-line text-center text-xs text-muted hover:bg-line/20"
+          />
         </div>
       </div>
 
@@ -648,6 +752,15 @@ export default function PurchaseEditorPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {lightboxAttachmentIndex !== null && (
+        <ImageLightbox
+          images={purchase.attachments}
+          startIndex={lightboxAttachmentIndex}
+          title={tVoucher('attachments')}
+          onClose={() => setLightboxAttachmentIndex(null)}
+        />
       )}
     </div>
   );
