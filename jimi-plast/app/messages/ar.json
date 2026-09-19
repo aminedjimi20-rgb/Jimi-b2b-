@@ -175,7 +175,12 @@
       "depotAsc": "الديبو (أ ← ي)",
       "depotDesc": "الديبو (ي ← أ)"
     },
-    "done": "انتهى"
+    "done": "انتهى",
+    "close": "إغلاق",
+    "scanBarcode": "مسح",
+    "scanBarcodeHint": "حط الكود بار أو QR داخل المنطقة تحت.",
+    "cameraError": "تعذر الوصول للكاميرا — تحقق من صلاحيات المتصفح.",
+    "notFoundByBarcode": "ما كاين حتى منتوج يوافق هذا الكود."
   },
   "catalog": {
     "title": "الكتالوج",
@@ -222,7 +227,8 @@
     "adjusted": "معدّل",
     "inCart": "فالبانيي",
     "missingPieces": "القطع الناقصة",
-    "minus": "ناقص"
+    "minus": "ناقص",
+    "clearance": "تصفية"
   },
   "products": {
     "title": "المنتجات",
@@ -258,7 +264,13 @@
       "addImage": "إضافة صورة",
       "manufacturer": "الصانع",
       "noManufacturer": "— بدون صانع —",
-      "depot": "الديبو"
+      "depot": "الديبو",
+      "manageDepots": "تسيير المستودعات",
+      "newDepotPlaceholder": "اسم المستودع الجديد",
+      "isSeasonal": "موسمي",
+      "seasonStart": "بداية الموسم",
+      "seasonEnd": "نهاية الموسم",
+      "isClearance": "تصفية مخزون"
     },
     "active": "نشط",
     "inactive": "غير نشط",

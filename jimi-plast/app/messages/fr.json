@@ -175,7 +175,12 @@
       "depotAsc": "Dépôt (A → Z)",
       "depotDesc": "Dépôt (Z → A)"
     },
-    "done": "Terminer"
+    "done": "Terminer",
+    "close": "Fermer",
+    "scanBarcode": "Scanner",
+    "scanBarcodeHint": "Cadrez le code-barres ou QR dans la zone ci-dessous.",
+    "cameraError": "Impossible d'accéder à la caméra — vérifiez les autorisations du navigateur.",
+    "notFoundByBarcode": "Aucun produit ne correspond à ce code."
   },
   "catalog": {
     "title": "Catalogue",
@@ -222,7 +227,8 @@
     "adjusted": "Ajusté",
     "inCart": "Dans le panier",
     "missingPieces": "Pièces manquantes",
-    "minus": "moins"
+    "minus": "moins",
+    "clearance": "Déstockage"
   },
   "products": {
     "title": "Produits",
@@ -258,7 +264,13 @@
       "addImage": "Ajouter une photo",
       "manufacturer": "Fabricant",
       "noManufacturer": "— Aucun fabricant —",
-      "depot": "Dépôt"
+      "depot": "Dépôt",
+      "manageDepots": "Gérer les dépôts",
+      "newDepotPlaceholder": "Nom du nouveau dépôt",
+      "isSeasonal": "Saisonnier",
+      "seasonStart": "Début de saison",
+      "seasonEnd": "Fin de saison",
+      "isClearance": "Déstockage"
     },
     "active": "Actif",
     "inactive": "Inactif",

@@ -21,6 +21,10 @@ interface PackagingUnit {
   key: string;
   label: string;
 }
+interface DepotOption {
+  id: string;
+  name: string;
+}
 interface PriceTierType {
   id: string;
   key: string;
@@ -53,14 +57,16 @@ interface FullProduct {
   isNew: boolean;
   isFeatured: boolean;
   isActive: boolean;
+  isSeasonal: boolean;
+  seasonStart: string | null;
+  seasonEnd: string | null;
+  isClearance: boolean;
   createdAt: string;
   category: { nameFr: string };
   manufacturer: { name: string } | null;
   images: { id: string; url: string; isPrimary: boolean }[];
   prices: { priceTierType: PriceTierType; price: string }[];
 }
-
-const DEFAULT_DEPOTS = ['Dépôt 1', 'Dépôt 2', 'Dépôt 3'];
 
 const EMPTY_FORM = {
   sku: '',
@@ -79,10 +85,16 @@ const EMPTY_FORM = {
   isNew: false,
   isFeatured: false,
   isActive: true,
+  isSeasonal: false,
+  seasonStart: '',
+  seasonEnd: '',
+  isClearance: false,
   priceFactory: '',
   priceWholesale: '',
   priceRetail: '',
 };
+
+const PRODUCTS_PAGE_SIZE = 40;
 
 export default function ProductsAdminPage() {
   const t = useTranslations('products');
@@ -96,6 +108,11 @@ export default function ProductsAdminPage() {
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [packagingUnits, setPackagingUnits] = useState<PackagingUnit[]>([]);
   const [priceTierTypes, setPriceTierTypes] = useState<PriceTierType[]>([]);
+  const [depots, setDepots] = useState<DepotOption[]>([]);
+  const [showDepotManager, setShowDepotManager] = useState(false);
+  const [newDepotName, setNewDepotName] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PAGE_SIZE);
+  const loadMoreRef = useRef<HTMLTableRowElement>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -107,21 +124,18 @@ export default function ProductsAdminPage() {
   const [sortMode, setSortMode] = useState<SortMode>('newest');
   const [lastChanges, setLastChanges] = useState<Record<string, LastChange | null>>({});
 
+  useEffect(() => {
+    setVisibleCount(PRODUCTS_PAGE_SIZE);
+  }, [search, categoryFilter, manufacturerFilter, sortMode]);
+
+  function reloadDepots() {
+    api.get<DepotOption[]>('/depots').then(setDepots);
+  }
+
   function reloadProducts() {
-    api
-      .get<{ items: { id: string }[] }>('/products?pageSize=100', token)
-      .then((res) => Promise.all(res.items.map((p) => api.get<FullProduct>(`/products/${p.id}/full`, token))))
-      .then((rows) => {
-        setProducts(rows);
-        Promise.all(
-          rows.map((p) =>
-            api
-              .get<LastChange | null>(`/products/${p.id}/last-change`, token)
-              .then((change) => [p.id, change] as const)
-              .catch(() => [p.id, null] as const),
-          ),
-        ).then((entries) => setLastChanges(Object.fromEntries(entries)));
-      });
+    // Une seule requête pour toute la liste (plus de N+1 par produit) —
+    // reste fluide même avec des centaines de fiches.
+    api.get<FullProduct[]>('/products/admin/list', token).then(setProducts);
   }
 
   useEffect(() => {
@@ -131,8 +145,42 @@ export default function ProductsAdminPage() {
     api.get<Manufacturer[]>('/manufacturers', token).then(setManufacturers);
     api.get<PackagingUnit[]>('/catalog-settings/packaging-units').then(setPackagingUnits);
     api.get<PriceTierType[]>('/catalog-settings/price-tier-types').then(setPriceTierTypes);
+    reloadDepots();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  async function addDepot() {
+    const name = newDepotName.trim();
+    if (!name) return;
+    try {
+      await api.post('/depots', { name }, token);
+      setNewDepotName('');
+      reloadDepots();
+    } catch {
+      setError(tCommon('error'));
+    }
+  }
+
+  async function removeDepot(id: string) {
+    await api.delete(`/depots/${id}`, token);
+    reloadDepots();
+  }
+
+  // Scroll fluide sur une longue liste (200+ produits) : on n'affiche qu'un
+  // lot à la fois, et on en charge davantage quand la ligne sentinelle
+  // devient visible en bas de tableau — pas de pagination cliquable.
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setVisibleCount((v) => v + PRODUCTS_PAGE_SIZE);
+      },
+      { rootMargin: '400px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount]);
 
   useEffect(() => {
     const editParam = searchParams.get('edit');
@@ -178,6 +226,10 @@ export default function ProductsAdminPage() {
       isNew: form.isNew,
       isFeatured: form.isFeatured,
       isActive: form.isActive,
+      isSeasonal: form.isSeasonal,
+      seasonStart: form.isSeasonal && form.seasonStart ? form.seasonStart : undefined,
+      seasonEnd: form.isSeasonal && form.seasonEnd ? form.seasonEnd : undefined,
+      isClearance: form.isClearance,
       ...(editingId ? {} : { prices }),
     };
 
@@ -221,6 +273,10 @@ export default function ProductsAdminPage() {
       isNew: p.isNew,
       isFeatured: p.isFeatured,
       isActive: p.isActive,
+      isSeasonal: p.isSeasonal,
+      seasonStart: p.seasonStart ? p.seasonStart.slice(0, 10) : '',
+      seasonEnd: p.seasonEnd ? p.seasonEnd.slice(0, 10) : '',
+      isClearance: p.isClearance,
       priceFactory: String(priceOf('factory')),
       priceWholesale: String(priceOf('wholesale')),
       priceRetail: String(priceOf('retail')),
@@ -280,6 +336,24 @@ export default function ProductsAdminPage() {
       }
     });
 
+  // La colonne "Dernière modification" ne se charge que pour les lignes
+  // réellement visibles — évite un aller-retour par produit dès l'ouverture
+  // de la page quand il y en a des centaines.
+  useEffect(() => {
+    if (!token) return;
+    const pending = filteredProducts.slice(0, visibleCount).filter((p) => !(p.id in lastChanges));
+    if (pending.length === 0) return;
+    Promise.all(
+      pending.map((p) =>
+        api
+          .get<LastChange | null>(`/products/${p.id}/last-change`, token)
+          .then((change) => [p.id, change] as const)
+          .catch(() => [p.id, null] as const),
+      ),
+    ).then((entries) => setLastChanges((prev) => ({ ...prev, ...Object.fromEntries(entries) })));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, filteredProducts, visibleCount]);
+
   return (
     <div className="flex flex-col gap-6 xl:flex-row">
       <div className="flex-1">
@@ -335,7 +409,7 @@ export default function ProductsAdminPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((p) => {
+              {filteredProducts.slice(0, visibleCount).map((p) => {
                 const change = lastChanges[p.id];
                 return (
                   <tr key={p.id} className={`border-t border-line ${editingId === p.id ? 'bg-accent/5' : ''}`}>
@@ -377,6 +451,13 @@ export default function ProductsAdminPage() {
                   </tr>
                 );
               })}
+              {visibleCount < filteredProducts.length && (
+                <tr ref={loadMoreRef}>
+                  <td colSpan={8} className="px-4 py-3 text-center text-xs text-muted">
+                    {tCommon('loading')}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
           {filteredProducts.length === 0 && <p className="p-4 text-center text-xs text-muted">{tCommon('empty')}</p>}
@@ -448,7 +529,16 @@ export default function ProductsAdminPage() {
           />
 
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-muted">{t('form.depot')}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-muted">{t('form.depot')}</span>
+              <button
+                type="button"
+                onClick={() => setShowDepotManager((v) => !v)}
+                className="text-xs text-accent hover:underline"
+              >
+                {t('form.manageDepots')}
+              </button>
+            </div>
             <input
               list="product-depot-options"
               value={form.depot}
@@ -456,11 +546,37 @@ export default function ProductsAdminPage() {
               className="rounded border border-line bg-paper px-3 py-2"
             />
             <datalist id="product-depot-options">
-              {DEFAULT_DEPOTS.map((d) => (
-                <option key={d} value={d} />
+              {depots.map((d) => (
+                <option key={d.id} value={d.name} />
               ))}
             </datalist>
           </label>
+
+          {showDepotManager && (
+            <div className="rounded border border-line bg-paper p-2">
+              <div className="flex gap-2">
+                <input
+                  value={newDepotName}
+                  onChange={(e) => setNewDepotName(e.target.value)}
+                  placeholder={t('form.newDepotPlaceholder')}
+                  className="flex-1 rounded border border-line bg-panel px-2 py-1 text-sm"
+                />
+                <button type="button" onClick={addDepot} className="rounded bg-accent px-2 py-1 text-xs font-medium text-white">
+                  {tCommon('add')}
+                </button>
+              </div>
+              <ul className="mt-2 flex flex-col gap-1">
+                {depots.map((d) => (
+                  <li key={d.id} className="flex items-center justify-between text-xs text-ink">
+                    <span>{d.name}</span>
+                    <button type="button" onClick={() => removeDepot(d.id)} className="text-red-600 hover:underline">
+                      {tCommon('delete')}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-2">
             <Field
@@ -525,7 +641,46 @@ export default function ProductsAdminPage() {
               />
               {t('form.isActive')}
             </label>
+            <label className="flex items-center gap-1.5">
+              <input
+                type="checkbox"
+                checked={form.isSeasonal}
+                onChange={(e) => setForm({ ...form, isSeasonal: e.target.checked })}
+              />
+              {t('form.isSeasonal')}
+            </label>
+            <label className="flex items-center gap-1.5">
+              <input
+                type="checkbox"
+                checked={form.isClearance}
+                onChange={(e) => setForm({ ...form, isClearance: e.target.checked })}
+              />
+              {t('form.isClearance')}
+            </label>
           </div>
+
+          {form.isSeasonal && (
+            <div className="grid grid-cols-2 gap-2">
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{t('form.seasonStart')}</span>
+                <input
+                  type="date"
+                  value={form.seasonStart}
+                  onChange={(e) => setForm({ ...form, seasonStart: e.target.value })}
+                  className="rounded border border-line bg-paper px-3 py-2"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-muted">{t('form.seasonEnd')}</span>
+                <input
+                  type="date"
+                  value={form.seasonEnd}
+                  onChange={(e) => setForm({ ...form, seasonEnd: e.target.value })}
+                  className="rounded border border-line bg-paper px-3 py-2"
+                />
+              </label>
+            </div>
+          )}
 
           {editingProduct && (
             <div>

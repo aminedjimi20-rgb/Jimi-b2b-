@@ -8,6 +8,7 @@ import { api, ApiError } from '@/lib/api';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { SortSelect, type SortMode } from '@/components/sort-select';
+import { BarcodeScanButton } from '@/components/barcode-scanner';
 
 interface Price {
   tierKey: string;
@@ -16,6 +17,8 @@ interface Price {
 }
 interface PickerProduct {
   id: string;
+  sku: string;
+  barcode: string | null;
   nameFr: string;
   nameAr: string | null;
   nameEn: string | null;
@@ -242,6 +245,24 @@ export default function VoucherEditorPage() {
     setModalUnitPrice(String(price));
     setModalDiscount('0');
     setModalDiscountPercent('0');
+  }
+
+  // Scan caméra : cherche une correspondance exacte (SKU ou code-barres) et
+  // ouvre directement la fenêtre d'ajout — sinon retombe sur la recherche
+  // texte classique du sélecteur avec le code scanné.
+  async function handleBarcodeScan(code: string) {
+    setShowPicker(true);
+    try {
+      const res = await api.get<{ items: PickerProduct[] }>(`/products?search=${encodeURIComponent(code)}&pageSize=5`, token);
+      const exact = res.items.find((p) => p.sku === code || p.barcode === code);
+      if (exact) {
+        openAddModal(exact);
+        return;
+      }
+    } catch {
+      // on retombe sur la recherche texte ci-dessous
+    }
+    setPickerQuery(code);
   }
 
   /** Sous-total plein (cartons catalogue × prix catalogue) — base de calcul du %. */
@@ -557,12 +578,15 @@ export default function VoucherEditorPage() {
 
       {editable && (
         <div className="flex flex-col gap-3">
-          <button
-            onClick={() => setShowPicker((v) => !v)}
-            className="w-fit rounded bg-accent px-3 py-2 text-sm font-medium text-white"
-          >
-            {showPicker ? tCommon('cancel') : t('addProduct')}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowPicker((v) => !v)}
+              className="w-fit rounded bg-accent px-3 py-2 text-sm font-medium text-white"
+            >
+              {showPicker ? tCommon('cancel') : t('addProduct')}
+            </button>
+            <BarcodeScanButton onScan={handleBarcodeScan} />
+          </div>
 
           {showPicker && (
             <div className="rounded-lg border border-line bg-panel p-3">

@@ -118,6 +118,10 @@ export class UpsertProductDto {
   seasonEnd?: string;
 
   @IsOptional()
+  @IsBoolean()
+  isClearance?: boolean;
+
+  @IsOptional()
   @IsInt()
   manualPriority?: number;
 

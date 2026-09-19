@@ -12,6 +12,7 @@ import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { RegistrationRequestsModule } from './registration-requests/registration-requests.module';
 import { CategoriesModule } from './categories/categories.module';
+import { DepotsModule } from './depots/depots.module';
 import { CatalogSettingsModule } from './catalog-settings/catalog-settings.module';
 import { ProductsModule } from './products/products.module';
 import { CustomersModule } from './customers/customers.module';
@@ -44,6 +45,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     RolesModule,
     RegistrationRequestsModule,
     CategoriesModule,
+    DepotsModule,
     CatalogSettingsModule,
     ProductsModule,
     CustomersModule,

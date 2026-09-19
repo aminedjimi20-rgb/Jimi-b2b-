@@ -273,6 +273,19 @@ model PackagingUnit {
   @@map("packaging_units")
 }
 
+// Liste des dépôts physiques, administrable (§ Produits) — Product.depot et
+// SalesVoucher.depot restent de simples chaînes libres (pas de FK) : cette
+// table ne sert qu'à peupler/gérer la liste de choix partout où un dépôt se
+// sélectionne, sans avoir à migrer les valeurs déjà enregistrées.
+model Depot {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("depots")
+}
+
 // Niveau de prix (usine/gros/détail...) — administrable, lié à une permission
 // de visibilité (permissionKey) pour que la logique d'affichage reste générique.
 model PriceTierType {
@@ -320,6 +333,7 @@ model Product {
   isSeasonal  Boolean   @default(false)
   seasonStart DateTime?
   seasonEnd   DateTime?
+  isClearance Boolean   @default(false) // déstockage — mis en avant comme une liquidation, indépendamment des promotions/prix
   manualPriority Int?   // override manuel de l'ordre d'affichage
 
   createdAt DateTime  @default(now())

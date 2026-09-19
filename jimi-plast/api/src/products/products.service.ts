@@ -15,6 +15,7 @@ export interface ProductListFilters {
   isNew?: boolean;
   isFeatured?: boolean;
   isSeasonal?: boolean;
+  isClearance?: boolean;
   onSale?: boolean;
   availability?: 'in_stock' | 'out_of_stock';
   sort?: 'priority' | 'newest' | 'name_asc' | 'name_desc';
@@ -38,6 +39,7 @@ export class ProductsService {
     isNew: boolean;
     isFeatured: boolean;
     isSeasonal: boolean;
+    isClearance: boolean;
     seasonStart: Date | null;
     seasonEnd: Date | null;
     hasActivePromotion: boolean;
@@ -47,6 +49,7 @@ export class ProductsService {
 
     let score = 0;
     if (product.hasActivePromotion) score += 5000;
+    if (product.isClearance) score += 4000; // le déstockage doit se voir vite
     if (product.isNew) score += 3000;
     const now = new Date();
     const inSeason =
@@ -72,6 +75,7 @@ export class ProductsService {
       ...(filters.isNew !== undefined ? { isNew: filters.isNew } : {}),
       ...(filters.isFeatured !== undefined ? { isFeatured: filters.isFeatured } : {}),
       ...(filters.isSeasonal !== undefined ? { isSeasonal: filters.isSeasonal } : {}),
+      ...(filters.isClearance !== undefined ? { isClearance: filters.isClearance } : {}),
       ...(filters.availability === 'in_stock' ? { currentStock: { gt: 0 } } : {}),
       ...(filters.availability === 'out_of_stock' ? { currentStock: { lte: 0 } } : {}),
       ...(filters.search
@@ -156,6 +160,23 @@ export class ProductsService {
   }
 
   /** Vue interne complète (coûts, stock exact, historique) — réservée aux permissions adéquates. */
+  // Une seule requête pour toute la table Produits (admin) — évite le
+  // N+1 (un /:id/full par produit) qui devenait lourd passé une centaine
+  // de fiches.
+  adminList() {
+    return this.prisma.product.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        category: true,
+        manufacturer: true,
+        packagingUnit: true,
+        images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
+        prices: { include: { priceTierType: true } },
+      },
+    });
+  }
+
   async getFullById(id: string) {
     const product = await this.prisma.product.findFirst({
       where: { id, deletedAt: null },
@@ -191,6 +212,7 @@ export class ProductsService {
       isNew: boolean;
       isFeatured: boolean;
       isSeasonal: boolean;
+      isClearance: boolean;
       createdAt: Date;
       category: {
         id: string;
@@ -226,6 +248,7 @@ export class ProductsService {
       isNew: product.isNew,
       isFeatured: product.isFeatured,
       isSeasonal: product.isSeasonal,
+      isClearance: product.isClearance,
       createdAt: product.createdAt,
       availability: product.currentStock > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK',
       currentStock: permissions?.includes('stock.manage') ? product.currentStock : null,

@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { cart, useCarts } from '@/lib/cart';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { ImageLightbox } from '@/components/image-lightbox';
+import { BarcodeScanButton } from '@/components/barcode-scanner';
 
 interface Category {
   id: string;
@@ -38,6 +39,7 @@ interface CategoryRef {
 interface Product {
   id: string;
   sku: string;
+  barcode: string | null;
   nameFr: string;
   nameAr: string | null;
   nameEn: string | null;
@@ -49,6 +51,7 @@ interface Product {
   images: { url: string; isPrimary: boolean }[];
   isNew: boolean;
   isFeatured: boolean;
+  isClearance: boolean;
   availability: 'IN_STOCK' | 'OUT_OF_STOCK';
   currentStock: number | null;
   prices: Price[];
@@ -211,6 +214,23 @@ export default function CatalogPage() {
     setModalUnitPrice(String(price));
     setModalDiscount('0');
     setModalDiscountPercent('0');
+  }
+
+  // Scan caméra : cherche une correspondance exacte (SKU ou code-barres) et
+  // ouvre directement la fenêtre d'ajout au panier — sinon on retombe sur
+  // une recherche texte classique avec le code scanné.
+  async function handleBarcodeScan(code: string) {
+    try {
+      const res = await api.get<{ items: Product[] }>(`/products?search=${encodeURIComponent(code)}&pageSize=5`, token);
+      const exact = res.items.find((p) => p.sku === code || p.barcode === code);
+      if (exact) {
+        openAddModal(exact);
+        return;
+      }
+    } catch {
+      // on retombe sur la recherche texte ci-dessous
+    }
+    setSearch(code);
   }
 
   /** Sous-total plein (pièces réelles × prix catalogue) — base de calcul du %. */
@@ -445,6 +465,7 @@ export default function CatalogPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-56 rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
           />
+          <BarcodeScanButton onScan={handleBarcodeScan} />
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
@@ -556,6 +577,11 @@ export default function CatalogPage() {
                     {p.hasPromotion && (
                       <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-white">
                         {t('promo')}
+                      </span>
+                    )}
+                    {p.isClearance && (
+                      <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        {t('clearance')}
                       </span>
                     )}
                   </div>

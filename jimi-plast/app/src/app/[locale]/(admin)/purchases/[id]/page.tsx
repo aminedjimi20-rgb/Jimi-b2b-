@@ -5,9 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
+import { BarcodeScanButton } from '@/components/barcode-scanner';
 
 interface PickerProduct {
   id: string;
+  sku: string;
+  barcode: string | null;
   nameFr: string;
   nameAr: string | null;
   nameEn: string | null;
@@ -162,6 +165,26 @@ export default function PurchaseEditorPage() {
     setModalPieces(String(p.unitsPerPackage));
     setModalMissingPieces('0');
     setModalUnitCost('');
+  }
+
+  // Scan caméra : cherche une correspondance exacte (SKU ou code-barres)
+  // PARMI les produits de ce fabricant seulement — un code qui appartient à
+  // un autre fabricant ne doit pas pouvoir être ajouté à cet achat.
+  async function handleBarcodeScan(code: string) {
+    if (!purchase) return;
+    setShowPicker(true);
+    try {
+      const params = new URLSearchParams({ search: code, manufacturerId: purchase.manufacturerId, pageSize: '5' });
+      const res = await api.get<{ items: PickerProduct[] }>(`/products?${params.toString()}`, token);
+      const exact = res.items.find((p) => p.sku === code || p.barcode === code);
+      if (exact) {
+        openAddModal(exact);
+        return;
+      }
+      setError(tCommon('notFoundByBarcode'));
+    } catch {
+      setError(tCommon('error'));
+    }
   }
 
   function onModalQtyChange(v: string) {
@@ -360,9 +383,12 @@ export default function PurchaseEditorPage() {
 
       {editable && (
         <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowPicker((v) => !v)} className="w-fit rounded bg-accent px-3 py-2 text-sm font-medium text-white">
             {showPicker ? tCommon('cancel') : tVoucher('addProduct')}
           </button>
+          <BarcodeScanButton onScan={handleBarcodeScan} />
+          </div>
 
           {showPicker && (
             <div className="rounded-lg border border-line bg-panel p-3">

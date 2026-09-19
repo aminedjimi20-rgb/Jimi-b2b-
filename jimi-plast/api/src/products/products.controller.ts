@@ -33,6 +33,7 @@ export class ProductsController {
       isNew: toBool(query.isNew),
       isFeatured: toBool(query.isFeatured),
       isSeasonal: toBool(query.isSeasonal),
+      isClearance: toBool(query.isClearance),
       onSale: toBool(query.onSale),
       availability: query.availability as ProductListFilters['availability'],
       sort: query.sort as ProductListFilters['sort'],
@@ -40,6 +41,15 @@ export class ProductsController {
       pageSize: query.pageSize ? Number(query.pageSize) : undefined,
     };
     return this.productsService.list(filters, user?.permissions ?? null);
+  }
+
+  // Liste complète pour l'admin Produits — une seule requête (produit +
+  // fabricant + prix), pas de va-et-vient N+1 par produit comme /:id/full,
+  // pour rester fluide même avec des centaines de produits.
+  @Get('admin/list')
+  @RequirePermissions('catalog.manage')
+  adminList() {
+    return this.productsService.adminList();
   }
 
   @Public()
