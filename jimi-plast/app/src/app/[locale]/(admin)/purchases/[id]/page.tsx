@@ -60,6 +60,7 @@ interface Purchase {
   discount: string;
   transportCost: string;
   paidAmount: string;
+  notes: string | null;
   cancelReason: string | null;
   items: PurchaseItem[];
   attachments: { id: string; url: string; createdAt: string }[];
@@ -97,6 +98,7 @@ export default function PurchaseEditorPage() {
   const [discountPercent, setDiscountPercent] = useState('0');
   const [transportCost, setTransportCost] = useState('0');
   const [paidAmount, setPaidAmount] = useState('0');
+  const [notes, setNotes] = useState('');
   const [cancelReason, setCancelReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -126,6 +128,7 @@ export default function PurchaseEditorPage() {
       setDiscountPercent(sub > 0 ? String(Math.round((Number(p.discount) / sub) * 10000) / 100) : '0');
       setTransportCost(p.transportCost);
       setPaidAmount(p.paidAmount);
+      setNotes(p.notes ?? '');
     });
     api.get<HistoryEntry[]>(`/purchase-vouchers/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
   }
@@ -312,7 +315,18 @@ export default function PurchaseEditorPage() {
             { productId: addingProduct.id, quantityPackages: qty, unitCost: cost, actualTotalUnits: hasCustomPieces ? pieces : undefined, unitsPerPackage },
           ];
 
-    autoSave({ items: newItems });
+    // Un carton reçu incomplet laisse toujours une trace dans les
+    // observations avec le marqueur ⚠ — même système que le bon de vente —
+    // pour que le décalage reste visible même après une nouvelle modification.
+    let newNotes = notes;
+    if (hasCustomPieces) {
+      const prefix = `⚠ ${tCatalog('adjustedWarning')} : `;
+      const line = `${localizedName(addingProduct, locale)} : ${pieces} ${tCatalog('pieces')} (${qty} × ${unitsPerPackage})`;
+      newNotes = notes.startsWith(prefix) ? `${notes} | ${line}` : notes ? `${notes} | ${prefix}${line}` : `${prefix}${line}`;
+      setNotes(newNotes);
+    }
+
+    autoSave({ items: newItems, notes: newNotes || undefined });
     setAddingProduct(null);
     setPickerQuery('');
   }
@@ -590,6 +604,19 @@ export default function PurchaseEditorPage() {
           <input type="number" value={paidAmount} disabled={!editable} onChange={(e) => { setPaidAmount(e.target.value); autoSave({ paidAmount: Number(e.target.value) }); }} className="rounded border border-line bg-panel px-3 py-2 disabled:opacity-60" />
         </label>
       </div>
+
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="text-muted">{t('notes')}</span>
+        <textarea
+          value={notes}
+          disabled={!editable}
+          onChange={(e) => { setNotes(e.target.value); autoSave({ notes: e.target.value }); }}
+          rows={2}
+          className={`rounded border px-3 py-2 ${
+            notes.includes('⚠') ? 'border-amber-500 bg-amber-500/10 text-amber-700' : 'border-line bg-panel'
+          }`}
+        />
+      </label>
 
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
         <div className="flex justify-between py-1 text-muted">

@@ -490,6 +490,7 @@
     "title": "Achats",
     "newPurchase": "Nouveau bon d'achat",
     "selectManufacturer": "Sélectionner un fabricant",
+    "notes": "Observations",
     "columns": {
       "number": "N°",
       "manufacturer": "Fabricant",

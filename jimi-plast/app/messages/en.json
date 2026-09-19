@@ -490,6 +490,7 @@
     "title": "Purchases",
     "newPurchase": "New purchase voucher",
     "selectManufacturer": "Select a manufacturer",
+    "notes": "Notes",
     "columns": {
       "number": "No.",
       "manufacturer": "Manufacturer",

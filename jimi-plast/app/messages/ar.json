@@ -490,6 +490,7 @@
     "title": "المشتريات",
     "newPurchase": "بون شراء جديد",
     "selectManufacturer": "اختر مصنعاً",
+    "notes": "ملاحظات",
     "columns": {
       "number": "الرقم",
       "manufacturer": "المصنع",
