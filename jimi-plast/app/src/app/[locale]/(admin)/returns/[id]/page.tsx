@@ -143,6 +143,15 @@ export default function ReturnDetailPage() {
     await api.post(`/returns/${id}/items/${itemId}/images`, { url }, token);
     reload();
   }
+  async function removeItem(itemId: string) {
+    if (!window.confirm(t('removeItemConfirm'))) return;
+    try {
+      await api.delete(`/returns/${id}/items/${itemId}`, token);
+      reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : tCommon('error'));
+    }
+  }
   async function removeItemImage(itemId: string, imageId: string) {
     await api.delete(`/returns/${id}/items/${itemId}/images/${imageId}`, token);
     reload();
@@ -277,6 +286,14 @@ export default function ReturnDetailPage() {
                       onUploaded={(url) => addItemImage(item.id, url)}
                       className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30"
                     />
+                    {editMode && (
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-500/10"
+                      >
+                        {t('removeItem')}
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

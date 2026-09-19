@@ -137,12 +137,13 @@ export class PendingDeletionsService {
     if (voucher.status === 'CONFIRMED') {
       await this.prisma.$transaction(async (tx) => {
         for (const item of voucher.items) {
-          await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+          const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
           await tx.stockMovement.create({
             data: {
               productId: item.productId,
               type: 'ADJUSTMENT',
               quantity: -item.totalUnits,
+              stockAfter: decremented.currentStock,
               referenceType: 'PurchaseVoucher',
               referenceId: voucher.id,
               reason: `Suppression approuvée du bon ${voucher.number ?? ''} : ${reason}`,
@@ -340,12 +341,13 @@ export class PendingDeletionsService {
         if (pending.purchaseVoucher && pending.purchaseVoucher.status === 'CONFIRMED') {
           const voucher = pending.purchaseVoucher;
           for (const item of voucher.items) {
-            await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+            const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
             await tx.stockMovement.create({
               data: {
                 productId: item.productId,
                 type: 'ADJUSTMENT',
                 quantity: -item.totalUnits,
+                stockAfter: decremented.currentStock,
                 referenceType: 'PurchaseVoucher',
                 referenceId: voucher.id,
                 reason: `Suppression approuvée du bon ${voucher.number ?? ''} : ${pending.reason}`,
@@ -372,12 +374,13 @@ export class PendingDeletionsService {
         if (pending.salesVoucher && (pending.salesVoucher.status === 'CONFIRMED' || pending.salesVoucher.status === 'DELIVERED')) {
           const voucher = pending.salesVoucher;
           for (const item of voucher.items) {
-            await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
+            const incremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
             await tx.stockMovement.create({
               data: {
                 productId: item.productId,
                 type: 'ADJUSTMENT',
                 quantity: item.totalUnits,
+                stockAfter: incremented.currentStock,
                 referenceType: 'SalesVoucher',
                 referenceId: voucher.id,
                 reason: `Suppression approuvée du bon ${voucher.number ?? ''} : ${pending.reason}`,

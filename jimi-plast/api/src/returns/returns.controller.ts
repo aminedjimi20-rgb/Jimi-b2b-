@@ -65,6 +65,11 @@ export class ReturnsController {
     return this.returnsService.addItems(id, dto.items, user.id);
   }
 
+  @Delete(':id/items/:itemId')
+  removeItem(@Param('id') id: string, @Param('itemId') itemId: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.returnsService.removeItem(id, itemId, user.id);
+  }
+
   @Post(':id/notes')
   updateNotes(@Param('id') id: string, @Body() dto: UpdateReturnNotesDto, @CurrentUser() user: AuthenticatedUser) {
     return this.returnsService.updateNotes(id, dto.notes, user.id);

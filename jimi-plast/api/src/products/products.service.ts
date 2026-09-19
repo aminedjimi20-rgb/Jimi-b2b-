@@ -351,6 +351,7 @@ export class ProductsService {
             productId: id,
             type: 'ADJUSTMENT',
             quantity: stockDiff,
+            stockAfter: result.currentStock,
             reason: 'Modifié depuis la fiche produit',
             createdById: actorId,
           },

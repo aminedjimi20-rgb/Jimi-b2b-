@@ -45,6 +45,7 @@ export class StockService {
           productId: dto.productId,
           type: 'ADJUSTMENT',
           quantity: diff,
+          stockAfter: dto.newQuantity,
           reason: dto.reason,
           createdById: actorId,
         },

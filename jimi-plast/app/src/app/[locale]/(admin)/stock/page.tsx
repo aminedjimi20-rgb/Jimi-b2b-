@@ -15,6 +15,7 @@ interface Movement {
   id: string;
   type: string;
   quantity: number;
+  stockAfter: number | null;
   reason: string | null;
   createdAt: string;
   product: { nameFr: string; sku: string; unitsPerPackage: number };
@@ -226,13 +227,14 @@ export default function StockPage() {
                 <th className="px-4 py-2 text-start">{t('columns.type')}</th>
                 <th className="px-4 py-2 text-end">{t('columns.quantity')}</th>
                 <th className="px-4 py-2 text-end">{t('columns.cartons')}</th>
+                <th className="px-4 py-2 text-end">{t('columns.stockAfter')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.reason')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredMovements.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-4 text-center text-sm text-muted">
+                  <td colSpan={7} className="px-4 py-4 text-center text-sm text-muted">
                     {tCommon('empty')}
                   </td>
                 </tr>
@@ -253,6 +255,7 @@ export default function StockPage() {
                       {cartons > 0 ? '+' : ''}
                       {cartons}
                     </td>
+                    <td className="px-4 py-2 text-end tabular text-ink">{m.stockAfter ?? '—'}</td>
                     <td className="px-4 py-2 text-xs text-muted">{m.reason ?? '—'}</td>
                   </tr>
                 );

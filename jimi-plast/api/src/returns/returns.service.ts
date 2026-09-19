@@ -143,12 +143,13 @@ export class ReturnsService {
             });
           } else {
             for (const item of priced) {
-              await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
+              const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
               await tx.stockMovement.create({
                 data: {
                   productId: item.productId,
                   type: 'RETURN_CUSTOMER',
                   quantity: -item.quantity,
+                  stockAfter: decremented.currentStock,
                   referenceType: 'Return',
                   referenceId: id,
                   reason: `Article ajouté au retour ${ret.number ?? ''}`,
@@ -171,12 +172,13 @@ export class ReturnsService {
             },
           });
           for (const item of priced) {
-            await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
+            const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
             await tx.stockMovement.create({
               data: {
                 productId: item.productId,
                 type: 'RETURN_SUPPLIER',
                 quantity: -item.quantity,
+                stockAfter: decremented.currentStock,
                 referenceType: 'Return',
                 referenceId: id,
                 reason: `Article ajouté au retour ${ret.number ?? ''}`,
@@ -197,6 +199,93 @@ export class ReturnsService {
       actorId,
     });
     return this.getById(id);
+  }
+
+  // Symétrique de addItems() : retire un article ajouté par erreur, y
+  // compris sur un retour déjà validé — l'effet comptable de CET article
+  // (avoir/ajustement + stock) est défait sans toucher aux autres lignes,
+  // et l'opération reste dans l'historique. Le dernier article d'un retour
+  // ne peut pas être retiré isolément — supprimer le retour entier plutôt.
+  async removeItem(returnId: string, itemId: string, actorId: string) {
+    const ret = await this.getById(returnId);
+    const item = ret.items.find((i) => i.id === itemId);
+    if (!item) throw new NotFoundException('Article introuvable');
+    if (ret.items.length === 1) {
+      throw new BadRequestException('Impossible de retirer le dernier article — supprimez le retour entier');
+    }
+    const lineTotal = Number(item.lineTotal);
+
+    await this.prisma.$transaction(async (tx) => {
+      if (ret.status === 'VALIDATED') {
+        if (ret.type === 'CUSTOMER' && ret.customerId) {
+          if (ret.decision !== 'REPLACEMENT') {
+            await tx.ledgerEntry.create({
+              data: {
+                customerId: ret.customerId,
+                type: 'RETURN_CREDIT',
+                amount: lineTotal,
+                reference: ret.number,
+                note: `Article retiré du retour ${ret.number ?? ''} : ${item.product.nameFr}`,
+                createdById: actorId,
+              },
+            });
+          } else {
+            const restored = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.quantity } } });
+            await tx.stockMovement.create({
+              data: {
+                productId: item.productId,
+                type: 'ADJUSTMENT',
+                quantity: item.quantity,
+                stockAfter: restored.currentStock,
+                referenceType: 'Return',
+                referenceId: returnId,
+                reason: `Article retiré du retour ${ret.number ?? ''}`,
+                createdById: actorId,
+              },
+            });
+          }
+        }
+
+        if (ret.type === 'SUPPLIER' && ret.manufacturerId) {
+          await tx.supplierLedgerEntry.create({
+            data: {
+              manufacturerId: ret.manufacturerId,
+              type: 'ADJUSTMENT',
+              amount: lineTotal,
+              reference: ret.number,
+              note: `Article retiré du retour ${ret.number ?? ''} : ${item.product.nameFr}`,
+              createdById: actorId,
+            },
+          });
+          const restored = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.quantity } } });
+          await tx.stockMovement.create({
+            data: {
+              productId: item.productId,
+              type: 'ADJUSTMENT',
+              quantity: item.quantity,
+              stockAfter: restored.currentStock,
+              referenceType: 'Return',
+              referenceId: returnId,
+              reason: `Article retiré du retour ${ret.number ?? ''}`,
+              createdById: actorId,
+            },
+          });
+        }
+      }
+
+      await tx.returnItem.delete({ where: { id: itemId } });
+      await tx.return.update({ where: { id: returnId }, data: { totalValue: { decrement: lineTotal } } });
+    });
+
+    await this.auditLog.record({
+      entityType: 'Return',
+      entityId: returnId,
+      action: 'UPDATE',
+      field: 'items',
+      reason: `Article retiré : ${item.product.nameFr} (${item.quantity} pièces)`,
+      actorId,
+    });
+    return this.getById(returnId);
   }
 
   async updateNotes(id: string, notes: string, actorId: string) {
@@ -220,12 +309,13 @@ export class ReturnsService {
             await tx.ledgerEntry.updateMany({ where: { customerId: ret.customerId, reference: ret.number }, data: { voidedAt: new Date() } });
           } else {
             for (const item of ret.items) {
-              await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.quantity } } });
+              const restored = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.quantity } } });
               await tx.stockMovement.create({
                 data: {
                   productId: item.productId,
                   type: 'ADJUSTMENT',
                   quantity: item.quantity,
+                  stockAfter: restored.currentStock,
                   referenceType: 'Return',
                   referenceId: id,
                   reason: `Suppression du retour ${ret.number ?? ''}`,
@@ -239,12 +329,13 @@ export class ReturnsService {
         if (ret.type === 'SUPPLIER' && ret.manufacturerId) {
           await tx.supplierLedgerEntry.updateMany({ where: { manufacturerId: ret.manufacturerId, reference: ret.number }, data: { voidedAt: new Date() } });
           for (const item of ret.items) {
-            await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.quantity } } });
+            const restored = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.quantity } } });
             await tx.stockMovement.create({
               data: {
                 productId: item.productId,
                 type: 'ADJUSTMENT',
                 quantity: item.quantity,
+                stockAfter: restored.currentStock,
                 referenceType: 'Return',
                 referenceId: id,
                 reason: `Suppression du retour ${ret.number ?? ''}`,
@@ -327,12 +418,13 @@ export class ReturnsService {
           });
         } else {
           for (const item of ret.items) {
-            await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
+            const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
             await tx.stockMovement.create({
               data: {
                 productId: item.productId,
                 type: 'RETURN_CUSTOMER',
                 quantity: -item.quantity,
+                stockAfter: decremented.currentStock,
                 referenceType: 'Return',
                 referenceId: ret.id,
                 reason: 'Remplacement suite retour client',
@@ -355,12 +447,13 @@ export class ReturnsService {
           },
         });
         for (const item of ret.items) {
-          await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
+          const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.quantity } } });
           await tx.stockMovement.create({
             data: {
               productId: item.productId,
               type: 'RETURN_SUPPLIER',
               quantity: -item.quantity,
+              stockAfter: decremented.currentStock,
               referenceType: 'Return',
               referenceId: ret.id,
               createdById: actorId,

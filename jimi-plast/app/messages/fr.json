@@ -515,7 +515,8 @@
       "type": "Type",
       "quantity": "Quantité (pièces)",
       "cartons": "Cartons",
-      "reason": "Raison"
+      "reason": "Raison",
+      "stockAfter": "Stock après"
     },
     "movementTypes": {
       "SALE": "Vente",
@@ -546,6 +547,7 @@
     "unitPriceHint": "Laisser vide pour le prix automatique",
     "addItem": "Ajouter",
     "removeItem": "Retirer",
+    "removeItemConfirm": "Retirer cet article ? Si le retour est déjà validé, le mouvement de stock et de compte de cet article sera annulé.",
     "noItems": "Aucun article ajouté",
     "createReturn": "Créer le retour",
     "validate": "Valider",

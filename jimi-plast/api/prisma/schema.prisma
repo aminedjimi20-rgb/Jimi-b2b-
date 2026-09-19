@@ -602,6 +602,7 @@ model StockMovement {
   productId     String
   type          StockMovementType
   quantity      Int // toujours en pièces ; négatif = sortie, positif = entrée
+  stockAfter    Int? // stock du produit juste après ce mouvement — figé, jamais recalculé
   referenceType String? // "SalesVoucher" | "PurchaseVoucher" | ...
   referenceId   String?
   reason        String?

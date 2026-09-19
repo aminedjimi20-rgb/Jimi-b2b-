@@ -207,12 +207,13 @@ export class PurchaseVouchersService {
 
         for (const old of existingItems) {
           if (!newProductIds.has(old.productId)) {
-            await tx.product.update({ where: { id: old.productId }, data: { currentStock: { decrement: old.totalUnits } } });
+            const revertedProduct = await tx.product.update({ where: { id: old.productId }, data: { currentStock: { decrement: old.totalUnits } } });
             await tx.stockMovement.create({
               data: {
                 productId: old.productId,
                 type: 'ADJUSTMENT',
                 quantity: -old.totalUnits,
+                stockAfter: revertedProduct.currentStock,
                 referenceType: 'PurchaseVoucher',
                 referenceId: id,
                 reason: `Retiré du bon d'achat après confirmation par ${actorName}`,
@@ -248,7 +249,7 @@ export class PurchaseVouchersService {
           // Le catalogue reflète toujours le dernier coût et conditionnement
           // constatés à l'achat — que le stock bouge ou non (ex: correction
           // de prix ou de pièces/carton sans changement de quantité).
-          await tx.product.update({
+          const updatedProduct = await tx.product.update({
             where: { id: product.id },
             data: {
               costPrice: item.unitCost,
@@ -262,6 +263,7 @@ export class PurchaseVouchersService {
                 productId: product.id,
                 type: 'ADJUSTMENT',
                 quantity: delta,
+                stockAfter: updatedProduct.currentStock,
                 referenceType: 'PurchaseVoucher',
                 referenceId: id,
                 reason: `Modifié après confirmation par ${actorName}`,
@@ -335,7 +337,7 @@ export class PurchaseVouchersService {
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of voucher.items) {
-        await tx.product.update({
+        const receivedProduct = await tx.product.update({
           where: { id: item.productId },
           data: { currentStock: { increment: item.totalUnits }, costPrice: item.unitCost, unitsPerPackage: item.unitsPerPackageSnapshot },
         });
@@ -344,6 +346,7 @@ export class PurchaseVouchersService {
             productId: item.productId,
             type: 'PURCHASE',
             quantity: item.totalUnits,
+            stockAfter: receivedProduct.currentStock,
             referenceType: 'PurchaseVoucher',
             referenceId: voucher.id,
             createdById: actorId,
@@ -400,12 +403,13 @@ export class PurchaseVouchersService {
     await this.prisma.$transaction(async (tx) => {
       if (wasConfirmed) {
         for (const item of voucher.items) {
-          await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+          const revertedProduct = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
           await tx.stockMovement.create({
             data: {
               productId: item.productId,
               type: 'ADJUSTMENT',
               quantity: -item.totalUnits,
+              stockAfter: revertedProduct.currentStock,
               referenceType: 'PurchaseVoucher',
               referenceId: voucher.id,
               reason: `Annulation bon d'achat par ${actorName} : ${dto.reason}`,
@@ -462,12 +466,13 @@ export class PurchaseVouchersService {
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of voucher.items) {
-        await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
+        const revivedProduct = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
         await tx.stockMovement.create({
           data: {
             productId: item.productId,
             type: 'PURCHASE',
             quantity: item.totalUnits,
+            stockAfter: revivedProduct.currentStock,
             referenceType: 'PurchaseVoucher',
             referenceId: voucher.id,
             reason: `Annulation du bon d'achat annulée par ${actorName}`,

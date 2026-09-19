@@ -367,12 +367,13 @@ export class VouchersService {
         for (const old of existingItems) {
           if (!newProductIds.has(old.productId)) {
             const oldBilled = old.actualTotalUnits ?? old.totalUnits;
-            await tx.product.update({ where: { id: old.productId }, data: { currentStock: { increment: old.totalUnits } } });
+            const revertedProduct = await tx.product.update({ where: { id: old.productId }, data: { currentStock: { increment: old.totalUnits } } });
             await tx.stockMovement.create({
               data: {
                 productId: old.productId,
                 type: 'ADJUSTMENT',
                 quantity: old.totalUnits,
+                stockAfter: revertedProduct.currentStock,
                 referenceType: 'SalesVoucher',
                 referenceId: id,
                 reason: `Retiré du bon après confirmation par ${actorName}`,
@@ -406,12 +407,13 @@ export class VouchersService {
           const isChanged = !!old && (old.actualTotalUnits ?? old.totalUnits) !== billedUnits;
 
           if (delta !== 0) {
-            await tx.product.update({ where: { id: product.id }, data: { currentStock: { decrement: delta } } });
+            const adjustedProduct = await tx.product.update({ where: { id: product.id }, data: { currentStock: { decrement: delta } } });
             await tx.stockMovement.create({
               data: {
                 productId: product.id,
                 type: 'ADJUSTMENT',
                 quantity: -delta,
+                stockAfter: adjustedProduct.currentStock,
                 referenceType: 'SalesVoucher',
                 referenceId: id,
                 reason: `Modifié après confirmation par ${actorName}`,
@@ -512,7 +514,7 @@ export class VouchersService {
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of voucher.items) {
-        await tx.product.update({
+        const soldProduct = await tx.product.update({
           where: { id: item.productId },
           data: { currentStock: { decrement: item.totalUnits } },
         });
@@ -521,6 +523,7 @@ export class VouchersService {
             productId: item.productId,
             type: 'SALE',
             quantity: -item.totalUnits,
+            stockAfter: soldProduct.currentStock,
             referenceType: 'SalesVoucher',
             referenceId: voucher.id,
             createdById: actorId,
@@ -615,7 +618,7 @@ export class VouchersService {
     await this.prisma.$transaction(async (tx) => {
       if (wasConfirmed) {
         for (const item of voucher.items) {
-          await tx.product.update({
+          const restoredProduct = await tx.product.update({
             where: { id: item.productId },
             data: { currentStock: { increment: item.totalUnits } },
           });
@@ -624,6 +627,7 @@ export class VouchersService {
               productId: item.productId,
               type: 'SALE_CANCEL',
               quantity: item.totalUnits,
+              stockAfter: restoredProduct.currentStock,
               referenceType: 'SalesVoucher',
               referenceId: voucher.id,
               reason: dto.reason,
@@ -690,12 +694,13 @@ export class VouchersService {
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of voucher.items) {
-        await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+        const revivedProduct = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
         await tx.stockMovement.create({
           data: {
             productId: item.productId,
             type: 'SALE',
             quantity: -item.totalUnits,
+            stockAfter: revivedProduct.currentStock,
             referenceType: 'SalesVoucher',
             referenceId: id,
             reason: `Annulation du bon annulée par ${actorName}`,

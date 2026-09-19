@@ -515,7 +515,8 @@
       "type": "Type",
       "quantity": "Quantity (pieces)",
       "cartons": "Cartons",
-      "reason": "Reason"
+      "reason": "Reason",
+      "stockAfter": "Stock after"
     },
     "movementTypes": {
       "SALE": "Sale",
@@ -546,6 +547,7 @@
     "unitPriceHint": "Leave empty for the automatic price",
     "addItem": "Add",
     "removeItem": "Remove",
+    "removeItemConfirm": "Remove this item? If the return is already validated, that item's stock and account movement will be reversed.",
     "noItems": "No items added",
     "createReturn": "Create the return",
     "validate": "Validate",
