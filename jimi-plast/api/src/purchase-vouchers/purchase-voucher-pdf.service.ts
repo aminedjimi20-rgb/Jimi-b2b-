@@ -5,7 +5,7 @@ interface PurchaseVoucherForPdf {
   number: string | null;
   createdAt: Date;
   confirmedAt: Date | null;
-  manufacturer: { name: string; company: string | null; phone: string | null };
+  manufacturer: { name: string; company: string | null };
   buyer: { fullName: string };
   discount: unknown;
   transportCost: unknown;
@@ -87,11 +87,13 @@ export class PurchaseVoucherPdfService {
       d.moveTo(40, 100).lineTo(555, 100).strokeColor(LINE).stroke();
 
       d.fillColor(INK).fontSize(11).font('Helvetica-Bold').text('Fournisseur', 40, 112);
-      d.fontSize(10)
-        .font('Helvetica')
-        .text(voucher.manufacturer.company ?? voucher.manufacturer.name, 40, 128)
-        .text(voucher.manufacturer.name, 40, 142)
-        .text(voucher.manufacturer.phone ?? '', 40, 156);
+      d.fontSize(10).font('Helvetica').fillColor(INK);
+      const { company, name } = voucher.manufacturer;
+      if (company && company !== name) {
+        d.text(company, 40, 128).text(name, 40, 142);
+      } else {
+        d.text(name, 40, 128);
+      }
     };
 
     const drawHeadRow = (y: number) => {
@@ -158,28 +160,54 @@ export class PurchaseVoucherPdfService {
     }
 
     y += 16;
+    const footerTop = y;
 
-    const row = (label: string, value: string, bold = false) => {
-      d.font(bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor(INK);
-      d.text(label, 320, y, { width: 140 });
-      d.text(value, 460, y, { width: 95, align: 'right' });
-      y += 16;
+    // Trois blocs côte à côte : colisage à gauche, calcul du montant au
+    // centre, règlement à droite — plus lisible qu'une longue liste empilée.
+    const FOOTER_COL_W = (TABLE_RIGHT - TABLE_LEFT) / 3;
+    const col1X = TABLE_LEFT;
+    const col2X = TABLE_LEFT + FOOTER_COL_W;
+    const col3X = TABLE_LEFT + FOOTER_COL_W * 2;
+
+    const drawColumn = (x: number, rows: { label: string; value: string; bold?: boolean }[]) => {
+      let cy = footerTop;
+      for (const r of rows) {
+        d.font(r.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(9).fillColor(r.bold ? INK : MUTED);
+        d.text(r.label, x, cy, { width: FOOTER_COL_W - 10 });
+        d.font(r.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(r.bold ? 11 : 10).fillColor(INK);
+        d.text(r.value, x, cy + 12, { width: FOOTER_COL_W - 10 });
+        cy += 30;
+      }
+      return cy;
     };
 
-    row('Nombre de colis', `${totalColis}`);
-    row('Total des quantités', `${totalQte}`);
-    y += 4;
-    row('Sous-total', `${subtotal.toFixed(2)} DA`);
-    if (num(voucher.discount) > 0) row('Remise', `-${num(voucher.discount).toFixed(2)} DA`);
-    if (num(voucher.transportCost) > 0) row('Transport', `${num(voucher.transportCost).toFixed(2)} DA`);
-    row('MONTANT TTC', `${total.toFixed(2)} DA`, true);
-    y += 6;
-    row('Dette précédente', `${num(voucher.previousDebt).toFixed(2)} DA`);
-    row('Montant payé', `${num(voucher.paidAmount).toFixed(2)} DA`);
-    row('Nouvelle dette', `${newDebt.toFixed(2)} DA`, true);
+    const discountAmount = num(voucher.discount);
+    const discountPercent = subtotal > 0 ? (discountAmount / subtotal) * 100 : 0;
+
+    const middleRows: { label: string; value: string; bold?: boolean }[] = [{ label: 'Sous-total', value: `${subtotal.toFixed(2)} DA` }];
+    if (discountAmount > 0) {
+      middleRows.push({ label: `Remise (${discountPercent.toFixed(1)} %)`, value: `-${discountAmount.toFixed(2)} DA` });
+    }
+    if (num(voucher.transportCost) > 0) {
+      middleRows.push({ label: 'Transport', value: `${num(voucher.transportCost).toFixed(2)} DA` });
+    }
+    middleRows.push({ label: 'MONTANT TTC', value: `${total.toFixed(2)} DA`, bold: true });
+
+    const bottom1 = drawColumn(col1X, [
+      { label: 'Nombre de colis', value: `${totalColis}` },
+      { label: 'Total des quantités', value: `${totalQte}` },
+    ]);
+    const bottom2 = drawColumn(col2X, middleRows);
+    const bottom3 = drawColumn(col3X, [
+      { label: 'Dette précédente', value: `${num(voucher.previousDebt).toFixed(2)} DA` },
+      { label: 'Montant payé', value: `${num(voucher.paidAmount).toFixed(2)} DA` },
+      { label: 'Nouvelle dette', value: `${newDebt.toFixed(2)} DA`, bold: true },
+    ]);
+
+    y = Math.max(bottom1, bottom2, bottom3);
 
     if (voucher.notes) {
-      y += 14;
+      y += 10;
       d.font('Helvetica-Oblique').fontSize(9).fillColor(MUTED).text(`Observations : ${voucher.notes}`, 40, y, { width: 515 });
     }
 
