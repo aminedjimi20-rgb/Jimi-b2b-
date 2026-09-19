@@ -86,6 +86,54 @@ export class CustomersService {
     return this.getById(customer.id);
   }
 
+  /**
+   * Relevé de compte pour une période donnée : solde de départ (tous les
+   * mouvements antérieurs à `from`) puis chaque mouvement de la période avec
+   * son solde courant — la logique d'un extrait de compte bancaire.
+   */
+  async getStatement(id: string, from?: Date, to?: Date) {
+    const customer = await this.prisma.customer.findFirst({
+      where: { id, deletedAt: null },
+      include: { user: { select: { fullName: true, phone: true } } },
+    });
+    if (!customer) throw new NotFoundException('Client introuvable');
+
+    const startAgg = from
+      ? await this.prisma.ledgerEntry.aggregate({
+          where: { customerId: id, voidedAt: null, createdAt: { lt: from } },
+          _sum: { amount: true },
+        })
+      : null;
+    const startBalance = Number(startAgg?._sum.amount ?? 0);
+
+    const entries = await this.prisma.ledgerEntry.findMany({
+      where: {
+        customerId: id,
+        voidedAt: null,
+        ...(from ? { createdAt: { gte: from } } : {}),
+        ...(to ? { createdAt: { lte: to } } : {}),
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    let running = startBalance;
+    const rows = entries.map((e) => {
+      running += Number(e.amount);
+      return { ...e, balanceAfter: running };
+    });
+
+    return {
+      businessName: customer.businessName,
+      fullName: customer.user.fullName,
+      phone: customer.user.phone,
+      from: from ?? null,
+      to: to ?? null,
+      startBalance,
+      endBalance: running,
+      entries: rows,
+    };
+  }
+
   /** Créée automatiquement quand une demande d'inscription est acceptée avec un rôle commercial. */
   async createProfileForUser(
     userId: string,

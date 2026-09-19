@@ -313,7 +313,13 @@
       "back": "Back to customers",
       "deleteReasonPrompt": "Reason for deletion (the customer will need to approve):",
       "deleted": "Deleted",
-      "pendingDeletion": "Awaiting approval"
+      "pendingDeletion": "Awaiting approval",
+      "date": "Date",
+      "runningBalance": "Balance",
+      "statementTitle": "Print a statement",
+      "statementFrom": "From",
+      "statementTo": "To",
+      "print": "Print"
     },
     "entryTypes": {
       "SALE_VOUCHER": "Sales voucher",
@@ -434,7 +440,13 @@
       "amount": "Amount",
       "reason": "Reason",
       "history": "History",
-      "deleted": "Deleted"
+      "deleted": "Deleted",
+      "date": "Date",
+      "runningBalance": "Balance",
+      "statementTitle": "Print a statement",
+      "statementFrom": "From",
+      "statementTo": "To",
+      "print": "Print"
     },
     "entryTypes": {
       "PURCHASE_VOUCHER": "Purchase voucher",

@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { CustomersService } from './customers.service';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -8,12 +9,21 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from './dto/add-ledger-entry.dto';
 import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
 import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
+import { StatementPdfService } from '../common/services/statement-pdf.service';
+
+const ENTRY_TYPE_LABELS: Record<string, string> = {
+  SALE_VOUCHER: 'Bon de vente',
+  PAYMENT: 'Paiement',
+  RETURN_CREDIT: 'Avoir retour',
+  ADJUSTMENT: 'Ajustement',
+};
 
 @Controller('customers')
 export class CustomersController {
   constructor(
     private readonly customersService: CustomersService,
     private readonly pendingDeletions: PendingDeletionsService,
+    private readonly statementPdfService: StatementPdfService,
   ) {}
 
   @Get()
@@ -31,6 +41,41 @@ export class CustomersController {
   @RequirePermissions('customers.manage')
   getById(@Param('id') id: string) {
     return this.customersService.getById(id);
+  }
+
+  @Get(':id/statement/pdf')
+  @RequirePermissions('customers.manage')
+  async statementPdf(
+    @Param('id') id: string,
+    @Query('from') from: string | undefined,
+    @Query('to') to: string | undefined,
+    @Res() res: Response,
+  ) {
+    const fromDate = from ? new Date(from) : undefined;
+    const toDate = to ? new Date(`${to}T23:59:59.999`) : undefined;
+    const statement = await this.customersService.getStatement(id, fromDate, toDate);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="situation-${id}.pdf"`);
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    const doc = this.statementPdfService.generate({
+      documentTitle: 'Situation client',
+      partyLabel: 'Client',
+      partyName: statement.businessName ?? statement.fullName,
+      partySubtitle: statement.businessName ? statement.fullName : statement.phone,
+      from: statement.from,
+      to: statement.to,
+      startBalance: statement.startBalance,
+      endBalance: statement.endBalance,
+      entries: statement.entries.map((e) => ({
+        createdAt: e.createdAt,
+        typeLabel: ENTRY_TYPE_LABELS[e.type] ?? e.type,
+        note: e.note,
+        amount: Number(e.amount),
+        balanceAfter: e.balanceAfter,
+      })),
+    });
+    doc.pipe(res);
   }
 
   @Post()

@@ -313,7 +313,13 @@
       "back": "Retour aux clients",
       "deleteReasonPrompt": "Raison de la suppression (le client devra approuver) :",
       "deleted": "Supprimé",
-      "pendingDeletion": "En attente d'approbation"
+      "pendingDeletion": "En attente d'approbation",
+      "date": "Date",
+      "runningBalance": "Solde",
+      "statementTitle": "Imprimer une situation",
+      "statementFrom": "Du",
+      "statementTo": "Au",
+      "print": "Imprimer"
     },
     "entryTypes": {
       "SALE_VOUCHER": "Bon de vente",
@@ -434,7 +440,13 @@
       "amount": "Montant",
       "reason": "Raison",
       "history": "Historique",
-      "deleted": "Supprimé"
+      "deleted": "Supprimé",
+      "date": "Date",
+      "runningBalance": "Solde",
+      "statementTitle": "Imprimer une situation",
+      "statementFrom": "Du",
+      "statementTo": "Au",
+      "print": "Imprimer"
     },
     "entryTypes": {
       "PURCHASE_VOUCHER": "Bon d'achat",

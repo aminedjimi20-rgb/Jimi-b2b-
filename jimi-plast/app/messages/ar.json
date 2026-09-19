@@ -313,7 +313,13 @@
       "back": "العودة إلى العملاء",
       "deleteReasonPrompt": "علاش تحب تمحي (الزبون خاصو يوافق) :",
       "deleted": "محذوف",
-      "pendingDeletion": "فالانتظار للموافقة"
+      "pendingDeletion": "فالانتظار للموافقة",
+      "date": "التاريخ",
+      "runningBalance": "الرصيد",
+      "statementTitle": "طباعة سيتيواسيون",
+      "statementFrom": "من",
+      "statementTo": "إلى",
+      "print": "طباعة"
     },
     "entryTypes": {
       "SALE_VOUCHER": "بون بيع",
@@ -434,7 +440,13 @@
       "amount": "المبلغ",
       "reason": "السبب",
       "history": "السجل",
-      "deleted": "محذوف"
+      "deleted": "محذوف",
+      "date": "التاريخ",
+      "runningBalance": "الرصيد",
+      "statementTitle": "طباعة سيتيواسيون",
+      "statementFrom": "من",
+      "statementTo": "إلى",
+      "print": "طباعة"
     },
     "entryTypes": {
       "PURCHASE_VOUCHER": "وصل شراء",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -44,6 +44,9 @@ export default function CustomerDetailPage() {
   const [paymentNote, setPaymentNote] = useState('');
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustReason, setAdjustReason] = useState('');
+  const [statementFrom, setStatementFrom] = useState('');
+  const [statementTo, setStatementTo] = useState('');
+  const [printingStatement, setPrintingStatement] = useState(false);
 
   function reload() {
     api.get<CustomerDetail>(`/customers/${id}`, token).then(setCustomer);
@@ -78,6 +81,43 @@ export default function CustomerDetailPage() {
     await api.post(`/customers/entries/${entryId}/request-deletion`, { reason }, token);
     reload();
   }
+
+  async function printStatement() {
+    // window.open doit être appelé de façon synchrone dans le gestionnaire de
+    // clic, avant tout await, sinon les bloqueurs de popups l'empêchent.
+    const win = window.open('', '_blank');
+    setPrintingStatement(true);
+    try {
+      const params = new URLSearchParams();
+      if (statementFrom) params.set('from', statementFrom);
+      if (statementTo) params.set('to', statementTo);
+      const qs = params.toString();
+      const blob = await api.getBlob(`/customers/${id}/statement/pdf${qs ? `?${qs}` : ''}`, token);
+      const url = URL.createObjectURL(blob);
+      if (win) {
+        win.location.href = url;
+      } else {
+        window.location.href = url;
+      }
+    } catch {
+      win?.close();
+    } finally {
+      setPrintingStatement(false);
+    }
+  }
+
+  // Entrées triées du plus récent au plus ancien (ordre serveur) : on
+  // repart du solde actuel et on le "défait" mouvement par mouvement pour
+  // afficher le solde tel qu'il était juste après chaque écriture.
+  const entriesWithBalance = useMemo(() => {
+    if (!customer) return [];
+    let running = customer.balance;
+    return customer.entries.map((e) => {
+      const balanceAfter = running;
+      if (!e.voidedAt) running -= Number(e.amount);
+      return { ...e, balanceAfter };
+    });
+  }, [customer]);
 
   if (!customer) return <p className="text-muted">{tCommon('loading')}</p>;
 
@@ -161,12 +201,53 @@ export default function CustomerDetailPage() {
         </form>
       </div>
 
+      <div className="rounded-lg border border-line bg-panel p-4">
+        <h3 className="text-sm font-semibold text-ink">{t('detail.statementTitle')}</h3>
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            {t('detail.statementFrom')}
+            <input
+              type="date"
+              value={statementFrom}
+              onChange={(e) => setStatementFrom(e.target.value)}
+              className="rounded border border-line bg-paper px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            {t('detail.statementTo')}
+            <input
+              type="date"
+              value={statementTo}
+              onChange={(e) => setStatementTo(e.target.value)}
+              className="rounded border border-line bg-paper px-3 py-2 text-sm"
+            />
+          </label>
+          <button
+            onClick={printStatement}
+            disabled={printingStatement}
+            className="rounded bg-accent px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {t('detail.print')}
+          </button>
+        </div>
+      </div>
+
       <div>
         <h3 className="mb-2 text-sm font-semibold text-ink">{t('detail.history')}</h3>
         <div className="overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-line text-xs text-muted">
+                <th className="px-4 py-2 text-start font-medium">{t('detail.date')}</th>
+                <th className="px-4 py-2 text-start font-medium"></th>
+                <th className="px-4 py-2 text-start font-medium"></th>
+                <th className="px-4 py-2 text-end font-medium">{t('detail.amount')}</th>
+                <th className="px-4 py-2 text-end font-medium">{t('detail.runningBalance')}</th>
+                <th className="px-2 py-2"></th>
+              </tr>
+            </thead>
             <tbody>
-              {customer.entries.map((e) => {
+              {entriesWithBalance.map((e) => {
                 const latest = e.pendingDeletions[0];
                 const isVoided = !!e.voidedAt;
                 const isPending = latest?.status === 'PENDING';
@@ -193,6 +274,11 @@ export default function CustomerDetailPage() {
                     >
                       {Number(e.amount) > 0 ? '+' : ''}
                       {Number(e.amount).toLocaleString()} DA
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-end font-mono tabular text-xs ${struckThrough ? 'line-through text-muted' : 'text-ink'}`}
+                    >
+                      {e.balanceAfter.toLocaleString()} DA
                     </td>
                     <td className="px-2 py-2 text-end">
                       {canRequestDelete && (

@@ -74,6 +74,46 @@ export class ManufacturersService {
     return this.getById(manufacturer.id);
   }
 
+  /** Relevé de compte pour une période donnée — même logique que les clients. */
+  async getStatement(id: string, from?: Date, to?: Date) {
+    const manufacturer = await this.prisma.manufacturer.findFirst({ where: { id, deletedAt: null } });
+    if (!manufacturer) throw new NotFoundException('Fabricant introuvable');
+
+    const startAgg = from
+      ? await this.prisma.supplierLedgerEntry.aggregate({
+          where: { manufacturerId: id, voidedAt: null, createdAt: { lt: from } },
+          _sum: { amount: true },
+        })
+      : null;
+    const startBalance = Number(startAgg?._sum.amount ?? 0);
+
+    const entries = await this.prisma.supplierLedgerEntry.findMany({
+      where: {
+        manufacturerId: id,
+        voidedAt: null,
+        ...(from ? { createdAt: { gte: from } } : {}),
+        ...(to ? { createdAt: { lte: to } } : {}),
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    let running = startBalance;
+    const rows = entries.map((e) => {
+      running += Number(e.amount);
+      return { ...e, balanceAfter: running };
+    });
+
+    return {
+      name: manufacturer.name,
+      company: manufacturer.company,
+      from: from ?? null,
+      to: to ?? null,
+      startBalance,
+      endBalance: running,
+      entries: rows,
+    };
+  }
+
   // Vue en lecture seule, réservée au fabricant lui-même — ne montre que
   // ses propres produits, et seulement si l'admin l'y a autorisé.
   async getMyCatalog(userId: string) {
