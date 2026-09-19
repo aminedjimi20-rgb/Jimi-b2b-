@@ -63,6 +63,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ...(user.permissions.includes('transport.manage')
       ? [{ href: `/${locale}/transport`, label: t('transport') }]
       : []),
+    ...(user.permissions.includes('expenses.manage')
+      ? [{ href: `/${locale}/expenses`, label: t('expenses') }]
+      : []),
     ...(user.permissions.includes('requests.manage')
       ? [
           { href: `/${locale}/product-requests`, label: t('productRequests') },

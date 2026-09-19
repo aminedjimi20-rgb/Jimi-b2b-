@@ -74,6 +74,17 @@ interface StaffOption {
   id: string;
   fullName: string;
 }
+interface DeliveryInfo {
+  id: string;
+  driverId: string | null;
+  driverName: string | null;
+  cost: string;
+  status: string;
+}
+interface DriverOption {
+  id: string;
+  fullName: string;
+}
 
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
   if (locale === 'ar' && item.nameAr) return item.nameAr;
@@ -96,6 +107,7 @@ export default function VoucherEditorPage() {
   const t = useTranslations('vouchers');
   const tCatalog = useTranslations('catalog');
   const tCommon = useTranslations('common');
+  const tTransport = useTranslations('transport');
   const { token, hasPermission } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
@@ -137,6 +149,11 @@ export default function VoucherEditorPage() {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [delivery, setDelivery] = useState<DeliveryInfo | null>(null);
+  const [drivers, setDrivers] = useState<DriverOption[]>([]);
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+  const [deliveryDriverId, setDeliveryDriverId] = useState('');
+  const [deliveryCost, setDeliveryCost] = useState('');
 
   async function viewPdf() {
     // Sur mobile (partage de fichier supporté), on n'ouvre pas d'onglet —
@@ -167,6 +184,7 @@ export default function VoucherEditorPage() {
       setNotes(v.notes ?? '');
     });
     if (canManage) api.get<HistoryEntry[]>(`/vouchers/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
+    if (canManage) api.get<DeliveryInfo | null>(`/deliveries/voucher/${id}`, token).then(setDelivery).catch(() => setDelivery(null));
   }
 
   useEffect(() => {
@@ -176,8 +194,24 @@ export default function VoucherEditorPage() {
 
   useEffect(() => {
     if (token && canManage) api.get<StaffOption[]>('/vouchers/staff', token).then(setStaff).catch(() => setStaff([]));
+    if (token && canManage) api.get<DriverOption[]>('/drivers', token).then(setDrivers).catch(() => setDrivers([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, canManage]);
+
+  async function saveDelivery() {
+    await api.put(`/deliveries/voucher/${id}`, {
+      driverId: deliveryDriverId || undefined,
+      cost: deliveryCost === '' ? undefined : Number(deliveryCost),
+      billedToCustomer: Number(transportCost),
+    }, token);
+    setShowDeliveryForm(false);
+    reload();
+  }
+  async function cancelDelivery() {
+    if (!delivery || !window.confirm(t('removeDeliveryConfirm'))) return;
+    await api.post(`/deliveries/${delivery.id}/cancel`, {}, token);
+    reload();
+  }
 
   useEffect(() => {
     if (!token || !showPicker) return;
@@ -818,6 +852,68 @@ export default function VoucherEditorPage() {
           }`}
         />
       </label>
+
+      {canManage && (
+        <div className="rounded-lg border border-line bg-panel p-4">
+          <p className="mb-2 text-sm font-semibold text-ink">{t('delivery')}</p>
+          {delivery && delivery.status !== 'CANCELLED' ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <span className="text-ink">
+                {delivery.driverName ?? t('noDriverAssigned')} — {Number(delivery.cost).toLocaleString()} DA — {tTransport(`status.${delivery.status}` as never)}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setDeliveryDriverId(delivery.driverId ?? ''); setDeliveryCost(delivery.cost); setShowDeliveryForm(true); }}
+                  className="text-xs text-accent hover:underline"
+                >
+                  {tCommon('edit')}
+                </button>
+                <button onClick={cancelDelivery} className="text-xs text-red-600 hover:underline">
+                  {t('removeDelivery')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            !showDeliveryForm && (
+              <button
+                onClick={() => { setDeliveryDriverId(''); setDeliveryCost(''); setShowDeliveryForm(true); }}
+                className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
+              >
+                + {t('assignDriver')}
+              </button>
+            )
+          )}
+          {showDeliveryForm && (
+            <div className="mt-2 flex flex-wrap items-end gap-2">
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="text-muted">{t('driver')}</span>
+                <select
+                  value={deliveryDriverId}
+                  onChange={(e) => setDeliveryDriverId(e.target.value)}
+                  className="rounded border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+                >
+                  <option value="">—</option>
+                  {drivers.map((d) => (
+                    <option key={d.id} value={d.id}>{d.fullName}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="text-muted">{t('deliveryCost')}</span>
+                <input
+                  type="number"
+                  value={deliveryCost}
+                  onChange={(e) => setDeliveryCost(e.target.value)}
+                  className="w-28 rounded border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+                />
+              </label>
+              <button onClick={saveDelivery} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">{tCommon('save')}</button>
+              <button onClick={() => setShowDeliveryForm(false)} className="rounded border border-line px-3 py-1.5 text-sm text-ink">{tCommon('cancel')}</button>
+            </div>
+          )}
+          <p className="mt-1 text-[11px] text-muted">{t('deliveryHint')}</p>
+        </div>
+      )}
 
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
         <Row label={t('subtotal')} value={subtotal} />

@@ -22,6 +22,8 @@ import { PurchaseVouchersModule } from './purchase-vouchers/purchase-vouchers.mo
 import { StockModule } from './stock/stock.module';
 import { ReturnsModule } from './returns/returns.module';
 import { DeliveriesModule } from './deliveries/deliveries.module';
+import { DriversModule } from './drivers/drivers.module';
+import { ExpensesModule } from './expenses/expenses.module';
 import { ProductRequestsModule } from './product-requests/product-requests.module';
 import { NegotiationsModule } from './negotiations/negotiations.module';
 import { PendingDeletionsModule } from './pending-deletions/pending-deletions.module';
@@ -55,6 +57,8 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     StockModule,
     ReturnsModule,
     DeliveriesModule,
+    DriversModule,
+    ExpensesModule,
     ProductRequestsModule,
     NegotiationsModule,
     PendingDeletionsModule,

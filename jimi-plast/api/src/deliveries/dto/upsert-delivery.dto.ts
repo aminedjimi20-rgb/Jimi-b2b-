@@ -3,6 +3,10 @@ import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 export class UpsertDeliveryDto {
   @IsOptional()
   @IsString()
+  driverId?: string;
+
+  @IsOptional()
+  @IsString()
   driverName?: string;
 
   @IsOptional()
@@ -38,6 +42,25 @@ export class UpsertDeliveryDto {
   billedToCustomer?: number;
 
   @IsOptional()
+  @IsNumber()
+  billedToManufacturer?: number;
+
+  @IsOptional()
   @IsString()
   notes?: string;
+}
+
+export class CreateStandaloneDeliveryDto extends UpsertDeliveryDto {
+  // Catégorie de frais dans laquelle imputer le coût de cette course — une
+  // course sans bon ne touche jamais un compte client/fabricant, seulement
+  // les Frais généraux. Par défaut : catégorie "Livraison".
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+}
+
+export class CancelDeliveryDto {
+  @IsOptional()
+  @IsString()
+  reason?: string;
 }

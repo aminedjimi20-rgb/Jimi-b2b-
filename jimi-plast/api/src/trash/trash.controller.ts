@@ -21,6 +21,7 @@ const RESTORABLE_ENTITY_UPDATERS: Record<string, (prisma: PrismaService, entityI
   // déjà annulés à la suppression), les rejouer reste manuel — voir
   // ReturnsService.remove().
   Return: (prisma, id) => prisma.return.update({ where: { id }, data: { deletedAt: null } }),
+  Expense: (prisma, id) => prisma.expense.update({ where: { id }, data: { deletedAt: null } }),
 };
 
 @Controller('trash')

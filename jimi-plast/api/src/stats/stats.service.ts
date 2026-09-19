@@ -111,6 +111,87 @@ export class StatsService {
     };
   }
 
+  // La "Situation" (§ demandée pour un usage personnel du gérant) répond à
+  // 4 questions sur une période donnée : combien j'ai vendu (et gagné dessus
+  // après coût), combien j'ai acheté aux fabricants, combien j'ai dépensé en
+  // frais généraux (électricité, loyer, livreurs...), et où j'en suis avec
+  // les comptes clients/fabricants (soldes actuels, non bornés à la période).
+  async situation(period: Period) {
+    const { from, to } = dateRange(period);
+
+    const salesVouchers = await this.prisma.salesVoucher.findMany({
+      where: { status: { in: ['CONFIRMED', 'DELIVERED'] }, confirmedAt: { gte: from, lte: to } },
+      include: { items: { include: { product: { select: { costPrice: true } } } } },
+    });
+    let salesRevenue = 0;
+    let salesCOGS = 0;
+    for (const v of salesVouchers) {
+      const subtotal = v.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      salesRevenue += subtotal - Number(v.discount) + Number(v.transportCost);
+      for (const item of v.items) {
+        const unitCost = item.costPriceSnapshot ?? item.product.costPrice ?? 0;
+        salesCOGS += Number(unitCost) * item.totalUnits;
+      }
+    }
+
+    const purchaseVouchers = await this.prisma.purchaseVoucher.findMany({
+      where: { status: 'CONFIRMED', confirmedAt: { gte: from, lte: to } },
+      include: { items: true },
+    });
+    const purchaseSpend = purchaseVouchers.reduce((sum, v) => {
+      const subtotal = v.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      return sum + subtotal - Number(v.discount) + Number(v.transportCost);
+    }, 0);
+
+    const expenses = await this.prisma.expense.findMany({
+      where: { deletedAt: null, date: { gte: from, lte: to } },
+      include: { category: true },
+    });
+    const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0);
+    const expensesByCategoryMap = new Map<string, number>();
+    for (const e of expenses) {
+      expensesByCategoryMap.set(e.category.name, (expensesByCategoryMap.get(e.category.name) ?? 0) + Number(e.amount));
+    }
+
+    // Coût payé aux livreurs pour les courses rattachées à un bon (vente ou
+    // achat) — jamais dans `expenses` (seules les courses sans bon le sont),
+    // donc à soustraire séparément pour ne rien compter deux fois.
+    const linkedDeliveries = await this.prisma.delivery.findMany({
+      where: {
+        status: { not: 'CANCELLED' },
+        createdAt: { gte: from, lte: to },
+        OR: [{ salesVoucherId: { not: null } }, { purchaseVoucherId: { not: null } }],
+      },
+    });
+    const totalDeliveryPayouts = linkedDeliveries.reduce((s, d) => s + Number(d.cost), 0);
+
+    const [customerEntries, supplierEntries] = await Promise.all([
+      this.prisma.ledgerEntry.groupBy({ by: ['customerId'], where: { voidedAt: null }, _sum: { amount: true } }),
+      this.prisma.supplierLedgerEntry.groupBy({ by: ['manufacturerId'], where: { voidedAt: null }, _sum: { amount: true } }),
+    ]);
+    const customerDebt = customerEntries.reduce((sum, e) => sum + Math.max(0, Number(e._sum.amount ?? 0)), 0);
+    const supplierDebt = supplierEntries.reduce((sum, e) => sum + Math.max(0, Number(e._sum.amount ?? 0)), 0);
+
+    const round = (n: number) => Math.round(n * 100) / 100;
+    const grossMargin = salesRevenue - salesCOGS;
+    const netProfit = grossMargin - totalExpenses - totalDeliveryPayouts;
+
+    return {
+      from: from.toISOString().slice(0, 10),
+      to: to.toISOString().slice(0, 10),
+      salesRevenue: round(salesRevenue),
+      salesCOGS: round(salesCOGS),
+      grossMargin: round(grossMargin),
+      purchaseSpend: round(purchaseSpend),
+      totalExpenses: round(totalExpenses),
+      expensesByCategory: Array.from(expensesByCategoryMap.entries()).map(([name, amount]) => ({ name, amount: round(amount) })),
+      totalDeliveryPayouts: round(totalDeliveryPayouts),
+      netProfit: round(netProfit),
+      customerDebt: round(customerDebt),
+      supplierDebt: round(supplierDebt),
+    };
+  }
+
   async overview() {
     const [products, pendingRequests, pendingReturns, pendingNegotiations, pendingProductRequests] = await Promise.all([
       this.prisma.product.findMany({ where: { deletedAt: null, isActive: true }, select: { currentStock: true, stockMin: true } }),

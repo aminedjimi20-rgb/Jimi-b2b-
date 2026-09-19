@@ -18,6 +18,7 @@ const PERMISSIONS: { key: string; label: string; group: string }[] = [
   { key: 'stock.manage', label: 'Gérer le stock et l’inventaire', group: 'stock' },
   { key: 'returns.manage', label: 'Traiter les retours', group: 'returns' },
   { key: 'transport.manage', label: 'Gérer le transport/livraison', group: 'transport' },
+  { key: 'expenses.manage', label: 'Gérer les frais généraux et la situation', group: 'finance' },
   { key: 'negotiations.manage', label: 'Répondre aux négociations', group: 'negotiations' },
   { key: 'stats.view', label: 'Accéder aux statistiques', group: 'stats' },
   { key: 'users.manage', label: 'Gérer utilisateurs/rôles/permissions', group: 'admin' },

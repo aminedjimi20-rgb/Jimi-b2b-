@@ -67,6 +67,18 @@ interface Purchase {
   pendingDeletions: PendingDeletion[];
 }
 
+interface DeliveryInfo {
+  id: string;
+  driverId: string | null;
+  driverName: string | null;
+  cost: string;
+  status: string;
+}
+interface DriverOption {
+  id: string;
+  fullName: string;
+}
+
 const localizedName = (item: { nameFr: string; nameAr?: string | null; nameEn?: string | null }, locale: string) => {
   if (locale === 'ar' && item.nameAr) return item.nameAr;
   if (locale === 'en' && item.nameEn) return item.nameEn;
@@ -89,6 +101,7 @@ export default function PurchaseEditorPage() {
   const tVoucher = useTranslations('vouchers');
   const tCatalog = useTranslations('catalog');
   const tCommon = useTranslations('common');
+  const tTransport = useTranslations('transport');
   const { token } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
@@ -120,6 +133,12 @@ export default function PurchaseEditorPage() {
   const [modalMissingPieces, setModalMissingPieces] = useState('0');
   const [modalUnitCost, setModalUnitCost] = useState('');
 
+  const [delivery, setDelivery] = useState<DeliveryInfo | null>(null);
+  const [drivers, setDrivers] = useState<DriverOption[]>([]);
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+  const [deliveryDriverId, setDeliveryDriverId] = useState('');
+  const [deliveryCost, setDeliveryCost] = useState('');
+
   function reload() {
     api.get<Purchase>(`/purchase-vouchers/${id}`, token).then((p) => {
       setPurchase(p);
@@ -131,12 +150,32 @@ export default function PurchaseEditorPage() {
       setNotes(p.notes ?? '');
     });
     api.get<HistoryEntry[]>(`/purchase-vouchers/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
+    api.get<DeliveryInfo | null>(`/deliveries/purchase-voucher/${id}`, token).then(setDelivery).catch(() => setDelivery(null));
   }
 
   useEffect(() => {
     if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  useEffect(() => {
+    if (token) api.get<DriverOption[]>('/drivers', token).then(setDrivers).catch(() => setDrivers([]));
+  }, [token]);
+
+  async function saveDelivery() {
+    await api.put(`/deliveries/purchase-voucher/${id}`, {
+      driverId: deliveryDriverId || undefined,
+      cost: deliveryCost === '' ? undefined : Number(deliveryCost),
+      billedToManufacturer: Number(transportCost),
+    }, token);
+    setShowDeliveryForm(false);
+    reload();
+  }
+  async function cancelDelivery() {
+    if (!delivery || !window.confirm(tVoucher('removeDeliveryConfirm'))) return;
+    await api.post(`/deliveries/${delivery.id}/cancel`, {}, token);
+    reload();
+  }
 
   // On n'achète que ce que fournit CE fabricant — le sélecteur ne doit
   // montrer que ses propres produits, jamais le catalogue entier.
@@ -617,6 +656,66 @@ export default function PurchaseEditorPage() {
           }`}
         />
       </label>
+
+      <div className="rounded-lg border border-line bg-panel p-4">
+        <p className="mb-2 text-sm font-semibold text-ink">{tVoucher('delivery')}</p>
+        {delivery && delivery.status !== 'CANCELLED' ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+            <span className="text-ink">
+              {delivery.driverName ?? tVoucher('noDriverAssigned')} — {Number(delivery.cost).toLocaleString()} DA — {tTransport(`status.${delivery.status}` as never)}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setDeliveryDriverId(delivery.driverId ?? ''); setDeliveryCost(delivery.cost); setShowDeliveryForm(true); }}
+                className="text-xs text-accent hover:underline"
+              >
+                {tCommon('edit')}
+              </button>
+              <button onClick={cancelDelivery} className="text-xs text-red-600 hover:underline">
+                {tVoucher('removeDelivery')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          !showDeliveryForm && (
+            <button
+              onClick={() => { setDeliveryDriverId(''); setDeliveryCost(''); setShowDeliveryForm(true); }}
+              className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
+            >
+              + {tVoucher('assignDriver')}
+            </button>
+          )
+        )}
+        {showDeliveryForm && (
+          <div className="mt-2 flex flex-wrap items-end gap-2">
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted">{tVoucher('driver')}</span>
+              <select
+                value={deliveryDriverId}
+                onChange={(e) => setDeliveryDriverId(e.target.value)}
+                className="rounded border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+              >
+                <option value="">—</option>
+                {drivers.map((d) => (
+                  <option key={d.id} value={d.id}>{d.fullName}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted">{tVoucher('deliveryCost')}</span>
+              <input
+                type="number"
+                value={deliveryCost}
+                onChange={(e) => setDeliveryCost(e.target.value)}
+                className="w-28 rounded border border-line bg-paper px-2 py-1.5 text-sm text-ink"
+              />
+            </label>
+            <button onClick={saveDelivery} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">{tCommon('save')}</button>
+            <button onClick={() => setShowDeliveryForm(false)} className="rounded border border-line px-3 py-1.5 text-sm text-ink">{tCommon('cancel')}</button>
+          </div>
+        )}
+        <p className="mt-1 text-[11px] text-muted">{tVoucher('deliveryHint')}</p>
+      </div>
 
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
         <div className="flex justify-between py-1 text-muted">
