@@ -72,7 +72,12 @@ export class PurchaseVouchersService {
       include: {
         manufacturer: true,
         buyer: { select: { fullName: true } },
-        items: { include: { product: true, packagingUnit: true } },
+        items: {
+          include: {
+            product: { include: { images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] } } },
+            packagingUnit: true,
+          },
+        },
         attachments: { orderBy: { createdAt: 'desc' } },
         pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1, include: { requestedBy: { select: { fullName: true } } } },
       },

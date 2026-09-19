@@ -27,7 +27,7 @@ interface PickerProduct {
 }
 interface PurchaseItem {
   id: string;
-  product: { id: string; nameFr: string };
+  product: { id: string; nameFr: string; images: { url: string }[] };
   packagingUnit: { label: string };
   quantityPackages: number;
   unitsPerPackageSnapshot: number;
@@ -104,6 +104,7 @@ export default function PurchaseEditorPage() {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
+  const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sélecteur de produit : recherche + vignettes, même système que le bon de vente.
@@ -504,6 +505,7 @@ export default function PurchaseEditorPage() {
         <table className="w-full text-sm">
           <thead className="bg-line/30 text-xs uppercase text-muted">
             <tr>
+              <th className="px-4 py-2 text-start"></th>
               <th className="px-4 py-2 text-start">{tVoucher('product')}</th>
               <th className="px-4 py-2 text-start">{tVoucher('quantity')}</th>
               <th className="px-4 py-2 text-start">{t('unitCost')}</th>
@@ -512,8 +514,23 @@ export default function PurchaseEditorPage() {
             </tr>
           </thead>
           <tbody>
-            {purchase.items.map((item) => (
+            {purchase.items.map((item) => {
+              const itemImages = item.product.images ?? [];
+              return (
               <tr key={item.id} className={`border-t border-line ${item.modifiedAt ? 'bg-amber-500/10' : ''}`}>
+                <td className="px-2 py-2">
+                  {itemImages.length > 0 && (
+                    <button
+                      type="button"
+                      title={tVoucher('viewPhoto')}
+                      onClick={() => setViewingItemImages({ images: itemImages, title: item.product.nameFr })}
+                      className="flex h-8 w-8 items-center justify-center overflow-hidden rounded border border-line hover:opacity-80"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={itemImages[0].url} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-ink">{item.product.nameFr}</td>
                 <td className="px-4 py-2 text-xs text-muted">
                   {item.quantityPackages} {item.packagingUnit.label} = {item.totalUnits} {tVoucher('pieces')}
@@ -534,7 +551,8 @@ export default function PurchaseEditorPage() {
                   </td>
                 )}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -760,6 +778,14 @@ export default function PurchaseEditorPage() {
           startIndex={lightboxAttachmentIndex}
           title={tVoucher('attachments')}
           onClose={() => setLightboxAttachmentIndex(null)}
+        />
+      )}
+
+      {viewingItemImages && (
+        <ImageLightbox
+          images={viewingItemImages.images}
+          title={viewingItemImages.title}
+          onClose={() => setViewingItemImages(null)}
         />
       )}
     </div>
