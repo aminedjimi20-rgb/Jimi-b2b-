@@ -448,6 +448,7 @@ export default function ProductsAdminPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex-1">
+        <div className="sticky top-0 z-10 bg-paper pb-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
           <button type="button" onClick={openNewProductModal} className="rounded bg-accent px-3 py-2 text-sm font-medium text-white">
@@ -488,6 +489,7 @@ export default function ProductsAdminPage() {
             ))}
           </select>
           <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'name_asc', 'name_desc']} />
+        </div>
         </div>
 
         {search.trim() && (

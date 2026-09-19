@@ -54,7 +54,7 @@ export default function PurchasesPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 bg-paper pb-3">
         <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
         <div className="flex gap-2">
           <select value={selectedManufacturer} onChange={(e) => setSelectedManufacturer(e.target.value)} className="rounded border border-line bg-panel px-2 py-1.5 text-sm">

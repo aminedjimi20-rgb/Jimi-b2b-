@@ -106,6 +106,7 @@ export default function VouchersPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="sticky top-0 z-10 flex flex-col gap-3 bg-paper pb-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
         <div className="flex gap-2">
@@ -161,6 +162,7 @@ export default function VouchersPage() {
           onChange={setSortMode}
           options={['newest', 'oldest', 'price_desc', 'price_asc', 'qty_desc', 'qty_asc', 'name_asc', 'name_desc']}
         />
+      </div>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">

@@ -94,8 +94,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex min-h-screen bg-paper">
-      <aside className="flex w-60 flex-col border-e border-line bg-panel p-4">
+    <div className="flex h-screen overflow-hidden bg-paper">
+      <aside className="flex w-60 shrink-0 flex-col overflow-y-auto border-e border-line bg-panel p-4">
         <div className="mb-8 font-mono text-sm font-semibold uppercase tracking-wider text-accent">
           JIMI PLAST
         </div>
@@ -140,15 +140,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
       </aside>
-      <div className="flex-1">
-        <header className="flex items-center justify-end gap-3 border-b border-line bg-panel px-6 py-3">
+      <div className="flex h-screen flex-1 flex-col overflow-hidden">
+        <header className="flex shrink-0 items-center justify-end gap-3 border-b border-line bg-panel px-6 py-3">
           <NotificationBell />
           <LocaleSwitcher current={locale} />
           <button onClick={logout} className="text-xs text-accent hover:underline">
             {t('logout')}
           </button>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );

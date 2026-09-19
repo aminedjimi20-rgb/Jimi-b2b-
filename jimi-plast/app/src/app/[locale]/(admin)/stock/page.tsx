@@ -208,7 +208,7 @@ export default function StockPage() {
       </form>
 
       <div>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="sticky top-0 z-10 mb-2 flex flex-wrap items-center justify-between gap-2 bg-paper py-2">
           <h3 className="text-sm font-semibold text-ink">{t('movements')}</h3>
           <input
             type="search"

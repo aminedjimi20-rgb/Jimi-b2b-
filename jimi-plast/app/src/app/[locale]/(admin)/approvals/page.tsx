@@ -77,15 +77,17 @@ export default function ApprovalsPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+      <div className="sticky top-0 z-10 flex flex-col gap-3 bg-paper pb-3">
+        <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
 
-      <input
-        type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={tCommon('search')}
-        className="w-full max-w-xs rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
-      />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={tCommon('search')}
+          className="w-full max-w-xs rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
+        />
+      </div>
 
       {pending.length === 0 && <p className="text-sm text-muted">{search ? tCommon('empty') : t('noPending')}</p>}
 
@@ -150,7 +152,7 @@ export default function ApprovalsPage() {
       {resolved.length > 0 && (
         <div>
           <h2 className="mb-2 text-sm font-semibold text-ink">{t('resolved')}</h2>
-          <ul className="flex flex-col gap-1.5 rounded-lg border border-line bg-panel p-3 text-xs">
+          <ul className="flex max-h-[60vh] flex-col gap-1.5 overflow-y-auto rounded-lg border border-line bg-panel p-3 text-xs">
             {resolved.map((item) => (
               <li key={item.id} className="border-b border-line/50 pb-1.5 last:border-0 last:pb-0">
                 <span className={item.status === 'APPROVED' ? 'text-teal' : 'text-red-600'}>

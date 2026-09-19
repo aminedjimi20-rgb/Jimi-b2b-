@@ -428,26 +428,26 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-panel px-6 py-4 shadow-sm">
-        <Link href={`/${locale}/catalog`} className="font-mono text-sm font-semibold uppercase tracking-wider text-accent">
-          JIMI PLAST
-        </Link>
-        <div className="flex items-center gap-4">
-          {user ? (
-            <Link href={`/${locale}/dashboard`} className="text-sm text-ink hover:underline">
-              {user.fullName}
-            </Link>
-          ) : (
-            <Link href={`/${locale}/login`} className="text-sm text-accent hover:underline">
-              {tCommon('loginToSeePrices')}
-            </Link>
-          )}
-          <LocaleSwitcher current={locale} />
-        </div>
-      </header>
+      <div className="sticky top-0 z-40 border-b border-line bg-panel shadow-sm">
+        <header className="flex items-center justify-between px-6 py-4">
+          <Link href={`/${locale}/catalog`} className="font-mono text-sm font-semibold uppercase tracking-wider text-accent">
+            JIMI PLAST
+          </Link>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <Link href={`/${locale}/dashboard`} className="text-sm text-ink hover:underline">
+                {user.fullName}
+              </Link>
+            ) : (
+              <Link href={`/${locale}/login`} className="text-sm text-accent hover:underline">
+                {tCommon('loginToSeePrices')}
+              </Link>
+            )}
+            <LocaleSwitcher current={locale} />
+          </div>
+        </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="flex items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 pb-3">
           <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
           {canManageCatalog && (
             <Link
@@ -459,7 +459,7 @@ export default function CatalogPage() {
           )}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 pb-4">
           <input
             type="search"
             placeholder={tCommon('search')}
@@ -521,12 +521,14 @@ export default function CatalogPage() {
             </label>
           )}
         </div>
+      </div>
 
+      <div className="mx-auto max-w-7xl px-6 py-8">
         {!loading && products.length === 0 && (
           <p className="mt-10 text-center text-muted">{t('noResults')}</p>
         )}
 
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => {
             const mainPrice = priceForView(p);
             const inCart = cartProductIds.has(p.id);
