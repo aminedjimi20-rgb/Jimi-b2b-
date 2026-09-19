@@ -109,7 +109,8 @@ export class PurchaseVouchersService {
           const product = await tx.product.findFirst({ where: { id: item.productId, deletedAt: null } });
           if (!product) throw new BadRequestException(`Produit ${item.productId} introuvable`);
 
-          const totalUnits = item.quantityPackages * product.unitsPerPackage;
+          const unitsPerPackage = item.unitsPerPackage && item.unitsPerPackage > 0 ? item.unitsPerPackage : product.unitsPerPackage;
+          const totalUnits = item.quantityPackages * unitsPerPackage;
           const actualTotalUnits = item.actualTotalUnits != null && item.actualTotalUnits !== totalUnits ? item.actualTotalUnits : null;
           const billedUnits = actualTotalUnits ?? totalUnits;
           await tx.purchaseVoucherItem.create({
@@ -118,7 +119,7 @@ export class PurchaseVouchersService {
               productId: product.id,
               packagingUnitId: product.packagingUnitId,
               quantityPackages: item.quantityPackages,
-              unitsPerPackageSnapshot: product.unitsPerPackage,
+              unitsPerPackageSnapshot: unitsPerPackage,
               totalUnits,
               actualTotalUnits,
               unitCost: item.unitCost,
@@ -182,7 +183,8 @@ export class PurchaseVouchersService {
           const product = await tx.product.findFirst({ where: { id: item.productId, deletedAt: null } });
           if (!product) throw new BadRequestException(`Produit ${item.productId} introuvable`);
 
-          const totalUnits = item.quantityPackages * product.unitsPerPackage;
+          const unitsPerPackage = item.unitsPerPackage && item.unitsPerPackage > 0 ? item.unitsPerPackage : product.unitsPerPackage;
+          const totalUnits = item.quantityPackages * unitsPerPackage;
           const actualTotalUnits = item.actualTotalUnits != null && item.actualTotalUnits !== totalUnits ? item.actualTotalUnits : null;
           const billedUnits = actualTotalUnits ?? totalUnits;
           const old = existingByProduct.get(item.productId);
@@ -191,10 +193,24 @@ export class PurchaseVouchersService {
           // facturation (lineTotal) reflète le nombre réel de pièces dedans.
           const delta = totalUnits - (old?.totalUnits ?? 0);
           const isNew = !old;
-          const isChanged = !!old && (Number(old.unitCost) !== item.unitCost || (old.actualTotalUnits ?? old.totalUnits) !== billedUnits);
+          const isChanged =
+            !!old &&
+            (Number(old.unitCost) !== item.unitCost ||
+              (old.actualTotalUnits ?? old.totalUnits) !== billedUnits ||
+              old.unitsPerPackageSnapshot !== unitsPerPackage);
 
+          // Le catalogue reflète toujours le dernier coût et conditionnement
+          // constatés à l'achat — que le stock bouge ou non (ex: correction
+          // de prix ou de pièces/carton sans changement de quantité).
+          await tx.product.update({
+            where: { id: product.id },
+            data: {
+              costPrice: item.unitCost,
+              unitsPerPackage,
+              ...(delta !== 0 ? { currentStock: { increment: delta } } : {}),
+            },
+          });
           if (delta !== 0) {
-            await tx.product.update({ where: { id: product.id }, data: { currentStock: { increment: delta }, costPrice: item.unitCost } });
             await tx.stockMovement.create({
               data: {
                 productId: product.id,
@@ -217,7 +233,7 @@ export class PurchaseVouchersService {
               productId: product.id,
               packagingUnitId: product.packagingUnitId,
               quantityPackages: item.quantityPackages,
-              unitsPerPackageSnapshot: product.unitsPerPackage,
+              unitsPerPackageSnapshot: unitsPerPackage,
               totalUnits,
               actualTotalUnits,
               unitCost: item.unitCost,
@@ -275,7 +291,7 @@ export class PurchaseVouchersService {
       for (const item of voucher.items) {
         await tx.product.update({
           where: { id: item.productId },
-          data: { currentStock: { increment: item.totalUnits }, costPrice: item.unitCost },
+          data: { currentStock: { increment: item.totalUnits }, costPrice: item.unitCost, unitsPerPackage: item.unitsPerPackageSnapshot },
         });
         await tx.stockMovement.create({
           data: {

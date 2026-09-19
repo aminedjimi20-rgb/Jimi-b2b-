@@ -21,12 +21,14 @@ interface PickerProduct {
   images: { url: string }[];
   availability: 'IN_STOCK' | 'OUT_OF_STOCK';
   currentStock: number | null;
+  costPrice: number | null;
 }
 interface PurchaseItem {
   id: string;
   product: { id: string; nameFr: string };
   packagingUnit: { label: string };
   quantityPackages: number;
+  unitsPerPackageSnapshot: number;
   totalUnits: number;
   actualTotalUnits: number | null;
   unitCost: string;
@@ -167,7 +169,10 @@ export default function PurchaseEditorPage() {
     setModalUnitsPerPackage(String(p.unitsPerPackage));
     setModalPieces(String(p.unitsPerPackage));
     setModalMissingPieces('0');
-    setModalUnitCost('');
+    // Pré-rempli avec le dernier coût connu — évite de le retaper à chaque
+    // ajout ; l'utilisateur peut toujours le corriger, ce qui met à jour le
+    // catalogue à la confirmation (l'achat est la source de vérité du coût).
+    setModalUnitCost(p.costPrice != null ? String(p.costPrice) : '');
   }
 
   // Scan caméra : cherche une correspondance exacte (SKU ou code-barres)
@@ -239,7 +244,10 @@ export default function PurchaseEditorPage() {
     const qty = Math.max(1, Number(modalQty) || 1);
     const cost = Math.max(0, Number(modalUnitCost) || 0);
     const pieces = Math.max(0, Number(modalPieces) || 0);
-    const nominalUnits = qty * addingProduct.unitsPerPackage;
+    // Conditionnement réel constaté ici — s'il diffère du catalogue, il
+    // remplace product.unitsPerPackage à la confirmation (comme le coût).
+    const unitsPerPackage = Number(modalUnitsPerPackage) > 0 ? Number(modalUnitsPerPackage) : addingProduct.unitsPerPackage;
+    const nominalUnits = qty * unitsPerPackage;
     const hasCustomPieces = pieces > 0 && pieces !== nominalUnits;
     const addedUnits = hasCustomPieces ? pieces : nominalUnits;
 
@@ -248,6 +256,7 @@ export default function PurchaseEditorPage() {
       quantityPackages: i.quantityPackages,
       unitCost: Number(i.unitCost),
       actualTotalUnits: i.actualTotalUnits ?? undefined,
+      unitsPerPackage: i.unitsPerPackageSnapshot,
     }));
     const existingIndex = existingItems.findIndex((i) => i.productId === addingProduct.id);
     const newItems =
@@ -255,16 +264,20 @@ export default function PurchaseEditorPage() {
         ? existingItems.map((i, idx) => {
             if (idx !== existingIndex) return i;
             const mergedQty = i.quantityPackages + qty;
-            const prevUnits = i.actualTotalUnits ?? i.quantityPackages * addingProduct.unitsPerPackage;
+            const prevUnits = i.actualTotalUnits ?? i.quantityPackages * i.unitsPerPackage;
             const mergedUnits = prevUnits + addedUnits;
             return {
               productId: i.productId,
               quantityPackages: mergedQty,
               unitCost: cost,
-              actualTotalUnits: mergedUnits !== mergedQty * addingProduct.unitsPerPackage ? mergedUnits : undefined,
+              actualTotalUnits: mergedUnits !== mergedQty * unitsPerPackage ? mergedUnits : undefined,
+              unitsPerPackage,
             };
           })
-        : [...existingItems, { productId: addingProduct.id, quantityPackages: qty, unitCost: cost, actualTotalUnits: hasCustomPieces ? pieces : undefined }];
+        : [
+            ...existingItems,
+            { productId: addingProduct.id, quantityPackages: qty, unitCost: cost, actualTotalUnits: hasCustomPieces ? pieces : undefined, unitsPerPackage },
+          ];
 
     autoSave({ items: newItems });
     setAddingProduct(null);
@@ -275,7 +288,13 @@ export default function PurchaseEditorPage() {
     if (!purchase) return;
     const items = purchase.items
       .filter((i) => i.product.id !== productId)
-      .map((i) => ({ productId: i.product.id, quantityPackages: i.quantityPackages, unitCost: Number(i.unitCost), actualTotalUnits: i.actualTotalUnits ?? undefined }));
+      .map((i) => ({
+        productId: i.product.id,
+        quantityPackages: i.quantityPackages,
+        unitCost: Number(i.unitCost),
+        actualTotalUnits: i.actualTotalUnits ?? undefined,
+        unitsPerPackage: i.unitsPerPackageSnapshot,
+      }));
     autoSave({ items });
   }
 

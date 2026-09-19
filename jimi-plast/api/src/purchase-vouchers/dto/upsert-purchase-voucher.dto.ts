@@ -17,6 +17,16 @@ export class PurchaseItemInputDto {
   @IsInt()
   @Min(0)
   actualTotalUnits?: number;
+
+  // Conditionnement réel constaté à la réception (pièces/carton) — si
+  // différent du catalogue, remplace product.unitsPerPackage à la
+  // confirmation, exactement comme unitCost remplace product.costPrice :
+  // l'achat est la source de vérité sur ce que le fournisseur livre
+  // réellement.
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  unitsPerPackage?: number;
 }
 
 export class UpsertPurchaseVoucherDto {
