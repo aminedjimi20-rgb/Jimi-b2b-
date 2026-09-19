@@ -54,6 +54,8 @@ interface Product {
   isClearance: boolean;
   availability: 'IN_STOCK' | 'OUT_OF_STOCK';
   currentStock: number | null;
+  manufacturer: { id: string; name: string } | null;
+  depot: string | null;
   prices: Price[];
   hasPromotion: boolean;
 }
@@ -597,6 +599,16 @@ export default function CatalogPage() {
                 {p.costPrice != null && (
                   <p className="text-[11px] text-orange-600">
                     {t('costPrice')}: {p.costPrice.toLocaleString()} DA
+                  </p>
+                )}
+                {p.manufacturer && (
+                  <p className="text-[11px] text-muted">
+                    {t('manufacturer')}: {p.manufacturer.name}
+                  </p>
+                )}
+                {p.depot && (
+                  <p className="text-[11px] text-muted">
+                    {t('depot')}: {p.depot}
                   </p>
                 )}
                 {canManageVouchers &&

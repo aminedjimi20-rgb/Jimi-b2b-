@@ -228,7 +228,9 @@
     "inCart": "Dans le panier",
     "missingPieces": "Pièces manquantes",
     "minus": "moins",
-    "clearance": "Déstockage"
+    "clearance": "Déstockage",
+    "manufacturer": "Fabricant",
+    "depot": "Dépôt"
   },
   "products": {
     "title": "Produits",

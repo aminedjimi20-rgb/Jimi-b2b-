@@ -228,7 +228,9 @@
     "inCart": "In cart",
     "missingPieces": "Missing pieces",
     "minus": "minus",
-    "clearance": "Clearance"
+    "clearance": "Clearance",
+    "manufacturer": "Manufacturer",
+    "depot": "Depot"
   },
   "products": {
     "title": "Products",

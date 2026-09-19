@@ -108,6 +108,7 @@ export class ProductsService {
             },
           },
           packagingUnit: true,
+          manufacturer: { select: { id: true, name: true } },
           images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
           promotions: {
             where: { isActive: true, startDate: { lte: new Date() }, endDate: { gte: new Date() } },
@@ -148,6 +149,7 @@ export class ProductsService {
       include: {
         category: { include: { parent: true } },
         packagingUnit: true,
+        manufacturer: { select: { id: true, name: true } },
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
         promotions: {
           where: { isActive: true, startDate: { lte: new Date() }, endDate: { gte: new Date() } },
@@ -226,6 +228,8 @@ export class ProductsService {
       };
       packagingUnit: { id: string; key: string; label: string; labelPlural: string };
       images: { id: string; url: string; isPrimary: boolean }[];
+      manufacturer: { id: string; name: string } | null;
+      depot: string | null;
     },
     prices: VisiblePrice[],
     permissions: string[] | null,
@@ -254,6 +258,10 @@ export class ProductsService {
       createdAt: product.createdAt,
       availability: product.currentStock > 0 ? 'IN_STOCK' : 'OUT_OF_STOCK',
       currentStock: permissions?.includes('stock.manage') ? product.currentStock : null,
+      // Fournisseur et emplacement d'entrepôt — informations internes,
+      // jamais montrées à un client (même logique que costPrice/currentStock).
+      manufacturer: permissions?.includes('suppliers.view') ? product.manufacturer : null,
+      depot: permissions?.includes('stock.manage') ? product.depot : null,
       prices,
       hasPromotion: prices.some((p) => p.hasPromotion),
     };

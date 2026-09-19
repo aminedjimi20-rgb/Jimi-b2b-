@@ -228,7 +228,9 @@
     "inCart": "فالبانيي",
     "missingPieces": "القطع الناقصة",
     "minus": "ناقص",
-    "clearance": "تصفية"
+    "clearance": "تصفية",
+    "manufacturer": "الفابريكون",
+    "depot": "الديبو"
   },
   "products": {
     "title": "المنتجات",
