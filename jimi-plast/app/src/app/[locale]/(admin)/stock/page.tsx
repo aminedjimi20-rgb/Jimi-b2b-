@@ -22,10 +22,14 @@ interface Movement {
 interface ProductOption {
   id: string;
   nameFr: string;
+  sku: string;
+  unitsPerPackage: number;
+  images: { url: string }[];
 }
 
 export default function StockPage() {
   const t = useTranslations('stock');
+  const tProducts = useTranslations('products');
   const tCommon = useTranslations('common');
   const { token } = useAuth();
 
@@ -36,6 +40,9 @@ export default function StockPage() {
   const [newQuantity, setNewQuantity] = useState('');
   const [reason, setReason] = useState('');
   const [movementSearch, setMovementSearch] = useState('');
+  const [quantityUnit, setQuantityUnit] = useState<'pieces' | 'cartons'>('pieces');
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
 
   function reload() {
     api.get<ProductAlert[]>('/stock/alerts', token).then(setAlerts);
@@ -59,6 +66,28 @@ export default function StockPage() {
     return haystack.includes(q);
   });
 
+  const selectedProduct = products.find((p) => p.id === productId) ?? null;
+  const upp = selectedProduct?.unitsPerPackage || 1;
+  const quantityDisplayValue =
+    quantityUnit === 'pieces' || newQuantity === ''
+      ? newQuantity
+      : String(Math.round((Number(newQuantity) / upp) * 100) / 100);
+
+  function onQuantityDisplayChange(v: string) {
+    if (v === '') {
+      setNewQuantity('');
+      return;
+    }
+    const num = Number(v) || 0;
+    setNewQuantity(String(quantityUnit === 'cartons' ? Math.round(num * upp) : Math.round(num)));
+  }
+
+  const pickerResults = products.filter((p) => {
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return true;
+    return `${p.sku} ${p.nameFr}`.toLowerCase().includes(q);
+  });
+
   async function submitAdjust(e: React.FormEvent) {
     e.preventDefault();
     if (!productId || newQuantity === '' || !reason) return;
@@ -66,6 +95,8 @@ export default function StockPage() {
     setProductId('');
     setNewQuantity('');
     setReason('');
+    setProductSearch('');
+    setQuantityUnit('pieces');
     reload();
   }
 
@@ -88,15 +119,89 @@ export default function StockPage() {
 
       <form onSubmit={submitAdjust} className="grid grid-cols-1 gap-3 rounded-lg border border-line bg-panel p-4 sm:grid-cols-4">
         <h3 className="text-sm font-semibold text-ink sm:col-span-4">{t('adjust')}</h3>
-        <select value={productId} onChange={(e) => setProductId(e.target.value)} className="rounded border border-line bg-paper px-3 py-2 text-sm sm:col-span-2">
-          <option value="">{t('product')}</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nameFr}
-            </option>
-          ))}
-        </select>
-        <input type="number" placeholder={t('newStock')} value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} className="rounded border border-line bg-paper px-3 py-2 text-sm" />
+
+        <div className="sm:col-span-2">
+          <button
+            type="button"
+            onClick={() => setShowProductPicker((v) => !v)}
+            className="flex w-full items-center gap-2 rounded border border-line bg-paper px-3 py-2 text-start text-sm"
+          >
+            {selectedProduct?.images[0] ? (
+              <span className="h-6 w-6 shrink-0 overflow-hidden rounded border border-line">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={selectedProduct.images[0].url} alt="" className="h-full w-full object-cover" />
+              </span>
+            ) : null}
+            <span className={selectedProduct ? 'text-ink' : 'text-muted'}>{selectedProduct?.nameFr ?? t('product')}</span>
+          </button>
+          {showProductPicker && (
+            <div className="mt-2 rounded border border-line bg-panel p-2">
+              <input
+                type="search"
+                autoFocus
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                placeholder={tCommon('search')}
+                className="w-full rounded border border-line bg-paper px-3 py-2 text-sm"
+              />
+              <div className="mt-2 grid max-h-64 grid-cols-3 gap-2 overflow-y-auto sm:grid-cols-4">
+                {pickerResults.slice(0, 24).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setProductId(p.id);
+                      setShowProductPicker(false);
+                      setProductSearch('');
+                    }}
+                    className={`flex flex-col items-center gap-1 rounded border p-2 text-center hover:border-accent ${
+                      p.id === productId ? 'border-accent' : 'border-line'
+                    } bg-paper`}
+                  >
+                    <span className="h-12 w-12 overflow-hidden rounded border border-line bg-panel">
+                      {p.images[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.images[0].url} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </span>
+                    <span className="line-clamp-2 text-[10px] text-ink">{p.nameFr}</span>
+                  </button>
+                ))}
+                {pickerResults.length === 0 && <p className="col-span-full py-2 text-center text-xs text-muted">{tCommon('empty')}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted">{t('newStock')}</span>
+            <div className="flex overflow-hidden rounded border border-line text-[10px]">
+              <button
+                type="button"
+                onClick={() => setQuantityUnit('pieces')}
+                className={`px-1.5 py-0.5 ${quantityUnit === 'pieces' ? 'bg-accent text-white' : 'text-muted'}`}
+              >
+                {tProducts('form.stockPieces')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setQuantityUnit('cartons')}
+                className={`px-1.5 py-0.5 ${quantityUnit === 'cartons' ? 'bg-accent text-white' : 'text-muted'}`}
+              >
+                {tProducts('form.stockCartons')}
+              </button>
+            </div>
+          </div>
+          <input
+            type="number"
+            placeholder={t('newStock')}
+            value={quantityDisplayValue}
+            onChange={(e) => onQuantityDisplayChange(e.target.value)}
+            className="mt-1 w-full rounded border border-line bg-paper px-3 py-2 text-sm"
+          />
+        </div>
+
         <input placeholder={t('reason')} value={reason} onChange={(e) => setReason(e.target.value)} className="rounded border border-line bg-paper px-3 py-2 text-sm" />
         <button type="submit" className="rounded bg-accent px-3 py-2 text-sm font-medium text-white sm:col-span-4">
           {tCommon('save')}
