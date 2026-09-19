@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
+import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 
 interface PendingDeletion {
   id: string;
@@ -61,6 +62,7 @@ export default function ManufacturerDetailPage() {
   const [statementFrom, setStatementFrom] = useState('');
   const [statementTo, setStatementTo] = useState('');
   const [printingStatement, setPrintingStatement] = useState(false);
+  const [historySearch, setHistorySearch] = useState('');
 
   function reload() {
     api.get<ManufacturerDetail>(`/manufacturers/${id}`, token).then(setManufacturer);
@@ -142,20 +144,22 @@ export default function ManufacturerDetailPage() {
   }
 
   async function printStatement() {
-    const win = window.open('', '_blank');
+    // Sur mobile (partage de fichier supporté), pas d'onglet — la feuille de
+    // partage native s'occupe de tout, PDF réel en pièce jointe. Sur
+    // desktop, onglet vide synchrone dans le gestionnaire de clic (sinon
+    // les bloqueurs de popups l'empêchent une fois passé le premier await).
+    const win = supportsPdfShare() ? null : window.open('', '_blank');
     setPrintingStatement(true);
     try {
       const params = new URLSearchParams();
       if (statementFrom) params.set('from', statementFrom);
       if (statementTo) params.set('to', statementTo);
       const qs = params.toString();
-      const blob = await api.getBlob(`/manufacturers/${id}/statement/pdf${qs ? `?${qs}` : ''}`, token);
-      const url = URL.createObjectURL(blob);
-      if (win) {
-        win.location.href = url;
-      } else {
-        window.location.href = url;
-      }
+      await openOrSharePdf(
+        () => api.getBlob(`/manufacturers/${id}/statement/pdf${qs ? `?${qs}` : ''}`, token),
+        `situation-${manufacturer?.name ?? id}.pdf`,
+        win,
+      );
     } catch {
       win?.close();
     } finally {
@@ -174,6 +178,17 @@ export default function ManufacturerDetailPage() {
       return { ...e, balanceAfter };
     });
   }, [manufacturer]);
+
+  const filteredEntries = useMemo(() => {
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return entriesWithBalance;
+    return entriesWithBalance.filter((e) => {
+      const haystack = [t(`entryTypes.${e.type}`), e.note ?? '', new Date(e.createdAt).toLocaleString(), String(e.amount)]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [entriesWithBalance, historySearch, t]);
 
   if (!manufacturer) return <p className="text-muted">{tCommon('loading')}</p>;
 
@@ -348,7 +363,16 @@ export default function ManufacturerDetailPage() {
       </div>
 
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-ink">{t('detail.history')}</h3>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-ink">{t('detail.history')}</h3>
+          <input
+            type="search"
+            value={historySearch}
+            onChange={(e) => setHistorySearch(e.target.value)}
+            placeholder={tCommon('search')}
+            className="w-full max-w-xs rounded border border-line bg-panel px-3 py-1.5 text-sm"
+          />
+        </div>
         <div className="overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full text-sm">
             <thead>
@@ -362,7 +386,14 @@ export default function ManufacturerDetailPage() {
               </tr>
             </thead>
             <tbody>
-              {entriesWithBalance.map((e) => {
+              {filteredEntries.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-4 text-center text-sm text-muted">
+                    {tCommon('empty')}
+                  </td>
+                </tr>
+              )}
+              {filteredEntries.map((e) => {
                 const latest = e.pendingDeletions[0];
                 const isVoided = !!e.voidedAt;
                 const isEntryPending = latest?.status === 'PENDING';

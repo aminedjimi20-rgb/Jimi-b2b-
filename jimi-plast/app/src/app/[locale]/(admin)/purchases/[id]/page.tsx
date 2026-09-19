@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
+import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 
 interface PickerProduct {
   id: string;
@@ -279,15 +280,14 @@ export default function PurchaseEditorPage() {
   }
 
   async function viewPdf() {
-    // window.open synchrone dans le gestionnaire de clic — sinon les
-    // bloqueurs de popups (Safari/iOS) le bloquent après le premier "await".
-    const win = window.open('', '_blank');
+    // Sur mobile (partage de fichier supporté), pas d'onglet — la feuille de
+    // partage native s'occupe de tout. Sur desktop, onglet vide synchrone
+    // dans le gestionnaire de clic — sinon les bloqueurs de popups
+    // (Safari/iOS) le bloquent après le premier "await".
+    const win = supportsPdfShare() ? null : window.open('', '_blank');
     setLoadingPdf(true);
     try {
-      const blob = await api.getBlob(`/purchase-vouchers/${id}/pdf`, token);
-      const url = URL.createObjectURL(blob);
-      if (win) win.location.href = url;
-      else window.location.href = url;
+      await openOrSharePdf(() => api.getBlob(`/purchase-vouchers/${id}/pdf`, token), `${purchase?.number ?? 'achat'}.pdf`, win);
     } catch {
       win?.close();
       setError(tCommon('error'));

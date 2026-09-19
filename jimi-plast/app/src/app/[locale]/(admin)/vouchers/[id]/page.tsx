@@ -9,6 +9,7 @@ import { ImageLightbox } from '@/components/image-lightbox';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { SortSelect, type SortMode } from '@/components/sort-select';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
+import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 
 interface Price {
   tierKey: string;
@@ -137,22 +138,15 @@ export default function VoucherEditorPage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   async function viewPdf() {
-    // window.open doit être appelé de façon synchrone dans le gestionnaire de
-    // clic — sinon Safari/iOS et la plupart des bloqueurs de popups le
-    // bloquent une fois passé le premier "await". On ouvre donc un onglet
-    // vide tout de suite, puis on le redirige vers le PDF une fois prêt :
-    // le visualiseur PDF natif du navigateur s'ouvre directement, sans page
-    // intermédiaire visible.
-    const win = window.open('', '_blank');
+    // Sur mobile (partage de fichier supporté), on n'ouvre pas d'onglet —
+    // la feuille de partage native s'occupe de tout. Sur desktop, on ouvre
+    // un onglet vide tout de suite (synchrone, sinon les bloqueurs de popup
+    // l'empêchent une fois passé le premier "await") puis on le redirige
+    // vers le PDF une fois prêt.
+    const win = supportsPdfShare() ? null : window.open('', '_blank');
     setLoadingPdf(true);
     try {
-      const blob = await api.getBlob(`/vouchers/${id}/pdf`, token);
-      const url = URL.createObjectURL(blob);
-      if (win) {
-        win.location.href = url;
-      } else {
-        window.location.href = url;
-      }
+      await openOrSharePdf(() => api.getBlob(`/vouchers/${id}/pdf`, token), `${voucher?.number ?? 'bon'}.pdf`, win);
     } catch {
       win?.close();
       setError(tCommon('error'));
