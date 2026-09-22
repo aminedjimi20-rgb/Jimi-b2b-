@@ -28,7 +28,22 @@ interface DeliveryRow {
 interface Situation {
   totalDeliveries: number;
   totalCost: number;
+  breakdown: {
+    standalone: { count: number; total: number };
+    sales: { count: number; total: number };
+    purchase: { count: number; total: number };
+  };
 }
+
+const EMPTY_SITUATION: Situation = {
+  totalDeliveries: 0,
+  totalCost: 0,
+  breakdown: {
+    standalone: { count: 0, total: 0 },
+    sales: { count: 0, total: 0 },
+    purchase: { count: 0, total: 0 },
+  },
+};
 
 export default function DriverDetailPage() {
   const t = useTranslations('transport');
@@ -39,7 +54,7 @@ export default function DriverDetailPage() {
 
   const [driver, setDriver] = useState<Driver | null>(null);
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
-  const [situation, setSituation] = useState<Situation>({ totalDeliveries: 0, totalCost: 0 });
+  const [situation, setSituation] = useState<Situation>(EMPTY_SITUATION);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [printing, setPrinting] = useState(false);
@@ -138,7 +153,25 @@ export default function DriverDetailPage() {
             {printing ? tc('loading') : t('driverDetail.print')}
           </button>
         </div>
-        <div className="mt-4 flex gap-8">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="rounded border border-line bg-paper p-3">
+            <p className="text-xs uppercase tracking-wide text-muted">{t('driverDetail.standalone')}</p>
+            <p className="mt-1 font-mono text-lg font-semibold text-ink">{situation.breakdown.standalone.total.toLocaleString()} DA</p>
+            <p className="text-xs text-muted">{situation.breakdown.standalone.count} {t('driverDetail.deliveriesCount')}</p>
+          </div>
+          <div className="rounded border border-line bg-paper p-3">
+            <p className="text-xs uppercase tracking-wide text-muted">{t('driverDetail.purchaseDeliveries')}</p>
+            <p className="mt-1 font-mono text-lg font-semibold text-ink">{situation.breakdown.purchase.total.toLocaleString()} DA</p>
+            <p className="text-xs text-muted">{situation.breakdown.purchase.count} {t('driverDetail.deliveriesCount')}</p>
+          </div>
+          <div className="rounded border border-line bg-paper p-3">
+            <p className="text-xs uppercase tracking-wide text-muted">{t('driverDetail.salesDeliveries')}</p>
+            <p className="mt-1 font-mono text-lg font-semibold text-ink">{situation.breakdown.sales.total.toLocaleString()} DA</p>
+            <p className="text-xs text-muted">{situation.breakdown.sales.count} {t('driverDetail.deliveriesCount')}</p>
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] text-muted">{t('driverDetail.breakdownHint')}</p>
+        <div className="mt-3 flex gap-8 border-t border-line pt-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted">{t('driverDetail.totalDeliveries')}</p>
             <p className="mt-1 font-mono text-2xl font-semibold text-ink">{situation.totalDeliveries}</p>

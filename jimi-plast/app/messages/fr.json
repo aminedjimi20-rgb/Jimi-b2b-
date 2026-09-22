@@ -672,7 +672,11 @@
       "totalOwed": "Montant dû",
       "historyTitle": "Historique des courses",
       "date": "Date",
-      "standalone": "Course sans bon"
+      "standalone": "Course sans bon",
+      "purchaseDeliveries": "Livraisons achats (fabricants)",
+      "salesDeliveries": "Livraisons ventes (clients)",
+      "deliveriesCount": "course(s)",
+      "breakdownHint": "Ce qui est lié à un bon de vente ou d'achat n'est jamais compté comme Frais — c'est déjà dans le compte du client/fabricant. Seules les courses sans bon entrent dans les Frais."
     }
   },
   "productRequests": {
@@ -781,13 +785,14 @@
       "grossMargin": "Marge brute",
       "purchaseSpend": "Achats fabricants",
       "expensesByCategory": "Frais par catégorie",
-      "deliveryPayouts": "Frais de livraison (bons)",
+      "deliveryPayouts": "Paiements chauffeurs (livraisons liées à un bon)",
       "totalExpenses": "Total des frais",
       "netProfit": "Résultat net",
       "accounts": "Comptes (solde actuel)",
       "customerDebt": "Dû par mes clients",
       "supplierDebt": "Dû aux fabricants",
-      "print": "Imprimer ma situation"
+      "print": "Imprimer ma situation",
+      "deliveryPayoutsHint": "Ce montant n'est pas un Frais — c'est déjà facturé au client/fabricant sur son bon. C'est le coût réel payé au livreur, déduit du résultat net à part."
     }
   },
   "trash": {

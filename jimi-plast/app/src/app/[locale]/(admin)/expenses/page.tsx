@@ -397,8 +397,12 @@ export default function ExpensesPage() {
                 {situation.expensesByCategory.map((c) => (
                   <Row key={c.name} label={c.name} value={c.amount} />
                 ))}
-                <Row label={t('situation.deliveryPayouts')} value={situation.totalDeliveryPayouts} />
-                <Row label={t('situation.totalExpenses')} value={situation.totalExpenses + situation.totalDeliveryPayouts} bold />
+                <Row label={t('situation.totalExpenses')} value={situation.totalExpenses} bold />
+              </div>
+              <div className="rounded-lg border border-line bg-panel p-4 sm:col-span-2">
+                <p className="mb-2 text-sm font-semibold text-accent">{t('situation.deliveryPayouts')}</p>
+                <Row label={t('situation.deliveryPayouts')} value={situation.totalDeliveryPayouts} bold />
+                <p className="mt-1 text-[11px] text-muted">{t('situation.deliveryPayoutsHint')}</p>
               </div>
               <div className="rounded-lg border-2 border-accent bg-panel p-4 sm:col-span-2">
                 <Row

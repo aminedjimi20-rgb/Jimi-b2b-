@@ -45,6 +45,13 @@ export class DriversService {
   // effectuées, hors courses annulées (rien n'est dû pour celles-ci). Sans
   // suivi de paiement pour l'instant, la période se lit isolément — pas de
   // solde reporté d'avant le "from", juste le total dû pour la période.
+  //
+  // Le coût d'une course liée à un bon (vente ou achat) est déjà le coût
+  // réel payé au livreur — il n'a rien à voir avec le montant facturé au
+  // client/fabricant (qui entre dans le compte du client/fabricant, pas
+  // dans un quelconque compte "Frais"). Ce découpage par catégorie sert
+  // uniquement à ce que l'utilisateur retrouve, pour CE livreur, ce qui a
+  // été fait sans bon, pour un fabricant et pour un client.
   async getSituation(id: string, from?: Date, to?: Date) {
     const driver = await this.getById(id);
     const deliveries = await this.prisma.delivery.findMany({
@@ -60,21 +67,34 @@ export class DriversService {
       orderBy: { createdAt: 'asc' },
     });
 
+    const breakdown = {
+      standalone: { count: 0, total: 0 },
+      sales: { count: 0, total: 0 },
+      purchase: { count: 0, total: 0 },
+    };
+
     let running = 0;
     const entries = deliveries.map((d) => {
-      running += Number(d.cost);
+      const cost = Number(d.cost);
+      running += cost;
+
+      const category: 'standalone' | 'sales' | 'purchase' = d.salesVoucherId ? 'sales' : d.purchaseVoucherId ? 'purchase' : 'standalone';
+      breakdown[category].count += 1;
+      breakdown[category].total += cost;
+
       const label = d.salesVoucherId
         ? `Bon de vente ${d.salesVoucher?.number ?? ''}`
         : d.purchaseVoucherId
           ? `Bon d'achat ${d.purchaseVoucher?.number ?? ''}`
-          : 'Course';
+          : 'Course sans bon';
       const party = d.salesVoucher?.customer?.user.fullName ?? d.purchaseVoucher?.manufacturer?.name ?? d.address ?? null;
       return {
         id: d.id,
         createdAt: d.createdAt,
+        category,
         typeLabel: label,
         note: party,
-        amount: Number(d.cost),
+        amount: cost,
         balanceAfter: running,
       };
     });
@@ -85,6 +105,7 @@ export class DriversService {
       to: to ?? null,
       totalDeliveries: entries.length,
       totalCost: running,
+      breakdown,
       entries,
     };
   }

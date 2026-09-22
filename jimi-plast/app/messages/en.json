@@ -672,7 +672,11 @@
       "totalOwed": "Amount owed",
       "historyTitle": "Delivery history",
       "date": "Date",
-      "standalone": "Standalone delivery"
+      "standalone": "Standalone delivery",
+      "purchaseDeliveries": "Purchase deliveries (manufacturers)",
+      "salesDeliveries": "Sales deliveries (customers)",
+      "deliveriesCount": "deliverie(s)",
+      "breakdownHint": "Anything linked to a sales or purchase voucher is never counted as an Expense — it's already in the customer's/manufacturer's account. Only standalone deliveries enter Expenses."
     }
   },
   "productRequests": {
@@ -781,13 +785,14 @@
       "grossMargin": "Gross margin",
       "purchaseSpend": "Manufacturer purchases",
       "expensesByCategory": "Expenses by category",
-      "deliveryPayouts": "Delivery costs (vouchers)",
+      "deliveryPayouts": "Driver payments (deliveries linked to a voucher)",
       "totalExpenses": "Total expenses",
       "netProfit": "Net result",
       "accounts": "Accounts (current balance)",
       "customerDebt": "Owed by my customers",
       "supplierDebt": "Owed to manufacturers",
-      "print": "Print my situation"
+      "print": "Print my situation",
+      "deliveryPayoutsHint": "This is not an Expense — it's already billed to the customer/manufacturer on their voucher. It's the real cost paid to the driver, deducted from net profit separately."
     }
   },
   "trash": {

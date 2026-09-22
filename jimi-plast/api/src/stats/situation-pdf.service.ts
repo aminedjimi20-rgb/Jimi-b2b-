@@ -58,8 +58,12 @@ export class SituationPdfService {
 
     section('Frais généraux');
     for (const c of s.expensesByCategory) row(c.name, money(c.amount));
-    row('Frais de livraison (courses liées à un bon)', money(s.totalDeliveryPayouts));
-    row('Total des frais', money(s.totalExpenses + s.totalDeliveryPayouts), { bold: true });
+    row('Total des frais', money(s.totalExpenses), { bold: true });
+
+    // Jamais mélangé aux Frais : ce montant est déjà facturé au client/
+    // fabricant sur son bon — c'est le coût réel payé au livreur.
+    section('Paiements chauffeurs (livraisons liées à un bon)');
+    row('Total', money(s.totalDeliveryPayouts));
 
     y += 10;
     d.moveTo(40, y).lineTo(555, y).strokeColor(LINE).stroke();
