@@ -172,6 +172,32 @@ export class StatsService {
     const customerDebt = customerEntries.reduce((sum, e) => sum + Math.max(0, Number(e._sum.amount ?? 0)), 0);
     const supplierDebt = supplierEntries.reduce((sum, e) => sum + Math.max(0, Number(e._sum.amount ?? 0)), 0);
 
+    // Cash réellement encaissé/décaissé sur la période — distinct de
+    // customerDebt/supplierDebt qui sont des soldes actuels (toutes dates
+    // confondues). Un "Paiement" est stocké en négatif (il réduit ce qui
+    // est dû) : on l'inverse pour afficher un montant encaissé/payé positif.
+    const [customerPayments, supplierPayments] = await Promise.all([
+      this.prisma.ledgerEntry.aggregate({
+        where: { type: 'PAYMENT', voidedAt: null, createdAt: { gte: from, lte: to } },
+        _sum: { amount: true },
+      }),
+      this.prisma.supplierLedgerEntry.aggregate({
+        where: { type: 'PAYMENT', voidedAt: null, createdAt: { gte: from, lte: to } },
+        _sum: { amount: true },
+      }),
+    ]);
+    const customerPaymentsReceived = -Number(customerPayments._sum.amount ?? 0);
+    const manufacturerPaymentsPaid = -Number(supplierPayments._sum.amount ?? 0);
+
+    // Valeur du stock non vendu (au prix de revient) — un instantané actuel,
+    // comme customerDebt/supplierDebt, pas une somme sur la période.
+    const stockProducts = await this.prisma.product.findMany({
+      where: { deletedAt: null },
+      select: { currentStock: true, costPrice: true },
+    });
+    const remainingStockUnits = stockProducts.reduce((s, p) => s + p.currentStock, 0);
+    const remainingStockValue = stockProducts.reduce((s, p) => s + p.currentStock * Number(p.costPrice ?? 0), 0);
+
     const round = (n: number) => Math.round(n * 100) / 100;
     const grossMargin = salesRevenue - salesCOGS;
     const netProfit = grossMargin - totalExpenses - totalDeliveryPayouts;
@@ -189,6 +215,10 @@ export class StatsService {
       netProfit: round(netProfit),
       customerDebt: round(customerDebt),
       supplierDebt: round(supplierDebt),
+      customerPaymentsReceived: round(customerPaymentsReceived),
+      manufacturerPaymentsPaid: round(manufacturerPaymentsPaid),
+      remainingStockUnits,
+      remainingStockValue: round(remainingStockValue),
     };
   }
 

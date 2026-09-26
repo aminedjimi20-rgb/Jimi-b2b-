@@ -793,7 +793,15 @@
       "customerDebt": "Owed by my customers",
       "supplierDebt": "Owed to manufacturers",
       "print": "Print my situation",
-      "deliveryPayoutsHint": "This is not an Expense — it's already billed to the customer/manufacturer on their voucher. It's the real cost paid to the driver, deducted from net profit separately."
+      "deliveryPayoutsHint": "This is not an Expense — it's already billed to the customer/manufacturer on their voucher. It's the real cost paid to the driver, deducted from net profit separately.",
+      "netProfitHint": "Net profit = Gross margin (revenue − cost of goods sold) − Total expenses − Driver payments. Manufacturer purchases (above) aren't subtracted a second time: their cost is already inside the cost of goods sold.",
+      "customerPaymentsReceived": "Received from customers (period)",
+      "manufacturerPaymentsPaid": "Paid to manufacturers (period)",
+      "remainingStock": "Unsold stock",
+      "remainingStockUnits": "Quantity in stock",
+      "remainingStockValue": "Value at cost price",
+      "remainingStockHint": "Current snapshot (all dates), not limited to the chosen period — it's what you still have to sell.",
+      "pieces": "pieces"
     }
   },
   "trash": {

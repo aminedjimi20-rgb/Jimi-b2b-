@@ -793,7 +793,15 @@
       "customerDebt": "Dû par mes clients",
       "supplierDebt": "Dû aux fabricants",
       "print": "Imprimer ma situation",
-      "deliveryPayoutsHint": "Ce montant n'est pas un Frais — c'est déjà facturé au client/fabricant sur son bon. C'est le coût réel payé au livreur, déduit du résultat net à part."
+      "deliveryPayoutsHint": "Ce montant n'est pas un Frais — c'est déjà facturé au client/fabricant sur son bon. C'est le coût réel payé au livreur, déduit du résultat net à part.",
+      "netProfitHint": "Résultat net = Marge brute (chiffre d'affaires − coût des marchandises vendues) − Total des frais − Paiements chauffeurs. Les achats fabricants (ci-dessus) ne sont pas soustraits une seconde fois : leur coût est déjà dans le coût des marchandises vendues.",
+      "customerPaymentsReceived": "Encaissé de mes clients (période)",
+      "manufacturerPaymentsPaid": "Payé aux fabricants (période)",
+      "remainingStock": "Stock non vendu",
+      "remainingStockUnits": "Quantité en stock",
+      "remainingStockValue": "Valeur au prix de revient",
+      "remainingStockHint": "Instantané actuel (toutes dates confondues), pas limité à la période choisie — c'est ce qu'il vous reste à vendre.",
+      "pieces": "pièces"
     }
   },
   "trash": {

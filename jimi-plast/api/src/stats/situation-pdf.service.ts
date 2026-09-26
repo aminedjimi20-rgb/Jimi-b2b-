@@ -14,6 +14,10 @@ interface Situation {
   netProfit: number;
   customerDebt: number;
   supplierDebt: number;
+  customerPaymentsReceived: number;
+  manufacturerPaymentsPaid: number;
+  remainingStockUnits: number;
+  remainingStockValue: number;
 }
 
 const ACCENT = '#d9641f';
@@ -73,6 +77,12 @@ export class SituationPdfService {
     section('Comptes (solde actuel)');
     row('Dû par mes clients', money(s.customerDebt));
     row('Dû aux fabricants', money(s.supplierDebt));
+    row('Encaissé de mes clients (période)', money(s.customerPaymentsReceived));
+    row('Payé aux fabricants (période)', money(s.manufacturerPaymentsPaid));
+
+    section('Stock non vendu (valeur actuelle)');
+    row('Quantité en stock', `${s.remainingStockUnits.toLocaleString('fr-FR')} pièces`);
+    row('Valeur au prix de revient', money(s.remainingStockValue));
 
     d.fontSize(7).font('Helvetica').fillColor(MUTED).text('Document interne JIMI PLAST — usage personnel', 40, 784, { width: 515, align: 'center' });
 

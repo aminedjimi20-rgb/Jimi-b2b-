@@ -42,6 +42,10 @@ interface Situation {
   netProfit: number;
   customerDebt: number;
   supplierDebt: number;
+  customerPaymentsReceived: number;
+  manufacturerPaymentsPaid: number;
+  remainingStockUnits: number;
+  remainingStockValue: number;
 }
 
 function todayISO() {
@@ -411,11 +415,20 @@ export default function ExpensesPage() {
                   bold
                   colorClass={situation.netProfit >= 0 ? 'text-teal' : 'text-accent'}
                 />
+                <p className="mt-1 text-[11px] text-muted">{t('situation.netProfitHint')}</p>
               </div>
               <div className="rounded-lg border border-line bg-panel p-4 sm:col-span-2">
                 <p className="mb-2 text-sm font-semibold text-accent">{t('situation.accounts')}</p>
                 <Row label={t('situation.customerDebt')} value={situation.customerDebt} />
                 <Row label={t('situation.supplierDebt')} value={situation.supplierDebt} />
+                <Row label={t('situation.customerPaymentsReceived')} value={situation.customerPaymentsReceived} />
+                <Row label={t('situation.manufacturerPaymentsPaid')} value={situation.manufacturerPaymentsPaid} />
+              </div>
+              <div className="rounded-lg border border-line bg-panel p-4 sm:col-span-2">
+                <p className="mb-2 text-sm font-semibold text-accent">{t('situation.remainingStock')}</p>
+                <Row label={t('situation.remainingStockUnits')} value={situation.remainingStockUnits} unit={t('situation.pieces')} />
+                <Row label={t('situation.remainingStockValue')} value={situation.remainingStockValue} />
+                <p className="mt-1 text-[11px] text-muted">{t('situation.remainingStockHint')}</p>
               </div>
             </div>
           )}
@@ -425,11 +438,25 @@ export default function ExpensesPage() {
   );
 }
 
-function Row({ label, value, bold, colorClass }: { label: string; value: number; bold?: boolean; colorClass?: string }) {
+function Row({
+  label,
+  value,
+  bold,
+  colorClass,
+  unit = 'DA',
+}: {
+  label: string;
+  value: number;
+  bold?: boolean;
+  colorClass?: string;
+  unit?: string;
+}) {
   return (
     <div className={`flex justify-between py-1 ${bold ? 'font-semibold' : ''} ${colorClass ?? (bold ? 'text-ink' : 'text-muted')}`}>
       <span>{label}</span>
-      <span className="tabular">{value.toLocaleString()} DA</span>
+      <span className="tabular">
+        {value.toLocaleString()} {unit}
+      </span>
     </div>
   );
 }
