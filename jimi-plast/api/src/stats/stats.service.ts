@@ -198,9 +198,14 @@ export class StatsService {
     const remainingStockUnits = stockProducts.reduce((s, p) => s + p.currentStock, 0);
     const remainingStockValue = stockProducts.reduce((s, p) => s + p.currentStock * Number(p.costPrice ?? 0), 0);
 
+    // Les paiements chauffeurs (livraisons liées à un bon) ne sont pas
+    // déduits du résultat net : ce coût est déjà compensé côté bon — le
+    // client (livraison facturée) ou le fabricant (transport facturé) l'a
+    // déjà couvert dans son propre compte. Affiché seulement à titre
+    // indicatif, comme les achats fabricants ci-dessus.
     const round = (n: number) => Math.round(n * 100) / 100;
     const grossMargin = salesRevenue - salesCOGS;
-    const netProfit = grossMargin - totalExpenses - totalDeliveryPayouts;
+    const netProfit = grossMargin - totalExpenses;
 
     return {
       from: from.toISOString().slice(0, 10),

@@ -18,6 +18,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const t = useTranslations('nav');
   const tCommon = useTranslations('common');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Repli du menu en mode ordinateur, mémorisé d'une session à l'autre —
+  // distinct du tiroir mobile (sidebarOpen) qui, lui, doit toujours
+  // redémarrer fermé.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('sidebarCollapsed') === '1') setSidebarCollapsed(true);
+    } catch {
+      // localStorage indisponible (navigation privée…) — repli ignoré.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sidebarCollapsed', sidebarCollapsed ? '1' : '0');
+    } catch {
+      // idem
+    }
+  }, [sidebarCollapsed]);
 
   async function onAvatarUploaded(url: string) {
     await api.put('/auth/me/avatar', { avatarUrl: url }, token);
@@ -109,9 +129,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
       <aside
-        className={`fixed inset-y-0 start-0 z-50 w-60 shrink-0 flex-col overflow-y-auto border-e border-line bg-panel p-4 sm:static sm:flex ${
+        className={`fixed inset-y-0 start-0 z-50 w-60 shrink-0 flex-col overflow-y-auto border-e border-line bg-panel p-4 sm:static ${
           sidebarOpen ? 'flex' : 'hidden'
-        }`}
+        } ${sidebarCollapsed ? 'sm:hidden' : 'sm:flex'}`}
       >
         <div className="mb-8 flex items-center justify-between">
           <span className="font-mono text-sm font-semibold uppercase tracking-wider text-accent">JIMI PLAST</span>
@@ -161,11 +181,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
       <div className="flex h-screen flex-1 flex-col overflow-hidden">
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line bg-panel px-4 py-3 sm:justify-end sm:px-6">
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line bg-panel px-4 py-3 sm:px-6">
           <button
             onClick={() => setSidebarOpen(true)}
             className="rounded border border-line px-2.5 py-1.5 text-ink sm:hidden"
             aria-label={t('menu')}
+          >
+            ☰
+          </button>
+          <button
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            className="hidden rounded border border-line px-2.5 py-1.5 text-ink sm:inline-flex"
+            aria-label={sidebarCollapsed ? t('menu') : tCommon('close')}
+            title={sidebarCollapsed ? t('menu') : tCommon('close')}
           >
             ☰
           </button>
