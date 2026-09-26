@@ -42,6 +42,8 @@ interface Situation {
   netProfit: number;
   customerDebt: number;
   supplierDebt: number;
+  customerCredit: number;
+  supplierCredit: number;
   customerPaymentsReceived: number;
   manufacturerPaymentsPaid: number;
   remainingStockUnits: number;
@@ -421,6 +423,13 @@ export default function ExpensesPage() {
                 <p className="mb-2 text-sm font-semibold text-accent">{t('situation.accounts')}</p>
                 <Row label={t('situation.customerDebt')} value={situation.customerDebt} />
                 <Row label={t('situation.supplierDebt')} value={situation.supplierDebt} />
+                {situation.customerCredit > 0 && (
+                  <Row label={t('situation.customerCredit')} value={-situation.customerCredit} colorClass="text-teal" />
+                )}
+                {situation.supplierCredit > 0 && (
+                  <Row label={t('situation.supplierCredit')} value={-situation.supplierCredit} colorClass="text-teal" />
+                )}
+                <p className="mt-1 text-[11px] text-muted">{t('situation.accountsHint')}</p>
                 <Row label={t('situation.customerPaymentsReceived')} value={situation.customerPaymentsReceived} />
                 <Row label={t('situation.manufacturerPaymentsPaid')} value={situation.manufacturerPaymentsPaid} />
               </div>

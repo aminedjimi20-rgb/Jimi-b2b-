@@ -165,12 +165,25 @@ export class StatsService {
     });
     const totalDeliveryPayouts = linkedDeliveries.reduce((s, d) => s + Number(d.cost), 0);
 
+    // Soldes dus tels qu'ils étaient à la fin de la période choisie (comme
+    // le solde de fin d'un relevé) — pas le solde d'aujourd'hui : une dette
+    // est cumulative depuis toujours, donc seule la borne "to" compte, pas
+    // "from". `to` vaut "maintenant" par défaut (§ dateRange ci-dessus),
+    // donc effacer les dates redonne bien le solde actuel.
     const [customerEntries, supplierEntries] = await Promise.all([
-      this.prisma.ledgerEntry.groupBy({ by: ['customerId'], where: { voidedAt: null }, _sum: { amount: true } }),
-      this.prisma.supplierLedgerEntry.groupBy({ by: ['manufacturerId'], where: { voidedAt: null }, _sum: { amount: true } }),
+      this.prisma.ledgerEntry.groupBy({ by: ['customerId'], where: { voidedAt: null, createdAt: { lte: to } }, _sum: { amount: true } }),
+      this.prisma.supplierLedgerEntry.groupBy({ by: ['manufacturerId'], where: { voidedAt: null, createdAt: { lte: to } }, _sum: { amount: true } }),
     ]);
     const customerDebt = customerEntries.reduce((sum, e) => sum + Math.max(0, Number(e._sum.amount ?? 0)), 0);
     const supplierDebt = supplierEntries.reduce((sum, e) => sum + Math.max(0, Number(e._sum.amount ?? 0)), 0);
+    // L'inverse : un client/fabricant à solde négatif (trop payé) n'est pas
+    // soustrait de la dette totale ci-dessus (un crédit chez l'un ne compense
+    // pas ce que doit un autre) — sinon un client en crédit pouvait faire
+    // disparaître un vrai solde dû sans que ça se voie nulle part. Affiché
+    // à part, pour qu'un crédit dû reste visible même s'il ne touche pas
+    // "Dû par mes clients"/"Dû aux fabricants".
+    const customerCredit = customerEntries.reduce((sum, e) => sum + Math.max(0, -Number(e._sum.amount ?? 0)), 0);
+    const supplierCredit = supplierEntries.reduce((sum, e) => sum + Math.max(0, -Number(e._sum.amount ?? 0)), 0);
 
     // Cash réellement encaissé/décaissé sur la période — distinct de
     // customerDebt/supplierDebt qui sont des soldes actuels (toutes dates
@@ -189,14 +202,23 @@ export class StatsService {
     const customerPaymentsReceived = -Number(customerPayments._sum.amount ?? 0);
     const manufacturerPaymentsPaid = -Number(supplierPayments._sum.amount ?? 0);
 
-    // Valeur du stock non vendu (au prix de revient) — un instantané actuel,
-    // comme customerDebt/supplierDebt, pas une somme sur la période.
-    const stockProducts = await this.prisma.product.findMany({
-      where: { deletedAt: null },
-      select: { currentStock: true, costPrice: true },
-    });
-    const remainingStockUnits = stockProducts.reduce((s, p) => s + p.currentStock, 0);
-    const remainingStockValue = stockProducts.reduce((s, p) => s + p.currentStock * Number(p.costPrice ?? 0), 0);
+    // Stock non vendu tel qu'il était à la fin de la période — reconstruit
+    // en défaisant, produit par produit, les mouvements survenus après
+    // "to" (chaque mouvement est journalisé avec le même delta que celui
+    // appliqué à currentStock, donc l'opération inverse est exacte). Le
+    // prix de revient utilisé reste le prix actuel — son historique n'est
+    // pas journalisé, seule la quantité est donc vraiment "à la période".
+    const [stockProducts, futureMovements] = await Promise.all([
+      this.prisma.product.findMany({ where: { deletedAt: null }, select: { id: true, currentStock: true, costPrice: true } }),
+      this.prisma.stockMovement.groupBy({ by: ['productId'], where: { createdAt: { gt: to } }, _sum: { quantity: true } }),
+    ]);
+    const futureDeltaByProduct = new Map(futureMovements.map((m) => [m.productId, Number(m._sum.quantity ?? 0)]));
+    const stockAsOfTo = stockProducts.map((p) => ({
+      stock: p.currentStock - (futureDeltaByProduct.get(p.id) ?? 0),
+      costPrice: Number(p.costPrice ?? 0),
+    }));
+    const remainingStockUnits = stockAsOfTo.reduce((s, p) => s + p.stock, 0);
+    const remainingStockValue = stockAsOfTo.reduce((s, p) => s + p.stock * p.costPrice, 0);
 
     // Les paiements chauffeurs (livraisons liées à un bon) ne sont pas
     // déduits du résultat net : ce coût est déjà compensé côté bon — le
@@ -220,6 +242,8 @@ export class StatsService {
       netProfit: round(netProfit),
       customerDebt: round(customerDebt),
       supplierDebt: round(supplierDebt),
+      customerCredit: round(customerCredit),
+      supplierCredit: round(supplierCredit),
       customerPaymentsReceived: round(customerPaymentsReceived),
       manufacturerPaymentsPaid: round(manufacturerPaymentsPaid),
       remainingStockUnits,

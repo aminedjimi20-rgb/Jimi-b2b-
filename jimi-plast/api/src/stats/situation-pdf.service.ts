@@ -14,6 +14,8 @@ interface Situation {
   netProfit: number;
   customerDebt: number;
   supplierDebt: number;
+  customerCredit: number;
+  supplierCredit: number;
   customerPaymentsReceived: number;
   manufacturerPaymentsPaid: number;
   remainingStockUnits: number;
@@ -74,13 +76,15 @@ export class SituationPdfService {
     y += 14;
     row('RÉSULTAT NET', money(s.netProfit), { bold: true, color: s.netProfit >= 0 ? TEAL : ACCENT });
 
-    section('Comptes (solde actuel)');
+    section('Comptes (soldes à la fin de la période)');
     row('Dû par mes clients', money(s.customerDebt));
     row('Dû aux fabricants', money(s.supplierDebt));
+    if (s.customerCredit > 0) row('Crédit dû à mes clients (trop payé)', money(s.customerCredit));
+    if (s.supplierCredit > 0) row('Crédit dû par mes fabricants (trop payé)', money(s.supplierCredit));
     row('Encaissé de mes clients (période)', money(s.customerPaymentsReceived));
     row('Payé aux fabricants (période)', money(s.manufacturerPaymentsPaid));
 
-    section('Stock non vendu (valeur actuelle)');
+    section('Stock non vendu (à la fin de la période)');
     row('Quantité en stock', `${s.remainingStockUnits.toLocaleString('fr-FR')} pièces`);
     row('Valeur au prix de revient', money(s.remainingStockValue));
 
