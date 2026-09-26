@@ -43,6 +43,14 @@ export class CustomersController {
     return this.customersService.getById(id);
   }
 
+  @Get(':id/period-summary')
+  @RequirePermissions('customers.manage')
+  periodSummary(@Param('id') id: string, @Query('from') from: string | undefined, @Query('to') to: string | undefined) {
+    const fromDate = from ? new Date(from) : undefined;
+    const toDate = to ? new Date(`${to}T23:59:59.999`) : undefined;
+    return this.customersService.getPeriodSummary(id, fromDate, toDate);
+  }
+
   @Get(':id/statement/pdf')
   @RequirePermissions('customers.manage')
   async statementPdf(

@@ -134,6 +134,43 @@ export class CustomersService {
     };
   }
 
+  // Vue rapide "combien j'ai travaillé avec lui / combien il m'a payé" sur
+  // une période — distincte du solde (toutes dates confondues) et du
+  // relevé complet (getStatement, ligne par ligne). Le total travaillé se
+  // base sur les bons confirmés sur la période (comme stats.situation),
+  // pas sur les écritures du ledger qui peuvent dater d'un ajustement
+  // ultérieur à un bon plus ancien.
+  async getPeriodSummary(id: string, from?: Date, to?: Date) {
+    const customer = await this.prisma.customer.findFirst({ where: { id, deletedAt: null } });
+    if (!customer) throw new NotFoundException('Client introuvable');
+
+    const vouchers = await this.prisma.salesVoucher.findMany({
+      where: {
+        customerId: id,
+        status: { in: ['CONFIRMED', 'DELIVERED'] },
+        ...(from || to ? { confirmedAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      },
+      include: { items: { select: { lineTotal: true } } },
+    });
+    const totalBusiness = vouchers.reduce((sum, v) => {
+      const subtotal = v.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      return sum + subtotal - Number(v.discount) + Number(v.transportCost);
+    }, 0);
+
+    const paymentAgg = await this.prisma.ledgerEntry.aggregate({
+      where: {
+        customerId: id,
+        type: 'PAYMENT',
+        voidedAt: null,
+        ...(from || to ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      },
+      _sum: { amount: true },
+    });
+    const totalPaid = -Number(paymentAgg._sum.amount ?? 0);
+
+    return { totalBusiness: Math.round(totalBusiness * 100) / 100, totalPaid: Math.round(totalPaid * 100) / 100 };
+  }
+
   /** Créée automatiquement quand une demande d'inscription est acceptée avec un rôle commercial. */
   async createProfileForUser(
     userId: string,

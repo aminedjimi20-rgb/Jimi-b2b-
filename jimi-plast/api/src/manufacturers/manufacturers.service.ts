@@ -114,6 +114,41 @@ export class ManufacturersService {
     };
   }
 
+  // Vue rapide "combien j'ai travaillé avec lui / combien je lui ai payé"
+  // sur une période — voir le pendant côté client pour le détail du
+  // raisonnement (bons confirmés sur la période, pas les écritures du
+  // ledger qui peuvent dater d'un ajustement ultérieur à un bon plus ancien).
+  async getPeriodSummary(id: string, from?: Date, to?: Date) {
+    const manufacturer = await this.prisma.manufacturer.findFirst({ where: { id, deletedAt: null } });
+    if (!manufacturer) throw new NotFoundException('Fabricant introuvable');
+
+    const vouchers = await this.prisma.purchaseVoucher.findMany({
+      where: {
+        manufacturerId: id,
+        status: 'CONFIRMED',
+        ...(from || to ? { confirmedAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      },
+      include: { items: { select: { lineTotal: true } } },
+    });
+    const totalBusiness = vouchers.reduce((sum, v) => {
+      const subtotal = v.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      return sum + subtotal - Number(v.discount) + Number(v.transportCost);
+    }, 0);
+
+    const paymentAgg = await this.prisma.supplierLedgerEntry.aggregate({
+      where: {
+        manufacturerId: id,
+        type: 'PAYMENT',
+        voidedAt: null,
+        ...(from || to ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+      },
+      _sum: { amount: true },
+    });
+    const totalPaid = -Number(paymentAgg._sum.amount ?? 0);
+
+    return { totalBusiness: Math.round(totalBusiness * 100) / 100, totalPaid: Math.round(totalPaid * 100) / 100 };
+  }
+
   // Vue en lecture seule, réservée au fabricant lui-même — ne montre que
   // ses propres produits, et seulement si l'admin l'y a autorisé.
   async getMyCatalog(userId: string) {

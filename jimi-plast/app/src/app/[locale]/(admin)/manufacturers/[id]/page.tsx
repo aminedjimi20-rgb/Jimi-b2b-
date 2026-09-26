@@ -64,6 +64,7 @@ export default function ManufacturerDetailPage() {
   const [statementTo, setStatementTo] = useState('');
   const [printingStatement, setPrintingStatement] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
+  const [periodSummary, setPeriodSummary] = useState<{ totalBusiness: number; totalPaid: number } | null>(null);
 
   function reload() {
     api.get<ManufacturerDetail>(`/manufacturers/${id}`, token).then(setManufacturer);
@@ -73,6 +74,20 @@ export default function ManufacturerDetailPage() {
     if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  // Chiffres "sur la période" (achats + payé), recalculés à chaque
+  // changement des dates Du/Au partagées avec l'impression de situation.
+  useEffect(() => {
+    if (!token) return;
+    const params = new URLSearchParams();
+    if (statementFrom) params.set('from', statementFrom);
+    if (statementTo) params.set('to', statementTo);
+    const qs = params.toString();
+    api
+      .get<{ totalBusiness: number; totalPaid: number }>(`/manufacturers/${id}/period-summary${qs ? `?${qs}` : ''}`, token)
+      .then(setPeriodSummary)
+      .catch(() => setPeriodSummary(null));
+  }, [token, id, statementFrom, statementTo]);
 
   function startEdit() {
     if (!manufacturer) return;
@@ -361,6 +376,18 @@ export default function ManufacturerDetailPage() {
             {t('detail.print')}
           </button>
         </div>
+        {periodSummary && (
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded border border-line bg-paper p-3">
+              <p className="text-xs uppercase tracking-wide text-muted">{t('detail.periodBusiness')}</p>
+              <p className="mt-1 font-mono text-lg font-semibold tabular text-ink">{periodSummary.totalBusiness.toLocaleString()} DA</p>
+            </div>
+            <div className="rounded border border-line bg-paper p-3">
+              <p className="text-xs uppercase tracking-wide text-muted">{t('detail.periodPaid')}</p>
+              <p className="mt-1 font-mono text-lg font-semibold tabular text-teal">{periodSummary.totalPaid.toLocaleString()} DA</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div>

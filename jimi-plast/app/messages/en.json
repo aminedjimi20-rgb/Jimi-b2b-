@@ -339,10 +339,12 @@
       "pendingDeletion": "Awaiting approval",
       "date": "Date",
       "runningBalance": "Balance",
-      "statementTitle": "Print a statement",
+      "statementTitle": "Over a period",
       "statementFrom": "From",
       "statementTo": "To",
-      "print": "Print"
+      "print": "Print",
+      "periodBusiness": "Revenue generated",
+      "periodPaid": "Paid by customer"
     },
     "entryTypes": {
       "SALE_VOUCHER": "Sales voucher",
@@ -474,10 +476,12 @@
       "deleted": "Deleted",
       "date": "Date",
       "runningBalance": "Balance",
-      "statementTitle": "Print a statement",
+      "statementTitle": "Over a period",
       "statementFrom": "From",
       "statementTo": "To",
-      "print": "Print"
+      "print": "Print",
+      "periodBusiness": "Purchases made",
+      "periodPaid": "Paid to manufacturer"
     },
     "entryTypes": {
       "PURCHASE_VOUCHER": "Purchase voucher",

@@ -339,10 +339,12 @@
       "pendingDeletion": "فالانتظار للموافقة",
       "date": "التاريخ",
       "runningBalance": "الرصيد",
-      "statementTitle": "طباعة سيتيواسيون",
+      "statementTitle": "على مدة",
       "statementFrom": "من",
       "statementTo": "إلى",
-      "print": "طباعة"
+      "print": "طباعة",
+      "periodBusiness": "رقم الأعمال المحقق",
+      "periodPaid": "خلصني الكليون"
     },
     "entryTypes": {
       "SALE_VOUCHER": "بون بيع",
@@ -474,10 +476,12 @@
       "deleted": "محذوف",
       "date": "التاريخ",
       "runningBalance": "الرصيد",
-      "statementTitle": "طباعة سيتيواسيون",
+      "statementTitle": "على مدة",
       "statementFrom": "من",
       "statementTo": "إلى",
-      "print": "طباعة"
+      "print": "طباعة",
+      "periodBusiness": "الشراء المنجز",
+      "periodPaid": "خلصت الفابريكو"
     },
     "entryTypes": {
       "PURCHASE_VOUCHER": "وصل شراء",

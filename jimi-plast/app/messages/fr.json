@@ -339,10 +339,12 @@
       "pendingDeletion": "En attente d'approbation",
       "date": "Date",
       "runningBalance": "Solde",
-      "statementTitle": "Imprimer une situation",
+      "statementTitle": "Sur une période",
       "statementFrom": "Du",
       "statementTo": "Au",
-      "print": "Imprimer"
+      "print": "Imprimer",
+      "periodBusiness": "Chiffre d'affaires réalisé",
+      "periodPaid": "Payé par le client"
     },
     "entryTypes": {
       "SALE_VOUCHER": "Bon de vente",
@@ -474,10 +476,12 @@
       "deleted": "Supprimé",
       "date": "Date",
       "runningBalance": "Solde",
-      "statementTitle": "Imprimer une situation",
+      "statementTitle": "Sur une période",
       "statementFrom": "Du",
       "statementTo": "Au",
-      "print": "Imprimer"
+      "print": "Imprimer",
+      "periodBusiness": "Achats effectués",
+      "periodPaid": "Payé au fabricant"
     },
     "entryTypes": {
       "PURCHASE_VOUCHER": "Bon d'achat",
