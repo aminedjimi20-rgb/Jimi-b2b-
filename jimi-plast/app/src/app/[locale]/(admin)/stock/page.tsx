@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
@@ -21,7 +21,19 @@ interface Movement {
   stockAfter: number | null;
   reason: string | null;
   createdAt: string;
+  referenceType: string | null;
+  referenceId: string | null;
+  voucherNumber: string | null;
+  partyName: string | null;
   product: { nameFr: string; sku: string; unitsPerPackage: number };
+}
+
+function movementLink(m: Movement, locale: string): string | null {
+  if (!m.referenceId) return null;
+  if (m.referenceType === 'SalesVoucher') return `/${locale}/vouchers/${m.referenceId}`;
+  if (m.referenceType === 'PurchaseVoucher') return `/${locale}/purchases/${m.referenceId}`;
+  if (m.referenceType === 'Return') return `/${locale}/returns/${m.referenceId}`;
+  return null;
 }
 interface ProductOption {
   id: string;
@@ -37,6 +49,7 @@ export default function StockPage() {
   const tCommon = useTranslations('common');
   const { token } = useAuth();
   const { locale } = useParams<{ locale: string }>();
+  const router = useRouter();
 
   const [alerts, setAlerts] = useState<ProductAlert[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -65,7 +78,15 @@ export default function StockPage() {
   const filteredMovements = movements.filter((m) => {
     const q = movementSearch.trim().toLowerCase();
     if (!q) return true;
-    const haystack = [m.product.nameFr, m.product.sku, t(`movementTypes.${m.type}` as never), m.reason ?? '', String(m.quantity)]
+    const haystack = [
+      m.product.nameFr,
+      m.product.sku,
+      t(`movementTypes.${m.type}` as never),
+      m.reason ?? '',
+      m.voucherNumber ?? '',
+      m.partyName ?? '',
+      String(m.quantity),
+    ]
       .join(' ')
       .toLowerCase();
     return haystack.includes(q);
@@ -243,6 +264,8 @@ export default function StockPage() {
                 <th className="px-4 py-2 text-start">{t('columns.date')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.product')}</th>
                 <th className="px-4 py-2 text-start">{t('columns.type')}</th>
+                <th className="px-4 py-2 text-start">{t('columns.voucher')}</th>
+                <th className="px-4 py-2 text-start">{t('columns.party')}</th>
                 <th className="px-4 py-2 text-end">{t('columns.quantity')}</th>
                 <th className="px-4 py-2 text-end">{t('columns.cartons')}</th>
                 <th className="px-4 py-2 text-end">{t('columns.stockAfter')}</th>
@@ -252,7 +275,7 @@ export default function StockPage() {
             <tbody>
               {filteredMovements.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-4 text-center text-sm text-muted">
+                  <td colSpan={9} className="px-4 py-4 text-center text-sm text-muted">
                     {tCommon('empty')}
                   </td>
                 </tr>
@@ -262,7 +285,7 @@ export default function StockPage() {
                   <DayGroupRow
                     label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
                     count={group.rows.length}
-                    colSpan={7}
+                    colSpan={9}
                     expanded={isExpanded(idx)}
                     onToggle={() => toggle(idx)}
                   />
@@ -270,11 +293,22 @@ export default function StockPage() {
                     group.rows.map((m) => {
                       const upp = m.product.unitsPerPackage || 1;
                       const cartons = Math.round((m.quantity / upp) * 100) / 100;
+                      const link = movementLink(m, locale);
                       return (
                         <tr key={m.id} className="border-t border-line">
                           <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
                           <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
                           <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
+                          <td className="px-4 py-2 font-mono text-xs">
+                            {link && m.voucherNumber ? (
+                              <button onClick={() => router.push(link)} className="text-accent hover:underline">
+                                {m.voucherNumber}
+                              </button>
+                            ) : (
+                              m.voucherNumber ?? '—'
+                            )}
+                          </td>
+                          <td className="px-4 py-2 text-xs text-muted">{m.partyName ?? '—'}</td>
                           <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
                             {m.quantity > 0 ? '+' : ''}
                             {m.quantity}

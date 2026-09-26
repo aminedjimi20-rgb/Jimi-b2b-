@@ -15,12 +15,65 @@ export class StockService {
     private readonly auditLog: AuditLogService,
   ) {}
 
-  movements(productId?: string) {
-    return this.prisma.stockMovement.findMany({
+  async movements(productId?: string) {
+    const movements = await this.prisma.stockMovement.findMany({
       where: productId ? { productId } : undefined,
       include: { product: { select: { nameFr: true, sku: true, unitsPerPackage: true } } },
       orderBy: { createdAt: 'desc' },
       take: 200,
+    });
+
+    const salesIds = [...new Set(movements.filter((m) => m.referenceType === 'SalesVoucher').map((m) => m.referenceId!))];
+    const purchaseIds = [...new Set(movements.filter((m) => m.referenceType === 'PurchaseVoucher').map((m) => m.referenceId!))];
+    const returnIds = [...new Set(movements.filter((m) => m.referenceType === 'Return').map((m) => m.referenceId!))];
+
+    const [salesVouchers, purchaseVouchers, returns] = await Promise.all([
+      salesIds.length
+        ? this.prisma.salesVoucher.findMany({
+            where: { id: { in: salesIds } },
+            select: { id: true, number: true, customer: { select: { user: { select: { fullName: true } } } } },
+          })
+        : Promise.resolve([]),
+      purchaseIds.length
+        ? this.prisma.purchaseVoucher.findMany({
+            where: { id: { in: purchaseIds } },
+            select: { id: true, number: true, manufacturer: { select: { name: true } } },
+          })
+        : Promise.resolve([]),
+      returnIds.length
+        ? this.prisma.return.findMany({
+            where: { id: { in: returnIds } },
+            select: {
+              id: true,
+              number: true,
+              customer: { select: { user: { select: { fullName: true } } } },
+              manufacturer: { select: { name: true } },
+            },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const salesMap = new Map(salesVouchers.map((v) => [v.id, v]));
+    const purchaseMap = new Map(purchaseVouchers.map((v) => [v.id, v]));
+    const returnMap = new Map(returns.map((r) => [r.id, r]));
+
+    return movements.map((m) => {
+      let voucherNumber: string | null = null;
+      let partyName: string | null = null;
+      if (m.referenceType === 'SalesVoucher' && m.referenceId) {
+        const v = salesMap.get(m.referenceId);
+        voucherNumber = v?.number ?? null;
+        partyName = v?.customer.user.fullName ?? null;
+      } else if (m.referenceType === 'PurchaseVoucher' && m.referenceId) {
+        const v = purchaseMap.get(m.referenceId);
+        voucherNumber = v?.number ?? null;
+        partyName = v?.manufacturer.name ?? null;
+      } else if (m.referenceType === 'Return' && m.referenceId) {
+        const r = returnMap.get(m.referenceId);
+        voucherNumber = r?.number ?? null;
+        partyName = r?.customer?.user.fullName ?? r?.manufacturer?.name ?? null;
+      }
+      return { ...m, voucherNumber, partyName };
     });
   }
 

@@ -541,6 +541,8 @@
       "date": "Date",
       "product": "Produit",
       "type": "Type",
+      "voucher": "Bon",
+      "party": "Client / Fabricant",
       "quantity": "Quantité (pièces)",
       "cartons": "Cartons",
       "reason": "Raison",
