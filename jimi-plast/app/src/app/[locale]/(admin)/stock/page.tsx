@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
-import { DayGroupRow } from '@/components/day-group-row';
+import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface ProductAlert {
@@ -72,7 +72,7 @@ export default function StockPage() {
   });
 
   const dayGroups = useMemo(() => groupByDay(filteredMovements, (m) => m.createdAt), [filteredMovements]);
-  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+  const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   const selectedProduct = products.find((p) => p.id === productId) ?? null;
   const upp = selectedProduct?.unitsPerPackage || 1;
@@ -217,13 +217,24 @@ export default function StockPage() {
       <div>
         <div className="sticky top-0 z-10 mb-2 flex flex-wrap items-center justify-between gap-2 bg-paper py-2">
           <h3 className="text-sm font-semibold text-ink">{t('movements')}</h3>
-          <input
-            type="search"
-            value={movementSearch}
-            onChange={(e) => setMovementSearch(e.target.value)}
-            placeholder={tCommon('search')}
-            className="w-full max-w-xs rounded border border-line bg-panel px-3 py-1.5 text-sm"
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="search"
+              value={movementSearch}
+              onChange={(e) => setMovementSearch(e.target.value)}
+              placeholder={tCommon('search')}
+              className="w-full max-w-xs rounded border border-line bg-panel px-3 py-1.5 text-sm"
+            />
+            {dayGroups.length > 0 && (
+              <DayGroupToggleAll
+                allExpanded={allExpanded}
+                onExpandAll={expandAll}
+                onCollapseAll={collapseAll}
+                expandLabel={tCommon('expandAll')}
+                collapseLabel={tCommon('collapseAll')}
+              />
+            )}
+          </div>
         </div>
         <div className="overflow-x-auto rounded-lg border border-line bg-panel">
           <table className="w-full text-sm">

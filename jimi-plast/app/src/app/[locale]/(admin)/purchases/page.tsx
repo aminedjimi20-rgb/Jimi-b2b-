@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
-import { DayGroupRow } from '@/components/day-group-row';
+import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface Manufacturer {
@@ -103,7 +103,7 @@ export default function PurchasesPage() {
     () => (groupByDate ? groupByDay(sortedPurchases, (p) => p.createdAt) : []),
     [sortedPurchases, groupByDate],
   );
-  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+  const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   return (
     <div className="flex flex-col gap-4">
@@ -147,6 +147,15 @@ export default function PurchasesPage() {
             onChange={setSortMode}
             options={['newest', 'oldest', 'price_desc', 'price_asc', 'qty_desc', 'qty_asc', 'name_asc', 'name_desc']}
           />
+          {groupByDate && dayGroups.length > 0 && (
+            <DayGroupToggleAll
+              allExpanded={allExpanded}
+              onExpandAll={expandAll}
+              onCollapseAll={collapseAll}
+              expandLabel={tCommon('expandAll')}
+              collapseLabel={tCommon('collapseAll')}
+            />
+          )}
         </div>
       </div>
 

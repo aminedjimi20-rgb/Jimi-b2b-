@@ -49,5 +49,11 @@ export function useExpandedGroups(groups: { key: string }[]) {
     if (key === undefined) return;
     setOverrides((prev) => ({ ...prev, [key]: !isExpanded(idx) }));
   }
-  return { isExpanded, toggle };
+  function setAll(expanded: boolean) {
+    const next: Record<string, boolean> = {};
+    for (const g of groups) next[g.key] = expanded;
+    setOverrides(next);
+  }
+  const allExpanded = groups.length > 0 && groups.every((_, idx) => isExpanded(idx));
+  return { isExpanded, toggle, allExpanded, expandAll: () => setAll(true), collapseAll: () => setAll(false) };
 }

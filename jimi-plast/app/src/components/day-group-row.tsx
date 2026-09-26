@@ -1,5 +1,29 @@
 'use client';
 
+export function DayGroupToggleAll({
+  allExpanded,
+  onExpandAll,
+  onCollapseAll,
+  expandLabel,
+  collapseLabel,
+}: {
+  allExpanded: boolean;
+  onExpandAll: () => void;
+  onCollapseAll: () => void;
+  expandLabel: string;
+  collapseLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={allExpanded ? onCollapseAll : onExpandAll}
+      className="rounded border border-line px-3 py-1.5 text-xs text-ink hover:bg-line/30"
+    >
+      {allExpanded ? collapseLabel : expandLabel}
+    </button>
+  );
+}
+
 export function DayGroupRow({
   label,
   count,

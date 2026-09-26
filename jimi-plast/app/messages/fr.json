@@ -159,6 +159,8 @@
     "search": "Rechercher…",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
+    "expandAll": "Tout déplier",
+    "collapseAll": "Tout replier",
     "loginToSeePrices": "Connectez-vous pour voir les prix",
     "uploadPhoto": "Depuis la galerie",
     "camera": "Caméra",

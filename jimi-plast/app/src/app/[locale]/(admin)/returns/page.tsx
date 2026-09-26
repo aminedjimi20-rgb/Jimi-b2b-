@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
-import { DayGroupRow } from '@/components/day-group-row';
+import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface Customer {
@@ -157,7 +157,7 @@ export default function ReturnsPage() {
     () => (groupByDate ? groupByDay(sortedReturns, (r) => r.createdAt) : []),
     [sortedReturns, groupByDate],
   );
-  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+  const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   const parties = type === 'CUSTOMER' ? customers : manufacturers;
 
@@ -230,6 +230,15 @@ export default function ReturnsPage() {
             onChange={setSortMode}
             options={['newest', 'oldest', 'modified_desc', 'modified_asc', 'price_desc', 'price_asc', 'name_asc', 'name_desc']}
           />
+          {groupByDate && dayGroups.length > 0 && (
+            <DayGroupToggleAll
+              allExpanded={allExpanded}
+              onExpandAll={expandAll}
+              onCollapseAll={collapseAll}
+              expandLabel={tCommon('expandAll')}
+              collapseLabel={tCommon('collapseAll')}
+            />
+          )}
         </div>
 
         {showForm && (

@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
-import { DayGroupRow } from '@/components/day-group-row';
+import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface Driver {
@@ -137,7 +137,7 @@ export default function TransportPage() {
   }, [deliveries, search]);
 
   const dayGroups = useMemo(() => groupByDay(filteredDeliveries, (d) => d.createdAt), [filteredDeliveries]);
-  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+  const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   const filteredDrivers = useMemo(() => {
     const q = driverSearch.trim().toLowerCase();
@@ -522,13 +522,24 @@ export default function TransportPage() {
         </div>
       )}
 
-      <input
-        type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={t('search')}
-        className="w-full max-w-xs rounded border border-line bg-panel px-3 py-1.5 text-sm"
-      />
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('search')}
+          className="w-full max-w-xs rounded border border-line bg-panel px-3 py-1.5 text-sm"
+        />
+        {dayGroups.length > 0 && (
+          <DayGroupToggleAll
+            allExpanded={allExpanded}
+            onExpandAll={expandAll}
+            onCollapseAll={collapseAll}
+            expandLabel={tc('expandAll')}
+            collapseLabel={tc('collapseAll')}
+          />
+        )}
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
         <table className="w-full min-w-[700px] text-sm">

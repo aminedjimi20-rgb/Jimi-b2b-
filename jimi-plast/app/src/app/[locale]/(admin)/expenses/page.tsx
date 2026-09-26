@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 import { SortSelect, type SortMode } from '@/components/sort-select';
-import { DayGroupRow } from '@/components/day-group-row';
+import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface ExpenseCategory {
@@ -135,7 +135,7 @@ export default function ExpensesPage() {
     () => (groupByDate ? groupByDay(sortedExpenses, (e) => e.date) : []),
     [sortedExpenses, groupByDate],
   );
-  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+  const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   function renderExpenseRow(e: Expense) {
     return (
@@ -311,6 +311,15 @@ export default function ExpensesPage() {
               <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="rounded border border-line bg-panel px-2 py-1.5 text-sm text-ink" />
             </label>
             <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'price_desc', 'price_asc', 'name_asc']} />
+            {groupByDate && dayGroups.length > 0 && (
+              <DayGroupToggleAll
+                allExpanded={allExpanded}
+                onExpandAll={expandAll}
+                onCollapseAll={collapseAll}
+                expandLabel={tc('expandAll')}
+                collapseLabel={tc('collapseAll')}
+              />
+            )}
             <button onClick={printExpenses} disabled={loadingPdf} className="rounded border border-line px-3 py-2 text-sm text-ink hover:bg-line/30 disabled:opacity-50">
               {loadingPdf ? tc('loading') : t('print')}
             </button>
