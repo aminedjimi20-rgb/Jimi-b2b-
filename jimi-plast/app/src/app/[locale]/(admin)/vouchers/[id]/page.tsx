@@ -126,6 +126,7 @@ export default function VoucherEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPatchRef = useRef<Record<string, unknown>>({});
 
   // Sélecteur de produit : recherche + vignettes + zoom, même système que le Catalogue.
   const [showPicker, setShowPicker] = useState(false);
@@ -251,14 +252,35 @@ export default function VoucherEditorPage() {
   const editable = isDraft || editMode;
   const voucherDeletion = voucher?.pendingDeletions[0];
 
+  // Ne recharge PAS ces 4 champs après un enregistrement automatique — ils
+  // sont déjà exacts localement (c'est justement ce qu'on vient d'envoyer).
+  // Les réécraser avec la réponse du serveur créait une course : si
+  // l'utilisateur retapait un chiffre pendant que ce fetch était en vol, sa
+  // frappe se faisait écraser par l'ancienne valeur au retour — d'où les
+  // chiffres qui "disparaissent et reviennent" en tapant vite. On ne
+  // rafraîchit voucher/discountPercent que si des articles ont changé.
+  function refreshVoucherOnly() {
+    api.get<Voucher>(`${basePath}/${id}`, token).then((v) => {
+      setVoucher(v);
+      const sub = v.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      setDiscountPercent(sub > 0 ? String(Math.round((Number(v.discount) / sub) * 10000) / 100) : '0');
+    });
+  }
+
   const autoSave = useCallback(
     (patch: Record<string, unknown>) => {
+      // Fusionne avec un éventuel changement déjà en attente — sinon,
+      // modifier un champ puis un autre avant la fin du délai perdait le
+      // premier (un seul minuteur partagé remplaçait le patch précédent).
+      pendingPatchRef.current = { ...pendingPatchRef.current, ...patch };
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
+        const toSend = pendingPatchRef.current;
+        pendingPatchRef.current = {};
         try {
-          await api.put(`${basePath}/${id}`, patch, token);
+          await api.put(`${basePath}/${id}`, toSend, token);
           setSavedAt(new Date());
-          reload();
+          if ('items' in toSend) refreshVoucherOnly();
         } catch {
           setError(tCommon('error'));
         }

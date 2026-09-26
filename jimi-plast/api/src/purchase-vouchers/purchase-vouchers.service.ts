@@ -144,7 +144,7 @@ export class PurchaseVouchersService {
     if (voucher.status === 'CANCELLED') throw new BadRequestException('Un bon annulé ne peut pas être modifié');
 
     if (voucher.status === 'DRAFT') return this.updateDraft(id, dto);
-    return this.updateConfirmed(id, dto, actorId, voucher.manufacturerId);
+    return this.updateConfirmed(id, dto, actorId, voucher);
   }
 
   private async updateDraft(id: string, dto: UpsertPurchaseVoucherDto) {
@@ -194,8 +194,13 @@ export class PurchaseVouchersService {
   // retiré, quantité/coût modifiés) recalcule le stock et la dette, se
   // consigne dans l'historique (immuable) et surligne la ligne concernée —
   // même logique que pour un bon de vente confirmé.
-  private async updateConfirmed(id: string, dto: UpsertPurchaseVoucherDto, actorId: string, manufacturerIdFallback: string) {
-    const manufacturerId = dto.manufacturerId ?? manufacturerIdFallback;
+  private async updateConfirmed(
+    id: string,
+    dto: UpsertPurchaseVoucherDto,
+    actorId: string,
+    existingVoucher: { manufacturerId: string; paidAmount: Prisma.Decimal; number: string | null },
+  ) {
+    const manufacturerId = dto.manufacturerId ?? existingVoucher.manufacturerId;
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
 
@@ -296,6 +301,26 @@ export class PurchaseVouchersService {
         where: { id },
         data: { manufacturerId, discount: dto.discount, transportCost: dto.transportCost, paidAmount: dto.paidAmount, notes: dto.notes },
       });
+
+      // Même règle que pour les clients : le montant payé du bon n'est
+      // qu'un miroir du compte fournisseur — l'écart entre l'ancien et le
+      // nouveau montant devient une nouvelle écriture de paiement, jamais
+      // une réécriture de l'historique existant.
+      if (dto.paidAmount != null) {
+        const delta = Number(dto.paidAmount) - Number(existingVoucher.paidAmount);
+        if (delta !== 0) {
+          await tx.supplierLedgerEntry.create({
+            data: {
+              manufacturerId,
+              type: 'PAYMENT',
+              amount: -delta,
+              reference: existingVoucher.number,
+              note: `Ajustement du montant payé sur le bon ${existingVoucher.number ?? ''} (modifié après confirmation)`,
+              createdById: actorId,
+            },
+          });
+        }
+      }
     });
 
     if (changes.length > 0) {

@@ -73,7 +73,7 @@ export class ManufacturersController {
       entries: statement.entries.map((e) => ({
         createdAt: e.createdAt,
         typeLabel: ENTRY_TYPE_LABELS[e.type] ?? e.type,
-        note: e.note,
+        note: [e.reference, e.note].filter(Boolean).join(' — ') || null,
         amount: Number(e.amount),
         balanceAfter: e.balanceAfter,
       })),

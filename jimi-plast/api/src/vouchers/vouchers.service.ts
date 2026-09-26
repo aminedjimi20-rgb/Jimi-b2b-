@@ -283,7 +283,7 @@ export class VouchersService {
     if (voucher.status === 'DRAFT') {
       return this.updateDraft(id, dto, dto.customerId ?? voucher.customerId);
     }
-    return this.updateConfirmed(id, dto, actorId, voucher.customerId);
+    return this.updateConfirmed(id, dto, actorId, voucher);
   }
 
   private async updateDraft(id: string, dto: UpsertVoucherDto, customerId: string) {
@@ -349,8 +349,13 @@ export class VouchersService {
    * et notifié au client ET au personnel, et la ligne touchée est marquée
    * (modifiedAt) pour être surlignée dans la liste.
    */
-  private async updateConfirmed(id: string, dto: UpsertVoucherDto, actorId: string, customerIdFallback: string) {
-    const customerId = dto.customerId ?? customerIdFallback;
+  private async updateConfirmed(
+    id: string,
+    dto: UpsertVoucherDto,
+    actorId: string,
+    existingVoucher: { customerId: string; paidAmount: Prisma.Decimal; number: string | null },
+  ) {
+    const customerId = dto.customerId ?? existingVoucher.customerId;
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
 
@@ -453,6 +458,27 @@ export class VouchersService {
           notes: dto.notes,
         },
       });
+
+      // Le montant payé du bon n'est qu'un miroir du compte client — sans
+      // ceci, le modifier après confirmation changeait le bon mais jamais
+      // le solde/l'historique du client. On ne réécrit jamais une écriture
+      // existante (§ pattern réversion) : seul l'écart se traduit en une
+      // nouvelle écriture de paiement.
+      if (dto.paidAmount != null) {
+        const delta = Number(dto.paidAmount) - Number(existingVoucher.paidAmount);
+        if (delta !== 0) {
+          await tx.ledgerEntry.create({
+            data: {
+              customerId,
+              type: 'PAYMENT',
+              amount: -delta,
+              reference: existingVoucher.number,
+              note: `Ajustement du montant payé sur le bon ${existingVoucher.number ?? ''} (modifié après confirmation)`,
+              createdById: actorId,
+            },
+          });
+        }
+      }
     });
 
     if (changes.length > 0) {

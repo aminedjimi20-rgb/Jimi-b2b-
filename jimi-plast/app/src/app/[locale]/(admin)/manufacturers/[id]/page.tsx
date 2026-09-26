@@ -18,6 +18,7 @@ interface LedgerEntry {
   type: 'PURCHASE_VOUCHER' | 'PAYMENT' | 'ADJUSTMENT';
   amount: string;
   note: string | null;
+  reference: string | null;
   createdAt: string;
   voidedAt: string | null;
   pendingDeletions: PendingDeletion[];
@@ -183,7 +184,7 @@ export default function ManufacturerDetailPage() {
     const q = historySearch.trim().toLowerCase();
     if (!q) return entriesWithBalance;
     return entriesWithBalance.filter((e) => {
-      const haystack = [t(`entryTypes.${e.type}`), e.note ?? '', new Date(e.createdAt).toLocaleString(), String(e.amount)]
+      const haystack = [t(`entryTypes.${e.type}`), e.note ?? '', e.reference ?? '', new Date(e.createdAt).toLocaleString(), String(e.amount)]
         .join(' ')
         .toLowerCase();
       return haystack.includes(q);
@@ -406,6 +407,8 @@ export default function ManufacturerDetailPage() {
                       {t(`entryTypes.${e.type}`)}
                     </td>
                     <td className={`px-4 py-2 text-xs text-muted ${struckThrough ? 'line-through' : ''}`}>
+                      {e.reference && <span className="font-mono text-ink">{e.reference}</span>}
+                      {e.reference && e.note && ' — '}
                       {e.note}
                       {latest && (isVoided || isEntryPending) && (
                         <p className={`mt-0.5 text-[11px] ${isVoided ? 'text-red-600' : 'text-amber-600'}`}>

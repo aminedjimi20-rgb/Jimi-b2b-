@@ -122,6 +122,7 @@ export default function PurchaseEditorPage() {
   const [lightboxAttachmentIndex, setLightboxAttachmentIndex] = useState<number | null>(null);
   const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPatchRef = useRef<Record<string, unknown>>({});
 
   // Sélecteur de produit : recherche + vignettes, même système que le bon de vente.
   const [showPicker, setShowPicker] = useState(false);
@@ -200,13 +201,31 @@ export default function PurchaseEditorPage() {
   const isPending = deletion?.status === 'PENDING';
   const isApproved = deletion?.status === 'APPROVED';
 
+  // Même correctif que côté bons de vente : ne jamais réécraser
+  // discount/transportCost/paidAmount/notes depuis la réponse serveur après
+  // un enregistrement automatique (ils sont déjà exacts localement) — sinon
+  // retaper un chiffre pendant que le fetch précédent est en vol le faisait
+  // disparaître puis revenir. On ne rafraîchit que si des articles ont changé.
+  function refreshPurchaseOnly() {
+    api.get<Purchase>(`/purchase-vouchers/${id}`, token).then((p) => {
+      setPurchase(p);
+      const sub = p.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+      setDiscountPercent(sub > 0 ? String(Math.round((Number(p.discount) / sub) * 10000) / 100) : '0');
+    });
+  }
+
   const autoSave = useCallback(
     (patch: Record<string, unknown>) => {
+      // Fusionne avec un éventuel changement en attente — un seul minuteur
+      // partagé remplaçait sinon le patch précédent au lieu de le combiner.
+      pendingPatchRef.current = { ...pendingPatchRef.current, ...patch };
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(async () => {
+        const toSend = pendingPatchRef.current;
+        pendingPatchRef.current = {};
         try {
-          await api.put(`/purchase-vouchers/${id}`, patch, token);
-          reload();
+          await api.put(`/purchase-vouchers/${id}`, toSend, token);
+          if ('items' in toSend) refreshPurchaseOnly();
         } catch {
           setError(tCommon('error'));
         }
