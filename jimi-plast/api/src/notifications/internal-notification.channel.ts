@@ -5,8 +5,10 @@ import { NotificationChannel, NotificationEvent } from './notification-channel.i
 /**
  * Alimente le centre de notifications interne (§71 du cahier des charges).
  * Si l'événement porte un userId précis dans data (ex: le client concerné
- * par son bon confirmé), seul ce destinataire est notifié ; sinon
- * l'événement est considéré "pour l'administration" et va à tous les ADMIN.
+ * par son bon confirmé), seul ce destinataire est notifié ; si data.userIds
+ * porte une liste (ex: diffusion à tous les clients pour un changement de
+ * produit), chacun est notifié en une seule écriture ; sinon l'événement
+ * est considéré "pour l'administration" et va à tous les ADMIN.
  */
 @Injectable()
 export class InternalNotificationChannel implements NotificationChannel {
@@ -16,12 +18,16 @@ export class InternalNotificationChannel implements NotificationChannel {
 
   async send(event: NotificationEvent): Promise<void> {
     const targetUserId = event.data?.userId as string | undefined;
+    const targetUserIds = event.data?.userIds as string[] | undefined;
 
-    const recipientIds = targetUserId
-      ? [targetUserId]
-      : (await this.prisma.user.findMany({ where: { role: { key: 'admin' } }, select: { id: true } })).map(
-          (u) => u.id,
-        );
+    const recipientIds =
+      targetUserIds && targetUserIds.length > 0
+        ? targetUserIds
+        : targetUserId
+          ? [targetUserId]
+          : (await this.prisma.user.findMany({ where: { role: { key: 'admin' } }, select: { id: true } })).map(
+              (u) => u.id,
+            );
 
     if (recipientIds.length === 0) return;
 

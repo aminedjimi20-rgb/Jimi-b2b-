@@ -4,10 +4,36 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
 import { TrashService } from '../common/services/trash.service';
 import { PricingService, VisiblePrice } from '../pricing/pricing.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UpsertProductDto } from './dto/upsert-product.dto';
 import { SetPriceDto } from './dto/set-price.dto';
 import { AddImageDto } from './dto/add-image.dto';
 import { UpsertPromotionDto } from './dto/upsert-promotion.dto';
+
+// Champs du formulaire produit qui intéressent les clients (quantité, mise en
+// avant, déstockage, saisonnier...) — le reste (SKU, dépôt, coût d'achat,
+// fabricant...) est purement interne et ne doit pas les spammer.
+const CUSTOMER_NOTIFY_FIELDS: Record<string, string> = {
+  currentStock: 'Stock',
+  isActive: 'Disponibilité',
+  isClearance: 'Déstockage',
+  isNew: 'Nouveauté',
+  isFeatured: 'Mis en avant',
+  isSeasonal: 'Saisonnier',
+  seasonStart: 'Début de saison',
+  seasonEnd: 'Fin de saison',
+  nameFr: 'Nom',
+};
+
+function formatCustomerFieldChange(field: string, oldVal: unknown, newVal: unknown): string {
+  const label = CUSTOMER_NOTIFY_FIELDS[field] ?? field;
+  if (field === 'currentStock') return `${label} : ${oldVal ?? 0} → ${newVal ?? 0}`;
+  if (typeof newVal === 'boolean') return `${label} : ${newVal ? 'activé' : 'désactivé'}`;
+  if (field === 'seasonStart' || field === 'seasonEnd') {
+    return `${label} : ${newVal ? new Date(newVal as string).toLocaleDateString('fr-FR') : '—'}`;
+  }
+  return `${label} : ${newVal ?? '—'}`;
+}
 
 export interface ProductListFilters {
   categoryId?: string;
@@ -33,7 +59,16 @@ export class ProductsService {
     private readonly auditLog: AuditLogService,
     private readonly trash: TrashService,
     private readonly pricing: PricingService,
+    private readonly notifications: NotificationsService,
   ) {}
+
+  /** Diffuse une notification informative à tous les clients (compte lié — toujours le cas). */
+  private async notifyCustomers(type: string, title: string, body: string, data: Record<string, unknown> = {}) {
+    const customers = await this.prisma.customer.findMany({ select: { userId: true } });
+    const userIds = customers.map((c) => c.userId);
+    if (userIds.length === 0) return;
+    await this.notifications.notify({ type, title, body, data: { ...data, userIds } });
+  }
 
   private priorityScore(product: {
     manualPriority: number | null;
@@ -373,6 +408,16 @@ export class ProductsService {
       });
     }
 
+    const customerFields = changedFields.filter((f) => f in CUSTOMER_NOTIFY_FIELDS);
+    if (customerFields.length > 0) {
+      await this.notifyCustomers(
+        'product.updated',
+        `Produit mis à jour : ${updated.nameFr}`,
+        customerFields.map((f) => formatCustomerFieldChange(f, oldValues[f], newValues[f])).join(' · '),
+        { productId: id },
+      );
+    }
+
     return updated;
   }
 
@@ -463,6 +508,14 @@ export class ProductsService {
       },
     });
 
+    const tierType = await this.prisma.priceTierType.findUnique({ where: { id: dto.priceTierTypeId }, select: { label: true } });
+    await this.notifyCustomers(
+      'product.price_changed',
+      `Prix mis à jour : ${product.nameFr}`,
+      `${tierType?.label ?? 'Prix'} : ${Number(dto.price).toLocaleString('fr-FR')} DA`,
+      { productId },
+    );
+
     return this.getFullById(productId);
   }
 
@@ -493,11 +546,15 @@ export class ProductsService {
     return { id: imageId };
   }
 
+  private formatDiscount(discountType: 'PERCENT' | 'AMOUNT', discountValue: Prisma.Decimal | number): string {
+    return discountType === 'PERCENT' ? `-${Number(discountValue)}%` : `-${Number(discountValue).toLocaleString('fr-FR')} DA`;
+  }
+
   async addPromotion(productId: string, dto: UpsertPromotionDto) {
     const product = await this.prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
     if (!product) throw new NotFoundException('Produit introuvable');
 
-    return this.prisma.promotion.create({
+    const promotion = await this.prisma.promotion.create({
       data: {
         productId,
         priceTierTypeId: dto.priceTierTypeId,
@@ -509,13 +566,22 @@ export class ProductsService {
       },
       include: { priceTierType: true },
     });
+
+    await this.notifyCustomers(
+      'product.promotion_added',
+      `Nouvelle promotion : ${product.nameFr}`,
+      `${promotion.priceTierType.label} : ${this.formatDiscount(promotion.discountType, promotion.discountValue)}`,
+      { productId },
+    );
+
+    return promotion;
   }
 
   async updatePromotion(promotionId: string, dto: UpsertPromotionDto) {
-    const promotion = await this.prisma.promotion.findUnique({ where: { id: promotionId } });
+    const promotion = await this.prisma.promotion.findUnique({ where: { id: promotionId }, include: { product: true } });
     if (!promotion) throw new NotFoundException('Promotion introuvable');
 
-    return this.prisma.promotion.update({
+    const updated = await this.prisma.promotion.update({
       where: { id: promotionId },
       data: {
         priceTierTypeId: dto.priceTierTypeId,
@@ -527,10 +593,30 @@ export class ProductsService {
       },
       include: { priceTierType: true },
     });
+
+    await this.notifyCustomers(
+      'product.promotion_updated',
+      `Promotion mise à jour : ${promotion.product.nameFr}`,
+      `${updated.priceTierType.label} : ${this.formatDiscount(updated.discountType, updated.discountValue)}`,
+      { productId: promotion.productId },
+    );
+
+    return updated;
   }
 
   async removePromotion(promotionId: string) {
+    const promotion = await this.prisma.promotion.findUnique({ where: { id: promotionId }, include: { product: true } });
+    if (!promotion) throw new NotFoundException('Promotion introuvable');
+
     await this.prisma.promotion.delete({ where: { id: promotionId } });
+
+    await this.notifyCustomers(
+      'product.promotion_removed',
+      `Promotion supprimée : ${promotion.product.nameFr}`,
+      `La promotion sur ${promotion.product.nameFr} a été retirée.`,
+      { productId: promotion.productId },
+    );
+
     return { id: promotionId };
   }
 

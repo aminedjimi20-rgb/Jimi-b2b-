@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
 
 /**
@@ -13,6 +14,7 @@ export class StockService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async movements(productId?: string) {
@@ -116,6 +118,21 @@ export class StockService {
       actorId,
     });
 
+    await this.notifyCustomersOfStockChange(product.nameFr, dto.productId, product.currentStock, dto.newQuantity);
+
     return { productId: dto.productId, previousStock: product.currentStock, newStock: dto.newQuantity, diff };
+  }
+
+  /** Diffuse une notification informative à tous les clients (compte lié — toujours le cas). */
+  private async notifyCustomersOfStockChange(productName: string, productId: string, oldStock: number, newStock: number) {
+    const customers = await this.prisma.customer.findMany({ select: { userId: true } });
+    const userIds = customers.map((c) => c.userId);
+    if (userIds.length === 0) return;
+    await this.notifications.notify({
+      type: 'product.updated',
+      title: `Produit mis à jour : ${productName}`,
+      body: `Stock : ${oldStock} → ${newStock}`,
+      data: { productId, userIds },
+    });
   }
 }
