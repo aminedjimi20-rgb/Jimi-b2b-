@@ -55,7 +55,8 @@
     "trash": "Trash",
     "besoins": "Needs",
     "myOrders": "My orders",
-    "approvals": "Approvals"
+    "approvals": "Approvals",
+    "menu": "Menu"
   },
   "dashboard": {
     "welcome": "Hello {name}",

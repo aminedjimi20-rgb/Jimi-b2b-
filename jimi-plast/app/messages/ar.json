@@ -55,7 +55,8 @@
     "trash": "سلة المهملات",
     "besoins": "الاحتياجات",
     "myOrders": "طلباتي",
-    "approvals": "الموافقات"
+    "approvals": "الموافقات",
+    "menu": "القائمة"
   },
   "dashboard": {
     "welcome": "مرحبًا {name}",

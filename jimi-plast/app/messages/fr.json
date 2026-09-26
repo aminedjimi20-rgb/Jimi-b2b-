@@ -55,7 +55,8 @@
     "trash": "Corbeille",
     "besoins": "Besoins",
     "myOrders": "Mes commandes",
-    "approvals": "Approbations"
+    "approvals": "Approbations",
+    "menu": "Menu"
   },
   "dashboard": {
     "welcome": "Bonjour {name}",
