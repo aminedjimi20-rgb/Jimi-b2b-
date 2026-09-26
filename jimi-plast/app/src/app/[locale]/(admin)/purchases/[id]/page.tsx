@@ -775,6 +775,10 @@ export default function PurchaseEditorPage() {
             <span className="tabular">-{Number(discount).toLocaleString()} DA</span>
           </div>
         )}
+        <div className="flex justify-between py-1 text-muted">
+          <span>{tVoucher('transport')}</span>
+          <span className="tabular">{Number(transportCost).toLocaleString()} DA</span>
+        </div>
         <div className="flex justify-between py-1 font-semibold text-ink">
           <span>{tVoucher('total')}</span>
           <span className="tabular">{total.toLocaleString()} DA</span>

@@ -417,7 +417,6 @@ model Customer {
   wilaya       String?
   creditLimit  Decimal  @default(0) @db.Decimal(12, 2)
   notes        String?
-  notesHidden  Boolean  @default(false) // masque la note générale sur la fiche sans la perdre — juste un repli d'affichage
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
@@ -429,8 +428,28 @@ model Customer {
   productRequests ProductRequest[]
   negotiations    Negotiation[]
   pendingDeletions PendingDeletion[]
+  remarks         CustomerRemark[]
 
   @@map("customers")
+}
+
+// Journal de remarques internes sur le client — jamais visible par le
+// client lui-même, jamais mélangé au ledger financier. Chaque remarque
+// est immuable une fois écrite (pas d'édition) : seule une rature directe
+// (voidedAt) est permise, sans workflow d'approbation puisque ce n'est
+// qu'une note interne, pas une écriture qui touche son compte.
+model CustomerRemark {
+  id          String    @id @default(cuid())
+  customerId  String
+  text        String
+  createdById String?
+  createdAt   DateTime  @default(now())
+  voidedAt    DateTime?
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("customer_remarks")
 }
 
 enum LedgerEntryType {
@@ -634,7 +653,6 @@ model Manufacturer {
   contactName   String?
   paymentTerms  String?
   notes         String?
-  notesHidden   Boolean @default(false) // masque la note générale sur la fiche sans la perdre — juste un repli d'affichage
   canViewCatalog Boolean @default(false) // autorisation admin : le fabricant peut voir le catalogue (ses produits seulement) depuis son propre compte
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -646,8 +664,26 @@ model Manufacturer {
   returns          Return[]
   products         Product[]
   pendingDeletions PendingDeletion[]
+  remarks          ManufacturerRemark[]
 
   @@map("manufacturers")
+}
+
+// Journal de remarques internes sur le fabricant — même principe que
+// CustomerRemark : jamais visible par le fabricant lui-même, immuable une
+// fois écrit, seule une rature directe (voidedAt) est permise.
+model ManufacturerRemark {
+  id             String    @id @default(cuid())
+  manufacturerId String
+  text           String
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  voidedAt       DateTime?
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+
+  @@index([manufacturerId])
+  @@map("manufacturer_remarks")
 }
 
 enum SupplierLedgerEntryType {

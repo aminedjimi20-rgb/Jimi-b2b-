@@ -967,6 +967,7 @@ export default function VoucherEditorPage() {
       <div className="ms-auto w-full max-w-xs rounded-lg border border-line bg-panel p-4 text-sm">
         <Row label={t('subtotal')} value={subtotal} />
         {Number(discount) > 0 && <Row label={`${t('discount')} (${discountPercent} %)`} value={-Number(discount)} />}
+        <Row label={t('transport')} value={Number(transportCost)} />
         <Row label={t('total')} value={total} bold />
       </div>
 

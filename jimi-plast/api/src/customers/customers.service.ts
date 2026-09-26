@@ -67,6 +67,8 @@ export class CustomersService {
       },
     });
 
+    const remarks = await this.prisma.customerRemark.findMany({ where: { customerId: id }, orderBy: { createdAt: 'desc' } });
+
     return {
       id: customer.id,
       businessName: customer.businessName,
@@ -77,6 +79,7 @@ export class CustomersService {
       user: customer.user,
       balance: entries.filter((e) => !e.voidedAt).reduce((sum, e) => sum + Number(e.amount), 0),
       entries,
+      remarks,
     };
   }
 
@@ -247,21 +250,21 @@ export class CustomersService {
     return this.getById(id);
   }
 
-  // Note générale affichée directement sur la fiche (pas cachée dans le
-  // formulaire d'édition) — sauvegarde rapide, indépendante du reste du
-  // formulaire. "hidden" replie juste l'affichage, le texte n'est jamais
-  // perdu.
-  async updateNote(id: string, dto: { note?: string; hidden?: boolean }) {
-    const existing = await this.prisma.customer.findFirst({ where: { id, deletedAt: null } });
+  // Journal de remarques internes — jamais visible par le client, jamais
+  // mélangé au ledger financier. Chaque "OK" ajoute une entrée datée,
+  // immuable (pas d'édition) : seule une rature directe est permise après
+  // coup (voidRemark), sans workflow d'approbation puisque ce n'est qu'une
+  // note interne.
+  async addRemark(customerId: string, text: string, actorId: string) {
+    const existing = await this.prisma.customer.findFirst({ where: { id: customerId, deletedAt: null } });
     if (!existing) throw new NotFoundException('Client introuvable');
-    await this.prisma.customer.update({
-      where: { id },
-      data: {
-        ...(dto.note !== undefined ? { notes: dto.note } : {}),
-        ...(dto.hidden !== undefined ? { notesHidden: dto.hidden } : {}),
-      },
-    });
-    return this.getById(id);
+    return this.prisma.customerRemark.create({ data: { customerId, text, createdById: actorId } });
+  }
+
+  async voidRemark(remarkId: string, voided: boolean) {
+    const remark = await this.prisma.customerRemark.findUnique({ where: { id: remarkId } });
+    if (!remark) throw new NotFoundException('Remarque introuvable');
+    return this.prisma.customerRemark.update({ where: { id: remarkId }, data: { voidedAt: voided ? new Date() : null } });
   }
 
   async remove(id: string, actorId: string, reason?: string) {

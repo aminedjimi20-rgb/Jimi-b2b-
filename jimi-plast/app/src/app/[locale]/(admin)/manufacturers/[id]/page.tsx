@@ -23,6 +23,12 @@ interface LedgerEntry {
   voidedAt: string | null;
   pendingDeletions: PendingDeletion[];
 }
+interface Remark {
+  id: string;
+  text: string;
+  createdAt: string;
+  voidedAt: string | null;
+}
 interface ManufacturerDetail {
   id: string;
   name: string;
@@ -35,12 +41,12 @@ interface ManufacturerDetail {
   contactName: string | null;
   paymentTerms: string | null;
   notes: string | null;
-  notesHidden: boolean;
   balance: number;
   userId: string | null;
   canViewCatalog: boolean;
   user: { id: string; email: string | null; phone: string | null } | null;
   entries: LedgerEntry[];
+  remarks: Remark[];
   pendingDeletions: PendingDeletion[];
 }
 
@@ -58,6 +64,7 @@ export default function ManufacturerDetailPage() {
   const [form, setForm] = useState<Record<string, string>>({});
   const [canViewCatalog, setCanViewCatalog] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentNote, setPaymentNote] = useState('');
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustReason, setAdjustReason] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -66,23 +73,21 @@ export default function ManufacturerDetailPage() {
   const [printingStatement, setPrintingStatement] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [periodSummary, setPeriodSummary] = useState<{ totalBusiness: number; totalPaid: number } | null>(null);
-  const [noteDraft, setNoteDraft] = useState('');
+  const [remarkDraft, setRemarkDraft] = useState('');
 
   function reload() {
-    api.get<ManufacturerDetail>(`/manufacturers/${id}`, token).then((m) => {
-      setManufacturer(m);
-      setNoteDraft(m.notes ?? '');
-    });
+    api.get<ManufacturerDetail>(`/manufacturers/${id}`, token).then(setManufacturer);
   }
 
-  async function saveNote() {
-    await api.put(`/manufacturers/${id}/note`, { note: noteDraft }, token);
+  async function addRemark() {
+    if (!remarkDraft.trim()) return;
+    await api.post(`/manufacturers/${id}/remarks`, { text: remarkDraft }, token);
+    setRemarkDraft('');
     reload();
   }
 
-  async function toggleNoteHidden() {
-    if (!manufacturer) return;
-    await api.put(`/manufacturers/${id}/note`, { hidden: !manufacturer.notesHidden }, token);
+  async function toggleRemarkVoided(remark: Remark) {
+    await api.put(`/manufacturers/remarks/${remark.id}/void`, { voided: !remark.voidedAt }, token);
     reload();
   }
 
@@ -136,8 +141,9 @@ export default function ManufacturerDetailPage() {
 
   async function submitPayment(e: React.FormEvent) {
     e.preventDefault();
-    await api.post(`/manufacturers/${id}/payments`, { amount: Number(paymentAmount) }, token);
+    await api.post(`/manufacturers/${id}/payments`, { amount: Number(paymentAmount), note: paymentNote }, token);
     setPaymentAmount('');
+    setPaymentNote('');
     reload();
   }
 
@@ -314,25 +320,32 @@ export default function ManufacturerDetailPage() {
       )}
 
       <div className="rounded-lg border border-line bg-panel p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-semibold text-ink">{t('detail.generalNote')}</p>
-          <button onClick={toggleNoteHidden} className="text-xs text-accent hover:underline">
-            {manufacturer.notesHidden ? t('detail.showNote') : t('detail.hideNote')}
+        <p className="mb-2 text-sm font-semibold text-ink">{t('detail.generalNote')}</p>
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={remarkDraft}
+            onChange={(e) => setRemarkDraft(e.target.value)}
+            placeholder={t('detail.generalNotePlaceholder')}
+            rows={2}
+            className="rounded border border-line bg-paper px-3 py-2 text-sm"
+          />
+          <button onClick={addRemark} disabled={!remarkDraft.trim()} className="w-fit rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50">
+            OK
           </button>
         </div>
-        {!manufacturer.notesHidden && (
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={noteDraft}
-              onChange={(e) => setNoteDraft(e.target.value)}
-              placeholder={t('detail.generalNotePlaceholder')}
-              rows={2}
-              className="rounded border border-line bg-paper px-3 py-2 text-sm"
-            />
-            <button onClick={saveNote} className="w-fit rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
-              OK
-            </button>
-          </div>
+        {manufacturer.remarks.length > 0 && (
+          <ul className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
+            {manufacturer.remarks.map((r) => (
+              <li key={r.id} className="flex items-start justify-between gap-2 text-sm">
+                <span className={r.voidedAt ? 'text-muted line-through' : 'text-ink'}>
+                  <span className="font-mono text-xs text-muted">{new Date(r.createdAt).toLocaleString()}</span> — {r.text}
+                </span>
+                <button onClick={() => toggleRemarkVoided(r)} className="shrink-0 text-xs text-accent hover:underline">
+                  {r.voidedAt ? t('detail.restoreRemark') : t('detail.strikeRemark')}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
@@ -353,6 +366,12 @@ export default function ManufacturerDetailPage() {
               placeholder={t('detail.amount')}
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(e.target.value)}
+              className="rounded border border-line bg-paper px-3 py-2 text-sm"
+            />
+            <input
+              placeholder={t('detail.reason')}
+              value={paymentNote}
+              onChange={(e) => setPaymentNote(e.target.value)}
               className="rounded border border-line bg-paper px-3 py-2 text-sm"
             />
             <button type="submit" className="rounded bg-teal px-3 py-2 text-sm font-medium text-white">

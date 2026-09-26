@@ -6,7 +6,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertManufacturerDto } from './dto/upsert-manufacturer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from '../customers/dto/add-ledger-entry.dto';
-import { UpdateNoteDto } from '../customers/dto/update-note.dto';
+import { CreateRemarkDto, VoidRemarkDto } from '../customers/dto/remark.dto';
 import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
 import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
 import { StatementPdfService } from '../common/services/statement-pdf.service';
@@ -99,9 +99,14 @@ export class ManufacturersController {
     return this.manufacturersService.update(id, dto, user.id);
   }
 
-  @Put(':id/note')
-  updateNote(@Param('id') id: string, @Body() dto: UpdateNoteDto) {
-    return this.manufacturersService.updateNote(id, dto);
+  @Post(':id/remarks')
+  addRemark(@Param('id') id: string, @Body() dto: CreateRemarkDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.manufacturersService.addRemark(id, dto.text, user.id);
+  }
+
+  @Put('remarks/:remarkId/void')
+  voidRemark(@Param('remarkId') remarkId: string, @Body() dto: VoidRemarkDto) {
+    return this.manufacturersService.voidRemark(remarkId, dto.voided ?? true);
   }
 
   @Delete(':id')

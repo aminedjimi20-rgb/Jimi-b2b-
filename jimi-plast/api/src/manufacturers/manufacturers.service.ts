@@ -61,10 +61,13 @@ export class ManufacturersService {
       include: { pendingDeletions: { orderBy: { createdAt: 'desc' }, take: 1, include: { requestedBy: { select: { fullName: true } } } } },
     });
 
+    const remarks = await this.prisma.manufacturerRemark.findMany({ where: { manufacturerId: id }, orderBy: { createdAt: 'desc' } });
+
     return {
       ...manufacturer,
       balance: entries.filter((e) => !e.voidedAt).reduce((s, e) => s + Number(e.amount), 0),
       entries,
+      remarks,
     };
   }
 
@@ -175,21 +178,19 @@ export class ManufacturersService {
     return updated;
   }
 
-  // Note générale affichée directement sur la fiche (pas cachée dans le
-  // formulaire d'édition) — sauvegarde rapide, indépendante du reste du
-  // formulaire. "hidden" replie juste l'affichage, le texte n'est jamais
-  // perdu.
-  async updateNote(id: string, dto: { note?: string; hidden?: boolean }) {
-    const existing = await this.prisma.manufacturer.findFirst({ where: { id, deletedAt: null } });
+  // Journal de remarques internes — même principe que côté client : jamais
+  // visible par le fabricant, immuable une fois écrit, seule une rature
+  // directe (voidRemark) est permise après coup.
+  async addRemark(manufacturerId: string, text: string, actorId: string) {
+    const existing = await this.prisma.manufacturer.findFirst({ where: { id: manufacturerId, deletedAt: null } });
     if (!existing) throw new NotFoundException('Fabricant introuvable');
-    await this.prisma.manufacturer.update({
-      where: { id },
-      data: {
-        ...(dto.note !== undefined ? { notes: dto.note } : {}),
-        ...(dto.hidden !== undefined ? { notesHidden: dto.hidden } : {}),
-      },
-    });
-    return this.getById(id);
+    return this.prisma.manufacturerRemark.create({ data: { manufacturerId, text, createdById: actorId } });
+  }
+
+  async voidRemark(remarkId: string, voided: boolean) {
+    const remark = await this.prisma.manufacturerRemark.findUnique({ where: { id: remarkId } });
+    if (!remark) throw new NotFoundException('Remarque introuvable');
+    return this.prisma.manufacturerRemark.update({ where: { id: remarkId }, data: { voidedAt: voided ? new Date() : null } });
   }
 
   async remove(id: string, actorId: string, reason?: string) {

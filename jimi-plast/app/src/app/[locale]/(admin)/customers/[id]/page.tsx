@@ -23,6 +23,12 @@ interface LedgerEntry {
   voidedAt: string | null;
   pendingDeletions: PendingDeletion[];
 }
+interface Remark {
+  id: string;
+  text: string;
+  createdAt: string;
+  voidedAt: string | null;
+}
 interface CustomerDetail {
   id: string;
   businessName: string | null;
@@ -30,10 +36,9 @@ interface CustomerDetail {
   wilaya: string | null;
   creditLimit: number;
   balance: number;
-  notes: string | null;
-  notesHidden: boolean;
   user: { fullName: string; email: string; phone: string | null; role: { name: string } };
   entries: LedgerEntry[];
+  remarks: Remark[];
 }
 
 export default function CustomerDetailPage() {
@@ -53,13 +58,10 @@ export default function CustomerDetailPage() {
   const [printingStatement, setPrintingStatement] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [periodSummary, setPeriodSummary] = useState<{ totalBusiness: number; totalPaid: number } | null>(null);
-  const [noteDraft, setNoteDraft] = useState('');
+  const [remarkDraft, setRemarkDraft] = useState('');
 
   function reload() {
-    api.get<CustomerDetail>(`/customers/${id}`, token).then((c) => {
-      setCustomer(c);
-      setNoteDraft(c.notes ?? '');
-    });
+    api.get<CustomerDetail>(`/customers/${id}`, token).then(setCustomer);
   }
 
   useEffect(() => {
@@ -67,14 +69,15 @@ export default function CustomerDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
 
-  async function saveNote() {
-    await api.put(`/customers/${id}/note`, { note: noteDraft }, token);
+  async function addRemark() {
+    if (!remarkDraft.trim()) return;
+    await api.post(`/customers/${id}/remarks`, { text: remarkDraft }, token);
+    setRemarkDraft('');
     reload();
   }
 
-  async function toggleNoteHidden() {
-    if (!customer) return;
-    await api.put(`/customers/${id}/note`, { hidden: !customer.notesHidden }, token);
+  async function toggleRemarkVoided(remark: Remark) {
+    await api.put(`/customers/remarks/${remark.id}/void`, { voided: !remark.voidedAt }, token);
     reload();
   }
 
@@ -184,25 +187,32 @@ export default function CustomerDetailPage() {
       </div>
 
       <div className="rounded-lg border border-line bg-panel p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-semibold text-ink">{t('detail.generalNote')}</p>
-          <button onClick={toggleNoteHidden} className="text-xs text-accent hover:underline">
-            {customer.notesHidden ? t('detail.showNote') : t('detail.hideNote')}
+        <p className="mb-2 text-sm font-semibold text-ink">{t('detail.generalNote')}</p>
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={remarkDraft}
+            onChange={(e) => setRemarkDraft(e.target.value)}
+            placeholder={t('detail.generalNotePlaceholder')}
+            rows={2}
+            className="rounded border border-line bg-paper px-3 py-2 text-sm"
+          />
+          <button onClick={addRemark} disabled={!remarkDraft.trim()} className="w-fit rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50">
+            OK
           </button>
         </div>
-        {!customer.notesHidden && (
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={noteDraft}
-              onChange={(e) => setNoteDraft(e.target.value)}
-              placeholder={t('detail.generalNotePlaceholder')}
-              rows={2}
-              className="rounded border border-line bg-paper px-3 py-2 text-sm"
-            />
-            <button onClick={saveNote} className="w-fit rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
-              OK
-            </button>
-          </div>
+        {customer.remarks.length > 0 && (
+          <ul className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
+            {customer.remarks.map((r) => (
+              <li key={r.id} className="flex items-start justify-between gap-2 text-sm">
+                <span className={r.voidedAt ? 'text-muted line-through' : 'text-ink'}>
+                  <span className="font-mono text-xs text-muted">{new Date(r.createdAt).toLocaleString()}</span> — {r.text}
+                </span>
+                <button onClick={() => toggleRemarkVoided(r)} className="shrink-0 text-xs text-accent hover:underline">
+                  {r.voidedAt ? t('detail.restoreRemark') : t('detail.strikeRemark')}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
