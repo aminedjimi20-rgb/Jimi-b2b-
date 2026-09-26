@@ -52,12 +52,16 @@ interface HistoryEntry {
   createdAt: string;
   actor: { fullName: string } | null;
 }
+interface CustomerOption {
+  id: string;
+  user: { fullName: string };
+}
 interface Voucher {
   id: string;
   number: string | null;
   status: 'DRAFT' | 'CONFIRMED' | 'DELIVERED' | 'CANCELLED';
-  customerId: string;
-  customer: { businessName: string | null; user: { fullName: string } };
+  customerId: string | null;
+  customer: { businessName: string | null; user: { fullName: string } } | null;
   discount: string;
   transportCost: string;
   paidAmount: string;
@@ -157,6 +161,8 @@ export default function VoucherEditorPage() {
   const [deliveryDriverId, setDeliveryDriverId] = useState('');
   const [deliveryCost, setDeliveryCost] = useState('');
   const [deliveryBilledToCustomer, setDeliveryBilledToCustomer] = useState('');
+  const [customers, setCustomers] = useState<CustomerOption[]>([]);
+  const [assignCustomerId, setAssignCustomerId] = useState('');
 
   async function viewPdf() {
     // Sur mobile (partage de fichier supporté), on n'ouvre pas d'onglet —
@@ -198,8 +204,28 @@ export default function VoucherEditorPage() {
   useEffect(() => {
     if (token && canManage) api.get<StaffOption[]>('/vouchers/staff', token).then(setStaff).catch(() => setStaff([]));
     if (token && canManage) api.get<DriverOption[]>('/drivers', token).then(setDrivers).catch(() => setDrivers([]));
+    if (token && canManage) api.get<CustomerOption[]>('/customers', token).then(setCustomers).catch(() => setCustomers([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, canManage]);
+
+  // Assigne (ou change) le client d'un brouillon — les articles déjà ajoutés
+  // sont renvoyés avec, pour que le backend recalcule leur prix au tarif du
+  // client (ils étaient au prix détail par défaut tant qu'aucun client n'était choisi).
+  async function assignCustomer(customerId: string) {
+    if (!voucher || !customerId) return;
+    const items = voucher.items.map((i) => ({
+      productId: i.product.id,
+      quantityPackages: i.quantityPackages,
+      actualTotalUnits: i.actualTotalUnits ?? undefined,
+    }));
+    try {
+      await api.put(`${basePath}/${id}`, { customerId, items }, token);
+      setAssignCustomerId('');
+      reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : tCommon('error'));
+    }
+  }
 
   async function saveDelivery() {
     await api.put(`/deliveries/voucher/${id}`, {
@@ -637,7 +663,36 @@ export default function VoucherEditorPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-ink">{voucher.number ?? t('status.DRAFT')}</h1>
-          <p className="text-sm text-muted">{voucher.customer.user.fullName}</p>
+          {voucher.customer ? (
+            <p className="text-sm text-muted">{voucher.customer.user.fullName}</p>
+          ) : (
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <p className="text-xs italic text-muted">{t('noCustomerYet')}</p>
+              {canManage && isDraft && (
+                <div className="flex items-center gap-1">
+                  <select
+                    value={assignCustomerId}
+                    onChange={(e) => setAssignCustomerId(e.target.value)}
+                    className="rounded border border-line bg-panel px-2 py-1 text-xs"
+                  >
+                    <option value="">{t('selectCustomer')}</option>
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.user.fullName}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => assignCustomer(assignCustomerId)}
+                    disabled={!assignCustomerId}
+                    className="rounded bg-accent px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
+                  >
+                    {t('assignCustomer')}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {editable && savedAt && <span className="text-xs text-muted">{t('autoSaved')} {savedAt.toLocaleTimeString()}</span>}
@@ -1005,8 +1060,12 @@ export default function VoucherEditorPage() {
 
       {isDraft && canManage && (
         <div>
-          <p className="mb-2 text-xs text-muted">{t('confirmWarning')}</p>
-          <button onClick={() => confirmVoucher()} className="rounded bg-teal px-4 py-2 text-sm font-medium text-white">
+          <p className="mb-2 text-xs text-muted">{voucher.customer ? t('confirmWarning') : t('noCustomerYet')}</p>
+          <button
+            onClick={() => confirmVoucher()}
+            disabled={!voucher.customer}
+            className="rounded bg-teal px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+          >
             {t('confirm')}
           </button>
         </div>

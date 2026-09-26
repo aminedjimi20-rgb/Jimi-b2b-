@@ -539,7 +539,7 @@ enum VoucherStatus {
 model SalesVoucher {
   id             String        @id @default(cuid())
   number         String?       @unique // attribué uniquement à la confirmation (BL-2026-000001)
-  customerId     String
+  customerId     String? // absent tant que le brouillon n'a pas encore de client (panier/proforma en préparation) — obligatoire dès la confirmation
   sellerId       String
   status         VoucherStatus @default(DRAFT)
   discount       Decimal       @default(0) @db.Decimal(12, 2)
@@ -558,7 +558,7 @@ model SalesVoucher {
   deliveredAt DateTime?
   deletedAt   DateTime?
 
-  customer    Customer            @relation(fields: [customerId], references: [id])
+  customer    Customer?           @relation(fields: [customerId], references: [id])
   seller      User                @relation(fields: [sellerId], references: [id])
   items       SalesVoucherItem[]
   delivery    Delivery?

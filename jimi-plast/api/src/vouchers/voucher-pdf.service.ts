@@ -5,7 +5,7 @@ interface VoucherForPdf {
   number: string | null;
   createdAt: Date;
   confirmedAt: Date | null;
-  customer: { businessName: string | null; user: { fullName: string; phone: string | null } };
+  customer: { businessName: string | null; user: { fullName: string; phone: string | null } } | null;
   seller: { fullName: string };
   discount: unknown;
   transportCost: unknown;
@@ -89,11 +89,15 @@ export class VoucherPdfService {
       d.moveTo(40, 100).lineTo(555, 100).strokeColor(LINE).stroke();
 
       d.fillColor(INK).fontSize(11).font('Helvetica-Bold').text('Pour', 40, 112);
-      d.fontSize(10)
-        .font('Helvetica')
-        .text(voucher.customer.businessName ?? voucher.customer.user.fullName, 40, 128)
-        .text(voucher.customer.user.fullName, 40, 142)
-        .text(voucher.customer.user.phone ?? '', 40, 156);
+      if (voucher.customer) {
+        d.fontSize(10)
+          .font('Helvetica')
+          .text(voucher.customer.businessName ?? voucher.customer.user.fullName, 40, 128)
+          .text(voucher.customer.user.fullName, 40, 142)
+          .text(voucher.customer.user.phone ?? '', 40, 156);
+      } else {
+        d.fontSize(10).font('Helvetica-Oblique').fillColor(MUTED).text('Client à préciser', 40, 128);
+      }
     };
 
     const drawHeadRow = (y: number) => {

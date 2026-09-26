@@ -102,6 +102,9 @@ export default function CatalogPage() {
   const [catalogIndex, setCatalogIndex] = useState<Map<string, Product>>(new Map());
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageInput, setPageInput] = useState('');
 
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -136,6 +139,14 @@ export default function CatalogPage() {
     api.get<Category[]>('/categories').then(setCategories);
   }, []);
 
+  // Revient à la page 1 dès qu'un filtre/tri change — sinon on peut se
+  // retrouver sur une page vide (ex: page 5 alors que le nouveau filtre n'a
+  // que 2 pages de résultats).
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew]);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
@@ -145,13 +156,15 @@ export default function CatalogPage() {
     if (onlyOnSale) params.set('onSale', 'true');
     if (onlyNew) params.set('isNew', 'true');
     params.set('pageSize', '48');
+    params.set('page', String(page));
 
     setLoading(true);
     api
-      .get<{ items: Product[]; total: number }>(`/products?${params.toString()}`, token)
+      .get<{ items: Product[]; total: number; totalPages: number }>(`/products?${params.toString()}`, token)
       .then((res) => {
         setProducts(res.items);
         setTotal(res.total);
+        setTotalPages(res.totalPages);
         setCatalogIndex((prev) => {
           const next = new Map(prev);
           res.items.forEach((p) => next.set(p.id, p));
@@ -159,7 +172,13 @@ export default function CatalogPage() {
         });
       })
       .finally(() => setLoading(false));
-  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew, token]);
+  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew, token, page]);
+
+  function goToPage(p: number) {
+    const clamped = Math.min(Math.max(1, p), totalPages);
+    setPage(clamped);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   useEffect(() => {
     if (token && canManageVouchers) {
@@ -354,12 +373,15 @@ export default function CatalogPage() {
     return lines.length > 0 ? `⚠ ${t('adjustedWarning')} : ${lines.join(' | ')}` : null;
   }
 
-  async function checkout() {
+  // Le panier peut se transformer en bon sans client — pour l'enregistrer et
+  // le reprendre plus tard, ou préparer une proforma avant de savoir pour qui.
+  // Le client se choisit à tout moment ensuite, au plus tard à la confirmation.
+  async function checkout(skipCustomer = false) {
     if (!user) {
       router.push(`/${locale}/login`);
       return;
     }
-    if (canManageVouchers && !selectedCustomerId) {
+    if (canManageVouchers && !selectedCustomerId && !skipCustomer) {
       setPickingCustomer(true);
       return;
     }
@@ -385,7 +407,7 @@ export default function CatalogPage() {
       const adjustmentNote = buildAdjustmentNote();
 
       if (canManageVouchers) {
-        const voucher = await api.post<{ id: string }>('/vouchers/draft', { customerId: selectedCustomerId }, token);
+        const voucher = await api.post<{ id: string }>('/vouchers/draft', { customerId: selectedCustomerId || undefined }, token);
         await api.put(`/vouchers/${voucher.id}`, { items: payloadItems, discount: totalDiscount, notes: adjustmentNote ?? undefined }, token);
         cart.closeSession(activeId);
         router.push(`/${locale}/vouchers/${voucher.id}`);
@@ -692,8 +714,73 @@ export default function CatalogPage() {
           })}
         </div>
 
-        {!loading && (
-          <p className="mt-6 text-center text-xs text-muted">{total} produits</p>
+        {!loading && total > 0 && (
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <p className="text-xs text-muted">
+              {total} produits — {t('page')} {page} / {totalPages}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                <button
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page <= 1}
+                  className="rounded border border-line px-2.5 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-40"
+                >
+                  ← {t('previousPage')}
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+                  .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
+                    if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('ellipsis');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((p, idx) =>
+                    p === 'ellipsis' ? (
+                      <span key={`e${idx}`} className="px-1 text-xs text-muted">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => goToPage(p)}
+                        className={`rounded border px-2.5 py-1 text-xs ${
+                          p === page ? 'border-accent bg-accent text-white' : 'border-line text-ink hover:bg-line/30'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ),
+                  )}
+                <button
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page >= totalPages}
+                  className="rounded border border-line px-2.5 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-40"
+                >
+                  {t('nextPage')} →
+                </button>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const n = Number(pageInput);
+                    if (n) goToPage(n);
+                    setPageInput('');
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={pageInput}
+                    onChange={(e) => setPageInput(onlyDigits(e.target.value))}
+                    placeholder={t('goToPage')}
+                    className="w-16 rounded border border-line bg-panel px-2 py-1 text-xs"
+                  />
+                  <button type="submit" className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30">
+                    {t('go')}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -739,7 +826,7 @@ export default function CatalogPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        cart.closeSession(s.id);
+                        if (window.confirm(t('closeCartConfirm'))) cart.closeSession(s.id);
                       }}
                       className="text-muted hover:text-red-600"
                       aria-label={t('closeCart')}
@@ -848,7 +935,7 @@ export default function CatalogPage() {
                 )}
                 {checkoutError && <p className="mb-2 text-xs text-red-600">{checkoutError}</p>}
                 <button
-                  onClick={checkout}
+                  onClick={() => checkout()}
                   disabled={checkingOut}
                   className="w-full rounded bg-accent px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
@@ -885,6 +972,15 @@ export default function CatalogPage() {
               className="mt-3 w-full rounded bg-accent px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
             >
               {t('checkout')}
+            </button>
+            <button
+              onClick={() => {
+                setPickingCustomer(false);
+                checkout(true);
+              }}
+              className="mt-2 w-full rounded border border-line px-3 py-2 text-sm text-ink hover:bg-line/30"
+            >
+              {t('checkoutNoCustomer')}
             </button>
           </div>
         </div>

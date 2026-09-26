@@ -115,13 +115,15 @@ export class VouchersService {
     });
 
     const updated = await this.getById(voucherId);
-    await this.notifyBoth(
-      updated.customer.user.id,
-      'order.attachment_removed',
-      'Photo supprimée',
-      `${actorName} a supprimé une photo jointe au bon ${updated.number ?? ''}.`,
-      { voucherId },
-    );
+    if (updated.customer) {
+      await this.notifyBoth(
+        updated.customer.user.id,
+        'order.attachment_removed',
+        'Photo supprimée',
+        `${actorName} a supprimé une photo jointe au bon ${updated.number ?? ''}.`,
+        { voucherId },
+      );
+    }
 
     return updated;
   }
@@ -191,12 +193,18 @@ export class VouchersService {
     return this.getById(voucherId);
   }
 
-  async createDraft(customerId: string, sellerId: string) {
-    const customer = await this.prisma.customer.findFirst({ where: { id: customerId, deletedAt: null } });
-    if (!customer) throw new BadRequestException('Client introuvable');
+  // Un bon peut se créer sans client — pour enregistrer un panier et le
+  // reprendre plus tard, ou préparer une proforma avant de savoir pour qui
+  // (voir resolveTierForCustomer, qui retombe sur le prix détail tant qu'aucun
+  // client n'est assigné). Le client redevient obligatoire à la confirmation.
+  async createDraft(customerId: string | undefined, sellerId: string) {
+    if (customerId) {
+      const customer = await this.prisma.customer.findFirst({ where: { id: customerId, deletedAt: null } });
+      if (!customer) throw new BadRequestException('Client introuvable');
+    }
 
     const voucher = await this.prisma.salesVoucher.create({
-      data: { customerId, sellerId, status: 'DRAFT' },
+      data: { customerId: customerId ?? null, sellerId, status: 'DRAFT' },
     });
     return this.getById(voucher.id);
   }
@@ -237,7 +245,7 @@ export class VouchersService {
       where: { id, deletedAt: null },
       include: { customer: true },
     });
-    if (!voucher || voucher.customer.userId !== userId) throw new NotFoundException('Bon introuvable');
+    if (!voucher || !voucher.customer || voucher.customer.userId !== userId) throw new NotFoundException('Bon introuvable');
     return voucher;
   }
 
@@ -253,7 +261,16 @@ export class VouchersService {
     return this.updateDraft(id, rest, voucher.customerId);
   }
 
-  private async resolveTierForCustomer(customerId: string) {
+  // Tant qu'aucun client n'est encore assigné (panier/proforma en
+  // préparation), on retombe sur le prix détail — le plus prudent, jamais en
+  // dessous du prix public. Les lignes sont recalculées au vrai tarif dès
+  // qu'un client est assigné (voir reassignCustomer).
+  private async resolveTierForCustomer(customerId: string | null) {
+    if (!customerId) {
+      const tier = await this.prisma.priceTierType.findUnique({ where: { key: 'retail' } });
+      if (!tier) throw new BadRequestException('Palier de prix par défaut introuvable');
+      return tier;
+    }
     const customer = await this.prisma.customer.findUniqueOrThrow({
       where: { id: customerId },
       include: { user: { include: { role: true } } },
@@ -286,7 +303,7 @@ export class VouchersService {
     return this.updateConfirmed(id, dto, actorId, voucher);
   }
 
-  private async updateDraft(id: string, dto: UpsertVoucherDto, customerId: string) {
+  private async updateDraft(id: string, dto: UpsertVoucherDto, customerId: string | null) {
     await this.prisma.$transaction(async (tx) => {
       if (dto.items) {
         const tier = await this.resolveTierForCustomer(customerId);
@@ -353,9 +370,12 @@ export class VouchersService {
     id: string,
     dto: UpsertVoucherDto,
     actorId: string,
-    existingVoucher: { customerId: string; paidAmount: Prisma.Decimal; discount: Prisma.Decimal; transportCost: Prisma.Decimal; number: string | null },
+    existingVoucher: { customerId: string | null; paidAmount: Prisma.Decimal; discount: Prisma.Decimal; transportCost: Prisma.Decimal; number: string | null },
   ) {
     const customerId = dto.customerId ?? existingVoucher.customerId;
+    // Un bon confirmé a forcément déjà un client (confirm() l'exige) — cette
+    // garde ne sert qu'à convaincre TypeScript, elle ne devrait jamais se déclencher.
+    if (!customerId) throw new BadRequestException("Ce bon n'a pas de client assigné");
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
 
@@ -573,8 +593,9 @@ export class VouchersService {
       });
 
       const updated = await this.getById(id);
+      // Un bon confirmé a forcément déjà un client (confirm() l'exige).
       await this.notifyBoth(
-        updated.customer.user.id,
+        updated.customer!.user.id,
         'order.modified_after_confirm',
         'Bon modifié',
         `${actorName} a modifié le bon ${updated.number ?? ''} après confirmation : ${changes.join(' | ')}`,
@@ -593,6 +614,7 @@ export class VouchersService {
   async confirm(id: string, actorId: string, force = false) {
     const voucher = await this.getById(id);
     if (voucher.status !== 'DRAFT') throw new BadRequestException('Ce bon a déjà été confirmé');
+    if (!voucher.customerId) throw new BadRequestException('Assignez un client avant de confirmer ce bon');
     if (voucher.items.length === 0) throw new BadRequestException('Le bon ne contient aucun produit');
 
     // Le stock peut ne pas encore refléter une réception réelle (marchandise
@@ -644,9 +666,11 @@ export class VouchersService {
         });
       }
 
+      // Vérifié avant l'ouverture de la transaction (voucher.customerId non nul) —
+      // la narrowing TS ne traverse pas la fermeture de $transaction.
       await tx.ledgerEntry.create({
         data: {
-          customerId: voucher.customerId,
+          customerId: voucher.customerId!,
           type: 'SALE_VOUCHER',
           amount: total,
           reference: number,
@@ -657,7 +681,7 @@ export class VouchersService {
       if (Number(voucher.paidAmount) > 0) {
         await tx.ledgerEntry.create({
           data: {
-            customerId: voucher.customerId,
+            customerId: voucher.customerId!,
             type: 'PAYMENT',
             amount: -Number(voucher.paidAmount),
             reference: number,
@@ -678,7 +702,7 @@ export class VouchersService {
       type: 'order.confirmed',
       title: 'Bon confirmé',
       body: `Bon ${number} confirmé — total ${total} DA`,
-      data: { voucherId: id, userId: voucher.customer.user.id },
+      data: { voucherId: id, userId: voucher.customer!.user.id },
     });
 
     return this.getById(id);
@@ -703,7 +727,7 @@ export class VouchersService {
 
     const updated = await this.getById(id);
     await this.notifyBoth(
-      updated.customer.user.id,
+      updated.customer!.user.id,
       'order.delivered',
       'Bon livré',
       `${actorName} a marqué le bon ${updated.number ?? ''} comme livré.`,
@@ -745,9 +769,10 @@ export class VouchersService {
 
         const total = this.computeTotal(voucher);
         const netCredit = total - Number(voucher.paidAmount);
+        // wasConfirmed garantit qu'un client était déjà assigné (confirm() l'exige).
         await tx.ledgerEntry.create({
           data: {
-            customerId: voucher.customerId,
+            customerId: voucher.customerId!,
             type: 'ADJUSTMENT',
             amount: -netCredit,
             reference: voucher.number,
@@ -775,13 +800,15 @@ export class VouchersService {
     });
 
     const updated = await this.getById(id);
-    await this.notifyBoth(
-      updated.customer.user.id,
-      'order.cancelled',
-      'Bon annulé',
-      `${actorName} a annulé le bon ${updated.number ?? ''} : ${dto.reason}`,
-      { voucherId: id },
-    );
+    if (updated.customer) {
+      await this.notifyBoth(
+        updated.customer.user.id,
+        'order.cancelled',
+        'Bon annulé',
+        `${actorName} a annulé le bon ${updated.number ?? ''} : ${dto.reason}`,
+        { voucherId: id },
+      );
+    }
 
     return updated;
   }
@@ -818,9 +845,10 @@ export class VouchersService {
 
       const total = this.computeTotal(voucher);
       const netCredit = total - Number(voucher.paidAmount);
+      // confirmedAt vérifié plus haut garantit qu'un client était déjà assigné.
       await tx.ledgerEntry.create({
         data: {
-          customerId: voucher.customerId,
+          customerId: voucher.customerId!,
           type: 'ADJUSTMENT',
           amount: netCredit,
           reference: voucher.number,
@@ -844,7 +872,7 @@ export class VouchersService {
 
     const updated = await this.getById(id);
     await this.notifyBoth(
-      updated.customer.user.id,
+      updated.customer!.user.id,
       'order.cancel_reverted',
       "Annulation annulée",
       `${actorName} a annulé l'annulation du bon ${updated.number ?? ''} — il redevient confirmé.`,

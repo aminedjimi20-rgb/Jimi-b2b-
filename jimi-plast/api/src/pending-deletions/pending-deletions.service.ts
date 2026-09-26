@@ -132,7 +132,7 @@ export class PendingDeletionsService {
         const netCredit = total - Number(voucher.paidAmount);
         await tx.ledgerEntry.create({
           data: {
-            customerId: voucher.customerId,
+            customerId: voucher.customerId!,
             type: 'ADJUSTMENT',
             amount: -netCredit,
             reference: voucher.number,
@@ -158,13 +158,14 @@ export class PendingDeletionsService {
     await this.auditLog.record({ entityType: 'SalesVoucher', entityId: voucherId, action: 'DELETE', reason, actorId: requestedById });
 
     const actorName = await this.actorName(requestedById);
-    await this.notifyBoth(
-      voucher.customer.user.id,
-      'pending_deletion.applied',
-      'Suppression effectuée',
-      `${actorName} a supprimé le bon ${voucher.number ?? ''} : ${reason}.`,
-      { pendingDeletionId: pending.id },
-    );
+    const body = `${actorName} a supprimé le bon ${voucher.number ?? ''} : ${reason}.`;
+    if (voucher.customer) {
+      await this.notifyBoth(voucher.customer.user.id, 'pending_deletion.applied', 'Suppression effectuée', body, {
+        pendingDeletionId: pending.id,
+      });
+    } else {
+      await this.notifyStaffOnly('pending_deletion.applied', 'Suppression effectuée', body, { pendingDeletionId: pending.id });
+    }
 
     return pending;
   }
@@ -463,7 +464,7 @@ export class PendingDeletionsService {
           const netCredit = total - Number(voucher.paidAmount);
           await tx.ledgerEntry.create({
             data: {
-              customerId: voucher.customerId,
+              customerId: voucher.customerId!,
               type: 'ADJUSTMENT',
               amount: -netCredit,
               reference: voucher.number,

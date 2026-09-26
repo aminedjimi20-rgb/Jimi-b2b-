@@ -65,7 +65,7 @@ export class StockService {
       if (m.referenceType === 'SalesVoucher' && m.referenceId) {
         const v = salesMap.get(m.referenceId);
         voucherNumber = v?.number ?? null;
-        partyName = v?.customer.user.fullName ?? null;
+        partyName = v?.customer?.user.fullName ?? null;
       } else if (m.referenceType === 'PurchaseVoucher' && m.referenceId) {
         const v = purchaseMap.get(m.referenceId);
         voucherNumber = v?.number ?? null;

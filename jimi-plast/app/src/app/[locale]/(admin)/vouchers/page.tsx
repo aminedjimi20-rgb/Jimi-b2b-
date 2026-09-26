@@ -21,7 +21,7 @@ interface VoucherRow {
   discount: string;
   transportCost: string;
   depot: string | null;
-  customer: { businessName: string | null; user: { fullName: string } };
+  customer: { businessName: string | null; user: { fullName: string } } | null;
   items: { lineTotal: string; totalUnits: number }[];
   pendingDeletions: { status: 'PENDING' | 'APPROVED' | 'REJECTED'; reason: string }[];
 }
@@ -63,9 +63,11 @@ export default function VouchersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, statusFilter, customerFilter, depotFilter]);
 
+  // Un bon peut se créer sans client — pour enregistrer un panier et le
+  // reprendre plus tard, ou préparer une proforma avant de savoir pour qui
+  // — le client se choisit à tout moment ensuite, au plus tard à la confirmation.
   async function createVoucher() {
-    if (!newCustomerId) return;
-    const voucher = await api.post<{ id: string }>('/vouchers/draft', { customerId: newCustomerId }, token);
+    const voucher = await api.post<{ id: string }>('/vouchers/draft', { customerId: newCustomerId || undefined }, token);
     router.push(`/${locale}/vouchers/${voucher.id}`);
   }
 
@@ -90,10 +92,10 @@ export default function VouchersPage() {
         arr.sort((a, b) => totalQty(a) - totalQty(b));
         break;
       case 'name_asc':
-        arr.sort((a, b) => a.customer.user.fullName.localeCompare(b.customer.user.fullName));
+        arr.sort((a, b) => (a.customer?.user.fullName ?? '').localeCompare(b.customer?.user.fullName ?? ''));
         break;
       case 'name_desc':
-        arr.sort((a, b) => b.customer.user.fullName.localeCompare(a.customer.user.fullName));
+        arr.sort((a, b) => (b.customer?.user.fullName ?? '').localeCompare(a.customer?.user.fullName ?? ''));
         break;
       case 'newest':
       default:
@@ -135,10 +137,9 @@ export default function VouchersPage() {
           </select>
           <button
             onClick={createVoucher}
-            disabled={!newCustomerId}
-            className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white"
           >
-            {t('newVoucher')}
+            {newCustomerId ? t('newVoucher') : t('newVoucherNoCustomer')}
           </button>
         </div>
       </div>
@@ -238,7 +239,7 @@ function VoucherTableRow({
       className={`cursor-pointer border-t border-line hover:bg-line/20 ${struckThrough ? 'line-through opacity-60' : ''}`}
     >
       <td className="px-4 py-2 font-mono text-xs">{v.number ?? '(brouillon)'}</td>
-      <td className="px-4 py-2 text-ink">{v.customer.user.fullName}</td>
+      <td className="px-4 py-2 text-ink">{v.customer ? v.customer.user.fullName : <span className="italic text-muted">{t('noCustomer')}</span>}</td>
       <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(v.createdAt).toLocaleDateString()}</td>
       <td className="px-4 py-2 tabular">{total(v).toLocaleString()} DA</td>
       <td className="px-4 py-2">

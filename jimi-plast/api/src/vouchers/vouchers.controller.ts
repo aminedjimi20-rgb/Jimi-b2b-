@@ -95,7 +95,7 @@ export class VouchersController {
   }
 
   @Post('draft')
-  createDraft(@Body('customerId') customerId: string, @CurrentUser() user: AuthenticatedUser) {
+  createDraft(@Body('customerId') customerId: string | undefined, @CurrentUser() user: AuthenticatedUser) {
     return this.vouchersService.createDraft(customerId, user.id);
   }
 
