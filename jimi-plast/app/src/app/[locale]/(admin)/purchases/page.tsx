@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
+import { DayGroupRow } from '@/components/day-group-row';
+import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface Manufacturer {
   id: string;
@@ -23,9 +25,12 @@ interface PurchaseRow {
   pendingDeletions: { status: 'PENDING' | 'APPROVED' | 'REJECTED' }[];
 }
 
+const total = (p: PurchaseRow) => p.items.reduce((s, i) => s + Number(i.lineTotal), 0) - Number(p.discount) + Number(p.transportCost);
+
 export default function PurchasesPage() {
   const t = useTranslations('purchases');
   const tVoucher = useTranslations('vouchers');
+  const tCommon = useTranslations('common');
   const { token } = useAuth();
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
@@ -59,7 +64,6 @@ export default function PurchasesPage() {
     router.push(`/${locale}/purchases/${voucher.id}`);
   }
 
-  const total = (p: PurchaseRow) => p.items.reduce((s, i) => s + Number(i.lineTotal), 0) - Number(p.discount) + Number(p.transportCost);
   const totalQty = (p: PurchaseRow) => p.items.reduce((s, i) => s + i.totalUnits, 0);
 
   const sortedPurchases = useMemo(() => {
@@ -93,6 +97,13 @@ export default function PurchasesPage() {
     return arr;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [purchases, sortMode]);
+
+  const groupByDate = sortMode === 'newest' || sortMode === 'oldest';
+  const dayGroups = useMemo(
+    () => (groupByDate ? groupByDay(sortedPurchases, (p) => p.createdAt) : []),
+    [sortedPurchases, groupByDate],
+  );
+  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
 
   return (
     <div className="flex flex-col gap-4">
@@ -151,26 +162,55 @@ export default function PurchasesPage() {
             </tr>
           </thead>
           <tbody>
-            {sortedPurchases.map((p) => {
-              const deletion = p.pendingDeletions[0];
-              const struckThrough = deletion?.status === 'PENDING' || deletion?.status === 'APPROVED';
-              return (
-                <tr
-                  key={p.id}
-                  onClick={() => router.push(`/${locale}/purchases/${p.id}`)}
-                  className={`cursor-pointer border-t border-line hover:bg-line/20 ${struckThrough ? 'line-through opacity-60' : ''}`}
-                >
-                  <td className="px-4 py-2 font-mono text-xs">{p.number ?? '(brouillon)'}</td>
-                  <td className="px-4 py-2 text-ink">{p.manufacturer.name}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(p.createdAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-2 tabular">{total(p).toLocaleString()} DA</td>
-                  <td className="px-4 py-2 text-xs">{tVoucher(`status.${p.status}` as never)}</td>
-                </tr>
-              );
-            })}
+            {groupByDate
+              ? dayGroups.map((group, idx) => (
+                  <Fragment key={group.key}>
+                    <DayGroupRow
+                      label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
+                      count={group.rows.length}
+                      colSpan={5}
+                      expanded={isExpanded(idx)}
+                      onToggle={() => toggle(idx)}
+                    />
+                    {isExpanded(idx) &&
+                      group.rows.map((p) => (
+                        <PurchaseTableRow key={p.id} p={p} tVoucher={tVoucher} locale={locale} router={router} />
+                      ))}
+                  </Fragment>
+                ))
+              : sortedPurchases.map((p) => (
+                  <PurchaseTableRow key={p.id} p={p} tVoucher={tVoucher} locale={locale} router={router} />
+                ))}
           </tbody>
         </table>
       </div>
     </div>
+  );
+}
+
+function PurchaseTableRow({
+  p,
+  tVoucher,
+  locale,
+  router,
+}: {
+  p: PurchaseRow;
+  tVoucher: (key: string) => string;
+  locale: string;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const deletion = p.pendingDeletions[0];
+  const struckThrough = deletion?.status === 'PENDING' || deletion?.status === 'APPROVED';
+  return (
+    <tr
+      onClick={() => router.push(`/${locale}/purchases/${p.id}`)}
+      className={`cursor-pointer border-t border-line hover:bg-line/20 ${struckThrough ? 'line-through opacity-60' : ''}`}
+    >
+      <td className="px-4 py-2 font-mono text-xs">{p.number ?? '(brouillon)'}</td>
+      <td className="px-4 py-2 text-ink">{p.manufacturer.name}</td>
+      <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(p.createdAt).toLocaleDateString()}</td>
+      <td className="px-4 py-2 tabular">{total(p).toLocaleString()} DA</td>
+      <td className="px-4 py-2 text-xs">{tVoucher(`status.${p.status}` as never)}</td>
+    </tr>
   );
 }

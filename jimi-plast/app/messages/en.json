@@ -157,6 +157,8 @@
     "error": "Something went wrong",
     "empty": "No items",
     "search": "Search…",
+    "today": "Today",
+    "yesterday": "Yesterday",
     "loginToSeePrices": "Sign in to see prices",
     "uploadPhoto": "From gallery",
     "camera": "Camera",

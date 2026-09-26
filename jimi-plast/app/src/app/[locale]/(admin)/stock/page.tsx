@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { DayGroupRow } from '@/components/day-group-row';
+import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface ProductAlert {
   id: string;
@@ -33,6 +36,7 @@ export default function StockPage() {
   const tProducts = useTranslations('products');
   const tCommon = useTranslations('common');
   const { token } = useAuth();
+  const { locale } = useParams<{ locale: string }>();
 
   const [alerts, setAlerts] = useState<ProductAlert[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -66,6 +70,9 @@ export default function StockPage() {
       .toLowerCase();
     return haystack.includes(q);
   });
+
+  const dayGroups = useMemo(() => groupByDay(filteredMovements, (m) => m.createdAt), [filteredMovements]);
+  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
 
   const selectedProduct = products.find((p) => p.id === productId) ?? null;
   const upp = selectedProduct?.unitsPerPackage || 1;
@@ -239,27 +246,39 @@ export default function StockPage() {
                   </td>
                 </tr>
               )}
-              {filteredMovements.map((m) => {
-                const upp = m.product.unitsPerPackage || 1;
-                const cartons = Math.round((m.quantity / upp) * 100) / 100;
-                return (
-                  <tr key={m.id} className="border-t border-line">
-                    <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
-                    <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
-                    <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
-                    <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
-                      {m.quantity > 0 ? '+' : ''}
-                      {m.quantity}
-                    </td>
-                    <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
-                      {cartons > 0 ? '+' : ''}
-                      {cartons}
-                    </td>
-                    <td className="px-4 py-2 text-end tabular text-ink">{m.stockAfter ?? '—'}</td>
-                    <td className="px-4 py-2 text-xs text-muted">{m.reason ?? '—'}</td>
-                  </tr>
-                );
-              })}
+              {dayGroups.map((group, idx) => (
+                <Fragment key={group.key}>
+                  <DayGroupRow
+                    label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
+                    count={group.rows.length}
+                    colSpan={7}
+                    expanded={isExpanded(idx)}
+                    onToggle={() => toggle(idx)}
+                  />
+                  {isExpanded(idx) &&
+                    group.rows.map((m) => {
+                      const upp = m.product.unitsPerPackage || 1;
+                      const cartons = Math.round((m.quantity / upp) * 100) / 100;
+                      return (
+                        <tr key={m.id} className="border-t border-line">
+                          <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
+                          <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
+                          <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
+                          <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
+                            {m.quantity > 0 ? '+' : ''}
+                            {m.quantity}
+                          </td>
+                          <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
+                            {cartons > 0 ? '+' : ''}
+                            {cartons}
+                          </td>
+                          <td className="px-4 py-2 text-end tabular text-ink">{m.stockAfter ?? '—'}</td>
+                          <td className="px-4 py-2 text-xs text-muted">{m.reason ?? '—'}</td>
+                        </tr>
+                      );
+                    })}
+                </Fragment>
+              ))}
             </tbody>
           </table>
         </div>

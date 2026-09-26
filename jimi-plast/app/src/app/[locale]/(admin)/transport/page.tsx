@@ -6,6 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
+import { DayGroupRow } from '@/components/day-group-row';
+import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface Driver {
   id: string;
@@ -19,6 +21,7 @@ interface Driver {
 }
 interface DeliveryRow {
   id: string;
+  createdAt: string;
   salesVoucherId: string | null;
   purchaseVoucherId: string | null;
   driverId: string | null;
@@ -132,6 +135,9 @@ export default function TransportPage() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deliveries, search]);
+
+  const dayGroups = useMemo(() => groupByDay(filteredDeliveries, (d) => d.createdAt), [filteredDeliveries]);
+  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
 
   const filteredDrivers = useMemo(() => {
     const q = driverSearch.trim().toLowerCase();
@@ -542,7 +548,16 @@ export default function TransportPage() {
                 <td colSpan={6} className="px-4 py-4 text-center text-sm text-muted">{tc('empty')}</td>
               </tr>
             )}
-            {filteredDeliveries.map((d) => {
+            {dayGroups.map((group, idx) => (
+              <Fragment key={group.key}>
+                <DayGroupRow
+                  label={dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}
+                  count={group.rows.length}
+                  colSpan={6}
+                  expanded={isExpanded(idx)}
+                  onToggle={() => toggle(idx)}
+                />
+                {isExpanded(idx) && group.rows.map((d) => {
               const cancelled = d.status === 'CANCELLED';
               return (
                 <Fragment key={d.id}>
@@ -599,7 +614,9 @@ export default function TransportPage() {
                   )}
                 </Fragment>
               );
-            })}
+                })}
+              </Fragment>
+            ))}
           </tbody>
         </table>
       </div>

@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
+import { DayGroupRow } from '@/components/day-group-row';
+import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface Customer {
   id: string;
@@ -150,7 +152,49 @@ export default function ReturnsPage() {
     return arr;
   }, [filteredReturns, sortMode]);
 
+  const groupByDate = sortMode === 'newest' || sortMode === 'oldest';
+  const dayGroups = useMemo(
+    () => (groupByDate ? groupByDay(sortedReturns, (r) => r.createdAt) : []),
+    [sortedReturns, groupByDate],
+  );
+  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+
   const parties = type === 'CUSTOMER' ? customers : manufacturers;
+
+  function renderReturnRow(r: ReturnRow) {
+    return (
+      <tr
+        key={r.id}
+        onClick={() => router.push(`/${locale}/returns/${r.id}`)}
+        className="cursor-pointer border-t border-line hover:bg-line/20"
+      >
+        <td className="px-4 py-2 font-mono text-xs">{r.number ?? '(brouillon)'}</td>
+        <td className="px-4 py-2 text-ink">{partyName(r)}</td>
+        <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(r.createdAt).toLocaleDateString()}</td>
+        <td className="px-4 py-2 tabular">{Number(r.totalValue).toLocaleString()} DA</td>
+        <td className="px-4 py-2 text-xs text-ink">{t(`status.${r.status}` as never)}</td>
+        <td className="px-4 py-2 text-end" onClick={(e) => e.stopPropagation()}>
+          {r.status === 'NEW' && (
+            <div className="flex justify-end gap-1">
+              <select
+                value={decisionByReturn[r.id] ?? ''}
+                onChange={(e) => setDecisionByReturn({ ...decisionByReturn, [r.id]: e.target.value })}
+                className="rounded border border-line bg-paper text-ink px-2 py-1 text-xs"
+              >
+                <option value="">{t('decision')}</option>
+                <option value="REFUND">{t('decisions.REFUND')}</option>
+                <option value="CREDIT_NOTE">{t('decisions.CREDIT_NOTE')}</option>
+                <option value="DEDUCT_NEXT">{t('decisions.DEDUCT_NEXT')}</option>
+                <option value="REPLACEMENT">{t('decisions.REPLACEMENT')}</option>
+              </select>
+              <button onClick={() => validate(r.id)} className="rounded bg-teal px-2 py-1 text-xs text-white">{t('validate')}</button>
+              <button onClick={() => reject(r.id)} className="rounded border border-red-300 px-2 py-1 text-xs text-red-600">{t('reject')}</button>
+            </div>
+          )}
+        </td>
+      </tr>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -243,38 +287,20 @@ export default function ReturnsPage() {
                 </td>
               </tr>
             )}
-            {sortedReturns.map((r) => (
-              <tr
-                key={r.id}
-                onClick={() => router.push(`/${locale}/returns/${r.id}`)}
-                className="cursor-pointer border-t border-line hover:bg-line/20"
-              >
-                <td className="px-4 py-2 font-mono text-xs">{r.number ?? '(brouillon)'}</td>
-                <td className="px-4 py-2 text-ink">{partyName(r)}</td>
-                <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(r.createdAt).toLocaleDateString()}</td>
-                <td className="px-4 py-2 tabular">{Number(r.totalValue).toLocaleString()} DA</td>
-                <td className="px-4 py-2 text-xs text-ink">{t(`status.${r.status}` as never)}</td>
-                <td className="px-4 py-2 text-end" onClick={(e) => e.stopPropagation()}>
-                  {r.status === 'NEW' && (
-                    <div className="flex justify-end gap-1">
-                      <select
-                        value={decisionByReturn[r.id] ?? ''}
-                        onChange={(e) => setDecisionByReturn({ ...decisionByReturn, [r.id]: e.target.value })}
-                        className="rounded border border-line bg-paper text-ink px-2 py-1 text-xs"
-                      >
-                        <option value="">{t('decision')}</option>
-                        <option value="REFUND">{t('decisions.REFUND')}</option>
-                        <option value="CREDIT_NOTE">{t('decisions.CREDIT_NOTE')}</option>
-                        <option value="DEDUCT_NEXT">{t('decisions.DEDUCT_NEXT')}</option>
-                        <option value="REPLACEMENT">{t('decisions.REPLACEMENT')}</option>
-                      </select>
-                      <button onClick={() => validate(r.id)} className="rounded bg-teal px-2 py-1 text-xs text-white">{t('validate')}</button>
-                      <button onClick={() => reject(r.id)} className="rounded border border-red-300 px-2 py-1 text-xs text-red-600">{t('reject')}</button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {groupByDate
+              ? dayGroups.map((group, idx) => (
+                  <Fragment key={group.key}>
+                    <DayGroupRow
+                      label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
+                      count={group.rows.length}
+                      colSpan={6}
+                      expanded={isExpanded(idx)}
+                      onToggle={() => toggle(idx)}
+                    />
+                    {isExpanded(idx) && group.rows.map((r) => renderReturnRow(r))}
+                  </Fragment>
+                ))
+              : sortedReturns.map((r) => renderReturnRow(r))}
           </tbody>
         </table>
       </div>

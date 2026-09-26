@@ -157,6 +157,8 @@
     "error": "Une erreur est survenue",
     "empty": "Aucun élément",
     "search": "Rechercher…",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
     "loginToSeePrices": "Connectez-vous pour voir les prix",
     "uploadPhoto": "Depuis la galerie",
     "camera": "Caméra",

@@ -2,10 +2,13 @@
 
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 import { SortSelect, type SortMode } from '@/components/sort-select';
+import { DayGroupRow } from '@/components/day-group-row';
+import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
 
 interface ExpenseCategory {
   id: string;
@@ -65,6 +68,7 @@ export default function ExpensesPage() {
   const t = useTranslations('expenses');
   const tc = useTranslations('common');
   const { token } = useAuth();
+  const { locale } = useParams<{ locale: string }>();
 
   const [tab, setTab] = useState<'frais' | 'situation'>('frais');
 
@@ -125,6 +129,49 @@ export default function ExpensesPage() {
   }, [filteredExpenses, sortMode]);
 
   const totalShown = sortedExpenses.reduce((s, e) => s + Number(e.amount), 0);
+
+  const groupByDate = sortMode === 'newest' || sortMode === 'oldest';
+  const dayGroups = useMemo(
+    () => (groupByDate ? groupByDay(sortedExpenses, (e) => e.date) : []),
+    [sortedExpenses, groupByDate],
+  );
+  const { isExpanded, toggle } = useExpandedGroups(dayGroups);
+
+  function renderExpenseRow(e: Expense) {
+    return (
+      <Fragment key={e.id}>
+        <tr className="border-t border-line">
+          <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(e.date).toLocaleDateString()}</td>
+          <td className="px-4 py-2 text-ink">{e.category.name}</td>
+          <td className="px-4 py-2 text-xs text-muted">{e.notes ?? '—'}</td>
+          <td className="px-4 py-2 text-end tabular text-ink">{Number(e.amount).toLocaleString()} DA</td>
+          <td className="px-4 py-2 text-end">
+            <div className="flex justify-end gap-2 text-xs">
+              <button onClick={() => toggleHistory(e.id)} className="text-muted hover:underline">{t('history')}</button>
+              <button onClick={() => openEdit(e)} className="text-accent hover:underline">{t('edit')}</button>
+              <button onClick={() => removeExpense(e.id)} className="text-red-600 hover:underline">{t('delete')}</button>
+            </div>
+          </td>
+        </tr>
+        {historyFor === e.id && (
+          <tr>
+            <td colSpan={5} className="bg-line/10 px-4 py-2">
+              <ul className="flex flex-col gap-1 text-xs">
+                {history.map((h) => (
+                  <li key={h.id}>
+                    <span className="text-muted">{new Date(h.createdAt).toLocaleString('fr-FR')}</span>{' — '}
+                    <span className="font-medium text-ink">{h.actor?.fullName ?? t('system')}</span>{' : '}
+                    <span className="text-ink">{h.reason ?? `${h.field ?? h.action} → ${h.newValue ?? ''}`}</span>
+                  </li>
+                ))}
+                {history.length === 0 && <li className="text-muted">{tc('empty')}</li>}
+              </ul>
+            </td>
+          </tr>
+        )}
+      </Fragment>
+    );
+  }
 
   function openNew() {
     setEditingId(null);
@@ -316,39 +363,20 @@ export default function ExpensesPage() {
                     <td colSpan={5} className="px-4 py-4 text-center text-sm text-muted">{tc('empty')}</td>
                   </tr>
                 )}
-                {sortedExpenses.map((e) => (
-                  <Fragment key={e.id}>
-                    <tr className="border-t border-line">
-                      <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(e.date).toLocaleDateString()}</td>
-                      <td className="px-4 py-2 text-ink">{e.category.name}</td>
-                      <td className="px-4 py-2 text-xs text-muted">{e.notes ?? '—'}</td>
-                      <td className="px-4 py-2 text-end tabular text-ink">{Number(e.amount).toLocaleString()} DA</td>
-                      <td className="px-4 py-2 text-end">
-                        <div className="flex justify-end gap-2 text-xs">
-                          <button onClick={() => toggleHistory(e.id)} className="text-muted hover:underline">{t('history')}</button>
-                          <button onClick={() => openEdit(e)} className="text-accent hover:underline">{t('edit')}</button>
-                          <button onClick={() => removeExpense(e.id)} className="text-red-600 hover:underline">{t('delete')}</button>
-                        </div>
-                      </td>
-                    </tr>
-                    {historyFor === e.id && (
-                      <tr>
-                        <td colSpan={5} className="bg-line/10 px-4 py-2">
-                          <ul className="flex flex-col gap-1 text-xs">
-                            {history.map((h) => (
-                              <li key={h.id}>
-                                <span className="text-muted">{new Date(h.createdAt).toLocaleString('fr-FR')}</span>{' — '}
-                                <span className="font-medium text-ink">{h.actor?.fullName ?? t('system')}</span>{' : '}
-                                <span className="text-ink">{h.reason ?? `${h.field ?? h.action} → ${h.newValue ?? ''}`}</span>
-                              </li>
-                            ))}
-                            {history.length === 0 && <li className="text-muted">{tc('empty')}</li>}
-                          </ul>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                ))}
+                {groupByDate
+                  ? dayGroups.map((group, idx) => (
+                      <Fragment key={group.key}>
+                        <DayGroupRow
+                          label={dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}
+                          count={group.rows.length}
+                          colSpan={5}
+                          expanded={isExpanded(idx)}
+                          onToggle={() => toggle(idx)}
+                        />
+                        {isExpanded(idx) && group.rows.map((e) => renderExpenseRow(e))}
+                      </Fragment>
+                    ))
+                  : sortedExpenses.map((e) => renderExpenseRow(e))}
               </tbody>
               {sortedExpenses.length > 0 && (
                 <tfoot>
