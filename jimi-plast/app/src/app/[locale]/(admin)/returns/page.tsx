@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Customer {
@@ -47,6 +47,7 @@ export default function ReturnsPage() {
   const [partyId, setPartyId] = useState('');
   const [decisionByReturn, setDecisionByReturn] = useState<Record<string, string>>({});
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function reload() {
     const params = new URLSearchParams();
@@ -79,6 +80,7 @@ export default function ReturnsPage() {
   async function createDraft() {
     if (!partyId) return;
     setCreating(true);
+    setError(null);
     try {
       const ret = await api.post<{ id: string }>('/returns', {
         type,
@@ -87,6 +89,8 @@ export default function ReturnsPage() {
         items: [],
       }, token);
       router.push(`/${locale}/returns/${ret.id}`);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : tCommon('error'));
     } finally {
       setCreating(false);
     }
@@ -214,6 +218,7 @@ export default function ReturnsPage() {
                 {t('createReturn')}
               </button>
             </div>
+            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           </div>
         )}
       </div>

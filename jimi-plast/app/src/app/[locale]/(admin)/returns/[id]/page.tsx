@@ -182,8 +182,9 @@ export default function ReturnDetailPage() {
   }
 
   async function confirmAddItem() {
-    if (!addingProduct || !modalReason.trim() || Number(modalQty) < 1) return;
+    if (!addingProduct || modalReason.trim().length < 2 || Number(modalQty) < 1) return;
     setAddingItem(true);
+    setError(null);
     try {
       await api.post(`/returns/${id}/items`, {
         items: [
@@ -200,6 +201,8 @@ export default function ReturnDetailPage() {
       setShowPicker(false);
       setPickerQuery('');
       reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : tCommon('error'));
     } finally {
       setAddingItem(false);
     }
@@ -496,13 +499,14 @@ export default function ReturnDetailPage() {
                 />
               </label>
             </div>
+            {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
             <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setAddingProduct(null)} className="rounded border border-line px-3 py-2 text-sm text-ink">
+              <button onClick={() => { setAddingProduct(null); setError(null); }} className="rounded border border-line px-3 py-2 text-sm text-ink">
                 {tCommon('cancel')}
               </button>
               <button
                 onClick={confirmAddItem}
-                disabled={!modalReason.trim() || Number(modalQty) < 1 || addingItem}
+                disabled={modalReason.trim().length < 2 || Number(modalQty) < 1 || addingItem}
                 className="rounded bg-accent px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {t('addItem')}
