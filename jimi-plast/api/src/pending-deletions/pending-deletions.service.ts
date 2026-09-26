@@ -6,15 +6,20 @@ import { TrashService } from '../common/services/trash.service';
 
 /**
  * Une suppression de ligne de crédit (ajustement/paiement), de bon ou de
- * fiche fabricant n'efface jamais rien tout de suite : elle crée une
- * demande que l'AUTRE partie (client/fabricant ↔ personnel) doit
- * approuver. Tant qu'elle n'est pas approuvée, les chiffres (solde,
- * stock) ne bougent pas — et même après approbation, la ligne visée reste
- * affichée (barrée, avec la raison), jamais retirée de l'écran.
+ * fiche fabricant s'applique immédiatement (le compte/stock bouge tout de
+ * suite) — mais jamais en effaçant l'entité visée : elle reste affichée
+ * (barrée, avec la raison), jamais retirée de l'écran. Le client ou le
+ * fabricant concerné (et le personnel) reçoit une notification informative
+ * dès que c'est fait ; il n'y a plus d'étape "à approuver" pour que ça se
+ * reflète sur son compte.
  *
- * Quand la partie visée (client ou fabricant) n'a pas encore son propre
- * compte, il n'y a personne pour approuver en face : la suppression
- * s'applique alors immédiatement (sans PendingDeletion).
+ * Chaque suppression garde tout de même une trace `PendingDeletion` (créée
+ * directement au statut APPROVED, auto-répondue par son propre auteur) —
+ * ça préserve l'historique/l'affichage barré existants sans y toucher.
+ *
+ * `respond()` reste en place tel quel pour permettre de résoudre d'anciennes
+ * demandes PENDING créées avant ce changement ; plus aucune nouvelle demande
+ * n'est créée à l'état PENDING désormais.
  */
 @Injectable()
 export class PendingDeletionsService {
@@ -46,6 +51,12 @@ export class PendingDeletionsService {
     );
   }
 
+  /** Même chose que notifyBoth, mais quand il n'y a personne en face (pas de compte lié) — le personnel seul est informé. */
+  private async notifyStaffOnly(type: string, title: string, body: string, data: Record<string, unknown> = {}) {
+    const staff = await this.listStaff();
+    await Promise.all(staff.map((s) => this.notifications.notify({ type, title, body, data: { ...data, userId: s.id } })));
+  }
+
   async requestLedgerEntryDeletion(entryId: string, reason: string, requestedById: string) {
     const entry = await this.prisma.ledgerEntry.findUnique({
       where: { id: entryId },
@@ -57,16 +68,30 @@ export class PendingDeletionsService {
     const existing = await this.prisma.pendingDeletion.findFirst({ where: { ledgerEntryId: entryId, status: 'PENDING' } });
     if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour cette ligne');
 
-    const pending = await this.prisma.pendingDeletion.create({
-      data: { ledgerEntryId: entryId, customerId: entry.customerId, reason, requestedById },
-    });
+    const now = new Date();
+    const [, pending] = await this.prisma.$transaction([
+      this.prisma.ledgerEntry.update({ where: { id: entryId }, data: { voidedAt: now } }),
+      this.prisma.pendingDeletion.create({
+        data: {
+          ledgerEntryId: entryId,
+          customerId: entry.customerId,
+          reason,
+          requestedById,
+          status: 'APPROVED',
+          respondedById: requestedById,
+          respondedAt: now,
+        },
+      }),
+    ]);
+
+    await this.auditLog.record({ entityType: 'LedgerEntry', entityId: entryId, action: 'DELETE', reason, actorId: requestedById });
 
     const actorName = await this.actorName(requestedById);
     await this.notifyBoth(
       entry.customer.user.id,
-      'pending_deletion.requested',
-      'Demande de suppression',
-      `${actorName} demande la suppression d'une ligne (${entry.type}) : ${reason}. Une approbation est nécessaire.`,
+      'pending_deletion.applied',
+      'Suppression effectuée',
+      `${actorName} a supprimé une ligne (${entry.type}) : ${reason}.`,
       { pendingDeletionId: pending.id },
     );
 
@@ -76,23 +101,68 @@ export class PendingDeletionsService {
   async requestVoucherDeletion(voucherId: string, reason: string, requestedById: string) {
     const voucher = await this.prisma.salesVoucher.findFirst({
       where: { id: voucherId, deletedAt: null },
-      include: { customer: { include: { user: { select: { id: true, fullName: true } } } } },
+      include: { customer: { include: { user: { select: { id: true, fullName: true } } } }, items: true },
     });
     if (!voucher) throw new NotFoundException('Bon introuvable');
 
     const existing = await this.prisma.pendingDeletion.findFirst({ where: { salesVoucherId: voucherId, status: 'PENDING' } });
     if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour ce bon');
 
-    const pending = await this.prisma.pendingDeletion.create({
-      data: { salesVoucherId: voucherId, customerId: voucher.customerId, reason, requestedById },
+    const now = new Date();
+    const pending = await this.prisma.$transaction(async (tx) => {
+      if (voucher.status === 'CONFIRMED' || voucher.status === 'DELIVERED') {
+        for (const item of voucher.items) {
+          const incremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
+          await tx.stockMovement.create({
+            data: {
+              productId: item.productId,
+              type: 'ADJUSTMENT',
+              quantity: item.totalUnits,
+              stockAfter: incremented.currentStock,
+              referenceType: 'SalesVoucher',
+              referenceId: voucher.id,
+              reason: `Suppression du bon ${voucher.number ?? ''} : ${reason}`,
+              createdById: requestedById,
+            },
+          });
+        }
+
+        const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+        const total = subtotal - Number(voucher.discount) + Number(voucher.transportCost);
+        const netCredit = total - Number(voucher.paidAmount);
+        await tx.ledgerEntry.create({
+          data: {
+            customerId: voucher.customerId,
+            type: 'ADJUSTMENT',
+            amount: -netCredit,
+            reference: voucher.number,
+            note: `Suppression du bon ${voucher.number ?? ''} : ${reason}`,
+            createdById: requestedById,
+          },
+        });
+      }
+
+      return tx.pendingDeletion.create({
+        data: {
+          salesVoucherId: voucherId,
+          customerId: voucher.customerId,
+          reason,
+          requestedById,
+          status: 'APPROVED',
+          respondedById: requestedById,
+          respondedAt: now,
+        },
+      });
     });
+
+    await this.auditLog.record({ entityType: 'SalesVoucher', entityId: voucherId, action: 'DELETE', reason, actorId: requestedById });
 
     const actorName = await this.actorName(requestedById);
     await this.notifyBoth(
       voucher.customer.user.id,
-      'pending_deletion.requested',
-      'Demande de suppression',
-      `${actorName} demande la suppression du bon ${voucher.number ?? ''} : ${reason}. Une approbation est nécessaire.`,
+      'pending_deletion.applied',
+      'Suppression effectuée',
+      `${actorName} a supprimé le bon ${voucher.number ?? ''} : ${reason}.`,
       { pendingDeletionId: pending.id },
     );
 
@@ -102,40 +172,16 @@ export class PendingDeletionsService {
   async requestPurchaseVoucherDeletion(voucherId: string, reason: string, requestedById: string) {
     const voucher = await this.prisma.purchaseVoucher.findFirst({
       where: { id: voucherId, deletedAt: null },
-      include: { manufacturer: { include: { user: { select: { id: true, fullName: true } } } } },
+      include: { manufacturer: { include: { user: { select: { id: true, fullName: true } } } }, items: true },
     });
     if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
 
     const existing = await this.prisma.pendingDeletion.findFirst({ where: { purchaseVoucherId: voucherId, status: 'PENDING' } });
     if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour ce bon');
 
-    if (!voucher.manufacturer.user) {
-      // Pas de compte fabricant lié : rien à approuver en face, on applique directement.
-      return this.applyPurchaseVoucherDeletion(voucher.id, reason, requestedById);
-    }
-
-    const pending = await this.prisma.pendingDeletion.create({
-      data: { purchaseVoucherId: voucherId, manufacturerId: voucher.manufacturerId, reason, requestedById },
-    });
-
-    const actorName = await this.actorName(requestedById);
-    await this.notifyBoth(
-      voucher.manufacturer.user.id,
-      'pending_deletion.requested',
-      'Demande de suppression',
-      `${actorName} demande la suppression du bon d'achat ${voucher.number ?? ''} : ${reason}. Une approbation est nécessaire.`,
-      { pendingDeletionId: pending.id },
-    );
-
-    return pending;
-  }
-
-  private async applyPurchaseVoucherDeletion(voucherId: string, reason: string, actorId: string) {
-    const voucher = await this.prisma.purchaseVoucher.findUnique({ where: { id: voucherId }, include: { items: true } });
-    if (!voucher) throw new NotFoundException('Bon d’achat introuvable');
-
-    if (voucher.status === 'CONFIRMED') {
-      await this.prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const pending = await this.prisma.$transaction(async (tx) => {
+      if (voucher.status === 'CONFIRMED') {
         for (const item of voucher.items) {
           const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
           await tx.stockMovement.create({
@@ -146,8 +192,8 @@ export class PendingDeletionsService {
               stockAfter: decremented.currentStock,
               referenceType: 'PurchaseVoucher',
               referenceId: voucher.id,
-              reason: `Suppression approuvée du bon ${voucher.number ?? ''} : ${reason}`,
-              createdById: actorId,
+              reason: `Suppression du bon ${voucher.number ?? ''} : ${reason}`,
+              createdById: requestedById,
             },
           });
         }
@@ -161,15 +207,38 @@ export class PendingDeletionsService {
             type: 'ADJUSTMENT',
             amount: -netDebt,
             reference: voucher.number,
-            note: `Suppression approuvée du bon ${voucher.number ?? ''} : ${reason}`,
-            createdById: actorId,
+            note: `Suppression du bon ${voucher.number ?? ''} : ${reason}`,
+            createdById: requestedById,
           },
         });
+      }
+
+      return tx.pendingDeletion.create({
+        data: {
+          purchaseVoucherId: voucherId,
+          manufacturerId: voucher.manufacturerId,
+          reason,
+          requestedById,
+          status: 'APPROVED',
+          respondedById: requestedById,
+          respondedAt: now,
+        },
       });
+    });
+
+    await this.auditLog.record({ entityType: 'PurchaseVoucher', entityId: voucherId, action: 'DELETE', reason, actorId: requestedById });
+
+    const actorName = await this.actorName(requestedById);
+    const body = `${actorName} a supprimé le bon d'achat ${voucher.number ?? ''} : ${reason}.`;
+    if (voucher.manufacturer.user) {
+      await this.notifyBoth(voucher.manufacturer.user.id, 'pending_deletion.applied', 'Suppression effectuée', body, {
+        pendingDeletionId: pending.id,
+      });
+    } else {
+      await this.notifyStaffOnly('pending_deletion.applied', 'Suppression effectuée', body, { pendingDeletionId: pending.id });
     }
 
-    await this.auditLog.record({ entityType: 'PurchaseVoucher', entityId: voucherId, action: 'DELETE', reason, actorId });
-    return { immediate: true };
+    return pending;
   }
 
   async requestManufacturerDeletion(manufacturerId: string, reason: string, requestedById: string) {
@@ -179,36 +248,34 @@ export class PendingDeletionsService {
     });
     if (!manufacturer) throw new NotFoundException('Fabricant introuvable');
 
-    if (!manufacturer.user) {
-      // Pas de compte fabricant lié : personne d'autre à approuver en face.
-      await this.prisma.manufacturer.update({ where: { id: manufacturerId }, data: { deletedAt: new Date() } });
-      await this.trash.moveToTrash({
-        entityType: 'Manufacturer',
-        entityId: manufacturerId,
-        snapshot: manufacturer as unknown as Record<string, unknown>,
-        deletedById: requestedById,
-        reason,
-      });
-      return { immediate: true };
-    }
-
     const existing = await this.prisma.pendingDeletion.findFirst({
       where: { manufacturerId, supplierLedgerEntryId: null, status: 'PENDING' },
     });
     if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour ce fabricant');
 
+    const now = new Date();
+    await this.prisma.manufacturer.update({ where: { id: manufacturerId }, data: { deletedAt: now } });
+    await this.trash.moveToTrash({
+      entityType: 'Manufacturer',
+      entityId: manufacturerId,
+      snapshot: manufacturer as unknown as Record<string, unknown>,
+      deletedById: requestedById,
+      reason,
+    });
+
     const pending = await this.prisma.pendingDeletion.create({
-      data: { manufacturerId, reason, requestedById },
+      data: { manufacturerId, reason, requestedById, status: 'APPROVED', respondedById: requestedById, respondedAt: now },
     });
 
     const actorName = await this.actorName(requestedById);
-    await this.notifyBoth(
-      manufacturer.user.id,
-      'pending_deletion.requested',
-      'Demande de suppression',
-      `${actorName} demande la suppression du fabricant ${manufacturer.name} : ${reason}. Une approbation est nécessaire.`,
-      { pendingDeletionId: pending.id },
-    );
+    const body = `${actorName} a supprimé le fabricant ${manufacturer.name} : ${reason}.`;
+    if (manufacturer.user) {
+      await this.notifyBoth(manufacturer.user.id, 'pending_deletion.applied', 'Suppression effectuée', body, {
+        pendingDeletionId: pending.id,
+      });
+    } else {
+      await this.notifyStaffOnly('pending_deletion.applied', 'Suppression effectuée', body, { pendingDeletionId: pending.id });
+    }
 
     return pending;
   }
@@ -224,31 +291,33 @@ export class PendingDeletionsService {
     const existing = await this.prisma.pendingDeletion.findFirst({ where: { supplierLedgerEntryId: entryId, status: 'PENDING' } });
     if (existing) throw new BadRequestException('Une demande de suppression est déjà en attente pour cette ligne');
 
-    if (!entry.manufacturer.user) {
-      // Pas de compte fabricant lié : suppression immédiate, rien à approuver en face.
-      await this.prisma.supplierLedgerEntry.update({ where: { id: entryId }, data: { voidedAt: new Date() } });
-      await this.auditLog.record({
-        entityType: 'SupplierLedgerEntry',
-        entityId: entryId,
-        action: 'DELETE',
-        reason,
-        actorId: requestedById,
-      });
-      return { immediate: true };
-    }
+    const now = new Date();
+    const [, pending] = await this.prisma.$transaction([
+      this.prisma.supplierLedgerEntry.update({ where: { id: entryId }, data: { voidedAt: now } }),
+      this.prisma.pendingDeletion.create({
+        data: {
+          supplierLedgerEntryId: entryId,
+          manufacturerId: entry.manufacturerId,
+          reason,
+          requestedById,
+          status: 'APPROVED',
+          respondedById: requestedById,
+          respondedAt: now,
+        },
+      }),
+    ]);
 
-    const pending = await this.prisma.pendingDeletion.create({
-      data: { supplierLedgerEntryId: entryId, manufacturerId: entry.manufacturerId, reason, requestedById },
-    });
+    await this.auditLog.record({ entityType: 'SupplierLedgerEntry', entityId: entryId, action: 'DELETE', reason, actorId: requestedById });
 
     const actorName = await this.actorName(requestedById);
-    await this.notifyBoth(
-      entry.manufacturer.user.id,
-      'pending_deletion.requested',
-      'Demande de suppression',
-      `${actorName} demande la suppression d'une ligne (${entry.type}) : ${reason}. Une approbation est nécessaire.`,
-      { pendingDeletionId: pending.id },
-    );
+    const body = `${actorName} a supprimé une ligne (${entry.type}) : ${reason}.`;
+    if (entry.manufacturer.user) {
+      await this.notifyBoth(entry.manufacturer.user.id, 'pending_deletion.applied', 'Suppression effectuée', body, {
+        pendingDeletionId: pending.id,
+      });
+    } else {
+      await this.notifyStaffOnly('pending_deletion.applied', 'Suppression effectuée', body, { pendingDeletionId: pending.id });
+    }
 
     return pending;
   }

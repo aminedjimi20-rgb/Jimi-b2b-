@@ -578,8 +578,9 @@ export default function VoucherEditorPage() {
     reload();
   }
 
-  // La suppression du bon n'efface rien tout de suite : elle attend
-  // l'approbation du client, et le bon reste affiché (barré) pour de bon.
+  // La suppression du bon s'applique tout de suite (stock et compte client
+  // mis à jour immédiatement, notification envoyée) — le bon reste affiché
+  // (barré) pour de bon, jamais retiré de l'écran.
   async function requestVoucherDeletion() {
     const reason = window.prompt(t('deleteReasonPrompt'));
     if (!reason) return;

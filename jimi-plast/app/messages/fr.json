@@ -342,7 +342,7 @@
       "note": "Note",
       "reason": "Raison",
       "back": "Retour aux clients",
-      "deleteReasonPrompt": "Raison de la suppression (le client devra approuver) :",
+      "deleteReasonPrompt": "Raison de la suppression (le compte du client est mis à jour immédiatement) :",
       "deleted": "Supprimé",
       "pendingDeletion": "En attente d'approbation",
       "date": "Date",
@@ -439,7 +439,7 @@
     "history": "Historique",
     "system": "Système",
     "deleteVoucher": "Supprimer le bon",
-    "deleteReasonPrompt": "Raison de la suppression (le client devra approuver) :",
+    "deleteReasonPrompt": "Raison de la suppression (le stock et le compte sont mis à jour immédiatement) :",
     "detailDeleted": "Supprimé",
     "detailPendingDeletion": "En attente d'approbation"
   },
@@ -469,7 +469,7 @@
       "canViewCatalog": "Autoriser à voir le catalogue (ses produits uniquement)"
     },
     "searchPlaceholder": "Rechercher un fabricant...",
-    "deleteReasonPrompt": "Raison de la suppression (l'autre partie devra approuver si un compte existe) :",
+    "deleteReasonPrompt": "Raison de la suppression (le compte est mis à jour immédiatement) :",
     "pendingDeletion": "En attente d'approbation",
     "hasAccount": "Compte actif",
     "noAccount": "Aucun compte lié",

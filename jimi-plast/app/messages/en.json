@@ -342,7 +342,7 @@
       "note": "Note",
       "reason": "Reason",
       "back": "Back to customers",
-      "deleteReasonPrompt": "Reason for deletion (the customer will need to approve):",
+      "deleteReasonPrompt": "Reason for deletion (the customer's account is updated immediately):",
       "deleted": "Deleted",
       "pendingDeletion": "Awaiting approval",
       "date": "Date",
@@ -439,7 +439,7 @@
     "history": "History",
     "system": "System",
     "deleteVoucher": "Delete voucher",
-    "deleteReasonPrompt": "Reason for deletion (the customer will need to approve):",
+    "deleteReasonPrompt": "Reason for deletion (stock and account are updated immediately):",
     "detailDeleted": "Deleted",
     "detailPendingDeletion": "Awaiting approval"
   },
@@ -469,7 +469,7 @@
       "canViewCatalog": "Allow viewing the catalog (own products only)"
     },
     "searchPlaceholder": "Search a manufacturer...",
-    "deleteReasonPrompt": "Reason for deletion (the other party must approve if an account exists):",
+    "deleteReasonPrompt": "Reason for deletion (the account is updated immediately):",
     "pendingDeletion": "Pending approval",
     "hasAccount": "Active account",
     "noAccount": "No linked account",

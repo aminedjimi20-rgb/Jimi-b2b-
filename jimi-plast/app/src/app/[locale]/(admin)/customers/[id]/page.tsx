@@ -111,8 +111,9 @@ export default function CustomerDetailPage() {
     reload();
   }
 
-  // La suppression ne s'applique jamais tout de suite : elle attend
-  // l'approbation du client, et la ligne reste affichée (barrée) pour de bon.
+  // La suppression s'applique tout de suite (compte mis à jour
+  // immédiatement, notification envoyée au client) — la ligne reste
+  // affichée (barrée) pour de bon, jamais retirée de l'écran.
   async function requestEntryDeletion(entryId: string) {
     const reason = window.prompt(t('detail.deleteReasonPrompt'));
     if (!reason) return;

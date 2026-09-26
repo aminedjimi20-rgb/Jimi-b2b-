@@ -342,7 +342,7 @@
       "note": "ملاحظة",
       "reason": "السبب",
       "back": "العودة إلى العملاء",
-      "deleteReasonPrompt": "علاش تحب تمحي (الزبون خاصو يوافق) :",
+      "deleteReasonPrompt": "علاش تحب تمحي (حساب الزبون يتحدث فالحين) :",
       "deleted": "محذوف",
       "pendingDeletion": "فالانتظار للموافقة",
       "date": "التاريخ",
@@ -439,7 +439,7 @@
     "history": "التاريخ",
     "system": "النظام",
     "deleteVoucher": "حذف البون",
-    "deleteReasonPrompt": "علاش تحب تمحي (الزبون خاصو يوافق) :",
+    "deleteReasonPrompt": "علاش تحب تمحي (المخزون و الحساب يتحدثو فالحين) :",
     "detailDeleted": "محذوف",
     "detailPendingDeletion": "فالانتظار للموافقة"
   },
@@ -469,7 +469,7 @@
       "canViewCatalog": "السماح له بمشاهدة الكاتالوغ (منتجاته فقط)"
     },
     "searchPlaceholder": "البحث عن فابريكان...",
-    "deleteReasonPrompt": "سبب الحذف (الطرف الآخر يوافق إذا عندو حساب) :",
+    "deleteReasonPrompt": "سبب الحذف (الحساب يتحدث فالحين) :",
     "pendingDeletion": "في انتظار الموافقة",
     "hasAccount": "حساب نشط",
     "noAccount": "بلا حساب",

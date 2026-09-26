@@ -460,9 +460,10 @@ export default function PurchaseEditorPage() {
     reload();
   }
 
-  // Comme pour un bon de vente : la suppression n'efface rien tout de suite
-  // — elle attend l'approbation du fabricant (s'il a son propre compte), et
-  // le bon reste affiché (barré) pour de bon.
+  // Comme pour un bon de vente : la suppression s'applique tout de suite
+  // (stock et compte fabricant mis à jour immédiatement, notification
+  // envoyée si le fabricant a son propre compte) — le bon reste affiché
+  // (barré) pour de bon, jamais retiré de l'écran.
   async function requestDeletion() {
     const reason = window.prompt(tVoucher('deleteReasonPrompt'));
     if (!reason) return;

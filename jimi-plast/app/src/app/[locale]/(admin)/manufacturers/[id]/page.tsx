@@ -155,9 +155,9 @@ export default function ManufacturerDetailPage() {
     reload();
   }
 
-  // Comme pour les clients : la suppression n'efface jamais rien tout de
-  // suite — elle attend l'approbation de l'autre partie (le fabricant, si
-  // son compte existe), et la ligne visée reste affichée (barrée) pour de bon.
+  // Comme pour les clients : la suppression s'applique tout de suite (compte
+  // mis à jour immédiatement, notification envoyée) — la ligne visée reste
+  // affichée (barrée) pour de bon, jamais retirée de l'écran.
   async function requestEntryDeletion(entryId: string) {
     const reason = window.prompt(t('deleteReasonPrompt'));
     if (!reason) return;
