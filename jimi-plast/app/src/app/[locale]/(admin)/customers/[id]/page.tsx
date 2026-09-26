@@ -30,6 +30,8 @@ interface CustomerDetail {
   wilaya: string | null;
   creditLimit: number;
   balance: number;
+  notes: string | null;
+  notesHidden: boolean;
   user: { fullName: string; email: string; phone: string | null; role: { name: string } };
   entries: LedgerEntry[];
 }
@@ -51,15 +53,30 @@ export default function CustomerDetailPage() {
   const [printingStatement, setPrintingStatement] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [periodSummary, setPeriodSummary] = useState<{ totalBusiness: number; totalPaid: number } | null>(null);
+  const [noteDraft, setNoteDraft] = useState('');
 
   function reload() {
-    api.get<CustomerDetail>(`/customers/${id}`, token).then(setCustomer);
+    api.get<CustomerDetail>(`/customers/${id}`, token).then((c) => {
+      setCustomer(c);
+      setNoteDraft(c.notes ?? '');
+    });
   }
 
   useEffect(() => {
     if (token) reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, id]);
+
+  async function saveNote() {
+    await api.put(`/customers/${id}/note`, { note: noteDraft }, token);
+    reload();
+  }
+
+  async function toggleNoteHidden() {
+    if (!customer) return;
+    await api.put(`/customers/${id}/note`, { hidden: !customer.notesHidden }, token);
+    reload();
+  }
 
   // Chiffres "sur la période" (chiffre d'affaires + payé), recalculés à
   // chaque changement des dates Du/Au partagées avec l'impression de situation.
@@ -164,6 +181,29 @@ export default function CustomerDetailPage() {
         <p className="text-xs text-muted">
           {customer.user.email} · {customer.user.phone}
         </p>
+      </div>
+
+      <div className="rounded-lg border border-line bg-panel p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-semibold text-ink">{t('detail.generalNote')}</p>
+          <button onClick={toggleNoteHidden} className="text-xs text-accent hover:underline">
+            {customer.notesHidden ? t('detail.showNote') : t('detail.hideNote')}
+          </button>
+        </div>
+        {!customer.notesHidden && (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              placeholder={t('detail.generalNotePlaceholder')}
+              rows={2}
+              className="rounded border border-line bg-paper px-3 py-2 text-sm"
+            />
+            <button onClick={saveNote} className="w-fit rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
+              OK
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

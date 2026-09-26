@@ -6,6 +6,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { UpsertManufacturerDto } from './dto/upsert-manufacturer.dto';
 import { AddPaymentDto, AddAdjustmentDto } from '../customers/dto/add-ledger-entry.dto';
+import { UpdateNoteDto } from '../customers/dto/update-note.dto';
 import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
 import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
 import { StatementPdfService } from '../common/services/statement-pdf.service';
@@ -96,6 +97,11 @@ export class ManufacturersController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpsertManufacturerDto, @CurrentUser() user: AuthenticatedUser) {
     return this.manufacturersService.update(id, dto, user.id);
+  }
+
+  @Put(':id/note')
+  updateNote(@Param('id') id: string, @Body() dto: UpdateNoteDto) {
+    return this.manufacturersService.updateNote(id, dto);
   }
 
   @Delete(':id')

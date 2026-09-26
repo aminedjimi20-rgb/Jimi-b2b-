@@ -6,6 +6,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { UpdateNoteDto } from './dto/update-note.dto';
 import { AddPaymentDto, AddAdjustmentDto } from './dto/add-ledger-entry.dto';
 import { PendingDeletionsService } from '../pending-deletions/pending-deletions.service';
 import { RequestDeletionDto } from '../pending-deletions/dto/request-deletion.dto';
@@ -96,6 +97,12 @@ export class CustomersController {
   @RequirePermissions('customers.manage')
   update(@Param('id') id: string, @Body() dto: UpdateCustomerDto, @CurrentUser() user: AuthenticatedUser) {
     return this.customersService.update(id, dto, user.id);
+  }
+
+  @Put(':id/note')
+  @RequirePermissions('customers.manage')
+  updateNote(@Param('id') id: string, @Body() dto: UpdateNoteDto) {
+    return this.customersService.updateNote(id, dto);
   }
 
   @Delete(':id')

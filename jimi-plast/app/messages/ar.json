@@ -326,6 +326,10 @@
     },
     "detail": {
       "balance": "الرصيد الحالي",
+      "generalNote": "ملاحظة عامة",
+      "generalNotePlaceholder": "اكتب ملاحظة على هاذ الكليون…",
+      "hideNote": "خبّي",
+      "showNote": "بيّن الملاحظة",
       "creditLimit": "حد الائتمان",
       "history": "السجل",
       "addPayment": "تسجيل دفعة",
@@ -468,6 +472,10 @@
     "detail": {
       "back": "الرجوع إلى الفابريكانات",
       "balance": "الدين الحالي",
+      "generalNote": "ملاحظة عامة",
+      "generalNotePlaceholder": "اكتب ملاحظة على هاذ الفابريكو…",
+      "hideNote": "خبّي",
+      "showNote": "بيّن الملاحظة",
       "addPayment": "تسجيل دفعة",
       "addAdjustment": "تعديل يدوي",
       "amount": "المبلغ",
@@ -504,6 +512,8 @@
     "title": "المشتريات",
     "newPurchase": "بون شراء جديد",
     "selectManufacturer": "اختر مصنعاً",
+    "filterStatus": "كل الحالات",
+    "filterManufacturer": "كل المصانع",
     "notes": "ملاحظات",
     "columns": {
       "number": "الرقم",

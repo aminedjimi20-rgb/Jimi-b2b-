@@ -35,6 +35,7 @@ interface ManufacturerDetail {
   contactName: string | null;
   paymentTerms: string | null;
   notes: string | null;
+  notesHidden: boolean;
   balance: number;
   userId: string | null;
   canViewCatalog: boolean;
@@ -65,9 +66,24 @@ export default function ManufacturerDetailPage() {
   const [printingStatement, setPrintingStatement] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [periodSummary, setPeriodSummary] = useState<{ totalBusiness: number; totalPaid: number } | null>(null);
+  const [noteDraft, setNoteDraft] = useState('');
 
   function reload() {
-    api.get<ManufacturerDetail>(`/manufacturers/${id}`, token).then(setManufacturer);
+    api.get<ManufacturerDetail>(`/manufacturers/${id}`, token).then((m) => {
+      setManufacturer(m);
+      setNoteDraft(m.notes ?? '');
+    });
+  }
+
+  async function saveNote() {
+    await api.put(`/manufacturers/${id}/note`, { note: noteDraft }, token);
+    reload();
+  }
+
+  async function toggleNoteHidden() {
+    if (!manufacturer) return;
+    await api.put(`/manufacturers/${id}/note`, { hidden: !manufacturer.notesHidden }, token);
+    reload();
   }
 
   useEffect(() => {
@@ -296,6 +312,29 @@ export default function ManufacturerDetailPage() {
           </div>
         </form>
       )}
+
+      <div className="rounded-lg border border-line bg-panel p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-semibold text-ink">{t('detail.generalNote')}</p>
+          <button onClick={toggleNoteHidden} className="text-xs text-accent hover:underline">
+            {manufacturer.notesHidden ? t('detail.showNote') : t('detail.hideNote')}
+          </button>
+        </div>
+        {!manufacturer.notesHidden && (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              placeholder={t('detail.generalNotePlaceholder')}
+              rows={2}
+              className="rounded border border-line bg-paper px-3 py-2 text-sm"
+            />
+            <button onClick={saveNote} className="w-fit rounded bg-accent px-3 py-1.5 text-sm font-medium text-white">
+              OK
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="rounded-lg border border-line bg-panel p-5 w-fit">
         <p className="text-xs uppercase tracking-wide text-muted">{t('detail.balance')}</p>

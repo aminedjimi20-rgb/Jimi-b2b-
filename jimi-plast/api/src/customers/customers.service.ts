@@ -247,6 +247,23 @@ export class CustomersService {
     return this.getById(id);
   }
 
+  // Note générale affichée directement sur la fiche (pas cachée dans le
+  // formulaire d'édition) — sauvegarde rapide, indépendante du reste du
+  // formulaire. "hidden" replie juste l'affichage, le texte n'est jamais
+  // perdu.
+  async updateNote(id: string, dto: { note?: string; hidden?: boolean }) {
+    const existing = await this.prisma.customer.findFirst({ where: { id, deletedAt: null } });
+    if (!existing) throw new NotFoundException('Client introuvable');
+    await this.prisma.customer.update({
+      where: { id },
+      data: {
+        ...(dto.note !== undefined ? { notes: dto.note } : {}),
+        ...(dto.hidden !== undefined ? { notesHidden: dto.hidden } : {}),
+      },
+    });
+    return this.getById(id);
+  }
+
   async remove(id: string, actorId: string, reason?: string) {
     const customer = await this.prisma.customer.findFirst({
       where: { id, deletedAt: null },

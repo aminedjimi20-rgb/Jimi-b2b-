@@ -417,6 +417,7 @@ model Customer {
   wilaya       String?
   creditLimit  Decimal  @default(0) @db.Decimal(12, 2)
   notes        String?
+  notesHidden  Boolean  @default(false) // masque la note générale sur la fiche sans la perdre — juste un repli d'affichage
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
@@ -633,6 +634,7 @@ model Manufacturer {
   contactName   String?
   paymentTerms  String?
   notes         String?
+  notesHidden   Boolean @default(false) // masque la note générale sur la fiche sans la perdre — juste un repli d'affichage
   canViewCatalog Boolean @default(false) // autorisation admin : le fabricant peut voir le catalogue (ses produits seulement) depuis son propre compte
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

@@ -327,6 +327,10 @@
     "detail": {
       "balance": "Solde actuel",
       "creditLimit": "Limite de crédit",
+      "generalNote": "Note générale",
+      "generalNotePlaceholder": "Écrire une remarque sur ce client…",
+      "hideNote": "Masquer",
+      "showNote": "Afficher la note",
       "history": "Historique",
       "addPayment": "Enregistrer un paiement",
       "addAdjustment": "Ajustement manuel",
@@ -468,6 +472,10 @@
     "detail": {
       "back": "Retour aux fabricants",
       "balance": "Dette actuelle",
+      "generalNote": "Note générale",
+      "generalNotePlaceholder": "Écrire une remarque sur ce fabricant…",
+      "hideNote": "Masquer",
+      "showNote": "Afficher la note",
       "addPayment": "Enregistrer un paiement",
       "addAdjustment": "Ajustement manuel",
       "amount": "Montant",
@@ -504,6 +512,8 @@
     "title": "Achats",
     "newPurchase": "Nouveau bon d'achat",
     "selectManufacturer": "Sélectionner un fabricant",
+    "filterStatus": "Tous les statuts",
+    "filterManufacturer": "Tous les fabricants",
     "notes": "Observations",
     "columns": {
       "number": "N°",

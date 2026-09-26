@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { SortSelect, type SortMode } from '@/components/sort-select';
 
 interface Manufacturer {
   id: string;
@@ -18,7 +19,7 @@ interface PurchaseRow {
   discount: string;
   transportCost: string;
   manufacturer: { name: string };
-  items: { lineTotal: string }[];
+  items: { lineTotal: string; totalUnits: number }[];
   pendingDeletions: { status: 'PENDING' | 'APPROVED' | 'REJECTED' }[];
 }
 
@@ -32,17 +33,25 @@ export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [selectedManufacturer, setSelectedManufacturer] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [manufacturerFilter, setManufacturerFilter] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
 
   function reload() {
-    api.get<PurchaseRow[]>('/purchase-vouchers', token).then(setPurchases);
+    const params = new URLSearchParams();
+    if (statusFilter) params.set('status', statusFilter);
+    if (manufacturerFilter) params.set('manufacturerId', manufacturerFilter);
+    api.get<PurchaseRow[]>(`/purchase-vouchers?${params.toString()}`, token).then(setPurchases);
   }
+
   useEffect(() => {
-    if (token) {
-      reload();
-      api.get<Manufacturer[]>('/manufacturers', token).then(setManufacturers);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (token) api.get<Manufacturer[]>('/manufacturers', token).then(setManufacturers);
   }, [token]);
+
+  useEffect(() => {
+    if (token) reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, statusFilter, manufacturerFilter]);
 
   async function createPurchase() {
     if (!selectedManufacturer) return;
@@ -51,23 +60,82 @@ export default function PurchasesPage() {
   }
 
   const total = (p: PurchaseRow) => p.items.reduce((s, i) => s + Number(i.lineTotal), 0) - Number(p.discount) + Number(p.transportCost);
+  const totalQty = (p: PurchaseRow) => p.items.reduce((s, i) => s + i.totalUnits, 0);
+
+  const sortedPurchases = useMemo(() => {
+    const arr = [...purchases];
+    switch (sortMode) {
+      case 'oldest':
+        arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'price_desc':
+        arr.sort((a, b) => total(b) - total(a));
+        break;
+      case 'price_asc':
+        arr.sort((a, b) => total(a) - total(b));
+        break;
+      case 'qty_desc':
+        arr.sort((a, b) => totalQty(b) - totalQty(a));
+        break;
+      case 'qty_asc':
+        arr.sort((a, b) => totalQty(a) - totalQty(b));
+        break;
+      case 'name_asc':
+        arr.sort((a, b) => a.manufacturer.name.localeCompare(b.manufacturer.name));
+        break;
+      case 'name_desc':
+        arr.sort((a, b) => b.manufacturer.name.localeCompare(a.manufacturer.name));
+        break;
+      case 'newest':
+      default:
+        arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    return arr;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [purchases, sortMode]);
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 bg-paper pb-3">
-        <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
-        <div className="flex gap-2">
-          <select value={selectedManufacturer} onChange={(e) => setSelectedManufacturer(e.target.value)} className="rounded border border-line bg-panel px-2 py-1.5 text-sm">
-            <option value="">{t('selectManufacturer')}</option>
+      <div className="sticky top-0 z-10 flex flex-col gap-3 bg-paper pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+          <div className="flex gap-2">
+            <select value={selectedManufacturer} onChange={(e) => setSelectedManufacturer(e.target.value)} className="rounded border border-line bg-panel px-2 py-1.5 text-sm">
+              <option value="">{t('selectManufacturer')}</option>
+              {manufacturers.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            <button onClick={createPurchase} disabled={!selectedManufacturer} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50">
+              {t('newPurchase')}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded border border-line bg-panel px-3 py-2 text-sm">
+            <option value="">{t('filterStatus')}</option>
+            {['DRAFT', 'CONFIRMED', 'CANCELLED'].map((s) => (
+              <option key={s} value={s}>
+                {tVoucher(`status.${s}` as never)}
+              </option>
+            ))}
+          </select>
+          <select value={manufacturerFilter} onChange={(e) => setManufacturerFilter(e.target.value)} className="rounded border border-line bg-panel px-3 py-2 text-sm">
+            <option value="">{t('filterManufacturer')}</option>
             {manufacturers.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
               </option>
             ))}
           </select>
-          <button onClick={createPurchase} disabled={!selectedManufacturer} className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50">
-            {t('newPurchase')}
-          </button>
+          <SortSelect
+            value={sortMode}
+            onChange={setSortMode}
+            options={['newest', 'oldest', 'price_desc', 'price_asc', 'qty_desc', 'qty_asc', 'name_asc', 'name_desc']}
+          />
         </div>
       </div>
 
@@ -83,7 +151,7 @@ export default function PurchasesPage() {
             </tr>
           </thead>
           <tbody>
-            {purchases.map((p) => {
+            {sortedPurchases.map((p) => {
               const deletion = p.pendingDeletions[0];
               const struckThrough = deletion?.status === 'PENDING' || deletion?.status === 'APPROVED';
               return (
