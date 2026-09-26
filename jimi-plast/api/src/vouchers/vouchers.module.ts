@@ -9,5 +9,6 @@ import { PendingDeletionsModule } from '../pending-deletions/pending-deletions.m
   imports: [NotificationsModule, PendingDeletionsModule],
   controllers: [VouchersController],
   providers: [VouchersService, VoucherPdfService],
+  exports: [VouchersService],
 })
 export class VouchersModule {}

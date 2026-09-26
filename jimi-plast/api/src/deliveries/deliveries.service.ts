@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/services/audit-log.service';
+import { VouchersService } from '../vouchers/vouchers.service';
+import { PurchaseVouchersService } from '../purchase-vouchers/purchase-vouchers.service';
 import { CancelDeliveryDto, CreateStandaloneDeliveryDto, UpsertDeliveryDto } from './dto/upsert-delivery.dto';
 
 const DELIVERY_EXPENSE_CATEGORY = 'Livraison';
@@ -10,6 +12,8 @@ export class DeliveriesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
+    private readonly vouchersService: VouchersService,
+    private readonly purchaseVouchersService: PurchaseVouchersService,
   ) {}
 
   list() {
@@ -65,11 +69,15 @@ export class DeliveriesService {
     // Le coût facturé à la partie (client/fabricant) sur la livraison EST le
     // transport du bon — synchronisé côté serveur pour que ça reste vrai
     // quel que soit l'écran d'où la livraison a été modifiée (Transport ou
-    // la fiche du bon elle-même), et qu'il entre bien dans le total.
+    // la fiche du bon elle-même), et qu'il entre bien dans le total. Passe
+    // par le service du bon (pas une écriture Prisma directe) pour qu'un
+    // bon déjà confirmé répercute l'écart dans le compte du client/
+    // fabricant et dans son propre historique, exactement comme une
+    // modification de transport faite depuis la fiche du bon elle-même.
     if (type === 'sales') {
-      await this.prisma.salesVoucher.update({ where: { id: voucherId }, data: { transportCost: delivery.billedToCustomer } });
+      await this.vouchersService.update(voucherId, { transportCost: Number(delivery.billedToCustomer) }, actorId);
     } else {
-      await this.prisma.purchaseVoucher.update({ where: { id: voucherId }, data: { transportCost: delivery.billedToManufacturer } });
+      await this.purchaseVouchersService.update(voucherId, { transportCost: Number(delivery.billedToManufacturer) }, actorId);
     }
 
     await this.auditLog.record({ entityType: 'Delivery', entityId: delivery.id, action: existing ? 'UPDATE' : 'CREATE', newValue: dto, actorId });
