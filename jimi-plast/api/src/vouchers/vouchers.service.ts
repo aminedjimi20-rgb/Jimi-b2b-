@@ -361,12 +361,14 @@ export class VouchersService {
 
     // Total avant modification (articles + remise + transport actuels) —
     // sert à ne répercuter dans le compte client que l'écart, une fois les
-    // changements appliqués plus bas.
+    // changements appliqués plus bas. Le sous-total sert à exprimer la
+    // remise en pourcentage dans l'historique, comme sur le bon lui-même.
     const oldItemsForTotal = await this.prisma.salesVoucherItem.findMany({ where: { voucherId: id } });
-    const oldTotal =
-      oldItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
-      Number(existingVoucher.discount) +
-      Number(existingVoucher.transportCost);
+    const oldSubtotal = oldItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0);
+    const oldDiscount = Number(existingVoucher.discount);
+    const oldTransportCost = Number(existingVoucher.transportCost);
+    const oldTotal = oldSubtotal - oldDiscount + oldTransportCost;
+    const pct = (amount: number, base: number) => (base > 0 ? Math.round((amount / base) * 1000) / 10 : 0);
 
     // Même garde-fou qu'à la confirmation initiale : augmenter une quantité
     // sur un bon déjà confirmé décrémente le stock sans le recalcul complet
@@ -499,16 +501,30 @@ export class VouchersService {
         },
       });
 
+      // Remise et transport : mêmes changements que les articles ci-dessus —
+      // jamais tracés jusqu'ici, ni sur le bon ni chez le client. La remise
+      // se décrit en pourcentage (comme le pense l'utilisateur), le montant
+      // exact restant entre parenthèses.
+      if (dto.discount != null && dto.discount !== oldDiscount) {
+        changes.push(
+          `Remise : ${pct(oldDiscount, oldSubtotal)}% (${oldDiscount} DA) → ${pct(dto.discount, oldSubtotal)}% (${dto.discount} DA)`,
+        );
+      }
+      if (dto.transportCost != null && dto.transportCost !== oldTransportCost) {
+        changes.push(`Transport : ${oldTransportCost} DA → ${dto.transportCost} DA`);
+      }
+
       // Idem pour le total du bon lui-même : ajouter/retirer un article,
       // changer la remise ou le transport modifiait le bon mais jamais ce
       // que le client doit — le compte client restait figé sur le montant
       // de la confirmation initiale. Seul l'écart de total devient une
-      // nouvelle écriture "Bon de vente" (jamais de réécriture).
+      // nouvelle écriture "Bon de vente" (jamais de réécriture), avec le
+      // même détail que l'historique du bon pour qu'on sache pourquoi.
       const newItemsForTotal = await tx.salesVoucherItem.findMany({ where: { voucherId: id } });
       const newTotal =
         newItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
-        (dto.discount ?? Number(existingVoucher.discount)) +
-        (dto.transportCost ?? Number(existingVoucher.transportCost));
+        (dto.discount ?? oldDiscount) +
+        (dto.transportCost ?? oldTransportCost);
       const totalDelta = newTotal - oldTotal;
       if (totalDelta !== 0) {
         await tx.ledgerEntry.create({
@@ -517,7 +533,7 @@ export class VouchersService {
             type: 'SALE_VOUCHER',
             amount: totalDelta,
             reference: existingVoucher.number,
-            note: `Ajustement du bon ${existingVoucher.number ?? ''} après modification`,
+            note: `Ajustement du bon ${existingVoucher.number ?? ''} : ${changes.length > 0 ? changes.join(' ; ') : 'après modification'}`,
             createdById: actorId,
           },
         });
@@ -525,12 +541,13 @@ export class VouchersService {
 
       // Le montant payé du bon n'est qu'un miroir du compte client — sans
       // ceci, le modifier après confirmation changeait le bon mais jamais
-      // le solde/l'historique du client. On ne réécrit jamais une écriture
-      // existante (§ pattern réversion) : seul l'écart se traduit en une
-      // nouvelle écriture de paiement.
+      // le solde/l'historique du client (ni le sien). On ne réécrit jamais
+      // une écriture existante (§ pattern réversion) : seul l'écart se
+      // traduit en une nouvelle écriture de paiement.
       if (dto.paidAmount != null) {
         const delta = Number(dto.paidAmount) - Number(existingVoucher.paidAmount);
         if (delta !== 0) {
+          changes.push(`Montant payé : ${existingVoucher.paidAmount} DA → ${dto.paidAmount} DA`);
           await tx.ledgerEntry.create({
             data: {
               customerId,

@@ -206,11 +206,14 @@ export class PurchaseVouchersService {
 
     // Total avant modification — sert à ne répercuter dans le compte
     // fournisseur que l'écart, une fois les changements appliqués plus bas.
+    // Le sous-total sert à exprimer la remise en pourcentage, comme sur le
+    // bon lui-même.
     const oldItemsForTotal = await this.prisma.purchaseVoucherItem.findMany({ where: { voucherId: id } });
-    const oldTotal =
-      oldItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
-      Number(existingVoucher.discount) +
-      Number(existingVoucher.transportCost);
+    const oldSubtotal = oldItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0);
+    const oldDiscount = Number(existingVoucher.discount);
+    const oldTransportCost = Number(existingVoucher.transportCost);
+    const oldTotal = oldSubtotal - oldDiscount + oldTransportCost;
+    const pct = (amount: number, base: number) => (base > 0 ? Math.round((amount / base) * 1000) / 10 : 0);
 
     // Réduire ou retirer une ligne sur un bon d'achat déjà confirmé retire
     // du stock la quantité correspondante — sans ceci, ça pouvait passer
@@ -340,15 +343,27 @@ export class PurchaseVouchersService {
         data: { manufacturerId, discount: dto.discount, transportCost: dto.transportCost, paidAmount: dto.paidAmount, notes: dto.notes },
       });
 
+      // Remise et transport : mêmes changements que les articles ci-dessus —
+      // jamais tracés jusqu'ici, ni sur le bon ni chez le fournisseur.
+      if (dto.discount != null && dto.discount !== oldDiscount) {
+        changes.push(
+          `Remise : ${pct(oldDiscount, oldSubtotal)}% (${oldDiscount} DA) → ${pct(dto.discount, oldSubtotal)}% (${dto.discount} DA)`,
+        );
+      }
+      if (dto.transportCost != null && dto.transportCost !== oldTransportCost) {
+        changes.push(`Transport : ${oldTransportCost} DA → ${dto.transportCost} DA`);
+      }
+
       // Idem pour le total du bon : ajouter/retirer un article, changer la
       // remise ou le transport modifiait le bon mais jamais ce qu'on doit
       // au fournisseur — le compte restait figé sur le montant de la
-      // confirmation initiale. Seul l'écart devient une nouvelle écriture.
+      // confirmation initiale. Seul l'écart devient une nouvelle écriture,
+      // avec le même détail que l'historique du bon.
       const newItemsForTotal = await tx.purchaseVoucherItem.findMany({ where: { voucherId: id } });
       const newTotal =
         newItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
-        (dto.discount ?? Number(existingVoucher.discount)) +
-        (dto.transportCost ?? Number(existingVoucher.transportCost));
+        (dto.discount ?? oldDiscount) +
+        (dto.transportCost ?? oldTransportCost);
       const totalDelta = newTotal - oldTotal;
       if (totalDelta !== 0) {
         await tx.supplierLedgerEntry.create({
@@ -357,7 +372,7 @@ export class PurchaseVouchersService {
             type: 'PURCHASE_VOUCHER',
             amount: totalDelta,
             reference: existingVoucher.number,
-            note: `Ajustement du bon ${existingVoucher.number ?? ''} après modification`,
+            note: `Ajustement du bon ${existingVoucher.number ?? ''} : ${changes.length > 0 ? changes.join(' ; ') : 'après modification'}`,
             createdById: actorId,
           },
         });
@@ -370,6 +385,7 @@ export class PurchaseVouchersService {
       if (dto.paidAmount != null) {
         const delta = Number(dto.paidAmount) - Number(existingVoucher.paidAmount);
         if (delta !== 0) {
+          changes.push(`Montant payé : ${existingVoucher.paidAmount} DA → ${dto.paidAmount} DA`);
           await tx.supplierLedgerEntry.create({
             data: {
               manufacturerId,
