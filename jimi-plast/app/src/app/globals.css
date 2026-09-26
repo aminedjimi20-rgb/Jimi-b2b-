@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: 246 243 236;
+  --panel: 255 253 248;
+  --ink: 32 29 26;
+  --muted: 120 112 95;
+  --line: 225 219 202;
+  --accent: 217 100 31;
+  --teal: 47 107 99;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: 24 25 26;
+    --panel: 33 34 35;
+    --ink: 236 231 220;
+    --muted: 163 154 134;
+    --line: 52 50 44;
+    --accent: 239 129 66;
+    --teal: 99 179 165;
+  }
+}
+
+body {
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
