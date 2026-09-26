@@ -359,6 +359,37 @@ export class VouchersService {
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
 
+    // Même garde-fou qu'à la confirmation initiale : augmenter une quantité
+    // sur un bon déjà confirmé décrémente le stock sans le recalcul complet
+    // du confirm() — sans ceci, le stock pouvait passer sous zéro en
+    // silence. On avertit et on laisse forcer, plutôt que de bloquer (la
+    // marchandise peut être en route, pas encore saisie en achat).
+    if (dto.items && !dto.force) {
+      const existingForCheck = await this.prisma.salesVoucherItem.findMany({ where: { voucherId: id } });
+      const existingByProductForCheck = new Map(existingForCheck.map((i) => [i.productId, i]));
+      const products = await this.prisma.product.findMany({ where: { id: { in: dto.items.map((i) => i.productId) } } });
+      const productById = new Map(products.map((p) => [p.id, p]));
+
+      const shortfalls = dto.items
+        .map((item) => {
+          const product = productById.get(item.productId);
+          if (!product) return null;
+          const old = existingByProductForCheck.get(item.productId);
+          const delta = item.quantityPackages * product.unitsPerPackage - (old?.totalUnits ?? 0);
+          if (delta <= 0 || product.currentStock >= delta) return null;
+          return { productId: item.productId, name: product.nameFr, available: product.currentStock, requested: delta };
+        })
+        .filter((s): s is { productId: string; name: string; available: number; requested: number } => s !== null);
+
+      if (shortfalls.length > 0) {
+        throw new BadRequestException({
+          code: 'INSUFFICIENT_STOCK',
+          message: 'Stock insuffisant pour un ou plusieurs produits',
+          shortfalls,
+        });
+      }
+    }
+
     await this.prisma.$transaction(async (tx) => {
       if (dto.items) {
         const tier = await this.resolveTierForCustomer(customerId);

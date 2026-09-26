@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 
 export class PurchaseItemInputDto {
   @IsString()
@@ -58,4 +58,10 @@ export class UpsertPurchaseVoucherDto {
   @ValidateNested({ each: true })
   @Type(() => PurchaseItemInputDto)
   items?: PurchaseItemInputDto[];
+
+  // Confirme malgré une réduction de quantité qui ferait passer le stock
+  // sous zéro (la marchandise "en moins" a déjà été vendue ailleurs).
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean;
 }

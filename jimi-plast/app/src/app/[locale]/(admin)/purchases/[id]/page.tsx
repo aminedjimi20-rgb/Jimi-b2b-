@@ -226,7 +226,22 @@ export default function PurchaseEditorPage() {
         try {
           await api.put(`/purchase-vouchers/${id}`, toSend, token);
           if ('items' in toSend) refreshPurchaseOnly();
-        } catch {
+        } catch (e) {
+          const details = e instanceof ApiError ? (e.details as { code?: string; shortfalls?: { name: string; available: number; requested: number }[] } | undefined) : undefined;
+          if (details?.code === 'INSUFFICIENT_STOCK' && details.shortfalls && 'items' in toSend) {
+            const lines = details.shortfalls
+              .map((s) => `${s.name} : ${tVoucher('stockAvailable')} ${s.available}, ${tVoucher('stockRequested')} ${s.requested}`)
+              .join('\n');
+            if (window.confirm(`${tVoucher('insufficientStockConfirm')}\n\n${lines}`)) {
+              try {
+                await api.put(`/purchase-vouchers/${id}`, { ...toSend, force: true }, token);
+              } catch {
+                setError(tCommon('error'));
+              }
+            }
+            refreshPurchaseOnly();
+            return;
+          }
           setError(tCommon('error'));
         }
       }, 500);

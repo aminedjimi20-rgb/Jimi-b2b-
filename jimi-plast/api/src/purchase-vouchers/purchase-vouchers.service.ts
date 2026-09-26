@@ -204,6 +204,36 @@ export class PurchaseVouchersService {
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
 
+    // Réduire ou retirer une ligne sur un bon d'achat déjà confirmé retire
+    // du stock la quantité correspondante — sans ceci, ça pouvait passer
+    // sous zéro en silence si cette marchandise a déjà été vendue depuis.
+    if (dto.items && !dto.force) {
+      const existingForCheck = await this.prisma.purchaseVoucherItem.findMany({
+        where: { voucherId: id },
+        include: { product: { select: { nameFr: true, currentStock: true } } },
+      });
+      const newByProduct = new Map(dto.items.map((i) => [i.productId, i]));
+
+      const shortfalls = existingForCheck
+        .map((old) => {
+          const newItem = newByProduct.get(old.productId);
+          const newUnitsPerPackage = newItem?.unitsPerPackage && newItem.unitsPerPackage > 0 ? newItem.unitsPerPackage : old.unitsPerPackageSnapshot;
+          const newTotalUnits = newItem ? newItem.quantityPackages * newUnitsPerPackage : 0;
+          const decrease = old.totalUnits - newTotalUnits;
+          if (decrease <= 0 || old.product.currentStock >= decrease) return null;
+          return { productId: old.productId, name: old.product.nameFr, available: old.product.currentStock, requested: decrease };
+        })
+        .filter((s): s is { productId: string; name: string; available: number; requested: number } => s !== null);
+
+      if (shortfalls.length > 0) {
+        throw new BadRequestException({
+          code: 'INSUFFICIENT_STOCK',
+          message: 'Stock insuffisant pour retirer ou réduire un ou plusieurs produits',
+          shortfalls,
+        });
+      }
+    }
+
     await this.prisma.$transaction(async (tx) => {
       if (dto.items) {
         const existingItems = await tx.purchaseVoucherItem.findMany({ where: { voucherId: id }, include: { product: { select: { nameFr: true } } } });

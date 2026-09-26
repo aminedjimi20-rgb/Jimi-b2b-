@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 
 export class VoucherItemInputDto {
   @IsString()
@@ -44,4 +44,10 @@ export class UpsertVoucherDto {
   @ValidateNested({ each: true })
   @Type(() => VoucherItemInputDto)
   items?: VoucherItemInputDto[];
+
+  // Confirme malgré un stock insuffisant sur un ou plusieurs articles —
+  // même principe que le `force` de la confirmation initiale.
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean;
 }

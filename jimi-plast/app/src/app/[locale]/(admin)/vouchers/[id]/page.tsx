@@ -281,7 +281,23 @@ export default function VoucherEditorPage() {
           await api.put(`${basePath}/${id}`, toSend, token);
           setSavedAt(new Date());
           if ('items' in toSend) refreshVoucherOnly();
-        } catch {
+        } catch (e) {
+          const details = e instanceof ApiError ? (e.details as { code?: string; shortfalls?: { name: string; available: number; requested: number }[] } | undefined) : undefined;
+          if (details?.code === 'INSUFFICIENT_STOCK' && details.shortfalls && 'items' in toSend) {
+            const lines = details.shortfalls.map((s) => `${s.name} : ${t('stockAvailable')} ${s.available}, ${t('stockRequested')} ${s.requested}`).join('\n');
+            if (window.confirm(`${t('insufficientStockConfirm')}\n\n${lines}`)) {
+              try {
+                await api.put(`${basePath}/${id}`, { ...toSend, force: true }, token);
+                setSavedAt(new Date());
+              } catch {
+                setError(tCommon('error'));
+              }
+            }
+            // Que la modification forcée réussisse ou soit refusée, on
+            // resynchronise l'affichage sur l'état réel du serveur.
+            refreshVoucherOnly();
+            return;
+          }
           setError(tCommon('error'));
         }
       }, 500);
