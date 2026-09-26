@@ -198,11 +198,19 @@ export class PurchaseVouchersService {
     id: string,
     dto: UpsertPurchaseVoucherDto,
     actorId: string,
-    existingVoucher: { manufacturerId: string; paidAmount: Prisma.Decimal; number: string | null },
+    existingVoucher: { manufacturerId: string; paidAmount: Prisma.Decimal; discount: Prisma.Decimal; transportCost: Prisma.Decimal; number: string | null },
   ) {
     const manufacturerId = dto.manufacturerId ?? existingVoucher.manufacturerId;
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
+
+    // Total avant modification — sert à ne répercuter dans le compte
+    // fournisseur que l'écart, une fois les changements appliqués plus bas.
+    const oldItemsForTotal = await this.prisma.purchaseVoucherItem.findMany({ where: { voucherId: id } });
+    const oldTotal =
+      oldItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
+      Number(existingVoucher.discount) +
+      Number(existingVoucher.transportCost);
 
     // Réduire ou retirer une ligne sur un bon d'achat déjà confirmé retire
     // du stock la quantité correspondante — sans ceci, ça pouvait passer
@@ -331,6 +339,29 @@ export class PurchaseVouchersService {
         where: { id },
         data: { manufacturerId, discount: dto.discount, transportCost: dto.transportCost, paidAmount: dto.paidAmount, notes: dto.notes },
       });
+
+      // Idem pour le total du bon : ajouter/retirer un article, changer la
+      // remise ou le transport modifiait le bon mais jamais ce qu'on doit
+      // au fournisseur — le compte restait figé sur le montant de la
+      // confirmation initiale. Seul l'écart devient une nouvelle écriture.
+      const newItemsForTotal = await tx.purchaseVoucherItem.findMany({ where: { voucherId: id } });
+      const newTotal =
+        newItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
+        (dto.discount ?? Number(existingVoucher.discount)) +
+        (dto.transportCost ?? Number(existingVoucher.transportCost));
+      const totalDelta = newTotal - oldTotal;
+      if (totalDelta !== 0) {
+        await tx.supplierLedgerEntry.create({
+          data: {
+            manufacturerId,
+            type: 'PURCHASE_VOUCHER',
+            amount: totalDelta,
+            reference: existingVoucher.number,
+            note: `Ajustement du bon ${existingVoucher.number ?? ''} après modification`,
+            createdById: actorId,
+          },
+        });
+      }
 
       // Même règle que pour les clients : le montant payé du bon n'est
       // qu'un miroir du compte fournisseur — l'écart entre l'ancien et le

@@ -353,11 +353,20 @@ export class VouchersService {
     id: string,
     dto: UpsertVoucherDto,
     actorId: string,
-    existingVoucher: { customerId: string; paidAmount: Prisma.Decimal; number: string | null },
+    existingVoucher: { customerId: string; paidAmount: Prisma.Decimal; discount: Prisma.Decimal; transportCost: Prisma.Decimal; number: string | null },
   ) {
     const customerId = dto.customerId ?? existingVoucher.customerId;
     const actorName = await this.actorName(actorId);
     const changes: string[] = [];
+
+    // Total avant modification (articles + remise + transport actuels) —
+    // sert à ne répercuter dans le compte client que l'écart, une fois les
+    // changements appliqués plus bas.
+    const oldItemsForTotal = await this.prisma.salesVoucherItem.findMany({ where: { voucherId: id } });
+    const oldTotal =
+      oldItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
+      Number(existingVoucher.discount) +
+      Number(existingVoucher.transportCost);
 
     // Même garde-fou qu'à la confirmation initiale : augmenter une quantité
     // sur un bon déjà confirmé décrémente le stock sans le recalcul complet
@@ -489,6 +498,30 @@ export class VouchersService {
           notes: dto.notes,
         },
       });
+
+      // Idem pour le total du bon lui-même : ajouter/retirer un article,
+      // changer la remise ou le transport modifiait le bon mais jamais ce
+      // que le client doit — le compte client restait figé sur le montant
+      // de la confirmation initiale. Seul l'écart de total devient une
+      // nouvelle écriture "Bon de vente" (jamais de réécriture).
+      const newItemsForTotal = await tx.salesVoucherItem.findMany({ where: { voucherId: id } });
+      const newTotal =
+        newItemsForTotal.reduce((s, i) => s + Number(i.lineTotal), 0) -
+        (dto.discount ?? Number(existingVoucher.discount)) +
+        (dto.transportCost ?? Number(existingVoucher.transportCost));
+      const totalDelta = newTotal - oldTotal;
+      if (totalDelta !== 0) {
+        await tx.ledgerEntry.create({
+          data: {
+            customerId,
+            type: 'SALE_VOUCHER',
+            amount: totalDelta,
+            reference: existingVoucher.number,
+            note: `Ajustement du bon ${existingVoucher.number ?? ''} après modification`,
+            createdById: actorId,
+          },
+        });
+      }
 
       // Le montant payé du bon n'est qu'un miroir du compte client — sans
       // ceci, le modifier après confirmation changeait le bon mais jamais
