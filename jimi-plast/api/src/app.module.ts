@@ -31,6 +31,8 @@ import { StatsModule } from './stats/stats.module';
 import { TrashModule } from './trash/trash.module';
 import { BesoinsModule } from './besoins/besoins.module';
 import { AttendanceModule } from './attendance/attendance.module';
+import { NotesModule } from './notes/notes.module';
+import { HistoryModule } from './history/history.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -67,6 +69,8 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     TrashModule,
     BesoinsModule,
     AttendanceModule,
+    NotesModule,
+    HistoryModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

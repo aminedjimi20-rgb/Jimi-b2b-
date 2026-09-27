@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: `/${locale}/dashboard`, label: t('dashboard') },
     { href: `/${locale}/catalog`, label: t('catalog') },
     { href: `/${locale}/besoins`, label: t('besoins') },
+    { href: `/${locale}/notes`, label: t('notes') },
     { href: `/${locale}/approvals`, label: t('approvals') },
     ...(user.permissions.includes('catalog.manage')
       ? [
@@ -124,6 +125,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ]
       : []),
     ...(user.permissions.includes('trash.restore') ? [{ href: `/${locale}/trash`, label: t('trash') }] : []),
+    ...(user.permissions.includes('audit.view') ? [{ href: `/${locale}/history`, label: t('history') }] : []),
   ];
 
   return (

@@ -44,4 +44,35 @@ export class AuditLogService {
       include: { actor: { select: { id: true, fullName: true, email: true } } },
     });
   }
+
+  /** Page "Historique" : tout ce qui s'est passé dans l'appli, tous types
+   * confondus — bornée aux entrées les plus récentes plutôt que paginée,
+   * comme le reste des pages de liste de l'appli. */
+  async list(params: { q?: string; includeHidden?: boolean } = {}) {
+    const { q, includeHidden } = params;
+    return this.prisma.auditLog.findMany({
+      where: {
+        ...(includeHidden ? {} : { hiddenAt: null }),
+        ...(q
+          ? {
+              OR: [
+                { entityType: { contains: q, mode: 'insensitive' } },
+                { field: { contains: q, mode: 'insensitive' } },
+                { reason: { contains: q, mode: 'insensitive' } },
+                { newValue: { contains: q, mode: 'insensitive' } },
+                { oldValue: { contains: q, mode: 'insensitive' } },
+                { actor: { fullName: { contains: q, mode: 'insensitive' } } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 500,
+      include: { actor: { select: { id: true, fullName: true } } },
+    });
+  }
+
+  async setHidden(id: string, hidden: boolean) {
+    return this.prisma.auditLog.update({ where: { id }, data: { hiddenAt: hidden ? new Date() : null } });
+  }
 }

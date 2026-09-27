@@ -54,6 +54,8 @@
     "logout": "Déconnexion",
     "trash": "Corbeille",
     "besoins": "Besoins",
+    "notes": "Notes",
+    "history": "Historique",
     "myOrders": "Mes commandes",
     "approvals": "Approbations",
     "menu": "Menu"
@@ -66,6 +68,39 @@
     "notClockedIn": "Pas encore pointé aujourd'hui",
     "notePlaceholder": "Ajouter une remarque sur votre journée…",
     "addNote": "Ajouter"
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Écrire une note…",
+    "add": "Ajouter",
+    "search": "Rechercher dans mes notes...",
+    "showHidden": "Voir les masquées",
+    "hide": "Masquer",
+    "unhide": "Republier"
+  },
+  "history": {
+    "title": "Historique",
+    "search": "Rechercher...",
+    "showHidden": "Voir les masquées",
+    "hide": "Masquer",
+    "unhide": "Republier",
+    "system": "Système",
+    "columns": {
+      "time": "Heure",
+      "entity": "Élément",
+      "action": "Action",
+      "actor": "Fait par",
+      "detail": "Détail"
+    },
+    "actions": {
+      "CREATE": "Créé",
+      "UPDATE": "Modifié",
+      "DELETE": "Supprimé",
+      "RESTORE": "Restauré",
+      "PURGE": "Purgé",
+      "LOGIN": "Connexion",
+      "LOGIN_FAILED": "Échec de connexion"
+    }
   },
   "dashboard": {
     "welcome": "Bonjour {name}",

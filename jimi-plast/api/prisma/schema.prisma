@@ -108,6 +108,7 @@ model User {
   productRequests    ProductRequest[]
   attendances        Attendance[]
   employeeNotes      EmployeeNote[]
+  notes              Note[]           @relation("NoteAuthor")
 
   @@map("users")
 }
@@ -223,12 +224,30 @@ model AuditLog {
   reason     String?
   actorId    String?
   createdAt  DateTime    @default(now())
+  hiddenAt   DateTime? // masqué de la page Historique — jamais supprimé, juste replié par défaut
 
   actor User? @relation("AuditLogActor", fields: [actorId], references: [id])
 
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// Bloc-notes personnel — chacun ne voit et ne gère que ses propres notes
+// (contrairement à EmployeeNote, qui vit sur la fiche d'un employé et est
+// consultable par l'administration). Même principe hide/unhide que
+// Besoin.hiddenAt : jamais supprimé, juste replié par défaut une fois traité.
+model Note {
+  id        String    @id @default(cuid())
+  authorId  String
+  text      String
+  createdAt DateTime  @default(now())
+  hiddenAt  DateTime?
+
+  author User @relation("NoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@map("notes")
 }
 
 model TrashItem {

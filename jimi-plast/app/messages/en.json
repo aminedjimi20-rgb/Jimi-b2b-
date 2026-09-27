@@ -54,6 +54,8 @@
     "logout": "Sign out",
     "trash": "Trash",
     "besoins": "Needs",
+    "notes": "Notes",
+    "history": "History",
     "myOrders": "My orders",
     "approvals": "Approvals",
     "menu": "Menu"
@@ -66,6 +68,39 @@
     "notClockedIn": "Not clocked in yet today",
     "notePlaceholder": "Add a note about your day…",
     "addNote": "Add"
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Write a note…",
+    "add": "Add",
+    "search": "Search my notes...",
+    "showHidden": "Show hidden",
+    "hide": "Hide",
+    "unhide": "Unhide"
+  },
+  "history": {
+    "title": "History",
+    "search": "Search...",
+    "showHidden": "Show hidden",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "system": "System",
+    "columns": {
+      "time": "Time",
+      "entity": "Item",
+      "action": "Action",
+      "actor": "By",
+      "detail": "Detail"
+    },
+    "actions": {
+      "CREATE": "Created",
+      "UPDATE": "Updated",
+      "DELETE": "Deleted",
+      "RESTORE": "Restored",
+      "PURGE": "Purged",
+      "LOGIN": "Login",
+      "LOGIN_FAILED": "Login failed"
+    }
   },
   "dashboard": {
     "welcome": "Hello {name}",
