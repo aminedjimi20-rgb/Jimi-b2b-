@@ -145,6 +145,7 @@
     "delete": "Delete",
     "approve": "Approve",
     "reject": "Reject",
+    "close": "Close",
     "confirmApprove": "Confirm: the numbers (stock, balance) will change permanently."
   },
   "common": {

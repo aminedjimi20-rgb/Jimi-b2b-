@@ -145,6 +145,7 @@
     "delete": "Supprimer",
     "approve": "Approuver",
     "reject": "Refuser",
+    "close": "Fermer",
     "confirmApprove": "Confirmer : les chiffres (stock, solde) vont changer définitivement."
   },
   "common": {

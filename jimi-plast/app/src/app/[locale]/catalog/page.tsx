@@ -615,6 +615,33 @@ export default function CatalogPage() {
               </select>
             </label>
           )}
+
+          {total > 0 && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const n = Number(goToInput);
+                if (n) goToItem(n);
+                setGoToInput('');
+              }}
+              className="ms-auto flex items-center gap-1.5"
+            >
+              <span className="text-xs text-muted">
+                {products.length} / {total} — {t('itemNumber')}
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={goToInput}
+                onChange={(e) => setGoToInput(onlyDigits(e.target.value))}
+                placeholder={t('goToItemPlaceholder')}
+                className="w-20 rounded border border-line bg-panel px-2 py-1.5 text-xs"
+              />
+              <button type="submit" className="rounded border border-line px-2.5 py-1.5 text-xs text-ink hover:bg-line/30">
+                {t('go')}
+              </button>
+            </form>
+          )}
         </div>
       </div>
 
@@ -807,38 +834,9 @@ export default function CatalogPage() {
           })}
         </div>
 
-        {!loading && total > 0 && (
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <p className="text-xs text-muted">
-              {products.length} / {total} produits
-            </p>
-            {products.length < total && (
-              <div ref={loadMoreRef} className="text-xs text-muted">
-                {loadingMore ? t('loadingMore') : ''}
-              </div>
-            )}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const n = Number(goToInput);
-                if (n) goToItem(n);
-                setGoToInput('');
-              }}
-              className="mt-2 flex items-center gap-1.5"
-            >
-              <span className="text-xs text-muted">{t('itemNumber')}</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={goToInput}
-                onChange={(e) => setGoToInput(onlyDigits(e.target.value))}
-                placeholder={t('goToItemPlaceholder')}
-                className="w-20 rounded border border-line bg-panel px-2 py-1 text-xs"
-              />
-              <button type="submit" className="rounded border border-line px-2.5 py-1 text-xs text-ink hover:bg-line/30">
-                {t('go')}
-              </button>
-            </form>
+        {!loading && products.length < total && (
+          <div ref={loadMoreRef} className="mt-6 text-center text-xs text-muted">
+            {loadingMore ? t('loadingMore') : ''}
           </div>
         )}
       </div>
