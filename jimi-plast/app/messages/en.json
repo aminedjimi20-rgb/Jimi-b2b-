@@ -58,6 +58,15 @@
     "approvals": "Approvals",
     "menu": "Menu"
   },
+  "attendance": {
+    "title": "Attendance",
+    "clockIn": "Clock in",
+    "clockOut": "Clock out",
+    "clockedInSince": "Clocked in since {time}",
+    "notClockedIn": "Not clocked in yet today",
+    "notePlaceholder": "Add a note about your day…",
+    "addNote": "Add"
+  },
   "dashboard": {
     "welcome": "Hello {name}",
     "roleLabel": "Role",
@@ -113,15 +122,53 @@
     "title": "Employees, roles & permissions",
     "tabUsers": "Users",
     "tabRoles": "Roles & permissions",
+    "search": "Search an employee...",
     "columns": {
       "name": "Name",
       "email": "Email",
+      "phone": "Phone",
       "role": "Role",
       "status": "Status",
       "lastLogin": "Last login"
     },
     "suspend": "Suspend",
     "activate": "Reactivate",
+    "newEmployee": "New employee",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this account? Restorable from Trash.",
+    "deleteReasonPrompt": "Reason for deletion (optional):",
+    "cannotDeleteAdmin": "An ADMIN account cannot be deleted",
+    "cannotDeleteSelf": "You cannot delete your own account",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back to employees",
+    "form": {
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "loginHint": "Email or phone — at least one, to sign in with",
+      "initialPassword": "Initial password",
+      "role": "Role"
+    },
+    "detail": {
+      "profile": "Profile",
+      "attendance": "Attendance",
+      "attendanceHistory": "Attendance history",
+      "clockIn": "Clock in",
+      "clockOut": "Clock out",
+      "duration": "Duration",
+      "ongoing": "Ongoing",
+      "activity": "Activity",
+      "activityHint": "Daily log — created vouchers show up automatically, no need to note them.",
+      "addNote": "Add a note",
+      "notePlaceholder": "Write a note about this day…",
+      "strikeNote": "Strike",
+      "restoreNote": "Restore",
+      "saleVoucher": "Sales voucher created",
+      "purchaseVoucher": "Purchase voucher created",
+      "noActivity": "No activity yet"
+    },
     "permissionGroups": {
       "prices": "Prices",
       "orders": "Orders",
@@ -892,7 +939,8 @@
       "Notification": "Notification",
       "Besoin": "Need",
       "Customer": "Customer",
-      "ProductRequest": "Product request"
+      "ProductRequest": "Product request",
+      "User": "Employee account"
     }
   },
   "besoins": {

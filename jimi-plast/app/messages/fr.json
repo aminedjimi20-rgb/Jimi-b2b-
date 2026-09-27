@@ -58,6 +58,15 @@
     "approvals": "Approbations",
     "menu": "Menu"
   },
+  "attendance": {
+    "title": "Pointage",
+    "clockIn": "Pointer l'entrée",
+    "clockOut": "Pointer la sortie",
+    "clockedInSince": "Pointé depuis {time}",
+    "notClockedIn": "Pas encore pointé aujourd'hui",
+    "notePlaceholder": "Ajouter une remarque sur votre journée…",
+    "addNote": "Ajouter"
+  },
   "dashboard": {
     "welcome": "Bonjour {name}",
     "roleLabel": "Rôle",
@@ -113,15 +122,53 @@
     "title": "Employés, rôles & permissions",
     "tabUsers": "Utilisateurs",
     "tabRoles": "Rôles & permissions",
+    "search": "Rechercher un employé...",
     "columns": {
       "name": "Nom",
       "email": "Email",
+      "phone": "Téléphone",
       "role": "Rôle",
       "status": "Statut",
       "lastLogin": "Dernière connexion"
     },
     "suspend": "Suspendre",
     "activate": "Réactiver",
+    "newEmployee": "Nouvel employé",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce compte ? Restaurable depuis la Corbeille.",
+    "deleteReasonPrompt": "Raison de la suppression (facultatif) :",
+    "cannotDeleteAdmin": "Un compte ADMIN ne peut pas être supprimé",
+    "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "back": "Retour aux employés",
+    "form": {
+      "fullName": "Nom complet",
+      "email": "Email",
+      "phone": "Téléphone",
+      "loginHint": "Email ou téléphone — au moins un des deux, pour se connecter",
+      "initialPassword": "Mot de passe initial",
+      "role": "Rôle"
+    },
+    "detail": {
+      "profile": "Profil",
+      "attendance": "Pointage",
+      "attendanceHistory": "Historique des pointages",
+      "clockIn": "Entrée",
+      "clockOut": "Sortie",
+      "duration": "Durée",
+      "ongoing": "En cours",
+      "activity": "Activité",
+      "activityHint": "Journal quotidien — les bons créés apparaissent automatiquement, pas besoin de les noter.",
+      "addNote": "Ajouter une remarque",
+      "notePlaceholder": "Écrire une remarque sur cette journée…",
+      "strikeNote": "Rayer",
+      "restoreNote": "Restaurer",
+      "saleVoucher": "Bon de vente créé",
+      "purchaseVoucher": "Bon d'achat créé",
+      "noActivity": "Aucune activité pour le moment"
+    },
     "permissionGroups": {
       "prices": "Prix",
       "orders": "Commandes",
@@ -892,7 +939,8 @@
       "Notification": "Notification",
       "Besoin": "Besoin",
       "Customer": "Client",
-      "ProductRequest": "Demande de produit"
+      "ProductRequest": "Demande de produit",
+      "User": "Compte employé"
     }
   },
   "besoins": {

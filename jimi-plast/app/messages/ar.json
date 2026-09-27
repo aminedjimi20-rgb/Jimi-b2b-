@@ -58,6 +58,15 @@
     "approvals": "الموافقات",
     "menu": "القائمة"
   },
+  "attendance": {
+    "title": "البوانطاج",
+    "clockIn": "بوانطاج الدخول",
+    "clockOut": "بوانطاج الخروج",
+    "clockedInSince": "بوانطي من {time}",
+    "notClockedIn": "مازال ما بوانطيتش اليوم",
+    "notePlaceholder": "زيد ملاحظة على نهارك…",
+    "addNote": "إضافة"
+  },
   "dashboard": {
     "welcome": "مرحبًا {name}",
     "roleLabel": "الدور",
@@ -113,15 +122,53 @@
     "title": "الموظفون والأدوار والصلاحيات",
     "tabUsers": "المستخدمون",
     "tabRoles": "الأدوار والصلاحيات",
+    "search": "البحث عن موظف...",
     "columns": {
       "name": "الاسم",
       "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
       "role": "الدور",
       "status": "الحالة",
       "lastLogin": "آخر دخول"
     },
     "suspend": "تعليق",
     "activate": "إعادة تفعيل",
+    "newEmployee": "موظف جديد",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "deleteConfirm": "حذف هذا الحساب؟ يمكن استرجاعه من سلة المهملات.",
+    "deleteReasonPrompt": "سبب الحذف (اختياري) :",
+    "cannotDeleteAdmin": "لا يمكن حذف حساب أدمين",
+    "cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "back": "العودة إلى الموظفين",
+    "form": {
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "loginHint": "البريد الإلكتروني أو الهاتف — واحد منهم على الأقل، باش يدخل بيه",
+      "initialPassword": "كلمة السر الأولية",
+      "role": "الدور"
+    },
+    "detail": {
+      "profile": "الملف الشخصي",
+      "attendance": "البوانطاج",
+      "attendanceHistory": "سجل البوانطاج",
+      "clockIn": "دخول",
+      "clockOut": "خروج",
+      "duration": "المدة",
+      "ongoing": "جاري",
+      "activity": "النشاط",
+      "activityHint": "سجل يومي — البونات المنشأة تبان وحدها، ماكاش داعي تكتبها.",
+      "addNote": "إضافة ملاحظة",
+      "notePlaceholder": "اكتب ملاحظة على هذا اليوم…",
+      "strikeNote": "شطب",
+      "restoreNote": "استرجاع",
+      "saleVoucher": "بون بيع تم إنشاؤه",
+      "purchaseVoucher": "بون شراء تم إنشاؤه",
+      "noActivity": "لا يوجد نشاط حاليا"
+    },
     "permissionGroups": {
       "prices": "الأسعار",
       "orders": "الطلبات",
@@ -892,7 +939,8 @@
       "Notification": "إشعار",
       "Besoin": "احتياج",
       "Customer": "زبون",
-      "ProductRequest": "طلب منتج"
+      "ProductRequest": "طلب منتج",
+      "User": "حساب موظف"
     }
   },
   "besoins": {

@@ -23,6 +23,7 @@ const RESTORABLE_ENTITY_UPDATERS: Record<string, (prisma: PrismaService, entityI
   Return: (prisma, id) => prisma.return.update({ where: { id }, data: { deletedAt: null } }),
   Expense: (prisma, id) => prisma.expense.update({ where: { id }, data: { deletedAt: null } }),
   ProductRequest: (prisma, id) => prisma.productRequest.update({ where: { id }, data: { deletedAt: null } }),
+  User: (prisma, id) => prisma.user.update({ where: { id }, data: { deletedAt: null } }),
 };
 
 @Controller('trash')

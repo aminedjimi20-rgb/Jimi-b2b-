@@ -30,6 +30,7 @@ import { PendingDeletionsModule } from './pending-deletions/pending-deletions.mo
 import { StatsModule } from './stats/stats.module';
 import { TrashModule } from './trash/trash.module';
 import { BesoinsModule } from './besoins/besoins.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -65,6 +66,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     StatsModule,
     TrashModule,
     BesoinsModule,
+    AttendanceModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

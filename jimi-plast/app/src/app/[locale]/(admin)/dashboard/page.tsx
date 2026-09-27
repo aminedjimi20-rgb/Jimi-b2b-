@@ -108,6 +108,8 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {!['wholesaler', 'retailer', 'manufacturer'].includes(user.role.key) && <AttendanceWidget />}
+
       {hasPermission('stats.view') && sales && margin && credits && (
         <CollapsibleSection id="stats" title={t('statsTitle')}>
           <div className="mb-1 flex flex-wrap items-end gap-3 rounded-lg border border-line bg-panel p-3">
@@ -226,6 +228,84 @@ function PresetButton({ children, onClick }: { children: React.ReactNode; onClic
     >
       {children}
     </button>
+  );
+}
+
+function AttendanceWidget() {
+  const t = useTranslations('attendance');
+  const { token } = useAuth();
+  const [loaded, setLoaded] = useState(false);
+  const [open, setOpen] = useState<{ clockInAt: string } | null>(null);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  function reload() {
+    if (!token) return;
+    // Un pointage ouvert répond un objet, aucun pointage ouvert répond un
+    // corps 200 vide qu'`api.get` traduit en `undefined` — jamais `null` ici.
+    api.get<{ clockInAt: string } | undefined>('/attendance/status', token).then((status) => {
+      setOpen(status ?? null);
+      setLoaded(true);
+    });
+  }
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  async function clockIn() {
+    setBusy(true);
+    try {
+      await api.post('/attendance/clock-in', undefined, token);
+      reload();
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function clockOut() {
+    setBusy(true);
+    try {
+      await api.post('/attendance/clock-out', undefined, token);
+      reload();
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function addNote() {
+    if (!noteDraft.trim()) return;
+    await api.post('/attendance/notes', { text: noteDraft }, token);
+    setNoteDraft('');
+  }
+
+  if (!loaded) return null;
+
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-line bg-panel p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-ink">
+          {open ? t('clockedInSince', { time: new Date(open.clockInAt).toLocaleTimeString() }) : t('notClockedIn')}
+        </span>
+        <button
+          onClick={open ? clockOut : clockIn}
+          disabled={busy}
+          className={`rounded px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 ${open ? 'bg-red-600' : 'bg-teal'}`}
+        >
+          {open ? t('clockOut') : t('clockIn')}
+        </button>
+      </div>
+      <div className="flex flex-1 items-center gap-2 sm:max-w-sm">
+        <input
+          value={noteDraft}
+          onChange={(e) => setNoteDraft(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addNote()}
+          placeholder={t('notePlaceholder')}
+          className="flex-1 rounded border border-line bg-paper px-3 py-1.5 text-sm"
+        />
+        <button onClick={addNote} disabled={!noteDraft.trim()} className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50">
+          {t('addNote')}
+        </button>
+      </div>
+    </div>
   );
 }
 

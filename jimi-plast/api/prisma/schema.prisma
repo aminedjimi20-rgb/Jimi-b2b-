@@ -106,8 +106,44 @@ model User {
   respondedDeletions PendingDeletion[] @relation("PendingDeletionRespondedBy")
   undoneDeletions    PendingDeletion[] @relation("PendingDeletionUndoneBy")
   productRequests    ProductRequest[]
+  attendances        Attendance[]
+  employeeNotes      EmployeeNote[]
 
   @@map("users")
+}
+
+// Pointage : une ligne par présence, ouverte au clock-in et fermée au
+// clock-out — jamais plus d'une ligne ouverte (clockOutAt null) à la fois
+// par utilisateur.
+model Attendance {
+  id         String    @id @default(cuid())
+  userId     String
+  clockInAt  DateTime  @default(now())
+  clockOutAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("attendances")
+}
+
+// Journal quotidien d'un employé — mêmes principes que CustomerRemark/
+// ManufacturerRemark/ProductRequestRemark : immuable une fois écrite, une
+// rature (voidedAt) plutôt qu'une suppression. Vient compléter, jamais
+// remplacer, ce qui est déjà tracé automatiquement (bons créés...), affiché
+// à côté dans le même fil au lieu d'être reconstruit ici.
+model EmployeeNote {
+  id          String    @id @default(cuid())
+  userId      String
+  text        String
+  createdById String?
+  createdAt   DateTime  @default(now())
+  voidedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("employee_notes")
 }
 
 model RefreshToken {
