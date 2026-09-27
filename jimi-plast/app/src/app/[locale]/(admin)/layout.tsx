@@ -88,6 +88,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ...(user.permissions.includes('returns.manage')
       ? [{ href: `/${locale}/returns`, label: t('returns') }]
       : []),
+    // Comme pour les demandes de produit : tout le monde peut voir ses
+    // propres retours, sauf le fabricant (concept "retour" différent chez lui).
+    ...(!user.permissions.includes('returns.manage') && user.role.key !== 'manufacturer'
+      ? [{ href: `/${locale}/returns`, label: t('returns') }]
+      : []),
     ...(user.permissions.includes('transport.manage')
       ? [{ href: `/${locale}/transport`, label: t('transport') }]
       : []),

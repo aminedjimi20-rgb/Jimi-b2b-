@@ -17,12 +17,13 @@ export class ReturnsService {
     private readonly trash: TrashService,
   ) {}
 
-  list(filters: { type?: string; status?: string }) {
+  list(filters: { type?: string; status?: string; createdById?: string }) {
     return this.prisma.return.findMany({
       where: {
         deletedAt: null,
         ...(filters.type ? { type: filters.type as never } : {}),
         ...(filters.status ? { status: filters.status as never } : {}),
+        ...(filters.createdById ? { createdById: filters.createdById } : {}),
       },
       include: {
         customer: { include: { user: { select: { fullName: true } } } },
@@ -32,6 +33,34 @@ export class ReturnsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  /**
+   * Espace personnel : un employé sans returns.manage ne voit que les
+   * retours qu'il a lui-même créés ; un client ne voit que les retours
+   * enregistrés contre son propre compte (c'est le personnel qui les
+   * saisit après inspection de la marchandise, pas le client).
+   */
+  async listMine(userId: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { userId } });
+    return this.prisma.return.findMany({
+      where: customer ? { customerId: customer.id, deletedAt: null } : { createdById: userId, deletedAt: null },
+      include: {
+        customer: { include: { user: { select: { fullName: true } } } },
+        manufacturer: true,
+        items: { include: { product: { include: { images: { take: 1 } } } } },
+        attachments: { orderBy: { createdAt: 'desc' } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getMineById(userId: string, id: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { userId } });
+    const ret = await this.getById(id);
+    const owns = customer ? ret.customerId === customer.id : ret.createdById === userId;
+    if (!owns) throw new NotFoundException('Retour introuvable');
+    return ret;
   }
 
   async getById(id: string) {

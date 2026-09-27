@@ -31,6 +31,11 @@ interface ReturnRow {
 }
 
 export default function ReturnsPage() {
+  const { hasPermission } = useAuth();
+  return hasPermission('returns.manage') ? <AdminReturnsView /> : <MineReturnsView />;
+}
+
+function AdminReturnsView() {
   const t = useTranslations('returns');
   const tCommon = useTranslations('common');
   const { token } = useAuth();
@@ -310,6 +315,61 @@ export default function ReturnsPage() {
                   </Fragment>
                 ))
               : sortedReturns.map((r) => renderReturnRow(r))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/** Vue employé/client sans returns.manage : lecture seule de ses propres retours (les siens créés, ou ceux enregistrés contre son compte client). */
+function MineReturnsView() {
+  const t = useTranslations('returns');
+  const tCommon = useTranslations('common');
+  const { token } = useAuth();
+  const [returns, setReturns] = useState<ReturnRow[]>([]);
+
+  useEffect(() => {
+    if (token) api.get<ReturnRow[]>('/returns/mine', token).then(setReturns);
+  }, [token]);
+
+  const partyName = (r: ReturnRow) => r.customer?.user.fullName ?? r.manufacturer?.name ?? '';
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+        <p className="text-sm text-muted">{t('mine')}</p>
+      </div>
+
+      <div className="overflow-x-auto rounded-lg border border-line bg-panel">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead className="bg-line/30 text-xs uppercase text-muted">
+            <tr>
+              <th className="px-4 py-2 text-start">{t('columns.number')}</th>
+              <th className="px-4 py-2 text-start">{t('columns.party')}</th>
+              <th className="px-4 py-2 text-start">{t('columns.date')}</th>
+              <th className="px-4 py-2 text-start">{t('columns.value')}</th>
+              <th className="px-4 py-2 text-start">{t('columns.status')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {returns.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-4 text-center text-sm text-muted">
+                  {tCommon('empty')}
+                </td>
+              </tr>
+            )}
+            {returns.map((r) => (
+              <tr key={r.id} className="border-t border-line">
+                <td className="px-4 py-2 font-mono text-xs">{r.number ?? '(brouillon)'}</td>
+                <td className="px-4 py-2 text-ink">{partyName(r)}</td>
+                <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(r.createdAt).toLocaleDateString()}</td>
+                <td className="px-4 py-2 tabular">{Number(r.totalValue).toLocaleString()} DA</td>
+                <td className="px-4 py-2 text-xs text-ink">{t(`status.${r.status}` as never)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

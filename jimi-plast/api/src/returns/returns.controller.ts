@@ -20,9 +20,24 @@ export class ReturnsController {
     private readonly pdfService: ReturnPdfService,
   ) {}
 
+  // Comme pour les bons : un employé (returns.manage sans être admin) ne
+  // voit que les retours qu'il a lui-même créés, l'administrateur voit tout.
   @Get()
-  list(@Query('type') type?: string, @Query('status') status?: string) {
-    return this.returnsService.list({ type, status });
+  list(@CurrentUser() user: AuthenticatedUser, @Query('type') type?: string, @Query('status') status?: string) {
+    const createdById = user.roleKey !== 'admin' ? user.id : undefined;
+    return this.returnsService.list({ type, status, createdById });
+  }
+
+  @Get('mine')
+  @RequirePermissions()
+  mine(@CurrentUser() user: AuthenticatedUser) {
+    return this.returnsService.listMine(user.id);
+  }
+
+  @Get('mine/:id')
+  @RequirePermissions()
+  mineById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.returnsService.getMineById(user.id, id);
   }
 
   @Get(':id')

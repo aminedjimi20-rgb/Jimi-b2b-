@@ -733,7 +733,8 @@
       "value": "Value",
       "status": "Status",
       "date": "Date"
-    }
+    },
+    "mine": "My returns"
   },
   "transport": {
     "title": "Transport",
