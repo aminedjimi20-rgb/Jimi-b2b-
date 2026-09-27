@@ -108,6 +108,10 @@ export default function CatalogPage() {
   const [goToInput, setGoToInput] = useState('');
   const [pendingScrollTo, setPendingScrollTo] = useState<number | null>(null);
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
+  // Une image cassée (URL morte, hébergeur indisponible…) affiche par défaut
+  // l'icône de navigateur + le texte alt par-dessus la carte — on bascule sur
+  // le même repli 📦 que "pas d'image" dès que le chargement échoue.
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
   const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const CATALOG_PAGE_SIZE = 100;
@@ -681,34 +685,44 @@ export default function CatalogPage() {
                     {t('itemNumber')}{itemNumber}
                   </span>
                 </div>
-                <div
-                  className={`group relative mb-2 flex aspect-square items-center justify-center overflow-hidden rounded bg-paper text-muted ${
-                    p.images.length > 0 ? 'cursor-zoom-in' : ''
-                  }`}
-                  onClick={() => p.images.length > 0 && setLightboxProduct(p)}
-                >
-                  {p.images[0] ? (
-                    <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={p.images[0].url}
-                        alt={localizedName(p, locale)}
-                        className="h-full w-full rounded object-cover transition-transform duration-200 group-hover:scale-110"
-                      />
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/20">
-                        <span className="scale-75 text-xl text-white opacity-0 transition group-hover:scale-100 group-hover:opacity-100">
-                          🔍
-                        </span>
-                      </div>
-                      {p.images.length > 1 && (
-                        <span className="absolute bottom-1 end-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                          +{p.images.length - 1}
-                        </span>
+                {(() => {
+                  const hasWorkingImage = p.images.length > 0 && !brokenImages.has(p.images[0].url);
+                  return (
+                    <div
+                      className={`group relative mb-2 flex aspect-square items-center justify-center overflow-hidden rounded bg-paper text-muted ${
+                        hasWorkingImage ? 'cursor-zoom-in' : ''
+                      }`}
+                      onClick={() => hasWorkingImage && setLightboxProduct(p)}
+                    >
+                      {hasWorkingImage ? (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={p.images[0].url}
+                            alt={localizedName(p, locale)}
+                            onError={() =>
+                              setBrokenImages((prev) => {
+                                const next = new Set(prev);
+                                next.add(p.images[0].url);
+                                return next;
+                              })
+                            }
+                            className="h-full w-full rounded object-cover transition-transform duration-200 group-hover:scale-110"
+                          />
+                          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/20">
+                            <span className="scale-75 text-xl text-white opacity-0 transition group-hover:scale-100 group-hover:opacity-100">
+                              🔍
+                            </span>
+                          </div>
+                          {p.images.length > 1 && (
+                            <span className="absolute bottom-1 end-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                              +{p.images.length - 1}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-3xl">📦</span>
                       )}
-                    </>
-                  ) : (
-                    <span className="text-3xl">📦</span>
-                  )}
                   <div className="absolute start-1 top-1 flex flex-col gap-1">
                     {p.isNew && (
                       <span className="rounded bg-teal px-1.5 py-0.5 text-[10px] font-semibold text-white">
@@ -730,8 +744,10 @@ export default function CatalogPage() {
                         {t('seasonal')}
                       </span>
                     )}
-                  </div>
-                </div>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <p className="line-clamp-2 text-sm font-medium text-ink">{localizedName(p, locale)}</p>
                 <p className="text-xs text-muted">
                   {p.category.parent ? `${localizedName(p.category.parent, locale)} › ` : ''}
