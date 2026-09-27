@@ -122,6 +122,11 @@ export default function CatalogPage() {
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [onlyOnSale, setOnlyOnSale] = useState(false);
   const [onlyNew, setOnlyNew] = useState(false);
+  // Repliés par défaut : sur mobile, le bandeau sticky (recherche + filtres)
+  // avalait tout l'écran et ne laissait plus de place pour voir un produit
+  // en entier — repliable pour libérer l'espace, recherche + "aller au N°"
+  // restent seuls visibles en permanence.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [showCart, setShowCart] = useState(false);
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
@@ -525,6 +530,8 @@ export default function CatalogPage() {
     }
   }
 
+  const hasActiveFilters = categoryId !== '' || sort !== 'priority' || onlyInStock || onlyOnSale || onlyNew;
+
   return (
     <div className="min-h-screen bg-paper">
       <div className="sticky top-0 z-40 border-b border-line bg-panel shadow-sm">
@@ -558,7 +565,7 @@ export default function CatalogPage() {
           )}
         </div>
 
-        <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 pb-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-6 pb-3">
           <input
             type="search"
             placeholder={tCommon('search')}
@@ -567,58 +574,17 @@ export default function CatalogPage() {
             className="w-56 rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
           />
           <BarcodeScanButton onScan={handleBarcodeScan} />
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded border border-line bg-panel px-3 py-2 text-sm"
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="relative flex items-center gap-1.5 rounded border border-line px-3 py-2 text-sm text-ink hover:bg-line/30"
           >
-            <option value="">{t('allCategories')}</option>
-            {topCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {localizedName(c, locale)}
-              </option>
-            ))}
-          </select>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="rounded border border-line bg-panel px-3 py-2 text-sm"
-          >
-            <option value="priority">{t('sortPriority')}</option>
-            <option value="newest">{t('sortNewest')}</option>
-            <option value="name_asc">{t('sortNameAsc')}</option>
-            <option value="name_desc">{t('sortNameDesc')}</option>
-          </select>
-
-          <label className="flex items-center gap-1.5 text-sm text-ink">
-            <input type="checkbox" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} />
-            {t('onlyInStock')}
-          </label>
-          <label className="flex items-center gap-1.5 text-sm text-ink">
-            <input type="checkbox" checked={onlyOnSale} onChange={(e) => setOnlyOnSale(e.target.checked)} />
-            {t('onlyOnSale')}
-          </label>
-          <label className="flex items-center gap-1.5 text-sm text-ink">
-            <input type="checkbox" checked={onlyNew} onChange={(e) => setOnlyNew(e.target.checked)} />
-            {t('onlyNew')}
-          </label>
-
-          {canManageVouchers && availableTiers.length > 1 && (
-            <label className="flex items-center gap-1.5 text-sm text-ink">
-              <span className="text-xs text-muted">{t('viewPricesAs')}</span>
-              <select
-                value={viewTier}
-                onChange={(e) => setViewTier(e.target.value)}
-                className="rounded border border-accent bg-panel px-2 py-1.5 text-sm text-accent"
-              >
-                {availableTiers.map((tier) => (
-                  <option key={tier.tierKey} value={tier.tierKey}>
-                    {tier.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+            {t('filters')}
+            <span className={`inline-block transition-transform ${filtersOpen ? 'rotate-180' : ''}`}>▾</span>
+            {hasActiveFilters && !filtersOpen && (
+              <span className="absolute -end-1 -top-1 h-2 w-2 rounded-full bg-accent" />
+            )}
+          </button>
 
           {total > 0 && (
             <form
@@ -647,6 +613,63 @@ export default function CatalogPage() {
             </form>
           )}
         </div>
+
+        {filtersOpen && (
+          <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 pb-4">
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="rounded border border-line bg-panel px-3 py-2 text-sm"
+            >
+              <option value="">{t('allCategories')}</option>
+              {topCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {localizedName(c, locale)}
+                </option>
+              ))}
+            </select>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="rounded border border-line bg-panel px-3 py-2 text-sm"
+            >
+              <option value="priority">{t('sortPriority')}</option>
+              <option value="newest">{t('sortNewest')}</option>
+              <option value="name_asc">{t('sortNameAsc')}</option>
+              <option value="name_desc">{t('sortNameDesc')}</option>
+            </select>
+
+            <label className="flex items-center gap-1.5 text-sm text-ink">
+              <input type="checkbox" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} />
+              {t('onlyInStock')}
+            </label>
+            <label className="flex items-center gap-1.5 text-sm text-ink">
+              <input type="checkbox" checked={onlyOnSale} onChange={(e) => setOnlyOnSale(e.target.checked)} />
+              {t('onlyOnSale')}
+            </label>
+            <label className="flex items-center gap-1.5 text-sm text-ink">
+              <input type="checkbox" checked={onlyNew} onChange={(e) => setOnlyNew(e.target.checked)} />
+              {t('onlyNew')}
+            </label>
+
+            {canManageVouchers && availableTiers.length > 1 && (
+              <label className="flex items-center gap-1.5 text-sm text-ink">
+                <span className="text-xs text-muted">{t('viewPricesAs')}</span>
+                <select
+                  value={viewTier}
+                  onChange={(e) => setViewTier(e.target.value)}
+                  className="rounded border border-accent bg-panel px-2 py-1.5 text-sm text-accent"
+                >
+                  {availableTiers.map((tier) => (
+                    <option key={tier.tierKey} value={tier.tierKey}>
+                      {tier.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mx-auto max-w-7xl px-6 py-8">

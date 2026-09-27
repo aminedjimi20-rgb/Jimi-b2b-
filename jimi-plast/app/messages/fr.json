@@ -193,6 +193,7 @@
   },
   "catalog": {
     "title": "Catalogue",
+    "filters": "Filtres",
     "allCategories": "Toutes les catégories",
     "sortPriority": "Priorité",
     "sortNewest": "Plus récents",

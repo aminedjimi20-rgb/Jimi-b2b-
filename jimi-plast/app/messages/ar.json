@@ -193,6 +193,7 @@
   },
   "catalog": {
     "title": "الكتالوج",
+    "filters": "الفلاتر",
     "allCategories": "كل الفئات",
     "sortPriority": "الأولوية",
     "sortNewest": "الأحدث",
