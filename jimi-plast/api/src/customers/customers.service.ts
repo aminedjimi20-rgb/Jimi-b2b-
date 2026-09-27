@@ -45,6 +45,15 @@ export class CustomersService {
     }));
   }
 
+  /** Liste minimale (id + nom) pour le sélecteur de client d'un bon — accessible à qui peut créer un bon, pas seulement customers.manage. */
+  listForPicker() {
+    return this.prisma.customer.findMany({
+      where: { deletedAt: null },
+      select: { id: true, user: { select: { fullName: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getById(id: string) {
     const customer = await this.prisma.customer.findFirst({
       where: { id, deletedAt: null },

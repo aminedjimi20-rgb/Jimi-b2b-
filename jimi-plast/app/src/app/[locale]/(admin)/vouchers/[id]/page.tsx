@@ -113,11 +113,13 @@ export default function VoucherEditorPage() {
   const tCatalog = useTranslations('catalog');
   const tCommon = useTranslations('common');
   const tTransport = useTranslations('transport');
-  const { token, hasPermission } = useAuth();
+  const { token, user, hasPermission } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
   const canManage = hasPermission('vouchers.create');
   const canSeeStock = hasPermission('stock.manage');
+  const canManageTransport = hasPermission('transport.manage');
+  const isAdmin = user?.role.key === 'admin';
   const basePath = canManage ? '/vouchers' : '/vouchers/mine';
 
   const [voucher, setVoucher] = useState<Voucher | null>(null);
@@ -203,8 +205,8 @@ export default function VoucherEditorPage() {
 
   useEffect(() => {
     if (token && canManage) api.get<StaffOption[]>('/vouchers/staff', token).then(setStaff).catch(() => setStaff([]));
-    if (token && canManage) api.get<DriverOption[]>('/drivers', token).then(setDrivers).catch(() => setDrivers([]));
-    if (token && canManage) api.get<CustomerOption[]>('/customers', token).then(setCustomers).catch(() => setCustomers([]));
+    if (token && canManageTransport) api.get<DriverOption[]>('/drivers', token).then(setDrivers).catch(() => setDrivers([]));
+    if (token && canManage) api.get<CustomerOption[]>('/customers/picker', token).then(setCustomers).catch(() => setCustomers([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, canManage]);
 
@@ -274,7 +276,10 @@ export default function VoucherEditorPage() {
   const isDraft = voucher?.status === 'DRAFT';
   // "Modifier" ouvre l'édition d'un bon déjà confirmé/livré : le backend
   // ajuste alors le stock du delta exact et journalise chaque changement.
-  const canReopen = canManage && (voucher?.status === 'CONFIRMED' || voucher?.status === 'DELIVERED');
+  // Une fois livré, seul l'administrateur peut encore rouvrir l'édition —
+  // le client (canManage=false) n'a de toute façon jamais accès à DELIVERED.
+  const canReopen =
+    voucher?.status === 'CONFIRMED' || (voucher?.status === 'DELIVERED' && isAdmin);
   const editable = isDraft || editMode;
   const voucherDeletion = voucher?.pendingDeletions[0];
 
@@ -962,7 +967,7 @@ export default function VoucherEditorPage() {
         />
       </label>
 
-      {canManage && (
+      {canManage && canManageTransport && (
         <div className="rounded-lg border border-line bg-panel p-4">
           <p className="mb-2 text-sm font-semibold text-ink">{t('delivery')}</p>
           {delivery && delivery.status !== 'CANCELLED' ? (

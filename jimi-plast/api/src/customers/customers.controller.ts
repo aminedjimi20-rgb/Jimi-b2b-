@@ -38,6 +38,13 @@ export class CustomersController {
     return this.customersService.getByUserId(user.id);
   }
 
+  /** Liste allégée (id + nom) pour le sélecteur de client d'un bon — n'importe qui pouvant créer un bon, pas seulement customers.manage. */
+  @Get('picker')
+  @RequirePermissions('vouchers.create')
+  picker() {
+    return this.customersService.listForPicker();
+  }
+
   @Get(':id')
   @RequirePermissions('customers.manage')
   getById(@Param('id') id: string) {

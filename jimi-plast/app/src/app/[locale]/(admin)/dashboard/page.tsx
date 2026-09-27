@@ -108,7 +108,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {!['wholesaler', 'retailer', 'manufacturer'].includes(user.role.key) && <AttendanceWidget />}
+      {user.role.key === 'employee' && <AttendanceWidget />}
 
       {hasPermission('stats.view') && sales && margin && credits && (
         <CollapsibleSection id="stats" title={t('statsTitle')}>

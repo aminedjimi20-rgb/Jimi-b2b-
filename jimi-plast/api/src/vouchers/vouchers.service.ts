@@ -15,6 +15,7 @@ const ROLE_TO_TIER_KEY: Record<string, string> = {
 export interface VoucherListFilters {
   status?: string;
   customerId?: string;
+  sellerId?: string;
   hidden?: boolean;
   dateFrom?: string;
   dateTo?: string;
@@ -41,6 +42,7 @@ export class VouchersService {
       hidden: filters.hidden ?? false,
       ...(filters.status ? { status: filters.status as never } : {}),
       ...(filters.customerId ? { customerId: filters.customerId } : {}),
+      ...(filters.sellerId ? { sellerId: filters.sellerId } : {}),
       ...(filters.depot ? { depot: filters.depot } : {}),
       ...(filters.dateFrom || filters.dateTo
         ? {
@@ -206,6 +208,16 @@ export class VouchersService {
     const voucher = await this.prisma.salesVoucher.create({
       data: { customerId: customerId ?? null, sellerId, status: 'DRAFT' },
     });
+
+    const actorName = await this.actorName(sellerId);
+    await this.auditLog.record({
+      entityType: 'SalesVoucher',
+      entityId: voucher.id,
+      action: 'CREATE',
+      reason: `Bon créé par ${actorName}`,
+      actorId: sellerId,
+    });
+
     return this.getById(voucher.id);
   }
 
@@ -228,6 +240,14 @@ export class VouchersService {
 
     const voucher = await this.prisma.salesVoucher.create({
       data: { customerId: customer.id, sellerId: userId, status: 'DRAFT' },
+    });
+
+    await this.auditLog.record({
+      entityType: 'SalesVoucher',
+      entityId: voucher.id,
+      action: 'CREATE',
+      reason: `Bon créé par ${customer.user.fullName} depuis le catalogue`,
+      actorId: userId,
     });
 
     await this.notifications.notify({
@@ -254,11 +274,21 @@ export class VouchersService {
     return this.getById(id);
   }
 
+  // Le client peut modifier son bon jusqu'à la livraison (pas seulement le
+  // brouillon) — seul un bon livré ou annulé devient figé (voir update(),
+  // même règle côté personnel). Il ne peut jamais réassigner le bon à un
+  // autre client : customerId est toujours ignoré ici.
   async updateMine(userId: string, id: string, dto: UpsertVoucherDto) {
     const voucher = await this.assertOwnVoucher(userId, id);
-    if (voucher.status !== 'DRAFT') throw new BadRequestException('Seul un brouillon peut être modifié librement');
+    if (voucher.status === 'CANCELLED') {
+      throw new BadRequestException("Un bon annulé ne peut pas être modifié");
+    }
+    if (voucher.status === 'DELIVERED') {
+      throw new ForbiddenException('Seul un administrateur peut modifier un bon déjà livré');
+    }
     const { customerId: _customerId, ...rest } = dto;
-    return this.updateDraft(id, rest, voucher.customerId);
+    if (voucher.status === 'DRAFT') return this.updateDraft(id, rest, voucher.customerId);
+    return this.updateConfirmed(id, rest, userId, voucher);
   }
 
   // Tant qu'aucun client n'est encore assigné (panier/proforma en
@@ -291,11 +321,21 @@ export class VouchersService {
    * historique et un ajustement de stock (voir updateConfirmed), un bon
    * annulé ne se modifie plus du tout (il faut d'abord le réactiver).
    */
-  async update(id: string, dto: UpsertVoucherDto, actorId: string) {
+  // actorRoleKey n'est fourni que lorsque l'appel vient directement d'une
+  // requête utilisateur (le contrôleur du bon) — un appel interne inter-
+  // services (ex: DeliveriesService synchronisant le transport) a déjà été
+  // autorisé par son propre contrôleur (transport.manage) et n'a pas à
+  // repasser par la règle "livré = admin seulement".
+  async update(id: string, dto: UpsertVoucherDto, actorId: string, actorRoleKey?: string) {
     const voucher = await this.prisma.salesVoucher.findFirst({ where: { id, deletedAt: null } });
     if (!voucher) throw new NotFoundException('Bon introuvable');
     if (voucher.status === 'CANCELLED') {
       throw new BadRequestException('Un bon annulé ne peut pas être modifié — réactivez-le d\'abord');
+    }
+    // Une fois livré, plus personne ne modifie le bon sauf l'administrateur —
+    // même règle que pour le client (updateMine), aucun rôle n'y échappe.
+    if (voucher.status === 'DELIVERED' && actorRoleKey && actorRoleKey !== 'admin') {
+      throw new ForbiddenException('Seul un administrateur peut modifier un bon déjà livré');
     }
     if (voucher.status === 'DRAFT') {
       return this.updateDraft(id, dto, dto.customerId ?? voucher.customerId);

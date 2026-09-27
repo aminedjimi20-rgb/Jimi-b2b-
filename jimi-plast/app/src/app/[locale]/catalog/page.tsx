@@ -264,7 +264,7 @@ export default function CatalogPage() {
 
   useEffect(() => {
     if (token && canManageVouchers) {
-      api.get<CustomerOption[]>('/customers', token).then(setCustomers);
+      api.get<CustomerOption[]>('/customers/picker', token).then(setCustomers);
     }
   }, [token, canManageVouchers]);
 

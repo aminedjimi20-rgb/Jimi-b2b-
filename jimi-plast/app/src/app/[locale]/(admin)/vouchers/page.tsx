@@ -55,7 +55,7 @@ export default function VouchersPage() {
   }
 
   useEffect(() => {
-    if (token) api.get<Customer[]>('/customers', token).then(setCustomers);
+    if (token) api.get<Customer[]>('/customers/picker', token).then(setCustomers);
   }, [token]);
 
   useEffect(() => {

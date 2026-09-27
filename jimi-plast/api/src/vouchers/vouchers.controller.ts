@@ -21,8 +21,13 @@ export class VouchersController {
     private readonly pendingDeletions: PendingDeletionsService,
   ) {}
 
+  // La liste des bons est limitée aux siens pour tout le monde sauf
+  // l'administrateur — un employé ne voit que ce qu'il a lui-même créé,
+  // mais peut toujours ouvrir/imprimer un bon précis par son lien (getById,
+  // non filtré) même s'il n'apparaît pas dans sa propre liste.
   @Get()
   list(
+    @CurrentUser() user: AuthenticatedUser,
     @Query('status') status?: string,
     @Query('customerId') customerId?: string,
     @Query('hidden') hidden?: string,
@@ -30,7 +35,8 @@ export class VouchersController {
     @Query('dateTo') dateTo?: string,
     @Query('depot') depot?: string,
   ) {
-    return this.vouchersService.list({ status, customerId, hidden: hidden === 'true', dateFrom, dateTo, depot });
+    const sellerId = user.roleKey !== 'admin' ? user.id : undefined;
+    return this.vouchersService.list({ status, customerId, sellerId, hidden: hidden === 'true', dateFrom, dateTo, depot });
   }
 
   @Get('mine')
@@ -101,7 +107,7 @@ export class VouchersController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpsertVoucherDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.vouchersService.update(id, dto, user.id);
+    return this.vouchersService.update(id, dto, user.id, user.roleKey);
   }
 
   @Post(':id/attachments')
