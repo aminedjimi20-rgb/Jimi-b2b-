@@ -758,7 +758,10 @@
     "generalNote": "General note",
     "generalNotePlaceholder": "Write a note about this request…",
     "strikeRemark": "Strike",
-    "restoreRemark": "Restore"
+    "restoreRemark": "Restore",
+    "customerSubtitle": "Can't find a product in the catalog? Request it here, we'll get back to you as soon as we know.",
+    "mine": "My requests",
+    "send": "Send request"
   },
   "negotiations": {
     "title": "Negotiations",

@@ -38,7 +38,21 @@ interface RequestRow {
 const STATUSES = ['NEW', 'SEARCHING', 'FOUND', 'ORDERED', 'AVAILABLE', 'REFUSED'];
 const EMPTY_FORM = { productName: '', description: '', quantityWanted: '', photoUrl: '' };
 
+const STATUS_COLORS: Record<string, string> = {
+  NEW: 'bg-line/40 text-muted',
+  SEARCHING: 'bg-accent/15 text-accent',
+  FOUND: 'bg-teal/15 text-teal',
+  ORDERED: 'bg-teal/15 text-teal',
+  AVAILABLE: 'bg-teal/20 text-teal',
+  REFUSED: 'bg-red-100 text-red-600',
+};
+
 export default function ProductRequestsPage() {
+  const { hasPermission } = useAuth();
+  return hasPermission('requests.manage') ? <AdminProductRequestsView /> : <CustomerProductRequestsView />;
+}
+
+function AdminProductRequestsView() {
   const t = useTranslations('productRequests');
   const tc = useTranslations('common');
   const { token } = useAuth();
@@ -355,6 +369,139 @@ export default function ProductRequestsPage() {
       </div>
 
       {lightboxUrl && <ImageLightbox images={[{ url: lightboxUrl }]} onClose={() => setLightboxUrl(null)} />}
+    </div>
+  );
+}
+
+interface MineRow {
+  id: string;
+  productName: string;
+  description: string | null;
+  photoUrl: string | null;
+  quantityWanted: number | null;
+  status: string;
+  adminNote: string | null;
+  createdAt: string;
+}
+
+// Vue client : pas de gestion (pas de statut modifiable, pas de suppression,
+// pas de journal de remarques internes — réservé au personnel) — juste
+// déposer une nouvelle demande et suivre l'avancement des siennes.
+function CustomerProductRequestsView() {
+  const t = useTranslations('productRequests');
+  const tc = useTranslations('common');
+  const { token } = useAuth();
+  const { locale } = useParams<{ locale: string }>();
+
+  const [requests, setRequests] = useState<MineRow[]>([]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [sending, setSending] = useState(false);
+
+  function reload() {
+    api.get<MineRow[]>('/product-requests/mine', token).then(setRequests);
+  }
+  useEffect(() => {
+    if (token) reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.productName.trim()) return;
+    setSending(true);
+    try {
+      await api.post(
+        '/product-requests',
+        {
+          productName: form.productName.trim(),
+          description: form.description.trim() || undefined,
+          photoUrl: form.photoUrl || undefined,
+          quantityWanted: form.quantityWanted ? Number(form.quantityWanted) : undefined,
+        },
+        token,
+      );
+      setForm(EMPTY_FORM);
+      reload();
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+        <p className="text-sm text-muted">{t('customerSubtitle')}</p>
+      </div>
+
+      <form onSubmit={submit} className="grid grid-cols-1 gap-3 rounded-lg border border-line bg-panel p-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">{t('form.productName')}</span>
+          <input
+            required
+            value={form.productName}
+            onChange={(e) => setForm((f) => ({ ...f, productName: e.target.value }))}
+            className="rounded border border-line bg-paper px-3 py-2 text-ink outline-none focus:border-accent"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">{t('form.quantityWanted')}</span>
+          <input
+            type="number"
+            min="1"
+            value={form.quantityWanted}
+            onChange={(e) => setForm((f) => ({ ...f, quantityWanted: e.target.value }))}
+            className="rounded border border-line bg-paper px-3 py-2 text-ink outline-none focus:border-accent"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+          <span className="text-muted">{t('form.description')}</span>
+          <textarea
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            rows={2}
+            className="rounded border border-line bg-paper px-3 py-2 text-ink outline-none focus:border-accent"
+          />
+        </label>
+        <div className="flex flex-col gap-1 text-sm sm:col-span-2">
+          <span className="text-muted">{t('form.photoUrl')}</span>
+          <div className="flex items-center gap-3">
+            {form.photoUrl && <img src={form.photoUrl} alt="" className="h-12 w-12 rounded border border-line object-cover" />}
+            <ImageUploadButton folder="product-requests" label={t('form.photoUrl')} onUploaded={(url) => setForm((f) => ({ ...f, photoUrl: url }))} />
+          </div>
+        </div>
+        <button
+          type="submit"
+          disabled={sending || !form.productName.trim()}
+          className="self-start rounded bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 sm:col-span-2"
+        >
+          {t('send')}
+        </button>
+      </form>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-ink">{t('mine')}</h2>
+        {requests.length === 0 && <p className="text-sm text-muted">{tc('empty')}</p>}
+        {requests.map((r) => (
+          <div key={r.id} className="flex flex-col gap-2 rounded-lg border border-line bg-panel p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-ink">
+                {r.productName}
+                {r.quantityWanted ? ` × ${r.quantityWanted}` : ''}
+              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="text-xs text-muted">{new Date(r.createdAt).toLocaleDateString(locale)}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_COLORS[r.status] ?? ''}`}>
+                  {t(`status.${r.status}` as never)}
+                </span>
+              </div>
+            </div>
+            {r.description && <p className="text-sm text-ink">{r.description}</p>}
+            {r.photoUrl && <img src={r.photoUrl} alt={r.productName} className="h-16 w-16 rounded border border-line object-cover" />}
+            {r.adminNote && <div className="rounded border-s-2 border-accent bg-accent/5 px-3 py-2 text-sm text-ink">{r.adminNote}</div>}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

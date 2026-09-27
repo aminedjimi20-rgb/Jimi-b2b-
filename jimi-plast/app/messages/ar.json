@@ -758,7 +758,10 @@
     "generalNote": "ملاحظة عامة",
     "generalNotePlaceholder": "اكتب ملاحظة على هذا الطلب…",
     "strikeRemark": "شطب",
-    "restoreRemark": "استرجاع"
+    "restoreRemark": "استرجاع",
+    "customerSubtitle": "ماكاينش المنتج لي حاب في الكاتالوغ؟ اطلبه هنا، نجاوبوك ملي يوصلنا خبر.",
+    "mine": "طلباتي",
+    "send": "إرسال الطلب"
   },
   "negotiations": {
     "title": "التفاوض",

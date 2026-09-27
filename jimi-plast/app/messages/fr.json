@@ -758,7 +758,10 @@
     "generalNote": "Note générale",
     "generalNotePlaceholder": "Écrire une remarque sur cette demande…",
     "strikeRemark": "Rayer",
-    "restoreRemark": "Restaurer"
+    "restoreRemark": "Restaurer",
+    "customerSubtitle": "Un produit que vous ne trouvez pas dans le catalogue ? Demandez-le, nous vous répondons dès qu'on a une réponse.",
+    "mine": "Mes demandes",
+    "send": "Envoyer la demande"
   },
   "negotiations": {
     "title": "Négociations",
