@@ -99,7 +99,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { href: `/${locale}/negotiations`, label: t('negotiations') },
         ]
       : []),
-    ...(!user.permissions.includes('requests.manage') && ['wholesaler', 'retailer'].includes(user.role.key)
+    // N'importe quel compte peut demander un produit — client (gros/détail) ou
+    // employé sans droit requests.manage ; seuls le fabricant et l'admin (déjà
+    // couvert ci-dessus) n'ont pas besoin de ce lien.
+    ...(!user.permissions.includes('requests.manage') && user.role.key !== 'manufacturer'
       ? [{ href: `/${locale}/product-requests`, label: t('productRequests') }]
       : []),
     ...(!user.permissions.includes('customers.manage') && ['wholesaler', 'retailer'].includes(user.role.key)
