@@ -21,6 +21,7 @@ function labelForSnapshot(snapshot: Record<string, unknown>): string {
     (snapshot.name as string) ||
     (snapshot.fullName as string) ||
     (snapshot.sku as string) ||
+    (snapshot.productName as string) ||
     ''
   );
 }

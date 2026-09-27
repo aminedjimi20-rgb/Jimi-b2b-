@@ -726,6 +726,7 @@
   "productRequests": {
     "title": "طلبات المنتجات",
     "columns": {
+      "date": "التاريخ",
       "product": "المنتج",
       "customer": "العميل",
       "quantity": "الكمية",
@@ -738,7 +739,26 @@
       "ORDERED": "تم الطلب",
       "AVAILABLE": "متوفر",
       "REFUSED": "مرفوضة"
-    }
+    },
+    "search": "البحث عن منتج أو عميل...",
+    "filterStatus": "كل الحالات",
+    "new": "طلب جديد",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "deleteReasonPrompt": "سبب الحذف (اختياري) :",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "employeeBadge": "طاقم العمل",
+    "form": {
+      "productName": "اسم المنتج",
+      "description": "الوصف",
+      "photoUrl": "صورة",
+      "quantityWanted": "الكمية المطلوبة"
+    },
+    "generalNote": "ملاحظة عامة",
+    "generalNotePlaceholder": "اكتب ملاحظة على هذا الطلب…",
+    "strikeRemark": "شطب",
+    "restoreRemark": "استرجاع"
   },
   "negotiations": {
     "title": "التفاوض",
@@ -867,7 +887,8 @@
       "Manufacturer": "مصنّع",
       "Notification": "إشعار",
       "Besoin": "احتياج",
-      "Customer": "زبون"
+      "Customer": "زبون",
+      "ProductRequest": "طلب منتج"
     }
   },
   "besoins": {

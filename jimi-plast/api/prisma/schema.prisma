@@ -105,6 +105,7 @@ model User {
   requestedDeletions PendingDeletion[] @relation("PendingDeletionRequestedBy")
   respondedDeletions PendingDeletion[] @relation("PendingDeletionRespondedBy")
   undoneDeletions    PendingDeletion[] @relation("PendingDeletionUndoneBy")
+  productRequests    ProductRequest[]
 
   @@map("users")
 }
@@ -426,7 +427,6 @@ model Customer {
   entries       LedgerEntry[]
   salesVouchers   SalesVoucher[]
   returns         Return[]
-  productRequests ProductRequest[]
   negotiations    Negotiation[]
   pendingDeletions PendingDeletion[]
   remarks         CustomerRemark[]
@@ -991,21 +991,45 @@ enum ProductRequestStatus {
   REFUSED
 }
 
+// requestedById plutôt que customerId : n'importe quel compte connecté
+// (client ou personnel) peut demander un produit, pas seulement les
+// clients — on retrouve le lien client (pour afficher gros/détail) via
+// requestedBy.customer quand il existe.
 model ProductRequest {
   id             String               @id @default(cuid())
-  customerId     String
+  requestedById  String
   productName    String
   description    String?
   photoUrl       String?
   quantityWanted Int?
   status         ProductRequestStatus @default(NEW)
   adminNote      String?
+  deletedAt      DateTime?
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
 
-  customer Customer @relation(fields: [customerId], references: [id])
+  requestedBy User                    @relation(fields: [requestedById], references: [id])
+  remarks     ProductRequestRemark[]
 
   @@map("product_requests")
+}
+
+// Journal de remarques internes sur une demande de produit (recherche de
+// fournisseur, décision, etc.) — même principe que CustomerRemark/
+// ManufacturerRemark : immuable une fois écrite, seule une rature directe
+// (voidedAt) est permise, pas de workflow d'approbation.
+model ProductRequestRemark {
+  id               String    @id @default(cuid())
+  productRequestId String
+  text             String
+  createdById      String?
+  createdAt        DateTime  @default(now())
+  voidedAt         DateTime?
+
+  productRequest ProductRequest @relation(fields: [productRequestId], references: [id], onDelete: Cascade)
+
+  @@index([productRequestId])
+  @@map("product_request_remarks")
 }
 
 enum NegotiationStatus {

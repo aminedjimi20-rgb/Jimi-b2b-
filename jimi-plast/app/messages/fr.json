@@ -726,6 +726,7 @@
   "productRequests": {
     "title": "Demandes de produits",
     "columns": {
+      "date": "Date",
       "product": "Produit",
       "customer": "Client",
       "quantity": "Quantité",
@@ -738,7 +739,26 @@
       "ORDERED": "Commandé",
       "AVAILABLE": "Disponible",
       "REFUSED": "Refusée"
-    }
+    },
+    "search": "Rechercher un produit ou un client...",
+    "filterStatus": "Tous les statuts",
+    "new": "Nouvelle demande",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteReasonPrompt": "Raison de la suppression (facultatif) :",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "employeeBadge": "Personnel",
+    "form": {
+      "productName": "Nom du produit",
+      "description": "Description",
+      "photoUrl": "Photo",
+      "quantityWanted": "Quantité souhaitée"
+    },
+    "generalNote": "Note générale",
+    "generalNotePlaceholder": "Écrire une remarque sur cette demande…",
+    "strikeRemark": "Rayer",
+    "restoreRemark": "Restaurer"
   },
   "negotiations": {
     "title": "Négociations",
@@ -867,7 +887,8 @@
       "Manufacturer": "Fabricant",
       "Notification": "Notification",
       "Besoin": "Besoin",
-      "Customer": "Client"
+      "Customer": "Client",
+      "ProductRequest": "Demande de produit"
     }
   },
   "besoins": {
