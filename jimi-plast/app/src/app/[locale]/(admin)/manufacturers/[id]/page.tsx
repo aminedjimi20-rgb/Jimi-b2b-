@@ -9,7 +9,7 @@ import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 
 interface PendingDeletion {
   id: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'UNDONE';
   reason: string;
   requestedBy: { fullName: string } | null;
 }
@@ -163,6 +163,16 @@ export default function ManufacturerDetailPage() {
     if (!reason) return;
     try {
       await api.post(`/manufacturers/entries/${entryId}/request-deletion`, { reason }, token);
+      reload();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tCommon('error'));
+    }
+  }
+
+  async function undoEntryDeletion(pendingDeletionId: string) {
+    if (!window.confirm(t('undoDeletionConfirm'))) return;
+    try {
+      await api.post(`/pending-deletions/${pendingDeletionId}/undo`, {}, token);
       reload();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : tCommon('error'));
@@ -516,6 +526,11 @@ export default function ManufacturerDetailPage() {
                       {canRequestDelete && (
                         <button onClick={() => requestEntryDeletion(e.id)} className="text-xs text-red-600 hover:underline">
                           {tCommon('delete')}
+                        </button>
+                      )}
+                      {isVoided && latest && (
+                        <button onClick={() => undoEntryDeletion(latest.id)} className="text-xs text-teal hover:underline">
+                          {t('undoDeletion')}
                         </button>
                       )}
                     </td>

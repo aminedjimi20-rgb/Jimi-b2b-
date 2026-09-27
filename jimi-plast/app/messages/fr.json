@@ -357,6 +357,8 @@
       "deleteReasonPrompt": "Raison de la suppression (le compte du client est mis à jour immédiatement) :",
       "deleted": "Supprimé",
       "pendingDeletion": "En attente d'approbation",
+      "undoDeletion": "Annuler la suppression",
+      "undoDeletionConfirm": "Annuler cette suppression ? Le compte est rétabli immédiatement.",
       "date": "Date",
       "runningBalance": "Solde",
       "statementTitle": "Sur une période",
@@ -458,7 +460,9 @@
     "deleteVoucher": "Supprimer le bon",
     "deleteReasonPrompt": "Raison de la suppression (le stock et le compte sont mis à jour immédiatement) :",
     "detailDeleted": "Supprimé",
-    "detailPendingDeletion": "En attente d'approbation"
+    "detailPendingDeletion": "En attente d'approbation",
+    "undoDeletion": "Annuler la suppression",
+    "undoDeletionConfirm": "Annuler cette suppression ? Le stock et le compte sont rétablis immédiatement."
   },
   "manufacturers": {
     "title": "Fabricants",
@@ -488,6 +492,8 @@
     "searchPlaceholder": "Rechercher un fabricant...",
     "deleteReasonPrompt": "Raison de la suppression (le compte est mis à jour immédiatement) :",
     "pendingDeletion": "En attente d'approbation",
+    "undoDeletion": "Annuler la suppression",
+    "undoDeletionConfirm": "Annuler cette suppression ? Le compte est rétabli immédiatement.",
     "hasAccount": "Compte actif",
     "noAccount": "Aucun compte lié",
     "detail": {

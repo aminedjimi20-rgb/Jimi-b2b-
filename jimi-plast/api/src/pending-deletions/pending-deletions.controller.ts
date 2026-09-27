@@ -24,4 +24,9 @@ export class PendingDeletionsController {
   respond(@Param('id') id: string, @Body() dto: RespondDeletionDto, @CurrentUser() user: AuthenticatedUser) {
     return this.service.respond(id, dto.decision, user.id);
   }
+
+  @Post(':id/undo')
+  undo(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.undo(id, user.id);
+  }
 }

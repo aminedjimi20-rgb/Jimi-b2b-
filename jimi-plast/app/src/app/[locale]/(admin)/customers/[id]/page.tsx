@@ -9,7 +9,7 @@ import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 
 interface PendingDeletion {
   id: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'UNDONE';
   reason: string;
   requestedBy: { fullName: string } | null;
 }
@@ -118,6 +118,15 @@ export default function CustomerDetailPage() {
     const reason = window.prompt(t('detail.deleteReasonPrompt'));
     if (!reason) return;
     await api.post(`/customers/entries/${entryId}/request-deletion`, { reason }, token);
+    reload();
+  }
+
+  // Rejoue en sens inverse exactement ce que la suppression avait fait
+  // (ici : lève voidedAt) — la ligne redevient normale et peut être
+  // supprimée à nouveau plus tard si besoin.
+  async function undoEntryDeletion(pendingDeletionId: string) {
+    if (!window.confirm(t('detail.undoDeletionConfirm'))) return;
+    await api.post(`/pending-deletions/${pendingDeletionId}/undo`, {}, token);
     reload();
   }
 
@@ -394,6 +403,11 @@ export default function CustomerDetailPage() {
                       {canRequestDelete && (
                         <button onClick={() => requestEntryDeletion(e.id)} className="text-xs text-red-600 hover:underline">
                           {tCommon('delete')}
+                        </button>
+                      )}
+                      {isVoided && latest && (
+                        <button onClick={() => undoEntryDeletion(latest.id)} className="text-xs text-teal hover:underline">
+                          {t('detail.undoDeletion')}
                         </button>
                       )}
                     </td>

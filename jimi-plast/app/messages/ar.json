@@ -357,6 +357,8 @@
       "deleteReasonPrompt": "علاش تحب تمحي (حساب الزبون يتحدث فالحين) :",
       "deleted": "محذوف",
       "pendingDeletion": "فالانتظار للموافقة",
+      "undoDeletion": "الغاء الحذف",
+      "undoDeletionConfirm": "تحب تلغي هذا الحذف؟ الحساب يرجع كيما كان فالحين.",
       "date": "التاريخ",
       "runningBalance": "الرصيد",
       "statementTitle": "على مدة",
@@ -458,7 +460,9 @@
     "deleteVoucher": "حذف البون",
     "deleteReasonPrompt": "علاش تحب تمحي (المخزون و الحساب يتحدثو فالحين) :",
     "detailDeleted": "محذوف",
-    "detailPendingDeletion": "فالانتظار للموافقة"
+    "detailPendingDeletion": "فالانتظار للموافقة",
+    "undoDeletion": "الغاء الحذف",
+    "undoDeletionConfirm": "تحب تلغي هذا الحذف؟ المخزون و الحساب يرجعو كيما كانو فالحين."
   },
   "manufacturers": {
     "title": "المصانع",
@@ -488,6 +492,8 @@
     "searchPlaceholder": "البحث عن فابريكان...",
     "deleteReasonPrompt": "سبب الحذف (الحساب يتحدث فالحين) :",
     "pendingDeletion": "في انتظار الموافقة",
+    "undoDeletion": "الغاء الحذف",
+    "undoDeletionConfirm": "تحب تلغي هذا الحذف؟ الحساب يرجع كيما كان فالحين.",
     "hasAccount": "حساب نشط",
     "noAccount": "بلا حساب",
     "detail": {

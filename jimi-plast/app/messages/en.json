@@ -357,6 +357,8 @@
       "deleteReasonPrompt": "Reason for deletion (the customer's account is updated immediately):",
       "deleted": "Deleted",
       "pendingDeletion": "Awaiting approval",
+      "undoDeletion": "Undo deletion",
+      "undoDeletionConfirm": "Undo this deletion? The account is restored immediately.",
       "date": "Date",
       "runningBalance": "Balance",
       "statementTitle": "Over a period",
@@ -458,7 +460,9 @@
     "deleteVoucher": "Delete voucher",
     "deleteReasonPrompt": "Reason for deletion (stock and account are updated immediately):",
     "detailDeleted": "Deleted",
-    "detailPendingDeletion": "Awaiting approval"
+    "detailPendingDeletion": "Awaiting approval",
+    "undoDeletion": "Undo deletion",
+    "undoDeletionConfirm": "Undo this deletion? Stock and account are restored immediately."
   },
   "manufacturers": {
     "title": "Manufacturers",
@@ -488,6 +492,8 @@
     "searchPlaceholder": "Search a manufacturer...",
     "deleteReasonPrompt": "Reason for deletion (the account is updated immediately):",
     "pendingDeletion": "Pending approval",
+    "undoDeletion": "Undo deletion",
+    "undoDeletionConfirm": "Undo this deletion? The account is restored immediately.",
     "hasAccount": "Active account",
     "noAccount": "No linked account",
     "detail": {

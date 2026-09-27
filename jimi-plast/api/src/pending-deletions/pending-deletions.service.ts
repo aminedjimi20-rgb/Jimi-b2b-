@@ -537,4 +537,165 @@ export class PendingDeletionsService {
 
     return updated;
   }
+
+  /**
+   * Annule une suppression déjà appliquée (status APPROVED) : rejoue en
+   * sens inverse exactement ce que la suppression avait fait (stock,
+   * écriture de compte, sortie de corbeille) et repasse l'entité visée en
+   * affichage normal. Ne s'applique jamais à une demande encore PENDING
+   * (utiliser `respond` avec REJECTED) ni à une demande déjà UNDONE/REJECTED.
+   */
+  async undo(id: string, actorId: string) {
+    const pending = await this.prisma.pendingDeletion.findUnique({
+      where: { id },
+      include: {
+        customer: { include: { user: { select: { id: true, fullName: true } } } },
+        manufacturer: { include: { user: { select: { id: true, fullName: true } } } },
+        ledgerEntry: true,
+        salesVoucher: { include: { items: true } },
+        purchaseVoucher: { include: { items: true } },
+        supplierLedgerEntry: true,
+      },
+    });
+    if (!pending) throw new NotFoundException('Demande introuvable');
+    if (pending.status !== 'APPROVED') throw new BadRequestException('Cette suppression ne peut pas être annulée');
+
+    const actor = await this.prisma.user.findUnique({ where: { id: actorId }, select: { role: { select: { key: true } } } });
+    const isStaff = actor ? ['admin', 'employee'].includes(actor.role.key) : false;
+    if (!isStaff) throw new ForbiddenException('Seul le personnel peut annuler une suppression');
+
+    await this.prisma.$transaction(async (tx) => {
+      if (pending.ledgerEntry) {
+        await tx.ledgerEntry.update({ where: { id: pending.ledgerEntry.id }, data: { voidedAt: null } });
+      }
+
+      if (pending.supplierLedgerEntry) {
+        await tx.supplierLedgerEntry.update({ where: { id: pending.supplierLedgerEntry.id }, data: { voidedAt: null } });
+      }
+
+      if (pending.manufacturerId && !pending.supplierLedgerEntryId && !pending.purchaseVoucherId) {
+        await tx.manufacturer.update({ where: { id: pending.manufacturerId }, data: { deletedAt: null } });
+      }
+
+      if (pending.purchaseVoucher && pending.purchaseVoucher.status === 'CONFIRMED') {
+        const voucher = pending.purchaseVoucher;
+        for (const item of voucher.items) {
+          const incremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { increment: item.totalUnits } } });
+          await tx.stockMovement.create({
+            data: {
+              productId: item.productId,
+              type: 'ADJUSTMENT',
+              quantity: item.totalUnits,
+              stockAfter: incremented.currentStock,
+              referenceType: 'PurchaseVoucher',
+              referenceId: voucher.id,
+              reason: `Annulation de la suppression du bon ${voucher.number ?? ''}`,
+              createdById: actorId,
+            },
+          });
+        }
+
+        const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+        const total = subtotal - Number(voucher.discount) + Number(voucher.transportCost);
+        const netDebt = total - Number(voucher.paidAmount);
+        await tx.supplierLedgerEntry.create({
+          data: {
+            manufacturerId: voucher.manufacturerId,
+            type: 'ADJUSTMENT',
+            amount: netDebt,
+            reference: voucher.number,
+            note: `Annulation de la suppression du bon ${voucher.number ?? ''}`,
+            createdById: actorId,
+          },
+        });
+      }
+
+      if (pending.salesVoucher && (pending.salesVoucher.status === 'CONFIRMED' || pending.salesVoucher.status === 'DELIVERED')) {
+        const voucher = pending.salesVoucher;
+        for (const item of voucher.items) {
+          const decremented = await tx.product.update({ where: { id: item.productId }, data: { currentStock: { decrement: item.totalUnits } } });
+          await tx.stockMovement.create({
+            data: {
+              productId: item.productId,
+              type: 'ADJUSTMENT',
+              quantity: -item.totalUnits,
+              stockAfter: decremented.currentStock,
+              referenceType: 'SalesVoucher',
+              referenceId: voucher.id,
+              reason: `Annulation de la suppression du bon ${voucher.number ?? ''}`,
+              createdById: actorId,
+            },
+          });
+        }
+
+        const subtotal = voucher.items.reduce((s, i) => s + Number(i.lineTotal), 0);
+        const total = subtotal - Number(voucher.discount) + Number(voucher.transportCost);
+        const netCredit = total - Number(voucher.paidAmount);
+        await tx.ledgerEntry.create({
+          data: {
+            customerId: voucher.customerId!,
+            type: 'ADJUSTMENT',
+            amount: netCredit,
+            reference: voucher.number,
+            note: `Annulation de la suppression du bon ${voucher.number ?? ''}`,
+            createdById: actorId,
+          },
+        });
+      }
+    });
+
+    if (pending.manufacturerId && !pending.supplierLedgerEntryId && !pending.purchaseVoucherId && pending.manufacturer) {
+      const trashItem = await this.prisma.trashItem.findFirst({
+        where: { entityType: 'Manufacturer', entityId: pending.manufacturerId, restoredAt: null, purgedAt: null },
+        orderBy: { deletedAt: 'desc' },
+      });
+      if (trashItem) await this.trash.markRestored(trashItem.id, actorId);
+    }
+
+    const updated = await this.prisma.pendingDeletion.update({
+      where: { id },
+      data: { status: 'UNDONE', undoneById: actorId, undoneAt: new Date() },
+    });
+
+    const actorName = await this.actorName(actorId);
+    const entityLabel = pending.ledgerEntry
+      ? 'la ligne de crédit'
+      : pending.supplierLedgerEntry
+        ? 'la ligne du fabricant'
+        : pending.salesVoucher
+          ? `le bon ${pending.salesVoucher.number ?? ''}`
+          : pending.purchaseVoucher
+            ? `le bon d'achat ${pending.purchaseVoucher.number ?? ''}`
+            : `le fabricant ${pending.manufacturer?.name ?? ''}`;
+    const entityType = pending.ledgerEntry
+      ? 'LedgerEntry'
+      : pending.supplierLedgerEntry
+        ? 'SupplierLedgerEntry'
+        : pending.salesVoucher
+          ? 'SalesVoucher'
+          : pending.purchaseVoucher
+            ? 'PurchaseVoucher'
+            : 'Manufacturer';
+    const entityId =
+      pending.ledgerEntryId ?? pending.supplierLedgerEntryId ?? pending.salesVoucherId ?? pending.purchaseVoucherId ?? (pending.manufacturerId as string);
+    await this.auditLog.record({
+      entityType,
+      entityId,
+      action: 'UPDATE',
+      field: 'pendingDeletion',
+      newValue: 'UNDONE',
+      reason: `Suppression annulée par ${actorName} : ${pending.reason}`,
+      actorId,
+    });
+
+    const body = `${actorName} a annulé la suppression de ${entityLabel}.`;
+    const partyUserId = pending.customer?.user.id ?? pending.manufacturer?.user?.id;
+    if (partyUserId) {
+      await this.notifyBoth(partyUserId, 'pending_deletion.undone', 'Suppression annulée', body, { pendingDeletionId: id });
+    } else {
+      await this.notifyStaffOnly('pending_deletion.undone', 'Suppression annulée', body, { pendingDeletionId: id });
+    }
+
+    return updated;
+  }
 }

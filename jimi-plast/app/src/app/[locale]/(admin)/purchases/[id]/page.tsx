@@ -48,7 +48,7 @@ interface HistoryEntry {
 }
 interface PendingDeletion {
   id: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'UNDONE';
   reason: string;
 }
 interface Purchase {
@@ -475,6 +475,16 @@ export default function PurchaseEditorPage() {
     }
   }
 
+  async function undoDeletion() {
+    if (!deletion || !window.confirm(tVoucher('undoDeletionConfirm'))) return;
+    try {
+      await api.post(`/pending-deletions/${deletion.id}/undo`, {}, token);
+      reload();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : tCommon('error'));
+    }
+  }
+
   async function addAttachment(url: string) {
     setUploadingAttachment(true);
     try {
@@ -534,8 +544,15 @@ export default function PurchaseEditorPage() {
       </div>
 
       {deletion && (isPending || isApproved) && (
-        <p className={`rounded border px-3 py-2 text-xs ${isApproved ? 'border-red-300 bg-red-50 text-red-600' : 'border-amber-400 bg-amber-500/10 text-amber-700'}`}>
-          {isApproved ? tVoucher('detailDeleted') : tVoucher('detailPendingDeletion')} : {deletion.reason}
+        <p className={`flex flex-wrap items-center gap-2 rounded border px-3 py-2 text-xs ${isApproved ? 'border-red-300 bg-red-50 text-red-600' : 'border-amber-400 bg-amber-500/10 text-amber-700'}`}>
+          <span>
+            {isApproved ? tVoucher('detailDeleted') : tVoucher('detailPendingDeletion')} : {deletion.reason}
+          </span>
+          {isApproved && (
+            <button onClick={undoDeletion} className="rounded border border-teal px-2 py-1 text-teal hover:bg-teal/10">
+              {tVoucher('undoDeletion')}
+            </button>
+          )}
         </p>
       )}
 

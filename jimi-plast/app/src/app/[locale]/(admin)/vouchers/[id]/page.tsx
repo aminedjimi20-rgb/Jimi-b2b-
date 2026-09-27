@@ -72,7 +72,7 @@ interface Voucher {
   depot: string | null;
   items: VoucherItem[];
   attachments: { id: string; url: string; createdAt: string }[];
-  pendingDeletions: { id: string; status: 'PENDING' | 'APPROVED' | 'REJECTED'; reason: string }[];
+  pendingDeletions: { id: string; status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'UNDONE'; reason: string }[];
 }
 interface StaffOption {
   id: string;
@@ -614,6 +614,12 @@ export default function VoucherEditorPage() {
     reload();
   }
 
+  async function undoVoucherDeletion() {
+    if (!voucherDeletion || !window.confirm(t('undoDeletionConfirm'))) return;
+    await api.post(`/pending-deletions/${voucherDeletion.id}/undo`, {}, token);
+    reload();
+  }
+
   if (!voucher) return <p className="text-muted">{tCommon('loading')}</p>;
 
   // Tolère un back-end pas encore redéployé (nouvelle migration Render en
@@ -722,8 +728,15 @@ export default function VoucherEditorPage() {
       </div>
 
       {voucherDeletion && (voucherDeletion.status === 'PENDING' || voucherDeletion.status === 'APPROVED') && (
-        <p className={`rounded border px-3 py-2 text-xs ${voucherDeletion.status === 'APPROVED' ? 'border-red-300 bg-red-50 text-red-600' : 'border-amber-400 bg-amber-500/10 text-amber-700'}`}>
-          {voucherDeletion.status === 'APPROVED' ? t('detailDeleted') : t('detailPendingDeletion')} : {voucherDeletion.reason}
+        <p className={`flex flex-wrap items-center gap-2 rounded border px-3 py-2 text-xs ${voucherDeletion.status === 'APPROVED' ? 'border-red-300 bg-red-50 text-red-600' : 'border-amber-400 bg-amber-500/10 text-amber-700'}`}>
+          <span>
+            {voucherDeletion.status === 'APPROVED' ? t('detailDeleted') : t('detailPendingDeletion')} : {voucherDeletion.reason}
+          </span>
+          {canManage && voucherDeletion.status === 'APPROVED' && (
+            <button onClick={undoVoucherDeletion} className="rounded border border-teal px-2 py-1 text-teal hover:bg-teal/10">
+              {t('undoDeletion')}
+            </button>
+          )}
         </p>
       )}
 

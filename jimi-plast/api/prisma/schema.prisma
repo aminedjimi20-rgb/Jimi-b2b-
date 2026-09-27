@@ -104,6 +104,7 @@ model User {
   besoinsAnswered Besoin[]         @relation("BesoinRespondedBy")
   requestedDeletions PendingDeletion[] @relation("PendingDeletionRequestedBy")
   respondedDeletions PendingDeletion[] @relation("PendingDeletionRespondedBy")
+  undoneDeletions    PendingDeletion[] @relation("PendingDeletionUndoneBy")
 
   @@map("users")
 }
@@ -483,6 +484,7 @@ enum PendingDeletionStatus {
   PENDING
   APPROVED
   REJECTED
+  UNDONE
 }
 
 // Une suppression de ligne de crédit (ajustement/paiement), de bon ou de
@@ -492,6 +494,8 @@ enum PendingDeletionStatus {
 // pour de vrai côté affichage. Exactement un des champs
 // customerId/manufacturerId est renseigné selon la partie concernée
 // (appliqué au niveau applicatif, Prisma ne peut pas exprimer un XOR).
+// UNDONE : le personnel a annulé une suppression déjà APPROVED — tous les
+// effets (stock, compte, corbeille) sont rejoués en sens inverse.
 model PendingDeletion {
   id                    String                @id @default(cuid())
   ledgerEntryId         String?
@@ -505,6 +509,8 @@ model PendingDeletion {
   requestedById         String?
   respondedById         String?
   respondedAt           DateTime?
+  undoneById            String?
+  undoneAt              DateTime?
   createdAt             DateTime              @default(now())
 
   ledgerEntry         LedgerEntry?         @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
@@ -515,6 +521,7 @@ model PendingDeletion {
   manufacturer        Manufacturer?        @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
   requestedBy         User?                @relation("PendingDeletionRequestedBy", fields: [requestedById], references: [id])
   respondedBy          User?               @relation("PendingDeletionRespondedBy", fields: [respondedById], references: [id])
+  undoneBy             User?               @relation("PendingDeletionUndoneBy", fields: [undoneById], references: [id])
 
   @@index([customerId])
   @@index([manufacturerId])
