@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { actionBadgeClass, fieldBadgeClass, renderHighlightedReason } from '@/lib/history-colors';
 
 interface AuditLogRow {
   id: string;
@@ -64,13 +65,12 @@ export default function HistoryPage() {
         <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(e.createdAt).toLocaleTimeString(locale)}</td>
         <td className="px-4 py-2 text-ink">{e.entityType}</td>
         <td className="px-4 py-2">
-          <span className="rounded-full bg-line/40 px-2 py-0.5 text-xs text-ink">{t(`actions.${e.action}` as never)}</span>
+          <span className={`rounded-full px-2 py-0.5 text-xs ${actionBadgeClass(e.action)}`}>{t(`actions.${e.action}` as never)}</span>
         </td>
         <td className="px-4 py-2 text-muted">{e.actor?.fullName ?? t('system')}</td>
         <td className="px-4 py-2 text-xs text-muted">
-          {e.field && <span className="font-medium text-ink">{e.field}</span>}
-          {e.field && (e.reason || e.newValue) ? ' — ' : ''}
-          {e.reason ?? truncate(e.newValue)}
+          {e.field && <span className={`mr-1 rounded px-1.5 py-0.5 font-medium ${fieldBadgeClass(e.field)}`}>{e.field}</span>}
+          {e.reason ? renderHighlightedReason(e.reason) : truncate(e.newValue)}
         </td>
         <td className="px-2 py-2 text-end">
           <button onClick={() => toggleHidden(e)} className="text-xs text-accent hover:underline">

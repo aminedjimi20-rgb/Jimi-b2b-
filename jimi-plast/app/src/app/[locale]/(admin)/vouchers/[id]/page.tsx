@@ -10,6 +10,7 @@ import { ImageUploadButton } from '@/components/image-upload-button';
 import { SortSelect, type SortMode } from '@/components/sort-select';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
 import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
+import { fieldBadgeClass, renderHighlightedReason } from '@/lib/history-colors';
 
 interface Price {
   tierKey: string;
@@ -1131,7 +1132,8 @@ export default function VoucherEditorPage() {
                 {' — '}
                 <span className="font-medium text-ink">{h.actor?.fullName ?? t('system')}</span>
                 {' : '}
-                <span className="text-ink">{h.reason ?? `${h.field ?? ''} → ${h.newValue ?? ''}`}</span>
+                {h.field && <span className={`mr-1 rounded px-1.5 py-0.5 font-medium ${fieldBadgeClass(h.field)}`}>{h.field}</span>}
+                <span className="text-ink">{h.reason ? renderHighlightedReason(h.reason) : (h.newValue ?? '')}</span>
               </li>
             ))}
           </ul>
