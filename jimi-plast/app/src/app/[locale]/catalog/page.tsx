@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -52,6 +52,7 @@ interface Product {
   isNew: boolean;
   isFeatured: boolean;
   isClearance: boolean;
+  isSeasonal: boolean;
   availability: 'IN_STOCK' | 'OUT_OF_STOCK';
   currentStock: number | null;
   manufacturer: { id: string; name: string } | null;
@@ -102,9 +103,14 @@ export default function CatalogPage() {
   const [catalogIndex, setCatalogIndex] = useState<Map<string, Product>>(new Map());
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [pageInput, setPageInput] = useState('');
+  const [loadedPages, setLoadedPages] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [goToInput, setGoToInput] = useState('');
+  const [pendingScrollTo, setPendingScrollTo] = useState<number | null>(null);
+  const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
+  const itemRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const CATALOG_PAGE_SIZE = 100;
 
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -139,15 +145,10 @@ export default function CatalogPage() {
     api.get<Category[]>('/categories').then(setCategories);
   }, []);
 
-  // Revient à la page 1 dès qu'un filtre/tri change — sinon on peut se
-  // retrouver sur une page vide (ex: page 5 alors que le nouveau filtre n'a
-  // que 2 pages de résultats).
-  useEffect(() => {
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew]);
-
-  useEffect(() => {
+  // Défilement continu, numéroté 1, 2, 3... sans notion de "page" — juste la
+  // position de l'article dans la liste triée/filtrée courante. On recharge
+  // depuis le début dès qu'un filtre/tri change.
+  function catalogParams(pageNum: number) {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (categoryId) params.set('categoryId', categoryId);
@@ -155,29 +156,101 @@ export default function CatalogPage() {
     if (onlyInStock) params.set('availability', 'in_stock');
     if (onlyOnSale) params.set('onSale', 'true');
     if (onlyNew) params.set('isNew', 'true');
-    params.set('pageSize', '48');
-    params.set('page', String(page));
+    params.set('pageSize', String(CATALOG_PAGE_SIZE));
+    params.set('page', String(pageNum));
+    return params;
+  }
 
+  function indexNewProducts(items: Product[]) {
+    setCatalogIndex((prev) => {
+      const next = new Map(prev);
+      items.forEach((p) => next.set(p.id, p));
+      return next;
+    });
+  }
+
+  useEffect(() => {
     setLoading(true);
+    itemRefs.current = {};
     api
-      .get<{ items: Product[]; total: number; totalPages: number }>(`/products?${params.toString()}`, token)
+      .get<{ items: Product[]; total: number }>(`/products?${catalogParams(1).toString()}`, token)
       .then((res) => {
         setProducts(res.items);
         setTotal(res.total);
-        setTotalPages(res.totalPages);
-        setCatalogIndex((prev) => {
-          const next = new Map(prev);
-          res.items.forEach((p) => next.set(p.id, p));
-          return next;
-        });
+        setLoadedPages(1);
+        indexNewProducts(res.items);
       })
       .finally(() => setLoading(false));
-  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew, token, page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew, token]);
 
-  function goToPage(p: number) {
-    const clamped = Math.min(Math.max(1, p), totalPages);
-    setPage(clamped);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  async function loadMore() {
+    if (loadingMore || loading || products.length >= total) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = loadedPages + 1;
+      const res = await api.get<{ items: Product[]; total: number }>(`/products?${catalogParams(nextPage).toString()}`, token);
+      setProducts((prev) => [...prev, ...res.items]);
+      indexNewProducts(res.items);
+      setLoadedPages(nextPage);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: '600px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products.length, total, loadingMore, loading]);
+
+  // Une fois assez d'articles chargés pour atteindre la cible, on défile
+  // jusqu'à elle et on la surligne brièvement — le numéro n'est qu'un repère
+  // de position, jamais lié à un article précis (il se recalcule à chaque
+  // filtre), donc "aller au N°128" veut juste dire "le 128e article affiché".
+  useEffect(() => {
+    if (pendingScrollTo == null || products.length < pendingScrollTo) return;
+    const el = itemRefs.current[pendingScrollTo];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightIndex(pendingScrollTo);
+      setTimeout(() => setHighlightIndex(null), 2000);
+    }
+    setPendingScrollTo(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, pendingScrollTo]);
+
+  async function goToItem(n: number) {
+    if (!Number.isFinite(n) || total === 0) return;
+    const target = Math.min(Math.max(1, Math.round(n)), total);
+    if (products.length >= target) {
+      setPendingScrollTo(target);
+      return;
+    }
+    setLoadingMore(true);
+    try {
+      let acc = products;
+      let currentPage = loadedPages;
+      while (acc.length < target && acc.length < total) {
+        currentPage += 1;
+        const res = await api.get<{ items: Product[]; total: number }>(`/products?${catalogParams(currentPage).toString()}`, token);
+        acc = [...acc, ...res.items];
+        indexNewProducts(res.items);
+      }
+      setLoadedPages(currentPage);
+      setProducts(acc);
+      setPendingScrollTo(target);
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
   useEffect(() => {
@@ -551,21 +624,36 @@ export default function CatalogPage() {
         )}
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {products.map((p) => {
+          {products.map((p, idx) => {
+            const itemNumber = idx + 1;
             const mainPrice = priceForView(p);
             const inCart = cartProductIds.has(p.id);
             return (
               <div
                 key={p.id}
-                className={`flex flex-col rounded-lg border p-3 shadow-sm ${
-                  inCart ? 'border-teal bg-teal/5' : 'border-line bg-panel'
+                ref={(el) => {
+                  itemRefs.current[itemNumber] = el;
+                }}
+                className={`flex flex-col rounded-lg border p-3 shadow-sm transition-colors ${
+                  highlightIndex === itemNumber
+                    ? 'border-accent ring-2 ring-accent'
+                    : inCart
+                      ? 'border-teal bg-teal/5'
+                      : 'border-line bg-panel'
                 }`}
               >
-                {inCart && (
-                  <span className="mb-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-teal px-2 py-0.5 text-[10px] font-semibold text-white">
-                    ✓ {t('inCart')}
+                <div className="mb-1.5 flex items-center justify-between gap-1">
+                  {inCart ? (
+                    <span className="inline-flex w-fit items-center gap-1 rounded-full bg-teal px-2 py-0.5 text-[10px] font-semibold text-white">
+                      ✓ {t('inCart')}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <span className="rounded-full bg-line/50 px-1.5 py-0.5 text-[10px] font-medium text-muted">
+                    {t('itemNumber')}{itemNumber}
                   </span>
-                )}
+                </div>
                 <div
                   className={`group relative mb-2 flex aspect-square items-center justify-center overflow-hidden rounded bg-paper text-muted ${
                     p.images.length > 0 ? 'cursor-zoom-in' : ''
@@ -608,6 +696,11 @@ export default function CatalogPage() {
                     {p.isClearance && (
                       <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                         {t('clearance')}
+                      </span>
+                    )}
+                    {p.isSeasonal && (
+                      <span className="rounded bg-amber-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        {t('seasonal')}
                       </span>
                     )}
                   </div>
@@ -717,69 +810,35 @@ export default function CatalogPage() {
         {!loading && total > 0 && (
           <div className="mt-6 flex flex-col items-center gap-2">
             <p className="text-xs text-muted">
-              {total} produits — {t('page')} {page} / {totalPages}
+              {products.length} / {total} produits
             </p>
-            {totalPages > 1 && (
-              <div className="flex flex-wrap items-center justify-center gap-1.5">
-                <button
-                  onClick={() => goToPage(page - 1)}
-                  disabled={page <= 1}
-                  className="rounded border border-line px-2.5 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-40"
-                >
-                  ← {t('previousPage')}
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
-                  .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
-                    if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('ellipsis');
-                    acc.push(p);
-                    return acc;
-                  }, [])
-                  .map((p, idx) =>
-                    p === 'ellipsis' ? (
-                      <span key={`e${idx}`} className="px-1 text-xs text-muted">…</span>
-                    ) : (
-                      <button
-                        key={p}
-                        onClick={() => goToPage(p)}
-                        className={`rounded border px-2.5 py-1 text-xs ${
-                          p === page ? 'border-accent bg-accent text-white' : 'border-line text-ink hover:bg-line/30'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ),
-                  )}
-                <button
-                  onClick={() => goToPage(page + 1)}
-                  disabled={page >= totalPages}
-                  className="rounded border border-line px-2.5 py-1 text-xs text-ink hover:bg-line/30 disabled:opacity-40"
-                >
-                  {t('nextPage')} →
-                </button>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const n = Number(pageInput);
-                    if (n) goToPage(n);
-                    setPageInput('');
-                  }}
-                  className="flex items-center gap-1"
-                >
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={pageInput}
-                    onChange={(e) => setPageInput(onlyDigits(e.target.value))}
-                    placeholder={t('goToPage')}
-                    className="w-16 rounded border border-line bg-panel px-2 py-1 text-xs"
-                  />
-                  <button type="submit" className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30">
-                    {t('go')}
-                  </button>
-                </form>
+            {products.length < total && (
+              <div ref={loadMoreRef} className="text-xs text-muted">
+                {loadingMore ? t('loadingMore') : ''}
               </div>
             )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const n = Number(goToInput);
+                if (n) goToItem(n);
+                setGoToInput('');
+              }}
+              className="mt-2 flex items-center gap-1.5"
+            >
+              <span className="text-xs text-muted">{t('itemNumber')}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={goToInput}
+                onChange={(e) => setGoToInput(onlyDigits(e.target.value))}
+                placeholder={t('goToItemPlaceholder')}
+                className="w-20 rounded border border-line bg-panel px-2 py-1 text-xs"
+              />
+              <button type="submit" className="rounded border border-line px-2.5 py-1 text-xs text-ink hover:bg-line/30">
+                {t('go')}
+              </button>
+            </form>
           </div>
         )}
       </div>

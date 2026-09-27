@@ -244,8 +244,12 @@
     "missingPieces": "Missing pieces",
     "minus": "minus",
     "clearance": "Clearance",
+    "seasonal": "Seasonal",
     "manufacturer": "Manufacturer",
-    "depot": "Depot"
+    "depot": "Depot",
+    "itemNumber": "#",
+    "goToItemPlaceholder": "Item #",
+    "loadingMore": "Loading…"
   },
   "products": {
     "title": "Products",

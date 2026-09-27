@@ -244,8 +244,12 @@
     "missingPieces": "Pièces manquantes",
     "minus": "moins",
     "clearance": "Déstockage",
+    "seasonal": "Saisonnier",
     "manufacturer": "Fabricant",
-    "depot": "Dépôt"
+    "depot": "Dépôt",
+    "itemNumber": "N°",
+    "goToItemPlaceholder": "N° d'article",
+    "loadingMore": "Chargement…"
   },
   "products": {
     "title": "Produits",

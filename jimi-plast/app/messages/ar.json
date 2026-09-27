@@ -244,8 +244,12 @@
     "missingPieces": "القطع الناقصة",
     "minus": "ناقص",
     "clearance": "تصفية",
+    "seasonal": "موسمي",
     "manufacturer": "الفابريكون",
-    "depot": "الديبو"
+    "depot": "الديبو",
+    "itemNumber": "رقم",
+    "goToItemPlaceholder": "رقم المنتج",
+    "loadingMore": "جارٍ التحميل…"
   },
   "products": {
     "title": "المنتجات",
