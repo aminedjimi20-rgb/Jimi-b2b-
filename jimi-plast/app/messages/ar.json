@@ -61,12 +61,19 @@
     "menu": "القائمة"
   },
   "attendance": {
-    "title": "البوانطاج",
-    "clockIn": "بوانطاج الدخول",
-    "clockOut": "بوانطاج الخروج",
-    "clockedInSince": "بوانطي من {time}",
-    "notClockedIn": "مازال ما بوانطيتش اليوم",
-    "notePlaceholder": "زيد ملاحظة على نهارك…",
+    "title": "الحضور",
+    "mark": "تأشير",
+    "unmark": "إلغاء التأشير",
+    "confirm": "تأكيد",
+    "unconfirm": "التراجع عن التأكيد",
+    "hide": "إخفاء",
+    "unhide": "إظهار",
+    "showHidden": "عرض المخفي",
+    "legendMarked": "مؤشَّر، في الانتظار",
+    "legendConfirmed": "مؤكَّد",
+    "markedTooltip": "أُشِّر في {time}",
+    "confirmedTooltip": "أكّده {name} في {time}",
+    "notePlaceholder": "أضف ملاحظة عن يومك…",
     "addNote": "إضافة"
   },
   "notes": {

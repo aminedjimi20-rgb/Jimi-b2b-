@@ -77,9 +77,26 @@ export class UsersController {
     return this.attendanceService.getActivity(id);
   }
 
+  // Le calendrier vu par l'administrateur est exactement le même que celui
+  // de l'employé (getCalendar) — seule la confirmation lui est réservée.
   @Get(':id/attendance')
-  getAttendance(@Param('id') id: string) {
-    return this.attendanceService.listAttendance(id);
+  getAttendanceCalendar(@Param('id') id: string) {
+    return this.attendanceService.getCalendar(id);
+  }
+
+  @Post(':id/attendance/:date/confirm')
+  confirmAttendance(@Param('id') id: string, @Param('date') date: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.attendanceService.confirm(user.id, id, date);
+  }
+
+  @Post(':id/attendance/:date/unconfirm')
+  unconfirmAttendance(@Param('id') id: string, @Param('date') date: string) {
+    return this.attendanceService.unconfirm(id, date);
+  }
+
+  @Put(':id/attendance/:attendanceId/hidden')
+  setAttendanceHidden(@Param('attendanceId') attendanceId: string, @Body('hidden') hidden: boolean) {
+    return this.attendanceService.setHidden(attendanceId, hidden);
   }
 
   @Post(':id/notes')

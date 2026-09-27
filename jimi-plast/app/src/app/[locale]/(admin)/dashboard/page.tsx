@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
+import { AttendanceCalendar, type AttendanceEntry } from '@/components/attendance-calendar';
 
 interface RegistrationRequest {
   status: string;
@@ -234,42 +236,30 @@ function PresetButton({ children, onClick }: { children: React.ReactNode; onClic
 function AttendanceWidget() {
   const t = useTranslations('attendance');
   const { token } = useAuth();
-  const [loaded, setLoaded] = useState(false);
-  const [open, setOpen] = useState<{ clockInAt: string } | null>(null);
+  const { locale } = useParams<{ locale: string }>();
+  const [entries, setEntries] = useState<AttendanceEntry[] | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
-  const [busy, setBusy] = useState(false);
 
   function reload() {
     if (!token) return;
-    // Un pointage ouvert répond un objet, aucun pointage ouvert répond un
-    // corps 200 vide qu'`api.get` traduit en `undefined` — jamais `null` ici.
-    api.get<{ clockInAt: string } | undefined>('/attendance/status', token).then((status) => {
-      setOpen(status ?? null);
-      setLoaded(true);
-    });
+    api.get<AttendanceEntry[]>('/attendance/calendar', token).then(setEntries);
   }
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  async function clockIn() {
-    setBusy(true);
-    try {
-      await api.post('/attendance/clock-in', undefined, token);
-      reload();
-    } finally {
-      setBusy(false);
-    }
+  async function mark(date: string) {
+    await api.post('/attendance/mark', { date }, token);
+    reload();
   }
-  async function clockOut() {
-    setBusy(true);
-    try {
-      await api.post('/attendance/clock-out', undefined, token);
-      reload();
-    } finally {
-      setBusy(false);
-    }
+  async function unmark(date: string) {
+    await api.post('/attendance/unmark', { date }, token);
+    reload();
+  }
+  async function toggleHidden(id: string, hidden: boolean) {
+    await api.put(`/attendance/${id}/hidden`, { hidden }, token);
+    reload();
   }
   async function addNote() {
     if (!noteDraft.trim()) return;
@@ -277,23 +267,20 @@ function AttendanceWidget() {
     setNoteDraft('');
   }
 
-  if (!loaded) return null;
+  if (!entries) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-line bg-panel p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-ink">
-          {open ? t('clockedInSince', { time: new Date(open.clockInAt).toLocaleTimeString() }) : t('notClockedIn')}
-        </span>
-        <button
-          onClick={open ? clockOut : clockIn}
-          disabled={busy}
-          className={`rounded px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 ${open ? 'bg-red-600' : 'bg-teal'}`}
-        >
-          {open ? t('clockOut') : t('clockIn')}
-        </button>
-      </div>
-      <div className="flex flex-1 items-center gap-2 sm:max-w-sm">
+    <div className="flex flex-col gap-3 rounded-lg border border-line bg-panel p-4">
+      <p className="text-sm font-semibold text-ink">{t('title')}</p>
+      <AttendanceCalendar
+        entries={entries}
+        mode="self"
+        locale={locale}
+        onMark={mark}
+        onUnmark={unmark}
+        onToggleHidden={toggleHidden}
+      />
+      <div className="flex items-center gap-2 border-t border-line pt-3">
         <input
           value={noteDraft}
           onChange={(e) => setNoteDraft(e.target.value)}

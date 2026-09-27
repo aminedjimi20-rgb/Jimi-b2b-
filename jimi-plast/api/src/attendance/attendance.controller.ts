@@ -1,29 +1,36 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
 import { CreateEmployeeNoteDto } from './dto/employee-note.dto';
+import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 
-/** Pointage et journal personnel — en libre-service pour tout compte connecté,
- * chacun ne pointe et ne note que pour lui-même. La vue admin (par employé)
- * vit dans UsersController, réservée à users.manage. */
+/** Pointage-calendrier et journal personnel — en libre-service pour tout
+ * compte connecté, chacun ne coche/ne note que pour lui-même. La vue admin
+ * (par employé, avec confirmation) vit dans UsersController, réservée à
+ * users.manage. */
 @Controller('attendance')
 export class AttendanceController {
   constructor(private readonly service: AttendanceService) {}
 
-  @Post('clock-in')
-  clockIn(@CurrentUser() user: AuthenticatedUser) {
-    return this.service.clockIn(user.id);
+  @Get('calendar')
+  calendar(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.getCalendar(user.id);
   }
 
-  @Post('clock-out')
-  clockOut(@CurrentUser() user: AuthenticatedUser) {
-    return this.service.clockOut(user.id);
+  @Post('mark')
+  mark(@CurrentUser() user: AuthenticatedUser, @Body() dto: MarkAttendanceDto) {
+    return this.service.mark(user.id, dto.date);
   }
 
-  @Get('status')
-  status(@CurrentUser() user: AuthenticatedUser) {
-    return this.service.getOpenAttendance(user.id);
+  @Post('unmark')
+  unmark(@CurrentUser() user: AuthenticatedUser, @Body() dto: MarkAttendanceDto) {
+    return this.service.unmark(user.id, dto.date);
+  }
+
+  @Put(':id/hidden')
+  setHidden(@Param('id') id: string, @Body('hidden') hidden: boolean, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.setHiddenMine(user.id, id, hidden);
   }
 
   @Get('mine')

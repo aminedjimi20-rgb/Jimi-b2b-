@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { AttendanceCalendar, type AttendanceEntry } from '@/components/attendance-calendar';
 
 interface UserDetail {
   id: string;
@@ -25,24 +26,12 @@ interface Role {
   name: string;
   isSystem: boolean;
 }
-interface AttendanceRow {
-  id: string;
-  clockInAt: string;
-  clockOutAt: string | null;
-}
 type ActivityItem =
   | { type: 'note'; id: string; text: string; createdAt: string; voidedAt: string | null }
   | { type: 'sale_voucher'; id: string; number: string | null; status: string; createdAt: string }
   | { type: 'purchase_voucher'; id: string; number: string | null; status: string; createdAt: string };
 
 const NON_EMPLOYEE_ROLE_KEYS = ['wholesaler', 'retailer', 'manufacturer'];
-
-function formatDuration(ms: number) {
-  const totalMinutes = Math.floor(ms / 60000);
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return `${h}h${String(m).padStart(2, '0')}`;
-}
 
 export default function UserDetailPage() {
   const t = useTranslations('users');
@@ -56,7 +45,7 @@ export default function UserDetailPage() {
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', roleKey: '' });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [attendance, setAttendance] = useState<AttendanceRow[]>([]);
+  const [attendance, setAttendance] = useState<AttendanceEntry[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [noteDraft, setNoteDraft] = useState('');
 
@@ -69,7 +58,7 @@ export default function UserDetailPage() {
         setForm({ fullName: u.fullName, email: u.email ?? '', phone: u.phone ?? '', roleKey: u.role.key });
       })
       .catch(() => setUser(null));
-    api.get<AttendanceRow[]>(`/users/${id}/attendance`, token).then(setAttendance);
+    api.get<AttendanceEntry[]>(`/users/${id}/attendance`, token).then(setAttendance);
     api.get<ActivityItem[]>(`/users/${id}/activity`, token).then(setActivity);
   }
   useEffect(() => {
@@ -132,6 +121,19 @@ export default function UserDetailPage() {
 
   async function toggleNoteVoided(item: Extract<ActivityItem, { type: 'note' }>) {
     await api.put(`/users/notes/${item.id}/void`, { voided: !item.voidedAt }, token);
+    reload();
+  }
+
+  async function confirmAttendance(date: string) {
+    await api.post(`/users/${id}/attendance/${date}/confirm`, undefined, token);
+    reload();
+  }
+  async function unconfirmAttendance(date: string) {
+    await api.post(`/users/${id}/attendance/${date}/unconfirm`, undefined, token);
+    reload();
+  }
+  async function toggleAttendanceHidden(attendanceId: string, hidden: boolean) {
+    await api.put(`/users/${id}/attendance/${attendanceId}/hidden`, { hidden }, token);
     reload();
   }
 
@@ -232,36 +234,14 @@ export default function UserDetailPage() {
 
       <div className="rounded-lg border border-line bg-panel p-4">
         <p className="mb-3 text-sm font-semibold text-ink">{t('detail.attendanceHistory')}</p>
-        {attendance.length === 0 ? (
-          <p className="text-sm text-muted">{tCommon('empty')}</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[420px] text-sm">
-              <thead className="text-xs uppercase text-muted">
-                <tr>
-                  <th className="px-2 py-1.5 text-start">{t('detail.clockIn')}</th>
-                  <th className="px-2 py-1.5 text-start">{t('detail.clockOut')}</th>
-                  <th className="px-2 py-1.5 text-start">{t('detail.duration')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendance.map((a) => (
-                  <tr key={a.id} className="border-t border-line">
-                    <td className="px-2 py-1.5 text-ink">{new Date(a.clockInAt).toLocaleString(locale)}</td>
-                    <td className="px-2 py-1.5 text-ink">
-                      {a.clockOutAt ? new Date(a.clockOutAt).toLocaleString(locale) : (
-                        <span className="text-teal">{t('detail.ongoing')}</span>
-                      )}
-                    </td>
-                    <td className="px-2 py-1.5 tabular text-muted">
-                      {formatDuration((a.clockOutAt ? new Date(a.clockOutAt).getTime() : Date.now()) - new Date(a.clockInAt).getTime())}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <AttendanceCalendar
+          entries={attendance}
+          mode="admin"
+          locale={locale}
+          onConfirm={confirmAttendance}
+          onUnconfirm={unconfirmAttendance}
+          onToggleHidden={toggleAttendanceHidden}
+        />
       </div>
 
       <div className="rounded-lg border border-line bg-panel p-4">

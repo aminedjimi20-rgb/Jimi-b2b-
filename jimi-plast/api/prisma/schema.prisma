@@ -107,23 +107,32 @@ model User {
   undoneDeletions    PendingDeletion[] @relation("PendingDeletionUndoneBy")
   productRequests    ProductRequest[]
   attendances        Attendance[]
+  confirmedAttendances Attendance[]   @relation("AttendanceConfirmedBy")
   employeeNotes      EmployeeNote[]
   notes              Note[]           @relation("NoteAuthor")
 
   @@map("users")
 }
 
-// Pointage : une ligne par présence, ouverte au clock-in et fermée au
-// clock-out — jamais plus d'une ligne ouverte (clockOutAt null) à la fois
-// par utilisateur.
+// Pointage-calendrier : l'employé coche un jour (markedAt), l'administrateur
+// confirme séparément (confirmedAt/confirmedById) — deux horodatages
+// distincts, jamais mélangés. Une ligne par employé par jour civil (date en
+// "YYYY-MM-DD", volontairement pas un DateTime, pour ignorer tout fuseau
+// horaire). Une fois confirmée, l'employé ne peut plus décocher.
 model Attendance {
-  id         String    @id @default(cuid())
-  userId     String
-  clockInAt  DateTime  @default(now())
-  clockOutAt DateTime?
+  id            String    @id @default(cuid())
+  userId        String
+  date          String
+  markedAt      DateTime  @default(now())
+  confirmedAt   DateTime?
+  confirmedById String?
+  hiddenAt      DateTime?
+  createdAt     DateTime  @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confirmedBy User? @relation("AttendanceConfirmedBy", fields: [confirmedById], references: [id], onDelete: SetNull)
 
+  @@unique([userId, date])
   @@index([userId])
   @@map("attendances")
 }
