@@ -299,6 +299,15 @@ export default function VoucherEditorPage() {
     });
   }
 
+  // L'historique n'a aucun risque de course avec la frappe (ce n'est pas un
+  // champ éditable) — contrairement à refreshVoucherOnly, on le recharge à
+  // chaque sauvegarde automatique sur un bon confirmé/livré (items, remise,
+  // transport, montant payé y journalisent tous une entrée côté serveur).
+  function refreshHistory() {
+    if (!canManage) return;
+    api.get<HistoryEntry[]>(`/vouchers/${id}/history`, token).then(setHistory).catch(() => setHistory([]));
+  }
+
   const autoSave = useCallback(
     (patch: Record<string, unknown>) => {
       // Fusionne avec un éventuel changement déjà en attente — sinon,
@@ -313,6 +322,7 @@ export default function VoucherEditorPage() {
           await api.put(`${basePath}/${id}`, toSend, token);
           setSavedAt(new Date());
           if ('items' in toSend) refreshVoucherOnly();
+          refreshHistory();
         } catch (e) {
           const details = e instanceof ApiError ? (e.details as { code?: string; shortfalls?: { name: string; available: number; requested: number }[] } | undefined) : undefined;
           if (details?.code === 'INSUFFICIENT_STOCK' && details.shortfalls && 'items' in toSend) {
@@ -321,6 +331,7 @@ export default function VoucherEditorPage() {
               try {
                 await api.put(`${basePath}/${id}`, { ...toSend, force: true }, token);
                 setSavedAt(new Date());
+                refreshHistory();
               } catch {
                 setError(tCommon('error'));
               }
