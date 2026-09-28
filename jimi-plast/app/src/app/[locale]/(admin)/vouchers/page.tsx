@@ -6,8 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 import { SearchableSelect } from '@/components/searchable-select';
 
 interface Customer {
@@ -113,7 +113,7 @@ export default function VouchersPage() {
 
   const groupByDate = sortMode === 'newest' || sortMode === 'oldest';
   const dayGroups = useMemo(
-    () => (groupByDate ? groupByDay(sortedVouchers, (v) => v.createdAt) : []),
+    () => (groupByDate ? groupHierarchical(sortedVouchers, (v) => v.createdAt) : []),
     [sortedVouchers, groupByDate],
   );
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
@@ -173,8 +173,8 @@ export default function VouchersPage() {
         {groupByDate && dayGroups.length > 0 && (
           <DayGroupToggleAll
             allExpanded={allExpanded}
-            onExpandAll={expandAll}
-            onCollapseAll={collapseAll}
+            onExpandAll={() => expandAll(dayGroups)}
+            onCollapseAll={() => collapseAll(dayGroups)}
             expandLabel={tCommon('expandAll')}
             collapseLabel={tCommon('collapseAll')}
           />
@@ -196,18 +196,18 @@ export default function VouchersPage() {
           </thead>
           <tbody>
             {groupByDate
-              ? dayGroups.map((group, idx) => (
-                  <Fragment key={group.key}>
-                    <DayGroupRow
-                      label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
-                      count={group.rows.length}
-                      colSpan={6}
-                      expanded={isExpanded(idx)}
-                      onToggle={() => toggle(idx)}
-                    />
-                    {isExpanded(idx) && group.rows.map((v) => <VoucherTableRow key={v.id} v={v} t={t} locale={locale} router={router} />)}
-                  </Fragment>
-                ))
+              ? (
+                <HierGroupRows
+                  groups={dayGroups}
+                  renderRow={(v) => <VoucherTableRow key={v.id} v={v} t={t} locale={locale} router={router} />}
+                  isExpanded={isExpanded}
+                  toggle={toggle}
+                  colSpan={6}
+                  locale={locale}
+                  todayLabel={tCommon('today')}
+                  yesterdayLabel={tCommon('yesterday')}
+                />
+              )
               : sortedVouchers.map((v) => <VoucherTableRow key={v.id} v={v} t={t} locale={locale} router={router} />)}
           </tbody>
         </table>

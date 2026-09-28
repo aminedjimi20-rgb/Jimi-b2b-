@@ -6,8 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 
 interface Customer {
   id: string;
@@ -159,7 +159,7 @@ function AdminReturnsView() {
 
   const groupByDate = sortMode === 'newest' || sortMode === 'oldest';
   const dayGroups = useMemo(
-    () => (groupByDate ? groupByDay(sortedReturns, (r) => r.createdAt) : []),
+    () => (groupByDate ? groupHierarchical(sortedReturns, (r) => r.createdAt) : []),
     [sortedReturns, groupByDate],
   );
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
@@ -238,8 +238,8 @@ function AdminReturnsView() {
           {groupByDate && dayGroups.length > 0 && (
             <DayGroupToggleAll
               allExpanded={allExpanded}
-              onExpandAll={expandAll}
-              onCollapseAll={collapseAll}
+              onExpandAll={() => expandAll(dayGroups)}
+              onCollapseAll={() => collapseAll(dayGroups)}
               expandLabel={tCommon('expandAll')}
               collapseLabel={tCommon('collapseAll')}
             />
@@ -302,18 +302,18 @@ function AdminReturnsView() {
               </tr>
             )}
             {groupByDate
-              ? dayGroups.map((group, idx) => (
-                  <Fragment key={group.key}>
-                    <DayGroupRow
-                      label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
-                      count={group.rows.length}
-                      colSpan={6}
-                      expanded={isExpanded(idx)}
-                      onToggle={() => toggle(idx)}
-                    />
-                    {isExpanded(idx) && group.rows.map((r) => renderReturnRow(r))}
-                  </Fragment>
-                ))
+              ? (
+                <HierGroupRows
+                  groups={dayGroups}
+                  renderRow={renderReturnRow}
+                  isExpanded={isExpanded}
+                  toggle={toggle}
+                  colSpan={6}
+                  locale={locale}
+                  todayLabel={tCommon('today')}
+                  yesterdayLabel={tCommon('yesterday')}
+                />
+              )
               : sortedReturns.map((r) => renderReturnRow(r))}
           </tbody>
         </table>

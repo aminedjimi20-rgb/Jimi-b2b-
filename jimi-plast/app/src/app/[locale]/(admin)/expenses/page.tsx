@@ -7,8 +7,8 @@ import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 import { SortSelect, type SortMode } from '@/components/sort-select';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 
 interface ExpenseCategory {
   id: string;
@@ -132,7 +132,7 @@ export default function ExpensesPage() {
 
   const groupByDate = sortMode === 'newest' || sortMode === 'oldest';
   const dayGroups = useMemo(
-    () => (groupByDate ? groupByDay(sortedExpenses, (e) => e.date) : []),
+    () => (groupByDate ? groupHierarchical(sortedExpenses, (e) => e.date) : []),
     [sortedExpenses, groupByDate],
   );
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
@@ -314,8 +314,8 @@ export default function ExpensesPage() {
             {groupByDate && dayGroups.length > 0 && (
               <DayGroupToggleAll
                 allExpanded={allExpanded}
-                onExpandAll={expandAll}
-                onCollapseAll={collapseAll}
+                onExpandAll={() => expandAll(dayGroups)}
+                onCollapseAll={() => collapseAll(dayGroups)}
                 expandLabel={tc('expandAll')}
                 collapseLabel={tc('collapseAll')}
               />
@@ -372,20 +372,20 @@ export default function ExpensesPage() {
                     <td colSpan={5} className="px-4 py-4 text-center text-sm text-muted">{tc('empty')}</td>
                   </tr>
                 )}
-                {groupByDate
-                  ? dayGroups.map((group, idx) => (
-                      <Fragment key={group.key}>
-                        <DayGroupRow
-                          label={dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}
-                          count={group.rows.length}
-                          colSpan={5}
-                          expanded={isExpanded(idx)}
-                          onToggle={() => toggle(idx)}
-                        />
-                        {isExpanded(idx) && group.rows.map((e) => renderExpenseRow(e))}
-                      </Fragment>
-                    ))
-                  : sortedExpenses.map((e) => renderExpenseRow(e))}
+                {groupByDate ? (
+                  <HierGroupRows
+                    groups={dayGroups}
+                    renderRow={renderExpenseRow}
+                    isExpanded={isExpanded}
+                    toggle={toggle}
+                    colSpan={5}
+                    locale={locale}
+                    todayLabel={tc('today')}
+                    yesterdayLabel={tc('yesterday')}
+                  />
+                ) : (
+                  sortedExpenses.map((e) => renderExpenseRow(e))
+                )}
               </tbody>
               {sortedExpenses.length > 0 && (
                 <tfoot>

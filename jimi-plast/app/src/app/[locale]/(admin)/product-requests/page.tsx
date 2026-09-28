@@ -7,8 +7,8 @@ import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageLightbox } from '@/components/image-lightbox';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 
 interface Remark {
   id: string;
@@ -88,7 +88,7 @@ function AdminProductRequestsView() {
     });
   }, [requests, search]);
 
-  const dayGroups = useMemo(() => groupByDay(filtered, (r) => r.createdAt), [filtered]);
+  const dayGroups = useMemo(() => groupHierarchical(filtered, (r) => r.createdAt), [filtered]);
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   async function updateStatus(id: string, status: string) {
@@ -277,8 +277,8 @@ function AdminProductRequestsView() {
         {dayGroups.length > 0 && (
           <DayGroupToggleAll
             allExpanded={allExpanded}
-            onExpandAll={expandAll}
-            onCollapseAll={collapseAll}
+            onExpandAll={() => expandAll(dayGroups)}
+            onCollapseAll={() => collapseAll(dayGroups)}
             expandLabel={tc('expandAll')}
             collapseLabel={tc('collapseAll')}
           />
@@ -352,18 +352,16 @@ function AdminProductRequestsView() {
                 </td>
               </tr>
             )}
-            {dayGroups.map((group, idx) => (
-              <Fragment key={group.key}>
-                <DayGroupRow
-                  label={dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}
-                  count={group.rows.length}
-                  colSpan={6}
-                  expanded={isExpanded(idx)}
-                  onToggle={() => toggle(idx)}
-                />
-                {isExpanded(idx) && group.rows.map((r) => renderRow(r))}
-              </Fragment>
-            ))}
+            <HierGroupRows
+              groups={dayGroups}
+              renderRow={renderRow}
+              isExpanded={isExpanded}
+              toggle={toggle}
+              colSpan={6}
+              locale={locale}
+              todayLabel={tc('today')}
+              yesterdayLabel={tc('yesterday')}
+            />
           </tbody>
         </table>
       </div>

@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 
 interface ProductAlert {
   id: string;
@@ -92,8 +92,41 @@ export default function StockPage() {
     return haystack.includes(q);
   });
 
-  const dayGroups = useMemo(() => groupByDay(filteredMovements, (m) => m.createdAt), [filteredMovements]);
+  const dayGroups = useMemo(() => groupHierarchical(filteredMovements, (m) => m.createdAt), [filteredMovements]);
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
+
+  function renderMovementRow(m: Movement) {
+    const upp = m.product.unitsPerPackage || 1;
+    const cartons = Math.round((m.quantity / upp) * 100) / 100;
+    const link = movementLink(m, locale);
+    return (
+      <tr key={m.id} className="border-t border-line">
+        <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
+        <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
+        <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
+        <td className="px-4 py-2 font-mono text-xs">
+          {link && m.voucherNumber ? (
+            <button onClick={() => router.push(link)} className="text-accent hover:underline">
+              {m.voucherNumber}
+            </button>
+          ) : (
+            m.voucherNumber ?? '—'
+          )}
+        </td>
+        <td className="px-4 py-2 text-xs text-muted">{m.partyName ?? '—'}</td>
+        <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
+          {m.quantity > 0 ? '+' : ''}
+          {m.quantity}
+        </td>
+        <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
+          {cartons > 0 ? '+' : ''}
+          {cartons}
+        </td>
+        <td className="px-4 py-2 text-end tabular text-ink">{m.stockAfter ?? '—'}</td>
+        <td className="px-4 py-2 text-xs text-muted">{m.reason ?? '—'}</td>
+      </tr>
+    );
+  }
 
   const selectedProduct = products.find((p) => p.id === productId) ?? null;
   const upp = selectedProduct?.unitsPerPackage || 1;
@@ -249,8 +282,8 @@ export default function StockPage() {
             {dayGroups.length > 0 && (
               <DayGroupToggleAll
                 allExpanded={allExpanded}
-                onExpandAll={expandAll}
-                onCollapseAll={collapseAll}
+                onExpandAll={() => expandAll(dayGroups)}
+                onCollapseAll={() => collapseAll(dayGroups)}
                 expandLabel={tCommon('expandAll')}
                 collapseLabel={tCommon('collapseAll')}
               />
@@ -280,50 +313,16 @@ export default function StockPage() {
                   </td>
                 </tr>
               )}
-              {dayGroups.map((group, idx) => (
-                <Fragment key={group.key}>
-                  <DayGroupRow
-                    label={dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}
-                    count={group.rows.length}
-                    colSpan={9}
-                    expanded={isExpanded(idx)}
-                    onToggle={() => toggle(idx)}
-                  />
-                  {isExpanded(idx) &&
-                    group.rows.map((m) => {
-                      const upp = m.product.unitsPerPackage || 1;
-                      const cartons = Math.round((m.quantity / upp) * 100) / 100;
-                      const link = movementLink(m, locale);
-                      return (
-                        <tr key={m.id} className="border-t border-line">
-                          <td className="px-4 py-2 font-mono text-xs text-muted">{new Date(m.createdAt).toLocaleString()}</td>
-                          <td className="px-4 py-2 text-ink">{m.product.nameFr}</td>
-                          <td className="px-4 py-2 text-xs">{t(`movementTypes.${m.type}` as never)}</td>
-                          <td className="px-4 py-2 font-mono text-xs">
-                            {link && m.voucherNumber ? (
-                              <button onClick={() => router.push(link)} className="text-accent hover:underline">
-                                {m.voucherNumber}
-                              </button>
-                            ) : (
-                              m.voucherNumber ?? '—'
-                            )}
-                          </td>
-                          <td className="px-4 py-2 text-xs text-muted">{m.partyName ?? '—'}</td>
-                          <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
-                            {m.quantity > 0 ? '+' : ''}
-                            {m.quantity}
-                          </td>
-                          <td className={`px-4 py-2 text-end tabular ${m.quantity > 0 ? 'text-teal' : 'text-accent'}`}>
-                            {cartons > 0 ? '+' : ''}
-                            {cartons}
-                          </td>
-                          <td className="px-4 py-2 text-end tabular text-ink">{m.stockAfter ?? '—'}</td>
-                          <td className="px-4 py-2 text-xs text-muted">{m.reason ?? '—'}</td>
-                        </tr>
-                      );
-                    })}
-                </Fragment>
-              ))}
+              <HierGroupRows
+                groups={dayGroups}
+                renderRow={renderMovementRow}
+                isExpanded={isExpanded}
+                toggle={toggle}
+                colSpan={9}
+                locale={locale}
+                todayLabel={tCommon('today')}
+                yesterdayLabel={tCommon('yesterday')}
+              />
             </tbody>
           </table>
         </div>

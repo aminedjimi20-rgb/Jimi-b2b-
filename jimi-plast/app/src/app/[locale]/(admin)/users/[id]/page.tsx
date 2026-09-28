@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api, ApiError } from '@/lib/api';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupBlocks, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 import { AttendanceCalendar, type AttendanceEntry } from '@/components/attendance-calendar';
 
 interface UserDetail {
@@ -137,8 +137,32 @@ export default function UserDetailPage() {
     reload();
   }
 
-  const dayGroups = useMemo(() => groupByDay(activity, (a) => a.createdAt), [activity]);
+  const dayGroups = useMemo(() => groupHierarchical(activity, (a) => a.createdAt), [activity]);
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
+
+  function renderActivityItem(item: ActivityItem) {
+    return (
+      <li key={`${item.type}-${item.id}`} className="flex items-start justify-between gap-2 text-sm">
+        {item.type === 'note' ? (
+          <>
+            <span className={item.voidedAt ? 'text-muted line-through' : 'text-ink'}>
+              <span className="font-mono text-xs text-muted">{new Date(item.createdAt).toLocaleTimeString(locale)}</span>{' '}
+              — {item.text}
+            </span>
+            <button onClick={() => toggleNoteVoided(item)} className="shrink-0 text-xs text-accent hover:underline">
+              {item.voidedAt ? t('detail.restoreNote') : t('detail.strikeNote')}
+            </button>
+          </>
+        ) : (
+          <span className="text-ink">
+            <span className="font-mono text-xs text-muted">{new Date(item.createdAt).toLocaleTimeString(locale)}</span>{' '}
+            — {item.type === 'sale_voucher' ? t('detail.saleVoucher') : t('detail.purchaseVoucher')}
+            {item.number ? ` (${item.number})` : ''}
+          </span>
+        )}
+      </li>
+    );
+  }
 
   if (!user) return <p className="text-muted">{tCommon('loading')}</p>;
 
@@ -253,8 +277,8 @@ export default function UserDetailPage() {
           {dayGroups.length > 0 && (
             <DayGroupToggleAll
               allExpanded={allExpanded}
-              onExpandAll={expandAll}
-              onCollapseAll={collapseAll}
+              onExpandAll={() => expandAll(dayGroups)}
+              onCollapseAll={() => collapseAll(dayGroups)}
               expandLabel={tCommon('expandAll')}
               collapseLabel={tCommon('collapseAll')}
             />
@@ -282,43 +306,15 @@ export default function UserDetailPage() {
           <p className="text-sm text-muted">{t('detail.noActivity')}</p>
         ) : (
           <div className="flex flex-col">
-            {dayGroups.map((group, idx) => (
-              <Fragment key={group.key}>
-                <button
-                  onClick={() => toggle(idx)}
-                  className="flex items-center gap-2 border-t border-line py-2 text-start text-xs font-semibold text-ink first:border-t-0"
-                >
-                  <span className={`inline-block transition-transform ${isExpanded(idx) ? 'rotate-90' : ''}`}>▶</span>
-                  <span>{dayGroupLabel(group.date, locale, tCommon('today'), tCommon('yesterday'))}</span>
-                  <span className="text-muted">({group.rows.length})</span>
-                </button>
-                {isExpanded(idx) && (
-                  <ul className="flex flex-col gap-1.5 pb-2 ps-6">
-                    {group.rows.map((item) => (
-                      <li key={`${item.type}-${item.id}`} className="flex items-start justify-between gap-2 text-sm">
-                        {item.type === 'note' ? (
-                          <>
-                            <span className={item.voidedAt ? 'text-muted line-through' : 'text-ink'}>
-                              <span className="font-mono text-xs text-muted">{new Date(item.createdAt).toLocaleTimeString(locale)}</span>{' '}
-                              — {item.text}
-                            </span>
-                            <button onClick={() => toggleNoteVoided(item)} className="shrink-0 text-xs text-accent hover:underline">
-                              {item.voidedAt ? t('detail.restoreNote') : t('detail.strikeNote')}
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-ink">
-                            <span className="font-mono text-xs text-muted">{new Date(item.createdAt).toLocaleTimeString(locale)}</span>{' '}
-                            — {item.type === 'sale_voucher' ? t('detail.saleVoucher') : t('detail.purchaseVoucher')}
-                            {item.number ? ` (${item.number})` : ''}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Fragment>
-            ))}
+            <HierGroupBlocks
+              groups={dayGroups}
+              renderRow={renderActivityItem}
+              isExpanded={isExpanded}
+              toggle={toggle}
+              locale={locale}
+              todayLabel={tCommon('today')}
+              yesterdayLabel={tCommon('yesterday')}
+            />
           </div>
         )}
       </div>

@@ -1,12 +1,12 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 import { actionBadgeClass, fieldBadgeClass, renderHighlightedReason } from '@/lib/history-colors';
 
 interface AuditLogRow {
@@ -56,7 +56,7 @@ export default function HistoryPage() {
     reload();
   }
 
-  const dayGroups = useMemo(() => groupByDay(entries, (e) => e.createdAt), [entries]);
+  const dayGroups = useMemo(() => groupHierarchical(entries, (e) => e.createdAt), [entries]);
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
 
   function renderRow(e: AuditLogRow) {
@@ -100,8 +100,8 @@ export default function HistoryPage() {
         {dayGroups.length > 0 && (
           <DayGroupToggleAll
             allExpanded={allExpanded}
-            onExpandAll={expandAll}
-            onCollapseAll={collapseAll}
+            onExpandAll={() => expandAll(dayGroups)}
+            onCollapseAll={() => collapseAll(dayGroups)}
             expandLabel={tc('expandAll')}
             collapseLabel={tc('collapseAll')}
           />
@@ -128,18 +128,16 @@ export default function HistoryPage() {
                 </td>
               </tr>
             )}
-            {dayGroups.map((group, idx) => (
-              <Fragment key={group.key}>
-                <DayGroupRow
-                  label={dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}
-                  count={group.rows.length}
-                  colSpan={6}
-                  expanded={isExpanded(idx)}
-                  onToggle={() => toggle(idx)}
-                />
-                {isExpanded(idx) && group.rows.map((e) => renderRow(e))}
-              </Fragment>
-            ))}
+            <HierGroupRows
+              groups={dayGroups}
+              renderRow={renderRow}
+              isExpanded={isExpanded}
+              toggle={toggle}
+              colSpan={6}
+              locale={locale}
+              todayLabel={tc('today')}
+              yesterdayLabel={tc('yesterday')}
+            />
           </tbody>
         </table>
       </div>

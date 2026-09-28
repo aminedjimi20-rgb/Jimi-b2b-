@@ -1,12 +1,12 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
-import { DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupBlocks, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 
 interface NoteRow {
   id: string;
@@ -51,8 +51,26 @@ export default function NotesPage() {
     reload();
   }
 
-  const dayGroups = useMemo(() => groupByDay(notes, (n) => n.createdAt), [notes]);
+  const dayGroups = useMemo(() => groupHierarchical(notes, (n) => n.createdAt), [notes]);
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
+
+  function renderNote(n: NoteRow) {
+    return (
+      <li
+        key={n.id}
+        className={`flex items-start justify-between gap-2 rounded-lg border border-line p-3 text-sm ${
+          n.hiddenAt ? 'bg-line/10 opacity-60' : 'bg-panel'
+        }`}
+      >
+        <span className="whitespace-pre-wrap text-ink">
+          <span className="font-mono text-xs text-muted">{new Date(n.createdAt).toLocaleTimeString(locale)}</span> — {n.text}
+        </span>
+        <button onClick={() => toggleHidden(n)} className="shrink-0 text-xs text-accent hover:underline">
+          {n.hiddenAt ? t('unhide') : t('hide')}
+        </button>
+      </li>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -93,8 +111,8 @@ export default function NotesPage() {
         {dayGroups.length > 0 && (
           <DayGroupToggleAll
             allExpanded={allExpanded}
-            onExpandAll={expandAll}
-            onCollapseAll={collapseAll}
+            onExpandAll={() => expandAll(dayGroups)}
+            onCollapseAll={() => collapseAll(dayGroups)}
             expandLabel={tc('expandAll')}
             collapseLabel={tc('collapseAll')}
           />
@@ -105,37 +123,15 @@ export default function NotesPage() {
         <p className="text-sm text-muted">{tc('empty')}</p>
       ) : (
         <div className="flex flex-col">
-          {dayGroups.map((group, idx) => (
-            <Fragment key={group.key}>
-              <button
-                onClick={() => toggle(idx)}
-                className="flex items-center gap-2 border-t border-line py-2 text-start text-xs font-semibold text-ink first:border-t-0"
-              >
-                <span className={`inline-block transition-transform ${isExpanded(idx) ? 'rotate-90' : ''}`}>▶</span>
-                <span>{dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}</span>
-                <span className="text-muted">({group.rows.length})</span>
-              </button>
-              {isExpanded(idx) && (
-                <ul className="flex flex-col gap-2 pb-3 ps-6">
-                  {group.rows.map((n) => (
-                    <li
-                      key={n.id}
-                      className={`flex items-start justify-between gap-2 rounded-lg border border-line p-3 text-sm ${
-                        n.hiddenAt ? 'bg-line/10 opacity-60' : 'bg-panel'
-                      }`}
-                    >
-                      <span className="whitespace-pre-wrap text-ink">
-                        <span className="font-mono text-xs text-muted">{new Date(n.createdAt).toLocaleTimeString(locale)}</span> — {n.text}
-                      </span>
-                      <button onClick={() => toggleHidden(n)} className="shrink-0 text-xs text-accent hover:underline">
-                        {n.hiddenAt ? t('unhide') : t('hide')}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Fragment>
-          ))}
+          <HierGroupBlocks
+            groups={dayGroups}
+            renderRow={renderNote}
+            isExpanded={isExpanded}
+            toggle={toggle}
+            locale={locale}
+            todayLabel={tc('today')}
+            yesterdayLabel={tc('yesterday')}
+          />
         </div>
       )}
     </div>

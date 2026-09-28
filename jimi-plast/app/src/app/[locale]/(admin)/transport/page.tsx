@@ -6,8 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
-import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
-import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { HierGroupRows, DayGroupToggleAll } from '@/components/day-group-row';
+import { groupHierarchical, useExpandedGroups } from '@/lib/date-groups';
 
 interface Driver {
   id: string;
@@ -136,8 +136,67 @@ export default function TransportPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deliveries, search]);
 
-  const dayGroups = useMemo(() => groupByDay(filteredDeliveries, (d) => d.createdAt), [filteredDeliveries]);
+  const dayGroups = useMemo(() => groupHierarchical(filteredDeliveries, (d) => d.createdAt), [filteredDeliveries]);
   const { isExpanded, toggle, allExpanded, expandAll, collapseAll } = useExpandedGroups(dayGroups);
+
+  function renderDeliveryRow(d: DeliveryRow) {
+    const cancelled = d.status === 'CANCELLED';
+    return (
+      <Fragment key={d.id}>
+        <tr className={`border-t border-line ${cancelled ? 'line-through opacity-50' : ''}`}>
+          <td className="px-4 py-2 font-mono text-xs">{voucherLabel(d)}</td>
+          <td className="px-4 py-2 text-ink">{partyName(d)}</td>
+          <td className="px-4 py-2 text-muted">
+            <div className="flex items-center gap-2">
+              {d.driverPhotoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={d.driverPhotoUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+              )}
+              {d.driverName ?? '—'}
+            </div>
+          </td>
+          <td className="px-4 py-2 tabular">{Number(d.cost).toLocaleString()} DA</td>
+          <td className="px-4 py-2">
+            {cancelled ? (
+              <span className="text-xs text-muted">{t('cancelled')}</span>
+            ) : (
+              <select
+                value={d.status}
+                onChange={(e) => {
+                  const path = d.salesVoucherId
+                    ? `/deliveries/voucher/${d.salesVoucherId}`
+                    : d.purchaseVoucherId
+                      ? `/deliveries/purchase-voucher/${d.purchaseVoucherId}`
+                      : null;
+                  if (path) api.put(path, { status: e.target.value }, token).then(reload);
+                }}
+                className="rounded border border-line bg-paper text-ink px-2 py-1 text-xs"
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>{t(`status.${s}` as never)}</option>
+                ))}
+              </select>
+            )}
+          </td>
+          <td className="px-4 py-2">
+            {!cancelled && (
+              <div className="flex gap-2">
+                <button onClick={() => openEdit(d)} className="text-xs text-accent hover:underline">{tc('edit')}</button>
+                <button onClick={() => cancelDelivery(d.id)} className="text-xs text-red-600 hover:underline">{t('delete')}</button>
+              </div>
+            )}
+          </td>
+        </tr>
+        {editingId === d.id && (
+          <tr>
+            <td colSpan={6} className="px-4 py-3">
+              {renderForm(() => submitEdit(d), d.salesVoucherId ? 'sales' : d.purchaseVoucherId ? 'purchase' : 'standalone')}
+            </td>
+          </tr>
+        )}
+      </Fragment>
+    );
+  }
 
   const filteredDrivers = useMemo(() => {
     const q = driverSearch.trim().toLowerCase();
@@ -533,8 +592,8 @@ export default function TransportPage() {
         {dayGroups.length > 0 && (
           <DayGroupToggleAll
             allExpanded={allExpanded}
-            onExpandAll={expandAll}
-            onCollapseAll={collapseAll}
+            onExpandAll={() => expandAll(dayGroups)}
+            onCollapseAll={() => collapseAll(dayGroups)}
             expandLabel={tc('expandAll')}
             collapseLabel={tc('collapseAll')}
           />
@@ -559,75 +618,16 @@ export default function TransportPage() {
                 <td colSpan={6} className="px-4 py-4 text-center text-sm text-muted">{tc('empty')}</td>
               </tr>
             )}
-            {dayGroups.map((group, idx) => (
-              <Fragment key={group.key}>
-                <DayGroupRow
-                  label={dayGroupLabel(group.date, locale, tc('today'), tc('yesterday'))}
-                  count={group.rows.length}
-                  colSpan={6}
-                  expanded={isExpanded(idx)}
-                  onToggle={() => toggle(idx)}
-                />
-                {isExpanded(idx) && group.rows.map((d) => {
-              const cancelled = d.status === 'CANCELLED';
-              return (
-                <Fragment key={d.id}>
-                  <tr className={`border-t border-line ${cancelled ? 'line-through opacity-50' : ''}`}>
-                    <td className="px-4 py-2 font-mono text-xs">{voucherLabel(d)}</td>
-                    <td className="px-4 py-2 text-ink">{partyName(d)}</td>
-                    <td className="px-4 py-2 text-muted">
-                      <div className="flex items-center gap-2">
-                        {d.driverPhotoUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={d.driverPhotoUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
-                        )}
-                        {d.driverName ?? '—'}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 tabular">{Number(d.cost).toLocaleString()} DA</td>
-                    <td className="px-4 py-2">
-                      {cancelled ? (
-                        <span className="text-xs text-muted">{t('cancelled')}</span>
-                      ) : (
-                        <select
-                          value={d.status}
-                          onChange={(e) => {
-                            const path = d.salesVoucherId
-                              ? `/deliveries/voucher/${d.salesVoucherId}`
-                              : d.purchaseVoucherId
-                                ? `/deliveries/purchase-voucher/${d.purchaseVoucherId}`
-                                : null;
-                            if (path) api.put(path, { status: e.target.value }, token).then(reload);
-                          }}
-                          className="rounded border border-line bg-paper text-ink px-2 py-1 text-xs"
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>{t(`status.${s}` as never)}</option>
-                          ))}
-                        </select>
-                      )}
-                    </td>
-                    <td className="px-4 py-2">
-                      {!cancelled && (
-                        <div className="flex gap-2">
-                          <button onClick={() => openEdit(d)} className="text-xs text-accent hover:underline">{tc('edit')}</button>
-                          <button onClick={() => cancelDelivery(d.id)} className="text-xs text-red-600 hover:underline">{t('delete')}</button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                  {editingId === d.id && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-3">
-                        {renderForm(() => submitEdit(d), d.salesVoucherId ? 'sales' : d.purchaseVoucherId ? 'purchase' : 'standalone')}
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              );
-                })}
-              </Fragment>
-            ))}
+            <HierGroupRows
+              groups={dayGroups}
+              renderRow={renderDeliveryRow}
+              isExpanded={isExpanded}
+              toggle={toggle}
+              colSpan={6}
+              locale={locale}
+              todayLabel={tc('today')}
+              yesterdayLabel={tc('yesterday')}
+            />
           </tbody>
         </table>
       </div>
