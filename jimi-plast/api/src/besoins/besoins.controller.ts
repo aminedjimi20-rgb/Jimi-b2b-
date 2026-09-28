@@ -18,7 +18,7 @@ export class BesoinsController {
 
   @Post()
   create(@Body() dto: CreateBesoinDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.besoinsService.create(user.id, user.fullName, dto);
+    return this.besoinsService.create(user.id, user.fullName, user.roleKey, dto);
   }
 
   @Get('mine')

@@ -10,6 +10,7 @@ import { cart, useCarts } from '@/lib/cart';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
+import { SearchableSelect } from '@/components/searchable-select';
 
 interface Category {
   id: string;
@@ -1047,18 +1048,12 @@ export default function CatalogPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setPickingCustomer(false)}>
           <div className="w-full max-w-sm rounded-lg bg-panel p-4" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-3 text-sm font-semibold text-ink">{t('chooseCustomer')}</h2>
-            <select
+            <SearchableSelect
               value={selectedCustomerId}
-              onChange={(e) => setSelectedCustomerId(e.target.value)}
-              className="w-full rounded border border-line bg-paper px-3 py-2 text-sm"
-            >
-              <option value="">{t('chooseCustomer')}</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.user.fullName}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedCustomerId}
+              options={customers.map((c) => ({ value: c.id, label: c.user.fullName }))}
+              placeholder={t('chooseCustomer')}
+            />
             <button
               onClick={() => {
                 setPickingCustomer(false);

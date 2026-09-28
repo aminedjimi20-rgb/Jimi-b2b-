@@ -51,6 +51,7 @@ const SEGMENT_COLORS: { test: RegExp; className: string }[] = [
   { test: /^transport/i, className: 'text-orange-700' },
   { test: /^montant payé/i, className: 'text-emerald-700' },
   { test: /^photo/i, className: 'text-muted' },
+  { test: /^observation/i, className: 'text-slate-600' },
 ];
 
 function segmentColor(segment: string): string {

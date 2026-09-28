@@ -158,7 +158,8 @@
     "initialPassword": "Initial password",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "note": "Note"
+    "note": "Note",
+    "alreadyHasPassword": "This account already chose its own password at sign-up — nothing to set here."
   },
   "users": {
     "title": "Employees, roles & permissions",

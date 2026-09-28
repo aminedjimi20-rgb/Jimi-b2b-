@@ -11,6 +11,7 @@ import { SortSelect, type SortMode } from '@/components/sort-select';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
 import { openOrSharePdf, supportsPdfShare } from '@/lib/pdf-share';
 import { fieldBadgeClass, renderHighlightedReason } from '@/lib/history-colors';
+import { SearchableSelect } from '@/components/searchable-select';
 
 interface Price {
   tierKey: string;
@@ -693,18 +694,13 @@ export default function VoucherEditorPage() {
               <p className="text-xs italic text-muted">{t('noCustomerYet')}</p>
               {canManage && isDraft && (
                 <div className="flex items-center gap-1">
-                  <select
+                  <SearchableSelect
                     value={assignCustomerId}
-                    onChange={(e) => setAssignCustomerId(e.target.value)}
-                    className="rounded border border-line bg-panel px-2 py-1 text-xs"
-                  >
-                    <option value="">{t('selectCustomer')}</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.user.fullName}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setAssignCustomerId}
+                    options={customers.map((c) => ({ value: c.id, label: c.user.fullName }))}
+                    placeholder={t('selectCustomer')}
+                    className="w-40"
+                  />
                   <button
                     onClick={() => assignCustomer(assignCustomerId)}
                     disabled={!assignCustomerId}

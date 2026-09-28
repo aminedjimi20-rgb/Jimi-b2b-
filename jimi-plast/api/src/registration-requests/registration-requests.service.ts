@@ -21,8 +21,10 @@ export class RegistrationRequestsService {
       where: status ? { status } : undefined,
       orderBy: { createdAt: 'desc' },
     });
-    // Ne jamais renvoyer le hash, même à l'admin.
-    return requests.map(({ passwordHash, ...rest }) => rest);
+    // Ne jamais renvoyer le hash, même à l'admin — juste s'il existe, pour
+    // que l'écran d'acceptation sache si un mot de passe initial est
+    // vraiment nécessaire (auto-inscription = non).
+    return requests.map(({ passwordHash, ...rest }) => ({ ...rest, hasOwnPassword: !!passwordHash }));
   }
 
   private async findOrThrow(id: string) {

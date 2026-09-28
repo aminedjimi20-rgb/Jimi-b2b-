@@ -158,7 +158,8 @@
     "initialPassword": "Mot de passe initial",
     "confirm": "Confirmer",
     "cancel": "Annuler",
-    "note": "Note"
+    "note": "Note",
+    "alreadyHasPassword": "Ce compte a déjà choisi son mot de passe à l'inscription — aucun mot de passe à définir ici."
   },
   "users": {
     "title": "Employés, rôles & permissions",

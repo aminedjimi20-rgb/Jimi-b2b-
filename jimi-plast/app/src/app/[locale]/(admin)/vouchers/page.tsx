@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { SortSelect, type SortMode } from '@/components/sort-select';
 import { DayGroupRow, DayGroupToggleAll } from '@/components/day-group-row';
 import { dayGroupLabel, groupByDay, useExpandedGroups } from '@/lib/date-groups';
+import { SearchableSelect } from '@/components/searchable-select';
 
 interface Customer {
   id: string;
@@ -123,18 +124,13 @@ export default function VouchersPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
         <div className="flex gap-2">
-          <select
+          <SearchableSelect
             value={newCustomerId}
-            onChange={(e) => setNewCustomerId(e.target.value)}
-            className="rounded border border-line bg-panel px-2 py-1.5 text-sm"
-          >
-            <option value="">{t('selectCustomer')}</option>
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.user.fullName}
-              </option>
-            ))}
-          </select>
+            onChange={setNewCustomerId}
+            options={customers.map((c) => ({ value: c.id, label: c.user.fullName }))}
+            placeholder={t('selectCustomer')}
+            className="w-48"
+          />
           <button
             onClick={createVoucher}
             className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white"

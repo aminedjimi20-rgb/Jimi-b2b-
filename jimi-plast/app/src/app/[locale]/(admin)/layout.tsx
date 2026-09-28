@@ -61,7 +61,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const links = [
     { href: `/${locale}/dashboard`, label: t('dashboard') },
     { href: `/${locale}/catalog`, label: t('catalog') },
-    { href: `/${locale}/besoins`, label: t('besoins') },
+    // Le fabricant n'a ni besoin, ni retour, ni demande produit — juste son
+    // catalogue, sa situation et ses bons d'achat (voir plus bas).
+    ...(user.role.key !== 'manufacturer' ? [{ href: `/${locale}/besoins`, label: t('besoins') }] : []),
     { href: `/${locale}/notes`, label: t('notes') },
     ...(user.role.key !== 'employee' ? [{ href: `/${locale}/approvals`, label: t('approvals') }] : []),
     ...(user.permissions.includes('catalog.manage')
@@ -118,6 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       ? [
           { href: `/${locale}/manufacturer-account`, label: t('myAccount') },
           { href: `/${locale}/manufacturer-catalog`, label: t('catalog') },
+          { href: `/${locale}/manufacturer-purchases`, label: t('purchases') },
         ]
       : []),
     ...(!user.permissions.includes('vouchers.create') && ['wholesaler', 'retailer'].includes(user.role.key)

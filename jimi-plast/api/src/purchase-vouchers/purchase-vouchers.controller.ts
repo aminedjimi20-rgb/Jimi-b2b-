@@ -25,6 +25,31 @@ export class PurchaseVouchersController {
     return this.service.list({ status, manufacturerId });
   }
 
+  // Espace fabricant : lecture seule de ses propres bons d'achat, sans
+  // besoin de suppliers.view — jamais de création/modification depuis ici.
+  @Get('mine')
+  @RequirePermissions()
+  listMine(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.listMine(user.id);
+  }
+
+  @Get('mine/:id')
+  @RequirePermissions()
+  getMineById(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.getMineById(user.id, id);
+  }
+
+  @Get('mine/:id/pdf')
+  @RequirePermissions()
+  async minePdf(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser, @Res() res: Response) {
+    const voucher = await this.service.getMineById(user.id, id);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${voucher.number ?? voucher.id}.pdf"`);
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    const doc = this.pdfService.generate(voucher);
+    doc.pipe(res);
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.service.getById(id);

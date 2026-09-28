@@ -205,8 +205,10 @@ export class VouchersService {
       if (!customer) throw new BadRequestException('Client introuvable');
     }
 
+    // Chargé par défaut par celui qui crée le bon (admin ou employé) —
+    // reste librement modifiable ensuite via le sélecteur "Chargé par".
     const voucher = await this.prisma.salesVoucher.create({
-      data: { customerId: customerId ?? null, sellerId, status: 'DRAFT' },
+      data: { customerId: customerId ?? null, sellerId, status: 'DRAFT', loadedById: sellerId },
     });
 
     const actorName = await this.actorName(sellerId);
@@ -287,7 +289,7 @@ export class VouchersService {
       throw new ForbiddenException('Seul un administrateur peut modifier un bon déjà livré');
     }
     const { customerId: _customerId, ...rest } = dto;
-    if (voucher.status === 'DRAFT') return this.updateDraft(id, rest, voucher.customerId);
+    if (voucher.status === 'DRAFT') return this.updateDraft(id, rest, voucher.customerId, userId);
     return this.updateConfirmed(id, rest, userId, voucher);
   }
 
@@ -338,12 +340,20 @@ export class VouchersService {
       throw new ForbiddenException('Seul un administrateur peut modifier un bon déjà livré');
     }
     if (voucher.status === 'DRAFT') {
-      return this.updateDraft(id, dto, dto.customerId ?? voucher.customerId);
+      return this.updateDraft(id, dto, dto.customerId ?? voucher.customerId, actorId);
     }
     return this.updateConfirmed(id, dto, actorId, voucher);
   }
 
-  private async updateDraft(id: string, dto: UpsertVoucherDto, customerId: string | null) {
+  private async updateDraft(id: string, dto: UpsertVoucherDto, customerId: string | null, actorId?: string) {
+    // Une observation écrite sur un brouillon doit quand même apparaître à
+    // date dans l'historique — sinon elle semble "disparaître" une fois
+    // enregistrée, aucune trace de qui a écrit quoi ni quand.
+    const existingNotes =
+      dto.notes !== undefined
+        ? (await this.prisma.salesVoucher.findUnique({ where: { id }, select: { notes: true } }))?.notes ?? null
+        : null;
+
     await this.prisma.$transaction(async (tx) => {
       if (dto.items) {
         const tier = await this.resolveTierForCustomer(customerId);
@@ -394,6 +404,18 @@ export class VouchersService {
       });
     });
 
+    if (dto.notes !== undefined && dto.notes !== existingNotes) {
+      const actorName = await this.actorName(actorId);
+      await this.auditLog.record({
+        entityType: 'SalesVoucher',
+        entityId: id,
+        action: 'UPDATE',
+        field: 'notes',
+        reason: dto.notes ? `Observation de ${actorName} : ${dto.notes}` : `Observation supprimée par ${actorName}`,
+        actorId,
+      });
+    }
+
     return this.getById(id);
   }
 
@@ -410,7 +432,7 @@ export class VouchersService {
     id: string,
     dto: UpsertVoucherDto,
     actorId: string,
-    existingVoucher: { customerId: string | null; paidAmount: Prisma.Decimal; discount: Prisma.Decimal; transportCost: Prisma.Decimal; number: string | null },
+    existingVoucher: { customerId: string | null; paidAmount: Prisma.Decimal; discount: Prisma.Decimal; transportCost: Prisma.Decimal; number: string | null; notes: string | null },
   ) {
     const customerId = dto.customerId ?? existingVoucher.customerId;
     // Un bon confirmé a forcément déjà un client (confirm() l'exige) — cette
@@ -572,6 +594,9 @@ export class VouchersService {
       }
       if (dto.transportCost != null && dto.transportCost !== oldTransportCost) {
         changes.push(`Transport : ${oldTransportCost} DA → ${dto.transportCost} DA`);
+      }
+      if (dto.notes !== undefined && dto.notes !== existingVoucher.notes) {
+        changes.push(dto.notes ? `Observation : ${dto.notes}` : 'Observation supprimée');
       }
 
       // Idem pour le total du bon lui-même : ajouter/retirer un article,

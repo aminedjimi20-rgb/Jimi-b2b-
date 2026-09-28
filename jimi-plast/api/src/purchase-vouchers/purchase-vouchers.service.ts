@@ -66,6 +66,20 @@ export class PurchaseVouchersService {
     });
   }
 
+  /** Lecture seule pour le fabricant lui-même : ses bons d'achat, jamais ceux des autres, jamais modifiables depuis ici. */
+  async listMine(userId: string) {
+    const manufacturer = await this.prisma.manufacturer.findUnique({ where: { userId } });
+    if (!manufacturer) return [];
+    return this.list({ manufacturerId: manufacturer.id });
+  }
+
+  async getMineById(userId: string, id: string) {
+    const manufacturer = await this.prisma.manufacturer.findUnique({ where: { userId } });
+    const voucher = await this.getById(id);
+    if (!manufacturer || voucher.manufacturerId !== manufacturer.id) throw new NotFoundException('Bon d’achat introuvable');
+    return voucher;
+  }
+
   async getById(id: string) {
     const voucher = await this.prisma.purchaseVoucher.findFirst({
       where: { id, deletedAt: null },

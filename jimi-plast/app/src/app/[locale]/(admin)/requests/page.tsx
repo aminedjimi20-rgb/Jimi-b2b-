@@ -13,6 +13,7 @@ interface RegistrationRequest {
   requestedRoleKey: string | null;
   status: 'NEW' | 'INFO_REQUESTED' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
+  hasOwnPassword: boolean;
 }
 
 interface Role {
@@ -65,7 +66,7 @@ export default function RequestsPage() {
     setBusyId(acceptTarget.id);
     await api.post(
       `/registration-requests/${acceptTarget.id}/accept`,
-      { roleKey, initialPassword },
+      { roleKey, ...(acceptTarget.hasOwnPassword ? {} : { initialPassword }) },
       token,
     );
     setBusyId(null);
@@ -171,17 +172,21 @@ export default function RequestsPage() {
               </select>
             </label>
 
-            <label className="mt-3 flex flex-col gap-1 text-sm">
-              <span className="text-muted">{t('initialPassword')}</span>
-              <input
-                type="text"
-                value={initialPassword}
-                onChange={(e) => setInitialPassword(e.target.value)}
-                minLength={8}
-                required
-                className="rounded border border-line bg-paper px-3 py-2 font-mono"
-              />
-            </label>
+            {acceptTarget.hasOwnPassword ? (
+              <p className="mt-3 rounded border border-teal/40 bg-teal/10 px-3 py-2 text-xs text-teal">{t('alreadyHasPassword')}</p>
+            ) : (
+              <label className="mt-3 flex flex-col gap-1 text-sm">
+                <span className="text-muted">{t('initialPassword')}</span>
+                <input
+                  type="text"
+                  value={initialPassword}
+                  onChange={(e) => setInitialPassword(e.target.value)}
+                  minLength={8}
+                  required
+                  className="rounded border border-line bg-paper px-3 py-2 font-mono"
+                />
+              </label>
+            )}
 
             <div className="mt-5 flex justify-end gap-2">
               <button
@@ -192,7 +197,7 @@ export default function RequestsPage() {
               </button>
               <button
                 onClick={confirmAccept}
-                disabled={initialPassword.length < 8}
+                disabled={!acceptTarget.hasOwnPassword && initialPassword.length < 8}
                 className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
               >
                 {t('confirm')}

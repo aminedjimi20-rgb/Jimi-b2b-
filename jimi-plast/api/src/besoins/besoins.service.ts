@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { TrashService } from '../common/services/trash.service';
@@ -13,7 +13,10 @@ export class BesoinsService {
     private readonly trash: TrashService,
   ) {}
 
-  async create(authorId: string, authorName: string, dto: CreateBesoinDto) {
+  // Le fabricant n'a pas de concept de "besoin dépôt" — il n'achète pas au
+  // dépôt, c'est le dépôt qui achète chez lui.
+  async create(authorId: string, authorName: string, authorRoleKey: string, dto: CreateBesoinDto) {
+    if (authorRoleKey === 'manufacturer') throw new BadRequestException("Cette fonctionnalité n'est pas disponible pour un compte fabricant");
     const besoin = await this.prisma.besoin.create({ data: { authorId, message: dto.message } });
 
     await this.notifications.notify({
