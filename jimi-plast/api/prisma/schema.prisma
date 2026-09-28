@@ -1185,3 +1185,29 @@ model Promotion {
   @@index([productId])
   @@map("promotions")
 }
+
+// ---------------------------------------------------------------------------
+// Image de marque : visible par tous (client/employé/fabricant) sur toutes
+// les pages via la barre latérale, mais gérée uniquement par l'admin
+// (settings.manage) — logos des entreprises partenaires + badge d'ancienneté.
+// ---------------------------------------------------------------------------
+
+model PartnerLogo {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("partner_logos")
+}
+
+// Ligne unique (singleton) — pas besoin d'une table de réglages généraux
+// tant qu'un seul réglage global existe ; on y ajoutera des colonnes plutôt
+// que des lignes si d'autres réglages de ce type apparaissent.
+model SiteBranding {
+  id              String   @id @default(cuid())
+  experienceYears Int      @default(35)
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_branding")
+}

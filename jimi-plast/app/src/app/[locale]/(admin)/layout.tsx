@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import { NotificationBell } from '@/components/notification-bell';
 import { ImageUploadButton } from '@/components/image-upload-button';
+import { BrandingFooter } from '@/components/branding-footer';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, token, loading, logout, refreshUser } = useAuth();
@@ -168,6 +169,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
           ))}
         </nav>
+        <BrandingFooter />
         <div className="border-t border-line pt-4">
           <div className="flex items-center gap-2">
             {user.avatarUrl ? (

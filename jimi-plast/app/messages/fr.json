@@ -1024,5 +1024,10 @@
     "viewManufacturer": "Voir le fabricant",
     "purchaseVoucher": "Suppression du bon d'achat {number}",
     "viewPurchaseVoucher": "Voir le bon d'achat"
+  },
+  "branding": {
+    "experienceLabel": "Ans d'expérience",
+    "partnersLabel": "Nos partenaires",
+    "removeLogo": "Retirer"
   }
 }

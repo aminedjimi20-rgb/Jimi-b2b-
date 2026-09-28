@@ -1024,5 +1024,10 @@
     "viewManufacturer": "View manufacturer",
     "purchaseVoucher": "Deletion of purchase voucher {number}",
     "viewPurchaseVoucher": "View purchase voucher"
+  },
+  "branding": {
+    "experienceLabel": "Years of experience",
+    "partnersLabel": "Our partners",
+    "removeLogo": "Remove"
   }
 }
