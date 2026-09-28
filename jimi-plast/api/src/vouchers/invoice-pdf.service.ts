@@ -7,7 +7,16 @@ interface InvoiceForPdf {
   voucher: {
     number: string | null;
     createdAt: Date;
-    customer: { businessName: string | null; user: { fullName: string; phone: string | null } } | null;
+    customer:
+      | {
+          businessName: string | null;
+          rc: string | null;
+          nif: string | null;
+          nis: string | null;
+          ai: string | null;
+          user: { fullName: string; phone: string | null };
+        }
+      | null;
     discount: unknown;
     transportCost: unknown;
     paidAmount: unknown;
@@ -114,6 +123,16 @@ export class InvoicePdfService {
           .text(voucher.customer.businessName ?? voucher.customer.user.fullName, 40, 146)
           .text(voucher.customer.user.fullName, 40, 160)
           .text(voucher.customer.user.phone ?? '', 40, 174);
+
+        const customerLegalBits = [
+          voucher.customer.rc && `RC : ${voucher.customer.rc}`,
+          voucher.customer.nif && `NIF : ${voucher.customer.nif}`,
+          voucher.customer.nis && `NIS : ${voucher.customer.nis}`,
+          voucher.customer.ai && `AI : ${voucher.customer.ai}`,
+        ].filter(Boolean) as string[];
+        if (customerLegalBits.length > 0) {
+          d.fillColor(MUTED).fontSize(8).font('Helvetica').text(customerLegalBits.join('  —  '), 40, 190, { width: 320 });
+        }
       }
     };
 
@@ -139,7 +158,7 @@ export class InvoicePdfService {
 
     drawHeader();
 
-    let y = 208;
+    let y = 218;
     let segmentTop = y;
     let boundaries = [y];
     drawHeadRow(y);

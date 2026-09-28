@@ -15,6 +15,10 @@ interface FormState {
   address: string;
   wilaya: string;
   businessName: string;
+  rc: string;
+  nif: string;
+  nis: string;
+  ai: string;
   requestedRoleKey: string;
   notes: string;
 }
@@ -27,6 +31,10 @@ const EMPTY_FORM: FormState = {
   address: '',
   wilaya: '',
   businessName: '',
+  rc: '',
+  nif: '',
+  nis: '',
+  ai: '',
   requestedRoleKey: 'wholesaler',
   notes: '',
 };
@@ -111,6 +119,11 @@ export default function RegisterPage() {
                 onChange={(v) => update('businessName', v)}
                 className="sm:col-span-2"
               />
+              <p className="-mb-2 text-xs text-muted sm:col-span-2">{t('legalIdsHint')}</p>
+              <Field label={t('rc')} value={form.rc} onChange={(v) => update('rc', v)} />
+              <Field label={t('nif')} value={form.nif} onChange={(v) => update('nif', v)} />
+              <Field label={t('nis')} value={form.nis} onChange={(v) => update('nis', v)} />
+              <Field label={t('ai')} value={form.ai} onChange={(v) => update('ai', v)} />
 
               <label className="flex flex-col gap-1 text-sm sm:col-span-2">
                 <span className="text-muted">{t('requestedRole')}</span>

@@ -28,4 +28,20 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsString()
   wilaya?: string;
+
+  @IsOptional()
+  @IsString()
+  rc?: string;
+
+  @IsOptional()
+  @IsString()
+  nif?: string;
+
+  @IsOptional()
+  @IsString()
+  nis?: string;
+
+  @IsOptional()
+  @IsString()
+  ai?: string;
 }

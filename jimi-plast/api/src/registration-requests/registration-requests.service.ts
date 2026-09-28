@@ -106,6 +106,10 @@ export class RegistrationRequestsService {
             businessName: request.businessName,
             address: request.address,
             wilaya: request.wilaya,
+            rc: request.rc,
+            nif: request.nif,
+            nis: request.nis,
+            ai: request.ai,
           },
         });
       }

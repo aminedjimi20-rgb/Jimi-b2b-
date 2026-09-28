@@ -31,7 +31,12 @@
     "roleManufacturer": "Manufacturer",
     "password": "Password (optional)",
     "emailOrPhoneHint": "Provide at least an email or a phone number.",
-    "emailOrPhoneRequired": "Provide at least an email or a phone number"
+    "emailOrPhoneRequired": "Provide at least an email or a phone number",
+    "legalIdsHint": "If you are a business, these identifiers will appear on your future invoices (optional).",
+    "rc": "Trade register (RC)",
+    "nif": "Tax ID (NIF)",
+    "nis": "Statistical ID (NIS)",
+    "ai": "Tax article (AI)"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -429,7 +434,11 @@
       "businessName": "Business name",
       "address": "Address",
       "wilaya": "Province",
-      "creditLimit": "Credit limit"
+      "creditLimit": "Credit limit",
+      "rc": "Trade register (RC)",
+      "nif": "Tax ID (NIF)",
+      "nis": "Statistical ID (NIS)",
+      "ai": "Tax article (AI)"
     },
     "detail": {
       "balance": "Current balance",

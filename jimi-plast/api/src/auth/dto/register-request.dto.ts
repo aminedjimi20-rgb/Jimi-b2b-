@@ -38,6 +38,22 @@ export class RegisterRequestDto {
 
   @IsOptional()
   @IsString()
+  rc?: string;
+
+  @IsOptional()
+  @IsString()
+  nif?: string;
+
+  @IsOptional()
+  @IsString()
+  nis?: string;
+
+  @IsOptional()
+  @IsString()
+  ai?: string;
+
+  @IsOptional()
+  @IsString()
   requestedRoleKey?: string;
 
   @IsOptional()

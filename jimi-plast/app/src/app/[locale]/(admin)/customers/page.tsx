@@ -17,6 +17,10 @@ interface CustomerRow {
   businessName: string | null;
   address: string | null;
   wilaya: string | null;
+  rc: string | null;
+  nif: string | null;
+  nis: string | null;
+  ai: string | null;
   creditLimit: number;
   createdAt: string;
   balance: number;
@@ -32,6 +36,10 @@ const EMPTY_FORM = {
   businessName: '',
   address: '',
   wilaya: '',
+  rc: '',
+  nif: '',
+  nis: '',
+  ai: '',
   creditLimit: '0',
 };
 
@@ -110,6 +118,10 @@ export default function CustomersPage() {
             businessName: form.businessName || undefined,
             address: form.address || undefined,
             wilaya: form.wilaya || undefined,
+            rc: form.rc || undefined,
+            nif: form.nif || undefined,
+            nis: form.nis || undefined,
+            ai: form.ai || undefined,
             creditLimit: Number(form.creditLimit) || 0,
           },
           token,
@@ -126,6 +138,10 @@ export default function CustomersPage() {
             businessName: form.businessName || undefined,
             address: form.address || undefined,
             wilaya: form.wilaya || undefined,
+            rc: form.rc || undefined,
+            nif: form.nif || undefined,
+            nis: form.nis || undefined,
+            ai: form.ai || undefined,
           },
           token,
         );
@@ -150,6 +166,10 @@ export default function CustomersPage() {
       businessName: c.businessName ?? '',
       address: c.address ?? '',
       wilaya: c.wilaya ?? '',
+      rc: c.rc ?? '',
+      nif: c.nif ?? '',
+      nis: c.nis ?? '',
+      ai: c.ai ?? '',
       creditLimit: String(c.creditLimit ?? 0),
     });
   }
@@ -231,6 +251,10 @@ export default function CustomersPage() {
           <Field label={t('form.businessName')} value={form.businessName} onChange={(v) => setForm({ ...form, businessName: v })} />
           <Field label={t('form.address')} value={form.address} onChange={(v) => setForm({ ...form, address: v })} />
           <Field label={t('form.wilaya')} value={form.wilaya} onChange={(v) => setForm({ ...form, wilaya: v })} />
+          <Field label={t('form.rc')} value={form.rc} onChange={(v) => setForm({ ...form, rc: v })} />
+          <Field label={t('form.nif')} value={form.nif} onChange={(v) => setForm({ ...form, nif: v })} />
+          <Field label={t('form.nis')} value={form.nis} onChange={(v) => setForm({ ...form, nis: v })} />
+          <Field label={t('form.ai')} value={form.ai} onChange={(v) => setForm({ ...form, ai: v })} />
           {editingId && (
             <Field
               label={t('form.creditLimit')}

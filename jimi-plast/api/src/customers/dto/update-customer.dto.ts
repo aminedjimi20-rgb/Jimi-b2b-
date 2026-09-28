@@ -14,6 +14,22 @@ export class UpdateCustomerDto {
   wilaya?: string;
 
   @IsOptional()
+  @IsString()
+  rc?: string;
+
+  @IsOptional()
+  @IsString()
+  nif?: string;
+
+  @IsOptional()
+  @IsString()
+  nis?: string;
+
+  @IsOptional()
+  @IsString()
+  ai?: string;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   creditLimit?: number;

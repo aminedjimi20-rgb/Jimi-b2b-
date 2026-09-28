@@ -31,7 +31,12 @@
     "roleManufacturer": "Fabricant",
     "password": "Mot de passe (optionnel)",
     "emailOrPhoneHint": "Indiquez au moins un email ou un numéro de téléphone.",
-    "emailOrPhoneRequired": "Indiquez au moins un email ou un numéro de téléphone"
+    "emailOrPhoneRequired": "Indiquez au moins un email ou un numéro de téléphone",
+    "legalIdsHint": "Si vous êtes une entreprise, ces identifiants apparaîtront sur vos futures factures (facultatif).",
+    "rc": "RC (registre de commerce)",
+    "nif": "NIF",
+    "nis": "NIS",
+    "ai": "Article d'imposition"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -429,7 +434,11 @@
       "businessName": "Nom du commerce",
       "address": "Adresse",
       "wilaya": "Wilaya",
-      "creditLimit": "Limite de crédit"
+      "creditLimit": "Limite de crédit",
+      "rc": "RC (registre de commerce)",
+      "nif": "NIF",
+      "nis": "NIS",
+      "ai": "Article d'imposition"
     },
     "detail": {
       "balance": "Solde actuel",

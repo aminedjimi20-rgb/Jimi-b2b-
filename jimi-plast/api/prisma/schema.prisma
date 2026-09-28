@@ -193,6 +193,10 @@ model RegistrationRequest {
   address             String?
   wilaya              String?
   businessName        String?
+  rc                  String?
+  nif                 String?
+  nis                 String?
+  ai                  String?
   requestedRoleKey    String? // suggestion du client: "wholesaler" | "retailer" | "manufacturer" | ...
   notes               String?
   status              RegistrationStatus @default(NEW)
@@ -481,6 +485,12 @@ model Customer {
   businessName String?
   address      String?
   wilaya       String?
+  // Identifiants légaux du client (si c'est lui-même une entreprise) —
+  // repris sur la facture officielle à côté des nôtres, quand renseignés.
+  rc           String?
+  nif          String?
+  nis          String?
+  ai           String?
   creditLimit  Decimal  @default(0) @db.Decimal(12, 2)
   notes        String?
   createdAt    DateTime @default(now())
