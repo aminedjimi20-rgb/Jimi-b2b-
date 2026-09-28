@@ -16,12 +16,41 @@ export class BrandingService {
       this.getOrCreateSettings(),
       this.prisma.partnerLogo.findMany({ orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] }),
     ]);
-    return { experienceYears: settings.experienceYears, logos };
+    const { id, updatedAt, ...rest } = settings;
+    return { ...rest, logos };
+  }
+
+  /** Coordonnées légales seules, pour la génération de la facture. */
+  async getCompanyInfo() {
+    const settings = await this.getOrCreateSettings();
+    return {
+      companyLegalName: settings.companyLegalName,
+      companyAddress: settings.companyAddress,
+      companyPhone: settings.companyPhone,
+      companyRC: settings.companyRC,
+      companyNIF: settings.companyNIF,
+      companyNIS: settings.companyNIS,
+      companyAI: settings.companyAI,
+    };
   }
 
   async setExperienceYears(experienceYears: number) {
     const settings = await this.getOrCreateSettings();
     await this.prisma.siteBranding.update({ where: { id: settings.id }, data: { experienceYears } });
+    return this.get();
+  }
+
+  async setCompanyInfo(data: {
+    companyLegalName?: string;
+    companyAddress?: string;
+    companyPhone?: string;
+    companyRC?: string;
+    companyNIF?: string;
+    companyNIS?: string;
+    companyAI?: string;
+  }) {
+    const settings = await this.getOrCreateSettings();
+    await this.prisma.siteBranding.update({ where: { id: settings.id }, data });
     return this.get();
   }
 

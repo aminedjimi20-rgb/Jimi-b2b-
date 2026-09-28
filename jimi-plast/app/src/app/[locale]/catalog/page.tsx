@@ -11,6 +11,7 @@ import { LocaleSwitcher } from '@/components/locale-switcher';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { BarcodeScanButton } from '@/components/barcode-scanner';
 import { SearchableSelect } from '@/components/searchable-select';
+import { BrandingFooter } from '@/components/branding-footer';
 
 interface Category {
   id: string;
@@ -553,6 +554,8 @@ export default function CatalogPage() {
             <LocaleSwitcher current={locale} />
           </div>
         </header>
+
+        <BrandingFooter variant="bar" />
 
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-6 pb-3">
           <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>

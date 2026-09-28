@@ -91,6 +91,23 @@ export class VouchersService {
     return voucher;
   }
 
+  // Un bon doit être confirmé (client + totaux définitifs) avant de pouvoir
+  // être facturé. Le numéro de facture, une fois attribué, ne change plus —
+  // les réimpressions successives réutilisent le même Invoice.
+  async getOrCreateInvoice(voucherId: string) {
+    const voucher = await this.prisma.salesVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
+    if (!voucher) throw new NotFoundException('Bon introuvable');
+    if (voucher.status === 'DRAFT') {
+      throw new BadRequestException('Le bon doit être confirmé avant de générer une facture');
+    }
+
+    const existing = await this.prisma.invoice.findUnique({ where: { voucherId } });
+    if (existing) return existing;
+
+    const number = await this.numberSequence.next('FAC');
+    return this.prisma.invoice.create({ data: { number, voucherId } });
+  }
+
   async addAttachment(voucherId: string, url: string) {
     const voucher = await this.prisma.salesVoucher.findFirst({ where: { id: voucherId, deletedAt: null } });
     if (!voucher) throw new NotFoundException('Bon introuvable');

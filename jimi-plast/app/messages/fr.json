@@ -519,6 +519,7 @@
     "cancel": "Annuler le bon",
     "cancelReason": "Raison de l'annulation",
     "viewPdf": "Voir le PDF",
+    "viewFacture": "Voir la facture",
     "autoSaved": "Enregistré automatiquement",
     "back": "Retour aux bons",
     "removeItem": "Retirer",
@@ -1028,6 +1029,16 @@
   "branding": {
     "experienceLabel": "Ans d'expérience",
     "partnersLabel": "Nos partenaires",
-    "removeLogo": "Retirer"
+    "removeLogo": "Retirer",
+    "companyInfoLink": "Infos de facturation",
+    "companyLegalName": "Raison sociale",
+    "companyAddress": "Adresse",
+    "companyPhone": "Téléphone",
+    "companyRC": "RC",
+    "companyNIF": "NIF",
+    "companyNIS": "NIS",
+    "companyAI": "Article d'imposition",
+    "cancel": "Annuler",
+    "save": "Enregistrer"
   }
 }

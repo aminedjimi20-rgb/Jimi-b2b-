@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { BrandingService } from './branding.service';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
-import { AddPartnerLogoDto, SetExperienceYearsDto } from './dto/branding.dto';
+import { AddPartnerLogoDto, SetCompanyInfoDto, SetExperienceYearsDto } from './dto/branding.dto';
 
 /**
  * Image de marque affichée dans la barre latérale de toutes les pages —
@@ -22,6 +22,12 @@ export class BrandingController {
   @RequirePermissions('settings.manage')
   setExperience(@Body() dto: SetExperienceYearsDto) {
     return this.service.setExperienceYears(dto.experienceYears);
+  }
+
+  @Put('company')
+  @RequirePermissions('settings.manage')
+  setCompanyInfo(@Body() dto: SetCompanyInfoDto) {
+    return this.service.setCompanyInfo(dto);
   }
 
   @Post('logos')

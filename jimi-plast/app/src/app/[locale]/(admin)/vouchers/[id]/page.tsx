@@ -157,6 +157,7 @@ export default function VoucherEditorPage() {
   const [itemSort, setItemSort] = useState<SortMode>('manual');
   const [viewingItemImages, setViewingItemImages] = useState<{ images: { url: string }[]; title: string } | null>(null);
   const [loadingPdf, setLoadingPdf] = useState(false);
+  const [loadingFacture, setLoadingFacture] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [delivery, setDelivery] = useState<DeliveryInfo | null>(null);
@@ -183,6 +184,19 @@ export default function VoucherEditorPage() {
       setError(tCommon('error'));
     } finally {
       setLoadingPdf(false);
+    }
+  }
+
+  async function viewFacture() {
+    const win = supportsPdfShare() ? null : window.open('', '_blank');
+    setLoadingFacture(true);
+    try {
+      await openOrSharePdf(() => api.getBlob(`/vouchers/${id}/facture-pdf`, token), `${voucher?.number ?? 'facture'}.pdf`, win);
+    } catch {
+      win?.close();
+      setError(tCommon('error'));
+    } finally {
+      setLoadingFacture(false);
     }
   }
 
@@ -730,6 +744,15 @@ export default function VoucherEditorPage() {
               className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50"
             >
               {loadingPdf ? tCommon('loading') : t('viewPdf')}
+            </button>
+          )}
+          {canManage && voucher?.status !== 'DRAFT' && (
+            <button
+              onClick={viewFacture}
+              disabled={loadingFacture}
+              className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50"
+            >
+              {loadingFacture ? tCommon('loading') : t('viewFacture')}
             </button>
           )}
           {canManage && voucherDeletion?.status !== 'PENDING' && voucherDeletion?.status !== 'APPROVED' && (

@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res } from '@ne
 import type { Response } from 'express';
 import { VouchersService } from './vouchers.service';
 import { VoucherPdfService } from './voucher-pdf.service';
+import { InvoicePdfService } from './invoice-pdf.service';
+import { BrandingService } from '../branding/branding.service';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../auth/auth.types';
@@ -18,6 +20,8 @@ export class VouchersController {
   constructor(
     private readonly vouchersService: VouchersService,
     private readonly pdfService: VoucherPdfService,
+    private readonly invoicePdfService: InvoicePdfService,
+    private readonly brandingService: BrandingService,
     private readonly pendingDeletions: PendingDeletionsService,
   ) {}
 
@@ -97,6 +101,20 @@ export class VouchersController {
     // Le bon contient des données client/prix — jamais indexable par les moteurs de recherche.
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     const doc = this.pdfService.generate(voucher);
+    doc.pipe(res);
+  }
+
+  @Get(':id/facture-pdf')
+  async facturePdf(@Param('id') id: string, @Res() res: Response) {
+    const [voucher, invoice, company] = await Promise.all([
+      this.vouchersService.getById(id),
+      this.vouchersService.getOrCreateInvoice(id),
+      this.brandingService.getCompanyInfo(),
+    ]);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${invoice.number}.pdf"`);
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    const doc = this.invoicePdfService.generate({ number: invoice.number, createdAt: invoice.createdAt, voucher, company });
     doc.pipe(res);
   }
 

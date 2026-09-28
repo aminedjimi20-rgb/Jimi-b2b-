@@ -635,10 +635,25 @@ model SalesVoucher {
   delivery    Delivery?
   attachments VoucherAttachment[]
   pendingDeletions PendingDeletion[]
+  invoice     Invoice?
 
   @@index([customerId])
   @@index([status])
   @@map("sales_vouchers")
+}
+
+// Facture officielle liée à un bon confirmé — numérotée à sa toute première
+// génération (FAC-2026-000001) puis réutilisée à chaque réimpression, pour
+// qu'un même bon garde toujours le même numéro de facture.
+model Invoice {
+  id        String   @id @default(cuid())
+  number    String   @unique
+  voucherId String   @unique
+  createdAt DateTime @default(now())
+
+  voucher SalesVoucher @relation(fields: [voucherId], references: [id])
+
+  @@map("invoices")
 }
 
 // Photos jointes à un bon (marchandise livrée, bon papier imprimé et
@@ -1204,10 +1219,20 @@ model PartnerLogo {
 // Ligne unique (singleton) — pas besoin d'une table de réglages généraux
 // tant qu'un seul réglage global existe ; on y ajoutera des colonnes plutôt
 // que des lignes si d'autres réglages de ce type apparaissent.
+// Coordonnées légales de l'entreprise — utilisées sur la facture officielle.
+// Tous optionnels : tant qu'un champ n'est pas rempli par l'admin, la
+// facture l'omet simplement plutôt que d'afficher un blanc suspect.
 model SiteBranding {
-  id              String   @id @default(cuid())
-  experienceYears Int      @default(35)
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(cuid())
+  experienceYears  Int      @default(35)
+  companyLegalName String?
+  companyAddress   String?
+  companyPhone     String?
+  companyRC        String?
+  companyNIF       String?
+  companyNIS       String?
+  companyAI        String?
+  updatedAt        DateTime @updatedAt
 
   @@map("site_branding")
 }

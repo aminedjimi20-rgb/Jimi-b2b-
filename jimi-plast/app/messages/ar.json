@@ -519,6 +519,7 @@
     "cancel": "إلغاء البون",
     "cancelReason": "سبب الإلغاء",
     "viewPdf": "عرض PDF",
+    "viewFacture": "عرض الفاتورة",
     "autoSaved": "تم الحفظ تلقائياً",
     "back": "العودة إلى البونات",
     "removeItem": "إزالة",
@@ -1028,6 +1029,16 @@
   "branding": {
     "experienceLabel": "سنوات خبرة",
     "partnersLabel": "شركاؤنا",
-    "removeLogo": "إزالة"
+    "removeLogo": "إزالة",
+    "companyInfoLink": "معلومات الفوترة",
+    "companyLegalName": "التسمية القانونية",
+    "companyAddress": "العنوان",
+    "companyPhone": "الهاتف",
+    "companyRC": "السجل التجاري (RC)",
+    "companyNIF": "رقم التعريف الجبائي (NIF)",
+    "companyNIS": "رقم التعريف الإحصائي (NIS)",
+    "companyAI": "المادة الضريبية (AI)",
+    "cancel": "إلغاء",
+    "save": "حفظ"
   }
 }

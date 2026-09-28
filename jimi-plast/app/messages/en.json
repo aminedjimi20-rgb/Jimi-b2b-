@@ -519,6 +519,7 @@
     "cancel": "Cancel voucher",
     "cancelReason": "Cancellation reason",
     "viewPdf": "View PDF",
+    "viewFacture": "View invoice",
     "autoSaved": "Auto-saved",
     "back": "Back to vouchers",
     "removeItem": "Remove",
@@ -1028,6 +1029,16 @@
   "branding": {
     "experienceLabel": "Years of experience",
     "partnersLabel": "Our partners",
-    "removeLogo": "Remove"
+    "removeLogo": "Remove",
+    "companyInfoLink": "Billing info",
+    "companyLegalName": "Legal name",
+    "companyAddress": "Address",
+    "companyPhone": "Phone",
+    "companyRC": "Trade register (RC)",
+    "companyNIF": "Tax ID (NIF)",
+    "companyNIS": "Statistical ID (NIS)",
+    "companyAI": "Tax article (AI)",
+    "cancel": "Cancel",
+    "save": "Save"
   }
 }
