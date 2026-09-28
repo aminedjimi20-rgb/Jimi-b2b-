@@ -50,6 +50,19 @@ async function refreshAccessToken(): Promise<string | null> {
         return data.accessToken;
       })
       .catch(() => {
+        // Le refresh token est à usage unique et révoqué dès qu'il sert : si
+        // un autre onglet (ou la PWA installée, qui partage le même
+        // localStorage) l'a déjà utilisé avec succès entre notre lecture et
+        // notre appel, le nôtre est rejeté alors que la session reste
+        // parfaitement valide — un nouveau token est déjà écrit en
+        // localStorage. On ne déconnecte que si ce n'est vraiment pas le cas,
+        // sinon on adopte silencieusement celui que l'autre a posé.
+        const currentRefresh = localStorage.getItem(REFRESH_KEY);
+        if (currentRefresh && currentRefresh !== refreshToken) {
+          const currentAccess = localStorage.getItem(TOKEN_KEY);
+          onTokensUpdated?.(currentAccess);
+          return currentAccess;
+        }
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REFRESH_KEY);
         onTokensUpdated?.(null);
