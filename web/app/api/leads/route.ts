@@ -3,7 +3,7 @@ import { addLead, type LeadType } from "@/lib/leads";
 import { isRateLimited } from "@/lib/rateLimit";
 import { notifyAdminNewSellRequest } from "@/lib/notifications";
 
-const VALID_TYPES: LeadType[] = ["buy", "sell", "service", "contact"];
+const VALID_TYPES: LeadType[] = ["buy", "sell", "service", "contact", "offer"];
 const MAX_FIELD_LENGTH = 2000;
 
 export async function POST(request: NextRequest) {

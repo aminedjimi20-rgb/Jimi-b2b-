@@ -3,10 +3,12 @@ import { Factory, Phone, Mail, MapPin, MessageCircle } from "lucide-react";
 import { siteConfig, buildWhatsAppLink } from "@/config/site.config";
 import { getTranslations } from "next-intl/server";
 import { PushSettingsLink } from "@/components/PushSettingsLink";
+import { getPartnerLogos } from "@/lib/partnerLogosStore";
 
 export async function Footer() {
   const t = await getTranslations();
   const year = new Date().getFullYear();
+  const partnerLogos = await getPartnerLogos();
   const waLink = buildWhatsAppLink(t("whatsappMessages.generalContact"), siteConfig.contact.whatsappNumber);
   const waLinkSecondary = buildWhatsAppLink(
     t("whatsappMessages.generalContact"),
@@ -46,6 +48,7 @@ export async function Footer() {
             <li><Link href="/acheter" className="hover:text-white">{t("nav.acheter")}</Link></li>
             <li><Link href="/vendre-equipement" className="hover:text-white">{t("nav.vendre")}</Link></li>
             <li><Link href="/realisations" className="hover:text-white">{t("nav.realisations")}</Link></li>
+            <li><Link href="/recherches" className="hover:text-white">{t("nav.recherches")}</Link></li>
             <li><Link href="/blog" className="hover:text-white">{t("nav.blogShort")}</Link></li>
             <li><Link href="/contact" className="hover:text-white">{t("nav.contact")}</Link></li>
           </ul>
@@ -121,6 +124,37 @@ export async function Footer() {
           </ul>
         </div>
       </div>
+
+      {partnerLogos.length > 0 && (
+        <div className="border-t border-white/10">
+          <div className="container-jimi py-8">
+            <p className="mb-5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("footer.partnersTitle")}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              {partnerLogos.map((logo) => {
+                const img = (
+                  // eslint-disable-next-line @next/next/no-img-element -- logos live on a user-configured Cloudinary domain, unknown at build time
+                  <img
+                    src={logo.logoUrl}
+                    alt={logo.name}
+                    className="h-10 w-auto object-contain opacity-80 grayscale transition hover:opacity-100 hover:grayscale-0"
+                  />
+                );
+                return logo.websiteUrl ? (
+                  <a key={logo.id} href={logo.websiteUrl} target="_blank" rel="noopener noreferrer" title={logo.name}>
+                    {img}
+                  </a>
+                ) : (
+                  <span key={logo.id} title={logo.name}>
+                    {img}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="border-t border-white/10">
         <div className="container-jimi flex flex-col items-center justify-between gap-2 py-5 text-xs text-slate-500 sm:flex-row">

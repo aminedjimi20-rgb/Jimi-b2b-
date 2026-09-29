@@ -4,7 +4,7 @@ import os from "os";
 import { randomUUID } from "crypto";
 import { getFirestoreAdmin, isFirebaseConfigured } from "@/lib/firebaseAdmin";
 
-export type LeadType = "buy" | "sell" | "service" | "contact";
+export type LeadType = "buy" | "sell" | "service" | "contact" | "offer";
 
 export interface Lead {
   id: string;

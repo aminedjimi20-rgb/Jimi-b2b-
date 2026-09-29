@@ -69,6 +69,7 @@ export function Navbar() {
 
   const trailingLinks = [
     { href: "/realisations", label: t("realisations") },
+    { href: "/recherches", label: t("recherches") },
     { href: "/blog", label: t("blogShort") },
     { href: "/contact", label: t("contact") },
   ];
@@ -97,10 +98,10 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 min-[1700px]:flex">
+        <nav className="hidden items-center gap-0.5 min-[1900px]:flex">
           <Link
             href="/"
-            className="rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
+            className="rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
           >
             {t("home")}
           </Link>
@@ -125,7 +126,7 @@ export function Navbar() {
 
           <Link
             href={moulesLink.href}
-            className="rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
+            className="rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
           >
             {moulesLink.label}
           </Link>
@@ -143,7 +144,7 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
+              className="rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
             >
               {link.label}
             </Link>
@@ -175,7 +176,7 @@ export function Navbar() {
           <div className="hidden md:block">
             <LanguageSwitcher />
           </div>
-          <div className="hidden min-[1700px]:block">
+          <div className="hidden min-[1900px]:block">
             <Button href="/contact" size="sm">
               {t("getQuote")}
             </Button>
@@ -183,7 +184,7 @@ export function Navbar() {
           <button
             type="button"
             aria-label="Menu"
-            className="rounded-md p-2 text-[var(--color-ink)] hover:bg-[var(--color-surface-2)] min-[1700px]:hidden"
+            className="rounded-md p-2 text-[var(--color-ink)] hover:bg-[var(--color-surface-2)] min-[1900px]:hidden"
             onClick={() => setMobileOpen((v) => !v)}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -192,7 +193,7 @@ export function Navbar() {
       </div>
 
       {mobileOpen && (
-        <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-[var(--color-border)] bg-white min-[1700px]:hidden">
+        <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-[var(--color-border)] bg-white min-[1900px]:hidden">
           <nav className="container-jimi flex flex-col gap-1 py-4">
             <div className="pb-3">
               <SearchBar placeholder={t("searchPlaceholder")} onSubmitted={() => setMobileOpen(false)} />
@@ -283,7 +284,7 @@ function DesktopDropdown({
     >
       <Link
         href={triggerHref}
-        className="flex items-center gap-1 rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
+        className="flex items-center gap-1 rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap text-[var(--color-text)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-accent)]"
       >
         {triggerLabel}
         <ChevronDown size={14} />

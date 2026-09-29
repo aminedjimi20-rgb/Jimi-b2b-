@@ -11,6 +11,8 @@ import { PartsTab } from "./PartsTab";
 import { ProjectsTab } from "./ProjectsTab";
 import { TestimonialsTab } from "./TestimonialsTab";
 import { ArticlesTab } from "./ArticlesTab";
+import { ContactNotesTab } from "./ContactNotesTab";
+import { WantedListingsTab } from "./WantedListingsTab";
 import { SettingsTab } from "./SettingsTab";
 import { AiTesterTab } from "./AiTesterTab";
 import { ConversationsTab } from "./ConversationsTab";
@@ -22,6 +24,9 @@ import type { BuyerProfile } from "@/lib/buyers";
 import type { MachineLead } from "@/lib/machineLeads";
 import type { ServiceVideos } from "@/lib/serviceVideos";
 import type { BusinessInfo } from "@/lib/businessInfoStore";
+import type { ContactNote } from "@/lib/contactNotesStore";
+import type { PartnerLogo } from "@/lib/partnerLogosStore";
+import type { WantedListing } from "@/lib/wantedListingsStore";
 import {
   Inbox,
   Factory,
@@ -36,6 +41,8 @@ import {
   Bot,
   MessageCircle,
   Newspaper,
+  NotebookPen,
+  Megaphone,
 } from "lucide-react";
 
 type Tab =
@@ -50,6 +57,8 @@ type Tab =
   | "buyers"
   | "machineLeads"
   | "conversations"
+  | "contactNotes"
+  | "wantedListings"
   | "aiTester"
   | "settings";
 
@@ -65,6 +74,9 @@ export function AdminDashboard({
   initialTestimonials,
   initialServiceVideos,
   initialBusinessInfo,
+  initialContactNotes,
+  initialPartnerLogos,
+  initialWantedListings,
   usingDefaultPassword,
 }: {
   initialLeads: Lead[];
@@ -78,6 +90,9 @@ export function AdminDashboard({
   initialTestimonials: Testimonial[];
   initialServiceVideos: ServiceVideos;
   initialBusinessInfo: BusinessInfo;
+  initialContactNotes: ContactNote[];
+  initialPartnerLogos: PartnerLogo[];
+  initialWantedListings: WantedListing[];
   usingDefaultPassword: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("leads");
@@ -97,6 +112,8 @@ export function AdminDashboard({
     { key: "testimonials", label: "Témoignages", icon: Quote, count: pendingTestimonials.length },
     { key: "sellers", label: "Vendeurs", icon: UserSquare2, count: initialSellers.length },
     { key: "buyers", label: "Acheteurs", icon: Users, count: initialBuyers.length },
+    { key: "contactNotes", label: "Notes clients/prospects", icon: NotebookPen, count: initialContactNotes.length },
+    { key: "wantedListings", label: "Recherches publiées", icon: Megaphone, count: initialWantedListings.length },
     { key: "aiTester", label: "Assistant IA", icon: Bot },
     { key: "settings", label: "Paramètres", icon: Settings2 },
   ];
@@ -147,6 +164,8 @@ export function AdminDashboard({
       {tab === "testimonials" && <TestimonialsTab initialTestimonials={initialTestimonials} />}
       {tab === "sellers" && <SellersTab initialSellers={initialSellers} machines={initialMachines} />}
       {tab === "buyers" && <BuyersTab initialBuyers={initialBuyers} leads={initialMachineLeads} />}
+      {tab === "contactNotes" && <ContactNotesTab initialNotes={initialContactNotes} />}
+      {tab === "wantedListings" && <WantedListingsTab initialListings={initialWantedListings} />}
       {tab === "conversations" && <ConversationsTab />}
       {tab === "aiTester" && <AiTesterTab />}
       {tab === "settings" && (
@@ -154,6 +173,7 @@ export function AdminDashboard({
           usingDefaultPassword={usingDefaultPassword}
           initialServiceVideos={initialServiceVideos}
           initialBusinessInfo={initialBusinessInfo}
+          initialPartnerLogos={initialPartnerLogos}
         />
       )}
     </div>

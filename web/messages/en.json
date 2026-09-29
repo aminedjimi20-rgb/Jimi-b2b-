@@ -18,6 +18,7 @@
     "acheter": "Buy",
     "vendre": "Sell",
     "realisations": "Projects",
+    "recherches": "Wanted",
     "blog": "Insights & News",
     "blogShort": "Insights",
     "contact": "Contact",
@@ -787,6 +788,20 @@
     "notFound": "Looking for something specific that isn't in the catalogue?",
     "notFoundCta": "Describe what you need, we'll look for it for you"
   },
+  "wanted": {
+    "eyebrow": "Wanted",
+    "pageTitle": "What our customers are looking for",
+    "pageSubtitle": "Have one of these? Click \"I have this\" to leave your details — we'll put you in touch.",
+    "seoTitle": "Machines and parts wanted in Algeria | JIMI Industrie",
+    "seoDescription": "Equipment our customers are looking for in Algeria: if you have one of these machines, parts or molds, contact us.",
+    "emptyTitle": "No requests right now",
+    "emptySubtitle": "Check back later, or tell us what you're looking for too.",
+    "offerCta": "I have this",
+    "offerMessagePlaceholder": "Condition, price, your location...",
+    "offerSubmit": "Send my details",
+    "offerSuccessTitle": "Thanks, your message was sent",
+    "offerSuccessMessage": "We're checking your offer and will get back to you shortly."
+  },
   "search": {
     "eyebrow": "Search",
     "pageTitle": "Search",
@@ -1061,6 +1076,7 @@
     "servicesTitle": "Services",
     "contactTitle": "Contact",
     "legalTitle": "Information",
+    "partnersTitle": "Trusted by",
     "rights": "All rights reserved.",
     "madeWith": "Professional website — JIMI Industrie",
     "privacyLink": "Privacy Policy"
@@ -1125,6 +1141,8 @@
       "driveType": "Servo / Hydraulic",
       "specificNeed": "Specific need",
       "priceWanted": "Desired price (DZD)",
+      "negotiable": "Negotiable price",
+      "condition": "Condition",
       "budget": "Budget (DZD)",
       "description": "Description",
       "availability": "Availability",

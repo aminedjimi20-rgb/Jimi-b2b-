@@ -7,6 +7,9 @@ import { getBuyers } from "@/lib/buyers";
 import { getMachineLeads } from "@/lib/machineLeads";
 import { getServiceVideos } from "@/lib/serviceVideos";
 import { getBusinessInfo } from "@/lib/businessInfoStore";
+import { getContactNotes } from "@/lib/contactNotesStore";
+import { getPartnerLogos } from "@/lib/partnerLogosStore";
+import { getWantedListings } from "@/lib/wantedListingsStore";
 import { AdminTopBar } from "@/components/admin/AdminTopBar";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
@@ -29,6 +32,9 @@ export default async function AdminDashboardPage() {
     testimonials,
     serviceVideos,
     businessInfo,
+    contactNotes,
+    partnerLogos,
+    wantedListings,
   ] = await Promise.all([
     getLeads(),
     getMachines(),
@@ -41,6 +47,9 @@ export default async function AdminDashboardPage() {
     getTestimonials(),
     getServiceVideos(),
     getBusinessInfo(),
+    getContactNotes(),
+    getPartnerLogos(),
+    getWantedListings(),
   ]);
 
   return (
@@ -58,6 +67,9 @@ export default async function AdminDashboardPage() {
         initialTestimonials={testimonials}
         initialServiceVideos={serviceVideos}
         initialBusinessInfo={businessInfo}
+        initialContactNotes={contactNotes}
+        initialPartnerLogos={partnerLogos}
+        initialWantedListings={wantedListings}
         usingDefaultPassword={usingDefaultPassword()}
       />
     </>

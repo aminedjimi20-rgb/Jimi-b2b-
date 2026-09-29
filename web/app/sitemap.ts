@@ -33,6 +33,7 @@ const staticPaths = [
   "/services/automatisation-industrielle",
   "/services/maintenance-depannage",
   "/realisations",
+  "/recherches",
   "/avis",
   "/blog",
   "/contact",

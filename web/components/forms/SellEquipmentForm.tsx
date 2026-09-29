@@ -118,6 +118,13 @@ function PartOrMoldForm({ equipmentType }: { equipmentType: "piece" | "moule" | 
           <FieldWrapper label={t("forms.fields.reference")}>
             <TextInput name="reference" placeholder="Siemens, SKF, moule 4 empreintes..." />
           </FieldWrapper>
+          <FieldWrapper label={t("forms.fields.condition")}>
+            <Select name="condition" defaultValue="occasion">
+              <option value="neuf">{t("pieces.condition.neuf")}</option>
+              <option value="occasion">{t("pieces.condition.occasion")}</option>
+              <option value="renove">{t("pieces.condition.renove")}</option>
+            </Select>
+          </FieldWrapper>
           <FieldWrapper label={t("forms.fields.priceWanted")}>
             <TextInput name="priceWanted" type="number" min={0} placeholder="50 000" />
           </FieldWrapper>
@@ -132,6 +139,10 @@ function PartOrMoldForm({ equipmentType }: { equipmentType: "piece" | "moule" | 
             </Select>
           </FieldWrapper>
         </div>
+        <label className="mt-4 flex items-center gap-2 text-sm text-[var(--color-text)]">
+          <input type="checkbox" name="negotiable" value="oui" className="h-4 w-4 rounded border-[var(--color-border)]" />
+          {t("forms.fields.negotiable")}
+        </label>
         <FieldWrapper label={t("forms.fields.description")} className="mt-4">
           <TextArea name="description" placeholder={t("forms.placeholders.description")} rows={4} />
         </FieldWrapper>

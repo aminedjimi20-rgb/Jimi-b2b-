@@ -10,6 +10,7 @@ const TYPE_LABELS: Record<LeadType, string> = {
   sell: "Vente équipement",
   service: "Demande de service",
   contact: "Contact",
+  offer: "J'ai ça (réponse à une recherche)",
 };
 
 const TYPE_TONE: Record<LeadType, string> = {
@@ -17,6 +18,7 @@ const TYPE_TONE: Record<LeadType, string> = {
   sell: "bg-teal-50 text-teal-700",
   service: "bg-amber-50 text-amber-700",
   contact: "bg-slate-100 text-slate-700",
+  offer: "bg-purple-50 text-purple-700",
 };
 
 const STATUS_LABELS: Record<Lead["status"], string> = {
@@ -63,8 +65,14 @@ function isAcceptableBuyLead(lead: Lead): boolean {
   return lead.type === "buy";
 }
 
+/** Une réponse "J'ai ça" à une annonce "Recherché" publique peut être
+ *  acceptée pour enregistrer le fournisseur dans l'onglet Vendeurs. */
+function isAcceptableOfferLead(lead: Lead): boolean {
+  return lead.type === "offer";
+}
+
 function isAcceptableLead(lead: Lead): boolean {
-  return isAcceptableSellLead(lead) || isAcceptableBuyLead(lead);
+  return isAcceptableSellLead(lead) || isAcceptableBuyLead(lead) || isAcceptableOfferLead(lead);
 }
 
 export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
@@ -131,6 +139,12 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
       if (isAcceptableSellLead(lead)) {
         const priceWanted = Number(lead.data.priceWanted);
         const nameOrRef = lead.data.reference?.trim() || lead.data.description?.trim() || "Pièce à identifier";
+        const condition = ["neuf", "occasion", "renove"].includes(lead.data.condition ?? "")
+          ? lead.data.condition
+          : "occasion";
+        const description = lead.data.negotiable === "oui"
+          ? `${lead.data.description ?? ""} (prix négociable)`.trim()
+          : lead.data.description ?? "";
         const [partRes, sellerOk] = await Promise.all([
           fetch("/api/admin/parts", {
             method: "POST",
@@ -139,9 +153,9 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
               category: EQUIPMENT_TYPE_TO_CATEGORY[lead.data.equipmentType ?? ""] ?? "autre",
               name: nameOrRef,
               reference: nameOrRef,
-              condition: "occasion",
+              condition,
               wilaya: lead.data.wilaya || undefined,
-              description: lead.data.description ?? "",
+              description,
               price: priceWanted > 0 ? priceWanted : null,
               priceOnRequest: !(priceWanted > 0),
               photos: parsePhotos(lead.data.photos),
@@ -163,6 +177,12 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
           alert("Erreur lors de l'enregistrement de l'acheteur.");
           return;
         }
+      } else if (isAcceptableOfferLead(lead)) {
+        const sellerOk = await registerContact(lead, "sellers");
+        if (!sellerOk) {
+          alert("Erreur lors de l'enregistrement du fournisseur.");
+          return;
+        }
       }
       setAcceptedIds((prev) => new Set(prev).add(lead.id));
       await setStatus(lead.id, "closed");
@@ -175,7 +195,7 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
-          {(["all", "buy", "sell", "service", "contact"] as const).map((type) => (
+          {(["all", "buy", "sell", "service", "contact", "offer"] as const).map((type) => (
             <button
               key={type}
               onClick={() => setFilterType(type)}
@@ -219,7 +239,7 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isAcceptableLead(lead) && !acceptedIds.has(lead.id) && (
+                  {isAcceptableLead(lead) && lead.status !== "closed" && !acceptedIds.has(lead.id) && (
                     <button
                       onClick={() => accept(lead)}
                       disabled={acceptingId === lead.id}
@@ -313,7 +333,9 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
                     <CheckCircle2 size={14} />
                     {isAcceptableSellLead(lead)
                       ? "Fiche créée en brouillon (à publier depuis l'onglet Pièces) et vendeur enregistré dans Vendeurs"
-                      : "Acheteur enregistré dans l'onglet Acheteurs"}
+                      : isAcceptableOfferLead(lead)
+                        ? "Fournisseur enregistré dans l'onglet Vendeurs"
+                        : "Acheteur enregistré dans l'onglet Acheteurs"}
                   </span>
                 </div>
               )}

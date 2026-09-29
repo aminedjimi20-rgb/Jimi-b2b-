@@ -18,6 +18,7 @@
     "acheter": "شراء",
     "vendre": "بيع",
     "realisations": "أعمالنا",
+    "recherches": "مطلوب",
     "blog": "نصائح وأخبار",
     "blogShort": "نصائح",
     "contact": "اتصل بنا",
@@ -787,6 +788,20 @@
     "notFound": "تبحث عن معدة محددة لا تجدها في الكتالوج؟",
     "notFoundCta": "صف احتياجك، سنبحث عنه من أجلك"
   },
+  "wanted": {
+    "eyebrow": "مطلوب",
+    "pageTitle": "ما يبحث عنه عملاؤنا",
+    "pageSubtitle": "عندك أحد هذه المعدات؟ اضغط على «عندي» لترك معلوماتك — نربطك بالطلب.",
+    "seoTitle": "آلات وقطع مطلوبة في الجزائر | JIMI Industrie",
+    "seoDescription": "معدات يبحث عنها عملاؤنا في الجزائر: إذا كانت لديك إحدى هذه الآلات أو القطع أو القوالب، تواصل معنا.",
+    "emptyTitle": "لا توجد طلبات حالياً",
+    "emptySubtitle": "عاود الزيارة لاحقاً، أو صف لنا ما تبحث عنه أنت أيضاً.",
+    "offerCta": "عندي",
+    "offerMessagePlaceholder": "حدد الحالة، السعر، مكانك...",
+    "offerSubmit": "إرسال معلوماتي",
+    "offerSuccessTitle": "شكراً، تم إرسال رسالتك بنجاح",
+    "offerSuccessMessage": "نتحقق من عرضك ونتواصل معك قريباً."
+  },
   "search": {
     "eyebrow": "بحث",
     "pageTitle": "بحث",
@@ -1061,6 +1076,7 @@
     "servicesTitle": "الخدمات",
     "contactTitle": "اتصل بنا",
     "legalTitle": "معلومات",
+    "partnersTitle": "يثقون بنا",
     "rights": "جميع الحقوق محفوظة.",
     "madeWith": "موقع احترافي — JIMI Industrie",
     "privacyLink": "سياسة الخصوصية"
@@ -1125,6 +1141,8 @@
       "driveType": "سيرفو / هيدروليكي",
       "specificNeed": "حاجة خاصة",
       "priceWanted": "السعر المطلوب (دج)",
+      "negotiable": "السعر قابل للتفاوض",
+      "condition": "الحالة",
       "budget": "الميزانية (دج)",
       "description": "الوصف",
       "availability": "التوفر",

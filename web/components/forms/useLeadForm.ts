@@ -5,7 +5,7 @@ import { markPushEngaged } from "@/lib/pushClient";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-export function useLeadForm(type: "buy" | "sell" | "service" | "contact") {
+export function useLeadForm(type: "buy" | "sell" | "service" | "contact" | "offer") {
   const [status, setStatus] = useState<Status>("idle");
 
   async function submit(e: FormEvent<HTMLFormElement>) {
