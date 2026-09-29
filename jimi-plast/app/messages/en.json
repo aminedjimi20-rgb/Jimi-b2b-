@@ -290,6 +290,7 @@
     "title": "Catalog",
     "filters": "Filters",
     "allCategories": "All categories",
+    "allSubcategories": "All subcategories",
     "sortPriority": "Priority",
     "sortNewest": "Newest",
     "sortNameAsc": "Name (A→Z)",
@@ -363,6 +364,8 @@
     "form": {
       "sku": "SKU",
       "category": "Category",
+      "subcategory": "Subcategory",
+      "subcategoryGeneral": "— General (no subcategory) —",
       "nameFr": "Name (French)",
       "nameAr": "Name (Arabic)",
       "nameEn": "Name (English)",

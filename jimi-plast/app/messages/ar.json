@@ -290,6 +290,7 @@
     "title": "الكتالوج",
     "filters": "الفلاتر",
     "allCategories": "كل الفئات",
+    "allSubcategories": "كل الفئات الفرعية",
     "sortPriority": "الأولوية",
     "sortNewest": "الأحدث",
     "sortNameAsc": "الاسم (أ→ي)",
@@ -363,6 +364,8 @@
     "form": {
       "sku": "المرجع (SKU)",
       "category": "الفئة",
+      "subcategory": "الفئة الفرعية",
+      "subcategoryGeneral": "— عامة (بلا فئة فرعية) —",
       "nameFr": "الاسم (فرنسي)",
       "nameAr": "الاسم (عربي)",
       "nameEn": "الاسم (إنجليزي)",

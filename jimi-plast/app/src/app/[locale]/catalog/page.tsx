@@ -271,6 +271,17 @@ export default function CatalogPage() {
   }, [token, canManageVouchers]);
 
   const topCategories = useMemo(() => categories.filter((c) => !c.parentId), [categories]);
+  // La catégorie sélectionnée peut être un parent ou une sous-catégorie —
+  // categoryId reste la seule source de vérité, ces deux listes ne font que
+  // dériver l'affichage des deux <select> en cascade.
+  const selectedTopCategoryId = useMemo(() => {
+    const cat = categories.find((c) => c.id === categoryId);
+    return cat ? cat.parentId ?? cat.id : '';
+  }, [categories, categoryId]);
+  const subcategories = useMemo(
+    () => categories.filter((c) => c.parentId === selectedTopCategoryId),
+    [categories, selectedTopCategoryId],
+  );
 
   const availableTiers = useMemo(() => {
     const map = new Map<string, string>();
@@ -621,7 +632,7 @@ export default function CatalogPage() {
         {filtersOpen && (
           <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 pb-4">
             <select
-              value={categoryId}
+              value={selectedTopCategoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               className="rounded border border-line bg-panel px-3 py-2 text-sm"
             >
@@ -632,6 +643,20 @@ export default function CatalogPage() {
                 </option>
               ))}
             </select>
+            {subcategories.length > 0 && (
+              <select
+                value={subcategories.some((s) => s.id === categoryId) ? categoryId : ''}
+                onChange={(e) => setCategoryId(e.target.value || selectedTopCategoryId)}
+                className="rounded border border-line bg-panel px-3 py-2 text-sm"
+              >
+                <option value="">{t('allSubcategories')}</option>
+                {subcategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {localizedName(c, locale)}
+                  </option>
+                ))}
+              </select>
+            )}
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}

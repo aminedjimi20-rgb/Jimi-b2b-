@@ -12,6 +12,7 @@ import { SortSelect, type SortMode } from '@/components/sort-select';
 interface Category {
   id: string;
   nameFr: string;
+  parentId: string | null;
 }
 interface Manufacturer {
   id: string;
@@ -131,6 +132,16 @@ export default function ProductsAdminPage() {
   const [newProductImages, setNewProductImages] = useState<string[]>([]);
   const [viewingImages, setViewingImages] = useState<{ images: { url: string }[]; startIndex: number } | null>(null);
   const [stockUnit, setStockUnit] = useState<'pieces' | 'cartons'>('pieces');
+
+  // Catégorie/sous-catégorie en cascade — form.categoryId reste la seule
+  // source de vérité (une sous-catégorie si choisie, sinon la catégorie
+  // parente), ces deux listes ne font que dériver son affichage.
+  const topCategories = categories.filter((c) => !c.parentId);
+  const selectedTopCategoryId = (() => {
+    const cat = categories.find((c) => c.id === form.categoryId);
+    return cat ? cat.parentId ?? cat.id : '';
+  })();
+  const subcategories = categories.filter((c) => c.parentId === selectedTopCategoryId);
   const [promoForm, setPromoForm] = useState({ priceTierTypeId: '', discountType: 'PERCENT' as 'PERCENT' | 'AMOUNT', discountValue: '', startDate: '', endDate: '' });
   const [error, setError] = useState<string | null>(null);
   const [appliedEditParam, setAppliedEditParam] = useState<string | null>(null);
@@ -626,18 +637,36 @@ export default function ProductsAdminPage() {
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">{t('form.category')}</span>
             <select
-              value={form.categoryId}
+              value={selectedTopCategoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               className="rounded border border-line bg-paper px-3 py-2"
             >
               <option value=""></option>
-              {categories.map((c) => (
+              {topCategories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.nameFr}
                 </option>
               ))}
             </select>
           </label>
+
+          {subcategories.length > 0 && (
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-muted">{t('form.subcategory')}</span>
+              <select
+                value={subcategories.some((s) => s.id === form.categoryId) ? form.categoryId : ''}
+                onChange={(e) => setForm({ ...form, categoryId: e.target.value || selectedTopCategoryId })}
+                className="rounded border border-line bg-paper px-3 py-2"
+              >
+                <option value="">{t('form.subcategoryGeneral')}</option>
+                {subcategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nameFr}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">{t('form.manufacturer')}</span>

@@ -290,6 +290,7 @@
     "title": "Catalogue",
     "filters": "Filtres",
     "allCategories": "Toutes les catégories",
+    "allSubcategories": "Toutes les sous-catégories",
     "sortPriority": "Priorité",
     "sortNewest": "Plus récents",
     "sortNameAsc": "Nom (A→Z)",
@@ -363,6 +364,8 @@
     "form": {
       "sku": "Référence (SKU)",
       "category": "Catégorie",
+      "subcategory": "Sous-catégorie",
+      "subcategoryGeneral": "— Générale (pas de sous-catégorie) —",
       "nameFr": "Nom (Français)",
       "nameAr": "Nom (Arabe)",
       "nameEn": "Nom (Anglais)",

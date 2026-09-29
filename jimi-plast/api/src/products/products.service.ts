@@ -99,14 +99,32 @@ export class ProductsService {
     return score;
   }
 
+  // Choisir une catégorie parente doit aussi montrer les produits de ses
+  // sous-catégories (ex. "Plastique" → "Bassines", "Accessoires"...) — sans
+  // ça, sélectionner juste le parent ne montre rien tant qu'aucun produit
+  // n'est rattaché directement à ce niveau-là.
+  private async resolveCategoryAndDescendants(categoryId: string): Promise<string[]> {
+    const all = await this.prisma.category.findMany({ where: { deletedAt: null }, select: { id: true, parentId: true } });
+    const ids = [categoryId];
+    let frontier = [categoryId];
+    while (frontier.length > 0) {
+      const children = all.filter((c) => c.parentId && frontier.includes(c.parentId)).map((c) => c.id);
+      ids.push(...children);
+      frontier = children;
+    }
+    return ids;
+  }
+
   async list(filters: ProductListFilters, permissions: string[] | null) {
     const page = filters.page ?? 1;
     const pageSize = Math.min(filters.pageSize ?? DEFAULT_PAGE_SIZE, 100);
 
+    const categoryIds = filters.categoryId ? await this.resolveCategoryAndDescendants(filters.categoryId) : undefined;
+
     const where: Prisma.ProductWhereInput = {
       deletedAt: null,
       isActive: true,
-      ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
+      ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
       ...(filters.manufacturerId ? { manufacturerId: filters.manufacturerId } : {}),
       ...(filters.isNew !== undefined ? { isNew: filters.isNew } : {}),
       ...(filters.isFeatured !== undefined ? { isFeatured: filters.isFeatured } : {}),
