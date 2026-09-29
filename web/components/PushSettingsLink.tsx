@@ -10,6 +10,7 @@ export function PushSettingsLink() {
   const [supported, setSupported] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isPushSupported()) return;
@@ -24,6 +25,7 @@ export function PushSettingsLink() {
 
   async function toggle() {
     setBusy(true);
+    setError(null);
     try {
       if (subscribed) {
         await unsubscribeFromPush();
@@ -32,8 +34,8 @@ export function PushSettingsLink() {
         await subscribeToPush(locale);
         setSubscribed(true);
       }
-    } catch {
-      // permission denied or unsupported — leave state as-is
+    } catch (err) {
+      setError(err instanceof Error && err.message === "permission_denied" ? t("errorPermissionDenied") : t("errorGeneric"));
     } finally {
       setBusy(false);
     }
@@ -42,13 +44,16 @@ export function PushSettingsLink() {
   if (!supported) return null;
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      disabled={busy}
-      className="text-start hover:text-white disabled:opacity-60"
-    >
-      {subscribed ? t("manageEnabled") : t("manageDisabled")}
-    </button>
+    <span className="inline-flex flex-col items-start gap-1">
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={busy}
+        className="text-start hover:text-white disabled:opacity-60"
+      >
+        {subscribed ? t("manageEnabled") : t("manageDisabled")}
+      </button>
+      {error && <span className="max-w-xs text-xs text-red-400">{error}</span>}
+    </span>
   );
 }

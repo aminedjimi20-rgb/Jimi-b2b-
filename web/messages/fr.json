@@ -1215,7 +1215,9 @@
   "demoDataBadge": "Démo",
   "push": {
     "manageEnabled": "🔔 Notifications activées",
-    "manageDisabled": "🔕 Activer les notifications"
+    "manageDisabled": "🔕 Activer les notifications",
+    "errorPermissionDenied": "Autorisation refusée — activez les notifications pour ce site dans les réglages de votre navigateur.",
+    "errorGeneric": "Impossible d'activer les notifications sur cet appareil/navigateur."
   },
   "partDetail": {
     "galleryTitle": "Photos",

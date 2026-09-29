@@ -1215,7 +1215,9 @@
   "demoDataBadge": "تجريبي",
   "push": {
     "manageEnabled": "🔔 الإشعارات مفعّلة",
-    "manageDisabled": "🔕 تفعيل الإشعارات"
+    "manageDisabled": "🔕 تفعيل الإشعارات",
+    "errorPermissionDenied": "تم رفض الإذن — فعّل الإشعارات لهذا الموقع من إعدادات متصفحك.",
+    "errorGeneric": "تعذّر تفعيل الإشعارات على هذا الجهاز/المتصفح."
   },
   "partDetail": {
     "galleryTitle": "الصور",

@@ -1215,7 +1215,9 @@
   "demoDataBadge": "Demo",
   "push": {
     "manageEnabled": "🔔 Notifications on",
-    "manageDisabled": "🔕 Enable notifications"
+    "manageDisabled": "🔕 Enable notifications",
+    "errorPermissionDenied": "Permission denied — enable notifications for this site in your browser settings.",
+    "errorGeneric": "Couldn't enable notifications on this device/browser."
   },
   "partDetail": {
     "galleryTitle": "Photos",
