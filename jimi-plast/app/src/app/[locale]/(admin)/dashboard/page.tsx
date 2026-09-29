@@ -233,16 +233,29 @@ function PresetButton({ children, onClick }: { children: React.ReactNode; onClic
   );
 }
 
+interface EmployeeNoteItem {
+  type: 'note';
+  id: string;
+  text: string;
+  createdAt: string;
+  voidedAt: string | null;
+}
+
 function AttendanceWidget() {
   const t = useTranslations('attendance');
+  const tCommon = useTranslations('common');
   const { token } = useAuth();
   const { locale } = useParams<{ locale: string }>();
   const [entries, setEntries] = useState<AttendanceEntry[] | null>(null);
+  const [notes, setNotes] = useState<EmployeeNoteItem[]>([]);
   const [noteDraft, setNoteDraft] = useState('');
 
   function reload() {
     if (!token) return;
     api.get<AttendanceEntry[]>('/attendance/calendar', token).then(setEntries);
+    api
+      .get<{ type: string }[]>('/attendance/mine', token)
+      .then((items) => setNotes(items.filter((i): i is EmployeeNoteItem => i.type === 'note')));
   }
   useEffect(() => {
     reload();
@@ -265,6 +278,7 @@ function AttendanceWidget() {
     if (!noteDraft.trim()) return;
     await api.post('/attendance/notes', { text: noteDraft }, token);
     setNoteDraft('');
+    reload();
   }
 
   if (!entries) return null;
@@ -280,17 +294,37 @@ function AttendanceWidget() {
         onUnmark={unmark}
         onToggleHidden={toggleHidden}
       />
-      <div className="flex items-center gap-2 border-t border-line pt-3">
-        <input
-          value={noteDraft}
-          onChange={(e) => setNoteDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addNote()}
-          placeholder={t('notePlaceholder')}
-          className="flex-1 rounded border border-line bg-paper px-3 py-1.5 text-sm"
-        />
-        <button onClick={addNote} disabled={!noteDraft.trim()} className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50">
-          {t('addNote')}
-        </button>
+      <div className="flex flex-col gap-2 border-t border-line pt-3">
+        <div className="flex items-center gap-2">
+          <input
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addNote()}
+            placeholder={t('notePlaceholder')}
+            className="flex-1 rounded border border-line bg-paper px-3 py-1.5 text-sm"
+          />
+          <button onClick={addNote} disabled={!noteDraft.trim()} className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30 disabled:opacity-50">
+            {t('addNote')}
+          </button>
+        </div>
+        {notes.filter((n) => !n.voidedAt).length === 0 ? (
+          <p className="text-xs text-muted">{tCommon('empty')}</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {notes
+              .filter((n) => !n.voidedAt)
+              .map((n) => (
+                <div key={n.id} className="rounded border border-line/60 bg-paper px-3 py-1.5 text-xs text-ink">
+                  <span className="text-muted">
+                    {new Date(n.createdAt).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
+                    {' — '}
+                    {new Date(n.createdAt).toLocaleTimeString(locale)}
+                  </span>
+                  <p>{n.text}</p>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );
