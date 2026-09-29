@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth-context';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 interface RegistrationRequest {
   id: string;
@@ -30,6 +30,8 @@ export default function RequestsPage() {
   const [roleKey, setRoleKey] = useState('wholesaler');
   const [initialPassword, setInitialPassword] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const tCommon = useTranslations('common');
 
   function reload() {
     if (!token) return;
@@ -46,33 +48,51 @@ export default function RequestsPage() {
   async function reject(id: string) {
     if (!token) return;
     const note = window.prompt(t('note')) ?? '';
+    setError(null);
     setBusyId(id);
-    await api.post(`/registration-requests/${id}/reject`, { reviewNote: note }, token);
-    setBusyId(null);
-    reload();
+    try {
+      await api.post(`/registration-requests/${id}/reject`, { reviewNote: note }, token);
+      reload();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tCommon('error'));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function requestInfo(id: string) {
     if (!token) return;
     const note = window.prompt(t('note')) ?? '';
+    setError(null);
     setBusyId(id);
-    await api.post(`/registration-requests/${id}/request-info`, { reviewNote: note }, token);
-    setBusyId(null);
-    reload();
+    try {
+      await api.post(`/registration-requests/${id}/request-info`, { reviewNote: note }, token);
+      reload();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tCommon('error'));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function confirmAccept() {
     if (!token || !acceptTarget) return;
+    setError(null);
     setBusyId(acceptTarget.id);
-    await api.post(
-      `/registration-requests/${acceptTarget.id}/accept`,
-      { roleKey, ...(acceptTarget.hasOwnPassword ? {} : { initialPassword }) },
-      token,
-    );
-    setBusyId(null);
-    setAcceptTarget(null);
-    setInitialPassword('');
-    reload();
+    try {
+      await api.post(
+        `/registration-requests/${acceptTarget.id}/accept`,
+        { roleKey, ...(acceptTarget.hasOwnPassword ? {} : { initialPassword }) },
+        token,
+      );
+      setAcceptTarget(null);
+      setInitialPassword('');
+      reload();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tCommon('error'));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   const pending = requests.filter((r) => r.status === 'NEW' || r.status === 'INFO_REQUESTED');
@@ -80,6 +100,7 @@ export default function RequestsPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold text-ink">{t('title')}</h1>
+      {error && !acceptTarget && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="overflow-x-auto rounded-lg border border-line bg-panel">
         <table className="w-full min-w-[640px] text-sm">
@@ -188,16 +209,21 @@ export default function RequestsPage() {
               </label>
             )}
 
+            {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
+
             <div className="mt-5 flex justify-end gap-2">
               <button
-                onClick={() => setAcceptTarget(null)}
+                onClick={() => {
+                  setAcceptTarget(null);
+                  setError(null);
+                }}
                 className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30"
               >
                 {t('cancel')}
               </button>
               <button
                 onClick={confirmAccept}
-                disabled={!acceptTarget.hasOwnPassword && initialPassword.length < 8}
+                disabled={busyId === acceptTarget.id || (!acceptTarget.hasOwnPassword && initialPassword.length < 8)}
                 className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
               >
                 {t('confirm')}
