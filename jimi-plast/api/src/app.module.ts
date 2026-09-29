@@ -34,6 +34,7 @@ import { AttendanceModule } from './attendance/attendance.module';
 import { NotesModule } from './notes/notes.module';
 import { HistoryModule } from './history/history.module';
 import { BrandingModule } from './branding/branding.module';
+import { AdminModule } from './admin/admin.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -73,6 +74,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
     NotesModule,
     HistoryModule,
     BrandingModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

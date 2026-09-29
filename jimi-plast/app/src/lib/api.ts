@@ -22,11 +22,55 @@ export function setTokensUpdatedHandler(handler: TokensUpdatedHandler | null) {
 
 let refreshPromise: Promise<string | null> | null = null;
 
+const WAKE_UP_RETRY_DELAYS_MS = [4000, 8000, 15000];
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Un vrai rejet : le serveur a bien répondu et a explicitement invalidé ce
+ * refresh token (401/403 avec un corps JSON lisible) — pas une panne
+ * réseau, pas la page de réveil HTML de Render pendant que l'instance
+ * gratuite redémarre après ~15 min d'inactivité.
+ */
+async function attemptRefresh(refreshToken: string): Promise<{ kind: 'ok'; accessToken: string; refreshToken: string } | { kind: 'rejected' } | { kind: 'transient' }> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch {
+    return { kind: 'transient' };
+  }
+
+  if (res.status >= 500 || res.status === 0) return { kind: 'transient' };
+
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    // 200 mais pas du JSON : page d'attente HTML de Render, pas un vrai rejet.
+    return { kind: 'transient' };
+  }
+
+  if (!res.ok) return { kind: 'rejected' };
+  const data = body as { accessToken: string; refreshToken: string };
+  return { kind: 'ok', accessToken: data.accessToken, refreshToken: data.refreshToken };
+}
+
 /**
  * L'access token expire au bout de 15 min (voir ACCESS_TOKEN_TTL côté API).
  * Sans ce rafraîchissement silencieux, toute session ouverte plus de 15 min
  * perd l'authentification au prochain appel — d'où les "erreurs réseau" et
  * déconnexions signalées après une pause.
+ *
+ * Cas particulier : une session laissée ouverte toute une nuit tombe sur
+ * l'instance Render gratuite endormie (15 min d'inactivité) juste au moment
+ * où elle a besoin de rafraîchir son token. Une simple panne réseau ou la
+ * page HTML de réveil de Render ne doivent jamais être interprétées comme
+ * "refresh token invalide" — on réessaie plusieurs fois pendant le réveil
+ * (~30-50s) avant d'abandonner, exactement comme request() le fait déjà
+ * pour les appels normaux.
  */
 async function refreshAccessToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
@@ -34,29 +78,30 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   if (!refreshPromise) {
-    refreshPromise = fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error('refresh failed');
-        return res.json() as Promise<{ accessToken: string; refreshToken: string }>;
-      })
-      .then((data) => {
-        localStorage.setItem(TOKEN_KEY, data.accessToken);
-        localStorage.setItem(REFRESH_KEY, data.refreshToken);
-        onTokensUpdated?.(data.accessToken);
-        return data.accessToken;
-      })
-      .catch(() => {
-        // Le refresh token est à usage unique et révoqué dès qu'il sert : si
-        // un autre onglet (ou la PWA installée, qui partage le même
-        // localStorage) l'a déjà utilisé avec succès entre notre lecture et
-        // notre appel, le nôtre est rejeté alors que la session reste
-        // parfaitement valide — un nouveau token est déjà écrit en
-        // localStorage. On ne déconnecte que si ce n'est vraiment pas le cas,
-        // sinon on adopte silencieusement celui que l'autre a posé.
+    refreshPromise = (async () => {
+      for (let attempt = 0; ; attempt++) {
+        const result = await attemptRefresh(refreshToken);
+
+        if (result.kind === 'ok') {
+          localStorage.setItem(TOKEN_KEY, result.accessToken);
+          localStorage.setItem(REFRESH_KEY, result.refreshToken);
+          onTokensUpdated?.(result.accessToken);
+          return result.accessToken;
+        }
+
+        if (result.kind === 'transient' && attempt < WAKE_UP_RETRY_DELAYS_MS.length) {
+          await sleep(WAKE_UP_RETRY_DELAYS_MS[attempt]);
+          continue;
+        }
+
+        // Rejet explicite du serveur (ou panne réseau qui persiste après
+        // tous les essais) — le refresh token est à usage unique et révoqué
+        // dès qu'il sert : si un autre onglet (ou la PWA installée, qui
+        // partage le même localStorage) l'a déjà utilisé avec succès entre
+        // notre lecture et notre appel, le nôtre est rejeté alors que la
+        // session reste parfaitement valide — un nouveau token est déjà
+        // écrit en localStorage. On ne déconnecte que si ce n'est vraiment
+        // pas le cas, sinon on adopte silencieusement celui que l'autre a posé.
         const currentRefresh = localStorage.getItem(REFRESH_KEY);
         if (currentRefresh && currentRefresh !== refreshToken) {
           const currentAccess = localStorage.getItem(TOKEN_KEY);
@@ -67,16 +112,13 @@ async function refreshAccessToken(): Promise<string | null> {
         localStorage.removeItem(REFRESH_KEY);
         onTokensUpdated?.(null);
         return null;
-      })
-      .finally(() => {
-        refreshPromise = null;
-      });
+      }
+    })().finally(() => {
+      refreshPromise = null;
+    });
   }
   return refreshPromise;
 }
-
-const WAKE_UP_RETRY_DELAYS_MS = [4000, 8000, 15000];
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * L'instance Render gratuite s'endort après inactivité : le premier appel
