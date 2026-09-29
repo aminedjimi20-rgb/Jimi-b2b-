@@ -34,10 +34,24 @@ export async function notifyAdminNewInterest(machine: Machine): Promise<void> {
   );
 }
 
-/** Fires when someone submits a "sell" lead (pièce, moule, ou autre
- *  équipement) via le formulaire "Vendre un équipement". */
-export async function notifyAdminNewSellRequest(equipmentType: string, from: string): Promise<void> {
+const LEAD_TYPE_LABELS: Record<string, string> = {
+  buy: "Recherche machine",
+  sell: "Vente équipement",
+  service: "Demande de service",
+  contact: "Contact",
+  offer: "J'ai ça (réponse à une recherche)",
+};
+
+/** Fires for every lead submitted via le formulaire générique du site
+ *  (acheter, vendre, service, contact, ou réponse "J'ai ça" à une recherche
+ *  publiée) — un seul point d'alerte pour ne rien manquer sans avoir à
+ *  rouvrir l'admin en continu. */
+export async function notifyAdminNewLead(type: string, data: Record<string, string>): Promise<void> {
+  const label = LEAD_TYPE_LABELS[type] || type;
+  const from = data.name || data.phone || "Client";
+  const detail = data.equipmentType || data.wantedTitle || data.message || "";
+  const detailLine = detail ? `\n${detail}` : "";
   await sendAdminAlert(
-    `🆕 Nouvelle demande de vente (${equipmentType})\nDe : ${from}\n\nVoir : /admin/dashboard`
+    `🆕 ${label}\nDe : ${from}${detailLine}\n\nVoir : /admin/dashboard`
   );
 }

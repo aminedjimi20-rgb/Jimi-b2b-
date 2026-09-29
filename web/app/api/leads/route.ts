@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addLead, type LeadType } from "@/lib/leads";
 import { isRateLimited } from "@/lib/rateLimit";
-import { notifyAdminNewSellRequest } from "@/lib/notifications";
+import { notifyAdminNewLead } from "@/lib/notifications";
 
 const VALID_TYPES: LeadType[] = ["buy", "sell", "service", "contact", "offer"];
 const MAX_FIELD_LENGTH = 2000;
@@ -53,12 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   const lead = await addLead(type as LeadType, cleanData);
-
-  if (type === "sell") {
-    const equipmentType = cleanData.equipmentType || "équipement";
-    const from = cleanData.name || cleanData.phone || "Client";
-    await notifyAdminNewSellRequest(equipmentType, from);
-  }
+  await notifyAdminNewLead(type, cleanData);
 
   return NextResponse.json({ ok: true, id: lead.id });
 }

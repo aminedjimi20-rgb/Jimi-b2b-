@@ -4,27 +4,20 @@ import {
   isWhatsAppWebhookConfigured,
   getWhatsAppVerifyToken,
   getWhatsAppAppSecret,
-  sendWhatsAppTextMessage,
 } from "@/lib/whatsapp";
-import { getOrCreateConversationByPhone, appendMessage, saveConversation } from "@/lib/conversationsStore";
-import { runAgentTurn, shouldAiRespond } from "@/lib/ai/agent";
+import { getOrCreateConversationByPhone, appendMessage } from "@/lib/conversationsStore";
 import { notifyAdminIfNeeded } from "@/lib/adminAlerts";
 
 /**
  * Webhook WhatsApp Business Platform (Meta Cloud API).
  *
- * Volontairement INERTE tant que WHATSAPP_APP_SECRET / WHATSAPP_VERIFY_TOKEN
- * / WHATSAPP_PHONE_NUMBER_ID / WHATSAPP_ACCESS_TOKEN ne sont pas configurés
- * (voir web/.env.example) : GET renvoie 503 à la vérification Meta, POST
- * renvoie 503 sans traiter le message. Aucune simulation — dès que ces
- * variables sont renseignées côté Vercel et que l'URL de production est
- * enregistrée dans le compte Meta Business, ce endpoint devient actif tel
- * quel, sans autre changement de code.
+ * La réponse automatique par IA a été retirée : ce endpoint n'enregistre
+ * plus que les messages entrants (visibles dans l'admin) et alerte l'admin —
+ * il ne répond jamais au client à la place d'un humain. Volontairement
+ * INERTE tant que WHATSAPP_APP_SECRET / WHATSAPP_VERIFY_TOKEN / etc. ne sont
+ * pas configurés (voir web/.env.example) : GET renvoie 503 à la vérification
+ * Meta, POST renvoie 503 sans traiter le message.
  */
-
-// L'appel à Claude (avec réflexion adaptative) peut dépasser la limite par
-// défaut (10s) des fonctions serverless Vercel — on l'étend explicitement.
-export const maxDuration = 60;
 
 // ---- GET : handshake de vérification Meta -----------------------------
 
@@ -104,28 +97,20 @@ export async function POST(request: NextRequest) {
         if (!text) continue;
 
         try {
+          // La réponse automatique par IA est désactivée : ce numéro est
+          // repassé en usage manuel (app WhatsApp Business classique). On se
+          // contente d'enregistrer le message entrant, pour qu'il reste
+          // visible dans l'admin, et d'alerter l'admin — jamais de réponse
+          // auto envoyée au client.
           const conversation = await getOrCreateConversationByPhone(from, contactName);
           const isNewConversation = conversation.messages.length === 0;
           const previousStatus = conversation.status;
           const previousScore = conversation.score;
 
-          if (!shouldAiRespond(conversation)) {
-            // Un admin a la main ou la conversation est fermée : on
-            // enregistre le message entrant sans faire répondre l'IA.
-            const updated = await appendMessage(conversation.id, { role: "user", content: text });
-            if (updated) {
-              await notifyAdminIfNeeded({ conversation: updated, isNewConversation, previousStatus, previousScore });
-            }
-            continue;
+          const updated = await appendMessage(conversation.id, { role: "user", content: text });
+          if (updated) {
+            await notifyAdminIfNeeded({ conversation: updated, isNewConversation, previousStatus, previousScore });
           }
-
-          const { reply, conversation: updated } = await runAgentTurn({
-            conversation,
-            userMessage: text,
-          });
-          await saveConversation(updated);
-          await sendWhatsAppTextMessage(from, reply);
-          await notifyAdminIfNeeded({ conversation: updated, isNewConversation, previousStatus, previousScore });
         } catch (error) {
           // On ne fait jamais échouer la requête webhook (Meta désactive un
           // webhook qui échoue trop souvent) : on journalise et on continue.
