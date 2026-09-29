@@ -23,6 +23,12 @@ export function setTokensUpdatedHandler(handler: TokensUpdatedHandler | null) {
 let refreshPromise: Promise<string | null> | null = null;
 
 const WAKE_UP_RETRY_DELAYS_MS = [4000, 8000, 15000];
+// Le réveil de Render peut prendre jusqu'à ~50s (voir plus bas) — perdre la
+// session entière coûte bien plus cher qu'un appel de données qui échoue une
+// fois, donc le rafraîchissement du token se donne une marge plus large que
+// WAKE_UP_RETRY_DELAYS_MS (27s au total, déjà insuffisant pour le pire cas
+// documenté) avant de conclure à un vrai rejet.
+const REFRESH_WAKE_UP_RETRY_DELAYS_MS = [3000, 5000, 8000, 12000, 15000, 20000];
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -89,8 +95,8 @@ async function refreshAccessToken(): Promise<string | null> {
           return result.accessToken;
         }
 
-        if (result.kind === 'transient' && attempt < WAKE_UP_RETRY_DELAYS_MS.length) {
-          await sleep(WAKE_UP_RETRY_DELAYS_MS[attempt]);
+        if (result.kind === 'transient' && attempt < REFRESH_WAKE_UP_RETRY_DELAYS_MS.length) {
+          await sleep(REFRESH_WAKE_UP_RETRY_DELAYS_MS[attempt]);
           continue;
         }
 
