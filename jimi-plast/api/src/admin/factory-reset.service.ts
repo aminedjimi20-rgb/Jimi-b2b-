@@ -3,10 +3,11 @@ import { PrismaService } from '../prisma/prisma.service';
 
 const CONFIRM_PHRASE = 'RESET';
 
-// Jamais vidées : la structure technique (rôles/permissions), les comptes
-// admin eux-mêmes, la vitrine de marque (logos + badge d'ancienneté) et les
-// réglages/traductions génériques de l'appli — tout le reste est considéré
-// "données métier" et repart à zéro.
+// Jamais vidées : la structure technique (rôles/permissions), la table users
+// elle-même (le compte de qui déclenche le reset y est explicitement
+// préservé plus bas, tout le reste y est supprimé), la vitrine de marque
+// (logos + badge d'ancienneté) et les réglages/traductions génériques de
+// l'appli — tout le reste est considéré "données métier" et repart à zéro.
 const PRESERVED_TABLES = [
   '_prisma_migrations',
   'roles',
@@ -34,22 +35,30 @@ export class FactoryResetService {
       throw new ForbiddenException('Réservé à l’administrateur');
     }
 
-    const tables = await this.prisma.$queryRawUnsafe<{ tablename: string }[]>(
-      `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
+    // Toutes les instructions d'un même reset dans une seule transaction :
+    // soit tout passe, soit rien n'est touché — jamais un état à moitié vidé
+    // si une étape échoue en cours de route.
+    const usersDeleted = await this.prisma.$transaction(
+      async (tx) => {
+        const tables = await tx.$queryRawUnsafe<{ tablename: string }[]>(
+          `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
+        );
+
+        for (const { tablename } of tables) {
+          if (PRESERVED_TABLES.includes(tablename)) continue;
+          await tx.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" RESTART IDENTITY CASCADE`);
+        }
+
+        // Seul le compte de qui a lancé le reset survit — pas "n'importe quel
+        // admin" : si quelqu'un d'autre a aussi le rôle admin, son compte est
+        // effacé comme tout le reste. Tout ce qui référençait ces comptes a
+        // déjà été vidé ci-dessus (bons, clients, fabricants, notes...), donc
+        // ça ne peut plus violer aucune contrainte de clé étrangère.
+        return tx.$executeRaw`DELETE FROM "users" WHERE "id" != ${actorId}`;
+      },
+      { timeout: 60_000 },
     );
 
-    for (const { tablename } of tables) {
-      if (PRESERVED_TABLES.includes(tablename)) continue;
-      await this.prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" RESTART IDENTITY CASCADE`);
-    }
-
-    // Tout ce qui référençait un compte non-admin a déjà été vidé ci-dessus
-    // (bons, clients, fabricants, notes...) — supprimer ces comptes ne peut
-    // donc plus violer aucune contrainte de clé étrangère.
-    await this.prisma.$executeRawUnsafe(
-      `DELETE FROM "users" WHERE "roleId" NOT IN (SELECT "id" FROM "roles" WHERE "key" = 'admin')`,
-    );
-
-    return { ok: true };
+    return { ok: true, usersDeleted };
   }
 }

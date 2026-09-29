@@ -18,7 +18,7 @@ export default function FactoryResetPage() {
   const { user, token } = useAuth();
   const [confirm, setConfirm] = useState('');
   const [running, setRunning] = useState(false);
-  const [done, setDone] = useState(false);
+  const [result, setResult] = useState<{ usersDeleted: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   if (!user) return null;
@@ -30,8 +30,8 @@ export default function FactoryResetPage() {
     setError(null);
     setRunning(true);
     try {
-      await api.post('/admin/factory-reset', { confirm }, token);
-      setDone(true);
+      const res = await api.post<{ ok: boolean; usersDeleted: number }>('/admin/factory-reset', { confirm }, token);
+      setResult({ usersDeleted: res.usersDeleted });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erreur');
     } finally {
@@ -39,14 +39,20 @@ export default function FactoryResetPage() {
     }
   }
 
-  if (done) {
+  if (result) {
     return (
       <div className="mx-auto max-w-lg p-6">
         <p className="text-lg font-medium text-teal">C’est fait. Le site est vierge.</p>
         <p className="mt-2 text-sm text-muted">
           Clients, employés, fabricants, produits, bons, achats, retours, transport, dépenses, notes, besoins,
-          demandes et historique ont été effacés. Votre compte, les rôles/permissions et les logos partenaires sont
-          restés intacts.
+          demandes et historique ont été effacés. Seul votre propre compte a été gardé — {result.usersDeleted} autre
+          {result.usersDeleted === 1 ? '' : 's'} compte{result.usersDeleted === 1 ? '' : 's'} supprimé
+          {result.usersDeleted === 1 ? '' : 's'} (y compris tout autre admin). Les rôles/permissions et les logos
+          partenaires sont restés intacts.
+        </p>
+        <p className="mt-3 text-xs text-muted">
+          Si la page « Employés & rôles » montre encore d’anciens comptes, faites un rechargement complet
+          (Ctrl/Cmd+Maj+R) — c’est le navigateur qui affiche une vieille liste, pas le serveur.
         </p>
       </div>
     );
@@ -61,7 +67,8 @@ export default function FactoryResetPage() {
         négociations, stock, historique et demandes d’inscription.
       </p>
       <p className="mt-2 text-sm text-ink">
-        Restent intacts : votre compte admin, les rôles/permissions, et les logos partenaires + badge d’expérience.
+        Restent intacts : uniquement votre propre compte (tout autre compte, admin y compris, est supprimé), les
+        rôles/permissions, et les logos partenaires + badge d’expérience.
       </p>
       <p className="mt-2 text-sm font-medium text-red-600">Aucun retour en arrière possible.</p>
 
