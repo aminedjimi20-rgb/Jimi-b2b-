@@ -16,7 +16,9 @@ export class CategoriesService {
     return this.prisma.category.findMany({
       where: { deletedAt: null },
       orderBy: [{ sortOrder: 'asc' }, { nameFr: 'asc' }],
-      include: { _count: { select: { products: true } } },
+      // Un produit supprimé part à la Corbeille (deletedAt renseigné) mais
+      // reste en base — sans ce filtre, le compteur le comptait quand même.
+      include: { _count: { select: { products: { where: { deletedAt: null } } } } },
     });
   }
 

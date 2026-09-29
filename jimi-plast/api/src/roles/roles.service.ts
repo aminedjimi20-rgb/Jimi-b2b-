@@ -16,7 +16,12 @@ export class RolesService {
 
   async listRoles() {
     const roles = await this.prisma.role.findMany({
-      include: { rolePermissions: { include: { permission: true } }, _count: { select: { users: true } } },
+      include: {
+        rolePermissions: { include: { permission: true } },
+        // Un compte supprimé garde son rôle mais deletedAt renseigné —
+        // sans ce filtre, il restait compté ici après suppression.
+        _count: { select: { users: { where: { deletedAt: null } } } },
+      },
       orderBy: { createdAt: 'asc' },
     });
     return roles.map((role) => ({
