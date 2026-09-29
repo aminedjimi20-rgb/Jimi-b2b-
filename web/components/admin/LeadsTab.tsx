@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Lead, LeadType } from "@/lib/leads";
 import type { PartCategory } from "@/lib/types";
+import type { WantedCategory } from "@/lib/wantedListingsStore";
 import { Trash2, RefreshCw, MessageCircle, Phone, Mail, Check, CheckCircle2 } from "lucide-react";
 
 const TYPE_LABELS: Record<LeadType, string> = {
@@ -73,6 +74,41 @@ function isAcceptableOfferLead(lead: Lead): boolean {
 
 function isAcceptableLead(lead: Lead): boolean {
   return isAcceptableSellLead(lead) || isAcceptableBuyLead(lead) || isAcceptableOfferLead(lead);
+}
+
+/** Reconstruit une annonce "Recherché" publique à partir d'une demande
+ *  "Recherche machine" (achat) — les deux formulaires qui créent ce type de
+ *  lead ne renseignent equipmentType que pour pièce/moule/équipement ; son
+ *  absence signale une recherche de machine (BuyerRequestForm). */
+function buildWantedListingFromBuyLead(lead: Lead) {
+  const d = lead.data;
+  const category: WantedCategory =
+    d.equipmentType === "piece" ? "piece" : d.equipmentType === "moule" ? "moule" : d.equipmentType === "equipement" ? "autre" : "machine";
+
+  const title =
+    category === "machine"
+      ? d.brand
+        ? `Machine ${d.brand} recherchée`
+        : "Machine recherchée"
+      : d.reference?.trim() || "Pièce recherchée";
+
+  const details: string[] = [];
+  if (d.description) details.push(d.description);
+  if (category === "machine") {
+    if (d.tonnageMin || d.tonnageMax) details.push(`Tonnage : ${d.tonnageMin || "?"}–${d.tonnageMax || "?"} T`);
+    if (d.yearMin) details.push(`Année ≥ ${d.yearMin}`);
+    if (d.budgetMin || d.budgetMax) details.push(`Budget : ${d.budgetMin || "?"}–${d.budgetMax || "?"} DA`);
+  } else if (d.budget) {
+    details.push(`Budget : ${d.budget} DA`);
+  }
+
+  return {
+    title,
+    category,
+    description: details.join(" · ") || "Détails à préciser — contactez-nous.",
+    wilaya: d.wilaya || undefined,
+    status: "published" as const,
+  };
 }
 
 export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
@@ -172,10 +208,20 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
           alert("Fiche créée, mais l'enregistrement du vendeur a échoué — à ajouter manuellement dans Vendeurs.");
         }
       } else if (isAcceptableBuyLead(lead)) {
-        const buyerOk = await registerContact(lead, "buyers");
+        const [buyerOk, listingRes] = await Promise.all([
+          registerContact(lead, "buyers"),
+          fetch("/api/admin/wanted-listings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(buildWantedListingFromBuyLead(lead)),
+          }),
+        ]);
         if (!buyerOk) {
           alert("Erreur lors de l'enregistrement de l'acheteur.");
           return;
+        }
+        if (!listingRes.ok) {
+          alert("Acheteur enregistré, mais la publication sur la page Recherches a échoué — à créer manuellement.");
         }
       } else if (isAcceptableOfferLead(lead)) {
         const sellerOk = await registerContact(lead, "sellers");
@@ -335,7 +381,7 @@ export function LeadsTab({ initialLeads }: { initialLeads: Lead[] }) {
                       ? "Fiche créée en brouillon (à publier depuis l'onglet Pièces) et vendeur enregistré dans Vendeurs"
                       : isAcceptableOfferLead(lead)
                         ? "Fournisseur enregistré dans l'onglet Vendeurs"
-                        : "Acheteur enregistré dans l'onglet Acheteurs"}
+                        : "Acheteur enregistré dans Acheteurs et recherche publiée sur la page Recherches"}
                   </span>
                 </div>
               )}

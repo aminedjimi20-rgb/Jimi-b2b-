@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { buildWhatsAppLink } from "@/config/site.config";
-import { ShoppingCart, MessageCircle, ShieldCheck, Tag, PackageSearch, FileText } from "lucide-react";
+import { ShoppingCart, MessageCircle, ShieldCheck, Tag, PackageSearch, FileText, Megaphone } from "lucide-react";
 
 export async function Hero() {
   const t = await getTranslations();
@@ -65,6 +65,15 @@ export async function Hero() {
               icon={<PackageSearch size={18} />}
             >
               {t("cta.requestEquipment")}
+            </Button>
+            <Button
+              href="/recherches"
+              size="lg"
+              variant="outline"
+              className="!bg-transparent !text-white !border-white/25 hover:!border-white"
+              icon={<Megaphone size={18} />}
+            >
+              {t("cta.seeWanted")}
             </Button>
             <Button
               href="/contact"

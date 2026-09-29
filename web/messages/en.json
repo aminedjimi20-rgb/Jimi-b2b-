@@ -64,6 +64,7 @@
     "acheter": "Buy",
     "vendre": "Sell",
     "requestEquipment": "Request equipment",
+    "seeWanted": "See current requests",
     "sendMyRequest": "Send my request",
     "viewAll": "View all",
     "readMore": "Read article",
