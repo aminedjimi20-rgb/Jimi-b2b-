@@ -151,6 +151,28 @@ export default function ProductsAdminPage() {
   const [sortMode, setSortMode] = useState<SortMode>('newest');
   const [lastChanges, setLastChanges] = useState<Record<string, LastChange | null>>({});
 
+  // Même cascade catégorie/sous-catégorie que le formulaire, pour le filtre
+  // de la liste — categoryFilter reste la seule source de vérité.
+  const selectedTopFilterId = (() => {
+    const cat = categories.find((c) => c.id === categoryFilter);
+    return cat ? cat.parentId ?? cat.id : '';
+  })();
+  const filterSubcategories = categories.filter((c) => c.parentId === selectedTopFilterId);
+  // Choisir une catégorie parente doit aussi montrer les produits de ses
+  // sous-catégories — sinon filtrer juste sur "Plastique" ne montre rien
+  // tant qu'aucun produit n'est rattaché directement à ce niveau-là.
+  const categoryFilterIds = (() => {
+    if (!categoryFilter) return null;
+    const ids = [categoryFilter];
+    let frontier = [categoryFilter];
+    while (frontier.length > 0) {
+      const children = categories.filter((c) => c.parentId && frontier.includes(c.parentId)).map((c) => c.id);
+      ids.push(...children);
+      frontier = children;
+    }
+    return ids;
+  })();
+
   useEffect(() => {
     setVisibleCount(PRODUCTS_PAGE_SIZE);
   }, [search, categoryFilter, manufacturerFilter, sortMode]);
@@ -415,7 +437,7 @@ export default function ProductsAdminPage() {
 
   const filteredProducts = products
     .filter((p) => {
-      if (categoryFilter && p.categoryId !== categoryFilter) return false;
+      if (categoryFilterIds && !categoryFilterIds.includes(p.categoryId)) return false;
       if (manufacturerFilter && p.manufacturerId !== manufacturerFilter) return false;
       if (search) {
         const needle = search.toLowerCase();
@@ -476,17 +498,31 @@ export default function ProductsAdminPage() {
             className="w-56 rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
           />
           <select
-            value={categoryFilter}
+            value={selectedTopFilterId}
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="rounded border border-line bg-panel px-3 py-2 text-sm"
           >
             <option value="">{t('form.category')}</option>
-            {categories.map((c) => (
+            {topCategories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nameFr}
               </option>
             ))}
           </select>
+          {filterSubcategories.length > 0 && (
+            <select
+              value={filterSubcategories.some((s) => s.id === categoryFilter) ? categoryFilter : ''}
+              onChange={(e) => setCategoryFilter(e.target.value || selectedTopFilterId)}
+              className="rounded border border-line bg-panel px-3 py-2 text-sm"
+            >
+              <option value="">{t('form.subcategoryGeneral')}</option>
+              {filterSubcategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nameFr}
+                </option>
+              ))}
+            </select>
+          )}
           <select
             value={manufacturerFilter}
             onChange={(e) => setManufacturerFilter(e.target.value)}
