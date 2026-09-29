@@ -103,6 +103,10 @@
       "action": "Request a quote"
     }
   },
+  "explainerVideo": {
+    "title": "How does JIMI Industrie work?",
+    "subtitle": "A short video explaining how to buy, sell, or request a service on the site."
+  },
   "home": {
     "categories": {
       "eyebrow": "What we do",

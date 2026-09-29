@@ -103,6 +103,10 @@
       "action": "Demander un devis"
     }
   },
+  "explainerVideo": {
+    "title": "Comment fonctionne JIMI Industrie ?",
+    "subtitle": "Une courte vidéo pour comprendre comment acheter, vendre ou demander un service sur le site."
+  },
   "home": {
     "categories": {
       "eyebrow": "Nos domaines",

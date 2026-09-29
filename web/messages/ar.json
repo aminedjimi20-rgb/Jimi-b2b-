@@ -103,6 +103,10 @@
       "action": "طلب عرض سعر"
     }
   },
+  "explainerVideo": {
+    "title": "كيفاش يخدم موقع JIMI Industrie؟",
+    "subtitle": "فيديو قصير يشرح كيفاش تشري، تبيع، أو تطلب خدمة من الموقع."
+  },
   "home": {
     "categories": {
       "eyebrow": "مجالاتنا",

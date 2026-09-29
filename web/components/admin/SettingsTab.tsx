@@ -2,9 +2,11 @@ import { siteConfig } from "@/config/site.config";
 import { ServiceVideosSettings } from "./ServiceVideosSettings";
 import { BusinessInfoSettings } from "./BusinessInfoSettings";
 import { PartnerLogosSettings } from "./PartnerLogosSettings";
+import { HomeVideoSettings } from "./HomeVideoSettings";
 import type { ServiceVideos } from "@/lib/serviceVideos";
 import type { BusinessInfo } from "@/lib/businessInfoStore";
 import type { PartnerLogo } from "@/lib/partnerLogosStore";
+import type { HomeVideo } from "@/lib/homeVideoStore";
 import { AlertTriangle, Settings2 } from "lucide-react";
 
 export function SettingsTab({
@@ -12,11 +14,13 @@ export function SettingsTab({
   initialServiceVideos,
   initialBusinessInfo,
   initialPartnerLogos,
+  initialHomeVideo,
 }: {
   usingDefaultPassword: boolean;
   initialServiceVideos: ServiceVideos;
   initialBusinessInfo: BusinessInfo;
   initialPartnerLogos: PartnerLogo[];
+  initialHomeVideo: HomeVideo;
 }) {
   const defaultPwd = usingDefaultPassword;
 
@@ -67,6 +71,8 @@ export function SettingsTab({
           ))}
         </dl>
       </div>
+
+      <HomeVideoSettings initialHomeVideo={initialHomeVideo} />
 
       <ServiceVideosSettings initialServiceVideos={initialServiceVideos} />
 

@@ -26,6 +26,7 @@ import type { ServiceVideos } from "@/lib/serviceVideos";
 import type { BusinessInfo } from "@/lib/businessInfoStore";
 import type { ContactNote } from "@/lib/contactNotesStore";
 import type { PartnerLogo } from "@/lib/partnerLogosStore";
+import type { HomeVideo } from "@/lib/homeVideoStore";
 import type { WantedListing } from "@/lib/wantedListingsStore";
 import {
   Inbox,
@@ -77,6 +78,7 @@ export function AdminDashboard({
   initialContactNotes,
   initialPartnerLogos,
   initialWantedListings,
+  initialHomeVideo,
   usingDefaultPassword,
 }: {
   initialLeads: Lead[];
@@ -93,6 +95,7 @@ export function AdminDashboard({
   initialContactNotes: ContactNote[];
   initialPartnerLogos: PartnerLogo[];
   initialWantedListings: WantedListing[];
+  initialHomeVideo: HomeVideo;
   usingDefaultPassword: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("leads");
@@ -174,6 +177,7 @@ export function AdminDashboard({
           initialServiceVideos={initialServiceVideos}
           initialBusinessInfo={initialBusinessInfo}
           initialPartnerLogos={initialPartnerLogos}
+          initialHomeVideo={initialHomeVideo}
         />
       )}
     </div>
