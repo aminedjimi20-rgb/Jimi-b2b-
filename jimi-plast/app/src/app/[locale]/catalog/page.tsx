@@ -880,14 +880,17 @@ export default function CatalogPage() {
                   </div>
                 </div>
                 <div className="mt-2 flex gap-1.5">
-                  {p.availability === 'IN_STOCK' && (
-                    <button
-                      onClick={() => openAddModal(p)}
-                      className="flex-1 rounded bg-accent px-2 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                    >
-                      {t('addToCart')}
-                    </button>
-                  )}
+                  {/* Le stock peut ne pas encore refléter une réception réelle
+                      (marchandise pas encore saisie) — on laisse ajouter au
+                      panier même en rupture plutôt que de bloquer la vente ;
+                      le bon garde son garde-fou (confirmation forcée) côté
+                      staff avant que le stock ne devienne négatif. */}
+                  <button
+                    onClick={() => openAddModal(p)}
+                    className="flex-1 rounded bg-accent px-2 py-1.5 text-xs font-medium text-white hover:opacity-90"
+                  >
+                    {t('addToCart')}
+                  </button>
                   {canManageCatalog && (
                     <Link
                       href={`/${locale}/products?edit=${p.id}`}
