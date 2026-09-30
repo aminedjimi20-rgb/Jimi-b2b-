@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { ImageUploadButton } from '@/components/image-upload-button';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { SortSelect, type SortMode } from '@/components/sort-select';
+import { SearchableSelect } from '@/components/searchable-select';
 
 interface Category {
   id: string;
@@ -497,44 +498,32 @@ export default function ProductsAdminPage() {
             placeholder={tCommon('search')}
             className="w-56 rounded border border-line bg-panel px-3 py-2 text-sm outline-none focus:border-accent"
           />
-          <select
+          <SearchableSelect
             value={selectedTopFilterId}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded border border-line bg-panel px-3 py-2 text-sm"
-          >
-            <option value="">{t('form.category')}</option>
-            {topCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nameFr}
-              </option>
-            ))}
-          </select>
+            onChange={setCategoryFilter}
+            options={topCategories.map((c) => ({ value: c.id, label: c.nameFr }))}
+            placeholder={t('form.category')}
+            emptyLabel={t('form.category')}
+            className="w-40"
+          />
           {filterSubcategories.length > 0 && (
-            <select
+            <SearchableSelect
               value={filterSubcategories.some((s) => s.id === categoryFilter) ? categoryFilter : ''}
-              onChange={(e) => setCategoryFilter(e.target.value || selectedTopFilterId)}
-              className="rounded border border-line bg-panel px-3 py-2 text-sm"
-            >
-              <option value="">{t('form.subcategoryGeneral')}</option>
-              {filterSubcategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nameFr}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setCategoryFilter(v || selectedTopFilterId)}
+              options={filterSubcategories.map((c) => ({ value: c.id, label: c.nameFr }))}
+              placeholder={t('form.subcategoryGeneral')}
+              emptyLabel={t('form.subcategoryGeneral')}
+              className="w-40"
+            />
           )}
-          <select
+          <SearchableSelect
             value={manufacturerFilter}
-            onChange={(e) => setManufacturerFilter(e.target.value)}
-            className="rounded border border-line bg-panel px-3 py-2 text-sm"
-          >
-            <option value="">{t('form.manufacturer')}</option>
-            {manufacturers.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+            onChange={setManufacturerFilter}
+            options={manufacturers.map((m) => ({ value: m.id, label: m.name }))}
+            placeholder={t('form.manufacturer')}
+            emptyLabel={t('form.manufacturer')}
+            className="w-40"
+          />
           <SortSelect value={sortMode} onChange={setSortMode} options={['newest', 'oldest', 'name_asc', 'name_desc']} />
         </div>
         </div>
@@ -672,52 +661,36 @@ export default function ProductsAdminPage() {
 
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">{t('form.category')}</span>
-            <select
+            <SearchableSelect
               value={selectedTopCategoryId}
-              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-              className="rounded border border-line bg-paper px-3 py-2"
-            >
-              <option value=""></option>
-              {topCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nameFr}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setForm({ ...form, categoryId: v })}
+              options={topCategories.map((c) => ({ value: c.id, label: c.nameFr }))}
+              placeholder={tCommon('search')}
+            />
           </label>
 
           {subcategories.length > 0 && (
             <label className="flex flex-col gap-1 text-sm">
               <span className="text-muted">{t('form.subcategory')}</span>
-              <select
+              <SearchableSelect
                 value={subcategories.some((s) => s.id === form.categoryId) ? form.categoryId : ''}
-                onChange={(e) => setForm({ ...form, categoryId: e.target.value || selectedTopCategoryId })}
-                className="rounded border border-line bg-paper px-3 py-2"
-              >
-                <option value="">{t('form.subcategoryGeneral')}</option>
-                {subcategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nameFr}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setForm({ ...form, categoryId: v || selectedTopCategoryId })}
+                options={subcategories.map((c) => ({ value: c.id, label: c.nameFr }))}
+                placeholder={tCommon('search')}
+                emptyLabel={t('form.subcategoryGeneral')}
+              />
             </label>
           )}
 
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">{t('form.manufacturer')}</span>
-            <select
+            <SearchableSelect
               value={form.manufacturerId}
-              onChange={(e) => setForm({ ...form, manufacturerId: e.target.value })}
-              className="rounded border border-line bg-paper px-3 py-2"
-            >
-              <option value="">{t('form.noManufacturer')}</option>
-              {manufacturers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setForm({ ...form, manufacturerId: v })}
+              options={manufacturers.map((m) => ({ value: m.id, label: m.name }))}
+              placeholder={tCommon('search')}
+              emptyLabel={t('form.noManufacturer')}
+            />
           </label>
 
           <Field label={t('form.nameFr')} value={form.nameFr} onChange={(v) => setForm({ ...form, nameFr: v })} />
