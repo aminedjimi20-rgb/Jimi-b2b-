@@ -1,0 +1,8 @@
+node_modules/
+.next/
+out/
+.env.local
+*.log
+AGENTS.md
+CLAUDE.md
+tsconfig.tsbuildinfo
