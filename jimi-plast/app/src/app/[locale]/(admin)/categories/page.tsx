@@ -150,10 +150,17 @@ export default function CategoriesPage() {
     }
   }
 
-  async function move(index: number, direction: -1 | 1) {
+  // Catégories principales et sous-catégories affichées dans deux tableaux
+  // distincts — mélangées dans une même liste triée par date, l'ordre réel
+  // de la hiérarchie devenait illisible (une sous-catégorie pouvait
+  // apparaître avant son propre parent).
+  const rootRows = useMemo(() => sortedFiltered.filter((c) => !c.parentId), [sortedFiltered]);
+  const subRows = useMemo(() => sortedFiltered.filter((c) => c.parentId), [sortedFiltered]);
+
+  async function move(rows: Category[], index: number, direction: -1 | 1) {
     const otherIndex = index + direction;
-    if (otherIndex < 0 || otherIndex >= sortedFiltered.length) return;
-    const reordered = [...sortedFiltered];
+    if (otherIndex < 0 || otherIndex >= rows.length) return;
+    const reordered = [...rows];
     [reordered[index], reordered[otherIndex]] = [reordered[otherIndex], reordered[index]];
 
     await Promise.all(
@@ -177,7 +184,6 @@ export default function CategoriesPage() {
     reload();
   }
 
-  const nameOf = (c: Category) => c.nameFr;
   const canReorder = search.trim() === '' && sortMode === 'manual';
 
   return (
@@ -199,62 +205,31 @@ export default function CategoriesPage() {
             />
           </div>
         </div>
-        <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-panel">
-          <table className="w-full min-w-[600px] text-sm">
-            <thead className="bg-line/30 text-xs uppercase text-muted">
-              <tr>
-                <th className="px-4 py-2 text-start">{t('columns.order')}</th>
-                <th className="px-4 py-2 text-start">{t('columns.name')}</th>
-                <th className="px-4 py-2 text-start">{t('columns.slug')}</th>
-                <th className="px-4 py-2 text-start">{t('columns.parent')}</th>
-                <th className="px-4 py-2 text-start">{t('columns.products')}</th>
-                <th className="px-4 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedFiltered.map((c, index) => (
-                <tr key={c.id} className="border-t border-line">
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => move(index, -1)}
-                        disabled={!canReorder || index === 0}
-                        title={t('moveUp')}
-                        className="rounded px-1 text-muted hover:text-accent disabled:opacity-20"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => move(index, 1)}
-                        disabled={!canReorder || index === sortedFiltered.length - 1}
-                        title={t('moveDown')}
-                        className="rounded px-1 text-muted hover:text-accent disabled:opacity-20"
-                      >
-                        ↓
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2 font-medium text-ink">{nameOf(c)}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted">{c.slug}</td>
-                  <td className="px-4 py-2 text-xs text-muted">
-                    {categories.find((p) => p.id === c.parentId)?.nameFr ?? '—'}
-                  </td>
-                  <td className="px-4 py-2 tabular">{c._count.products}</td>
-                  <td className="flex gap-2 px-4 py-2 text-end">
-                    <button onClick={() => startEdit(c)} className="text-xs text-accent hover:underline">
-                      {tCommon('edit')}
-                    </button>
-                    <button onClick={() => remove(c)} className="text-xs text-red-600 hover:underline">
-                      {tCommon('delete')}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-muted">{t('rootSectionTitle')}</h2>
+        <CategoryTable
+          rows={rootRows}
+          categories={categories}
+          canReorder={canReorder}
+          showParent={false}
+          onMove={(i, d) => move(rootRows, i, d)}
+          onEdit={startEdit}
+          onRemove={remove}
+          t={t}
+          tCommon={tCommon}
+        />
+
+        <h2 className="mt-6 text-sm font-semibold uppercase tracking-wide text-muted">{t('subSectionTitle')}</h2>
+        <CategoryTable
+          rows={subRows}
+          categories={categories}
+          canReorder={canReorder}
+          showParent={true}
+          onMove={(i, d) => move(subRows, i, d)}
+          onEdit={startEdit}
+          onRemove={remove}
+          t={t}
+          tCommon={tCommon}
+        />
       </div>
 
       <form onSubmit={onSubmit} className="w-full rounded-lg border border-line bg-panel p-4 lg:w-80">
@@ -333,6 +308,96 @@ export default function CategoriesPage() {
           </div>
         </div>
       </form>
+    </div>
+  );
+}
+
+function CategoryTable({
+  rows,
+  categories,
+  canReorder,
+  showParent,
+  onMove,
+  onEdit,
+  onRemove,
+  t,
+  tCommon,
+}: {
+  rows: Category[];
+  categories: Category[];
+  canReorder: boolean;
+  showParent: boolean;
+  onMove: (index: number, direction: -1 | 1) => void;
+  onEdit: (c: Category) => void;
+  onRemove: (c: Category) => void;
+  t: ReturnType<typeof useTranslations>;
+  tCommon: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <div className="mt-2 overflow-x-auto rounded-lg border border-line bg-panel">
+      <table className="w-full min-w-[600px] text-sm">
+        <thead className="bg-line/30 text-xs uppercase text-muted">
+          <tr>
+            <th className="px-4 py-2 text-start">{t('columns.order')}</th>
+            <th className="px-4 py-2 text-start">{t('columns.name')}</th>
+            <th className="px-4 py-2 text-start">{t('columns.slug')}</th>
+            {showParent && <th className="px-4 py-2 text-start">{t('columns.parent')}</th>}
+            <th className="px-4 py-2 text-start">{t('columns.products')}</th>
+            <th className="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={showParent ? 6 : 5} className="px-4 py-4 text-center text-sm text-muted">
+                {tCommon('empty')}
+              </td>
+            </tr>
+          )}
+          {rows.map((c, index) => (
+            <tr key={c.id} className="border-t border-line">
+              <td className="px-4 py-2">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onMove(index, -1)}
+                    disabled={!canReorder || index === 0}
+                    title={t('moveUp')}
+                    className="rounded px-1 text-muted hover:text-accent disabled:opacity-20"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onMove(index, 1)}
+                    disabled={!canReorder || index === rows.length - 1}
+                    title={t('moveDown')}
+                    className="rounded px-1 text-muted hover:text-accent disabled:opacity-20"
+                  >
+                    ↓
+                  </button>
+                </div>
+              </td>
+              <td className="px-4 py-2 font-medium text-ink">{c.nameFr}</td>
+              <td className="px-4 py-2 font-mono text-xs text-muted">{c.slug}</td>
+              {showParent && (
+                <td className="px-4 py-2 text-xs text-muted">
+                  {categories.find((p) => p.id === c.parentId)?.nameFr ?? '—'}
+                </td>
+              )}
+              <td className="px-4 py-2 tabular">{c._count.products}</td>
+              <td className="flex gap-2 px-4 py-2 text-end">
+                <button onClick={() => onEdit(c)} className="text-xs text-accent hover:underline">
+                  {tCommon('edit')}
+                </button>
+                <button onClick={() => onRemove(c)} className="text-xs text-red-600 hover:underline">
+                  {tCommon('delete')}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -45,7 +45,11 @@ export interface ProductListFilters {
   isClearance?: boolean;
   onSale?: boolean;
   availability?: 'in_stock' | 'out_of_stock';
-  sort?: 'priority' | 'newest' | 'name_asc' | 'name_desc';
+  sort?: 'priority' | 'newest' | 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc';
+  // Palier de prix à utiliser pour le tri par prix — le même que celui
+  // affiché côté catalogue ("Voir les prix"), sinon le tri ne correspondrait
+  // pas à ce que le client voit réellement à l'écran.
+  priceTierKey?: string;
   page?: number;
   pageSize?: number;
 }
@@ -182,11 +186,28 @@ export class ProductsService {
     if (filters.onSale) items = items.filter((p) => p.hasPromotion);
 
     const sort = filters.sort ?? 'priority';
+    // Prix du palier affiché au client — celui du filtre s'il est visible
+    // pour lui, sinon le premier palier qu'il peut voir (même repli que
+    // priceFor() côté catalogue). Un produit sans prix visible part toujours
+    // en fin de liste, quel que soit le sens du tri.
+    const priceOf = (item: (typeof items)[number]): number | null => {
+      if (item.prices.length === 0) return null;
+      const match = filters.priceTierKey ? item.prices.find((pr) => pr.tierKey === filters.priceTierKey) : undefined;
+      return (match ?? item.prices[0]).price;
+    };
     items.sort((a, b) => {
       if (sort === 'priority') return b._priority - a._priority;
       if (sort === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       if (sort === 'name_asc') return a.nameFr.localeCompare(b.nameFr);
       if (sort === 'name_desc') return b.nameFr.localeCompare(a.nameFr);
+      if (sort === 'price_asc' || sort === 'price_desc') {
+        const pa = priceOf(a);
+        const pb = priceOf(b);
+        if (pa === null && pb === null) return 0;
+        if (pa === null) return 1;
+        if (pb === null) return -1;
+        return sort === 'price_asc' ? pa - pb : pb - pa;
+      }
       return 0;
     });
 

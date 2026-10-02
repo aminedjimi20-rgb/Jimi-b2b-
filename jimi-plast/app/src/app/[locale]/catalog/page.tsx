@@ -164,6 +164,9 @@ export default function CatalogPage() {
     if (search) params.set('search', search);
     if (categoryId) params.set('categoryId', categoryId);
     if (sort) params.set('sort', sort);
+    // Le tri par prix doit porter sur le palier affiché ("Voir les prix") —
+    // sinon l'ordre résultant ne correspondrait pas aux prix vus à l'écran.
+    if ((sort === 'price_asc' || sort === 'price_desc') && viewTier) params.set('priceTierKey', viewTier);
     if (onlyInStock) params.set('availability', 'in_stock');
     if (onlyOnSale) params.set('onSale', 'true');
     if (onlyNew) params.set('isNew', 'true');
@@ -180,6 +183,12 @@ export default function CatalogPage() {
     });
   }
 
+  // Ne redéclenche le rechargement pour un changement de palier que si le tri
+  // courant en dépend (tri par prix) — sinon choisir "Voir les prix" n'a pas
+  // besoin de relancer une requête, les prix de tous les paliers visibles
+  // sont déjà inclus dans chaque produit chargé.
+  const priceSortTier = sort === 'price_asc' || sort === 'price_desc' ? viewTier : '';
+
   useEffect(() => {
     setLoading(true);
     itemRefs.current = {};
@@ -193,7 +202,7 @@ export default function CatalogPage() {
       })
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew, token]);
+  }, [search, categoryId, sort, onlyInStock, onlyOnSale, onlyNew, token, priceSortTier]);
 
   async function loadMore() {
     if (loadingMore || loading || products.length >= total) return;
@@ -631,31 +640,23 @@ export default function CatalogPage() {
 
         {filtersOpen && (
           <div className="mx-auto flex max-w-7xl flex-wrap gap-3 px-6 pb-4">
-            <select
+            <SearchableSelect
               value={selectedTopCategoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="rounded border border-line bg-panel px-3 py-2 text-sm"
-            >
-              <option value="">{t('allCategories')}</option>
-              {topCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {localizedName(c, locale)}
-                </option>
-              ))}
-            </select>
+              onChange={setCategoryId}
+              options={topCategories.map((c) => ({ value: c.id, label: localizedName(c, locale) }))}
+              placeholder={t('allCategories')}
+              emptyLabel={t('allCategories')}
+              className="w-44"
+            />
             {subcategories.length > 0 && (
-              <select
+              <SearchableSelect
                 value={subcategories.some((s) => s.id === categoryId) ? categoryId : ''}
-                onChange={(e) => setCategoryId(e.target.value || selectedTopCategoryId)}
-                className="rounded border border-line bg-panel px-3 py-2 text-sm"
-              >
-                <option value="">{t('allSubcategories')}</option>
-                {subcategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {localizedName(c, locale)}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setCategoryId(v || selectedTopCategoryId)}
+                options={subcategories.map((c) => ({ value: c.id, label: localizedName(c, locale) }))}
+                placeholder={t('allSubcategories')}
+                emptyLabel={t('allSubcategories')}
+                className="w-44"
+              />
             )}
             <select
               value={sort}
@@ -666,6 +667,8 @@ export default function CatalogPage() {
               <option value="newest">{t('sortNewest')}</option>
               <option value="name_asc">{t('sortNameAsc')}</option>
               <option value="name_desc">{t('sortNameDesc')}</option>
+              <option value="price_asc">{t('sortPriceAsc')}</option>
+              <option value="price_desc">{t('sortPriceDesc')}</option>
             </select>
 
             <label className="flex items-center gap-1.5 text-sm text-ink">

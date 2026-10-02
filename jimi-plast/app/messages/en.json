@@ -295,6 +295,8 @@
     "sortNewest": "Newest",
     "sortNameAsc": "Name (A→Z)",
     "sortNameDesc": "Name (Z→A)",
+    "sortPriceAsc": "Price (ascending)",
+    "sortPriceDesc": "Price (descending)",
     "inStock": "In stock",
     "outOfStock": "Out of stock",
     "onlyInStock": "In stock only",
@@ -915,7 +917,9 @@
     "none": "None",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "deleteConfirm": "Delete this category?"
+    "deleteConfirm": "Delete this category?",
+    "rootSectionTitle": "Main categories",
+    "subSectionTitle": "Subcategories"
   },
   "expenses": {
     "title": "Expenses",

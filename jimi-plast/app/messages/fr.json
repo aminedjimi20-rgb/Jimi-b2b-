@@ -295,6 +295,8 @@
     "sortNewest": "Plus récents",
     "sortNameAsc": "Nom (A→Z)",
     "sortNameDesc": "Nom (Z→A)",
+    "sortPriceAsc": "Prix (croissant)",
+    "sortPriceDesc": "Prix (décroissant)",
     "inStock": "En stock",
     "outOfStock": "Rupture de stock",
     "onlyInStock": "Disponibles uniquement",
@@ -915,7 +917,9 @@
     "none": "Aucune",
     "moveUp": "Monter",
     "moveDown": "Descendre",
-    "deleteConfirm": "Supprimer cette catégorie ?"
+    "deleteConfirm": "Supprimer cette catégorie ?",
+    "rootSectionTitle": "Catégories principales",
+    "subSectionTitle": "Sous-catégories"
   },
   "expenses": {
     "title": "Frais",

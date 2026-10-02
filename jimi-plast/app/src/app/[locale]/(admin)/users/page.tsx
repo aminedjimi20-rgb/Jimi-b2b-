@@ -36,7 +36,7 @@ const NEW_FORM = { fullName: '', email: '', phone: '', initialPassword: '', role
 export default function UsersPage() {
   const t = useTranslations('users');
   const tCommon = useTranslations('common');
-  const { token } = useAuth();
+  const { token, user: currentUser } = useAuth();
   const { locale } = useParams<{ locale: string }>();
   const router = useRouter();
   const [tab, setTab] = useState<'users' | 'roles'>('users');
@@ -91,8 +91,12 @@ export default function UsersPage() {
   async function toggleStatus(user: UserRow) {
     if (!token) return;
     const next = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-    await api.put(`/users/${user.id}/status`, { status: next }, token);
-    reloadUsers();
+    try {
+      await api.put(`/users/${user.id}/status`, { status: next }, token);
+      reloadUsers();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : tCommon('error'));
+    }
   }
 
   async function submitCreate() {
@@ -300,7 +304,7 @@ export default function UsersPage() {
                     </td>
                     <td className="px-4 py-2 text-end" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-2">
-                        {u.role.key !== 'admin' && (
+                        {u.id !== currentUser?.id && (
                           <button
                             onClick={() => toggleStatus(u)}
                             className="rounded border border-line px-2 py-1 text-xs text-ink hover:bg-line/30"
@@ -308,7 +312,7 @@ export default function UsersPage() {
                             {u.status === 'ACTIVE' ? t('suspend') : t('activate')}
                           </button>
                         )}
-                        {u.role.key !== 'admin' && (
+                        {u.id !== currentUser?.id && (
                           <button
                             onClick={(e) => removeUser(u, e)}
                             className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50"

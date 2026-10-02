@@ -36,7 +36,7 @@ const NON_EMPLOYEE_ROLE_KEYS = ['wholesaler', 'retailer', 'manufacturer'];
 export default function UserDetailPage() {
   const t = useTranslations('users');
   const tCommon = useTranslations('common');
-  const { token } = useAuth();
+  const { token, user: currentUser } = useAuth();
   const { locale, id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
 
@@ -97,8 +97,12 @@ export default function UserDetailPage() {
   async function toggleStatus() {
     if (!user) return;
     const next = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-    await api.put(`/users/${id}/status`, { status: next }, token);
-    reload();
+    try {
+      await api.put(`/users/${id}/status`, { status: next }, token);
+      reload();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : tCommon('error'));
+    }
   }
 
   async function removeUser() {
@@ -187,7 +191,7 @@ export default function UserDetailPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          {user.role.key !== 'admin' && (
+          {user.id !== currentUser?.id && (
             <>
               <button onClick={toggleStatus} className="rounded border border-line px-3 py-1.5 text-sm text-ink hover:bg-line/30">
                 {user.status === 'ACTIVE' ? t('suspend') : t('activate')}

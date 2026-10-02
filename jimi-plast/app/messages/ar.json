@@ -295,6 +295,8 @@
     "sortNewest": "الأحدث",
     "sortNameAsc": "الاسم (أ→ي)",
     "sortNameDesc": "الاسم (ي→أ)",
+    "sortPriceAsc": "السعر (تصاعدي)",
+    "sortPriceDesc": "السعر (تنازلي)",
     "inStock": "متوفر",
     "outOfStock": "نفدت الكمية",
     "onlyInStock": "المتوفر فقط",
@@ -915,7 +917,9 @@
     "none": "بدون",
     "moveUp": "تحريك للأعلى",
     "moveDown": "تحريك للأسفل",
-    "deleteConfirm": "حذف هذه الفئة؟"
+    "deleteConfirm": "حذف هذه الفئة؟",
+    "rootSectionTitle": "الفئات الرئيسية",
+    "subSectionTitle": "الفئات الفرعية"
   },
   "expenses": {
     "title": "المصاريف",

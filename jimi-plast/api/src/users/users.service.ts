@@ -117,8 +117,13 @@ export class UsersService {
   async remove(id: string, actorId: string, reason?: string) {
     const user = await this.prisma.user.findFirst({ where: { id, deletedAt: null }, include: { role: true } });
     if (!user) throw new NotFoundException('Utilisateur introuvable');
-    if (user.role.key === 'admin') throw new BadRequestException('Impossible de supprimer un compte ADMIN');
     if (id === actorId) throw new BadRequestException('Impossible de supprimer votre propre compte');
+    if (user.role.key === 'admin') {
+      const activeAdmins = await this.prisma.user.count({
+        where: { role: { key: 'admin' }, status: 'ACTIVE', deletedAt: null },
+      });
+      if (activeAdmins <= 1) throw new BadRequestException('Impossible de supprimer le dernier compte ADMIN actif');
+    }
 
     await this.prisma.user.update({ where: { id }, data: { deletedAt: new Date() } });
     await this.trash.moveToTrash({
@@ -145,8 +150,14 @@ export class UsersService {
   async setStatus(userId: string, dto: SetUserStatusDto, actorId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
     if (!user) throw new NotFoundException('Utilisateur introuvable');
-    if (user.role.key === 'admin' && dto.status === 'SUSPENDED') {
-      throw new BadRequestException('Impossible de suspendre un compte ADMIN');
+    if (dto.status === 'SUSPENDED') {
+      if (userId === actorId) throw new BadRequestException('Impossible de suspendre votre propre compte');
+      if (user.role.key === 'admin') {
+        const activeAdmins = await this.prisma.user.count({
+          where: { role: { key: 'admin' }, status: 'ACTIVE', deletedAt: null },
+        });
+        if (activeAdmins <= 1) throw new BadRequestException('Impossible de suspendre le dernier compte ADMIN actif');
+      }
     }
 
     const updated = await this.prisma.user.update({

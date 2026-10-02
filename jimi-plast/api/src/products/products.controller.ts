@@ -38,6 +38,7 @@ export class ProductsController {
       onSale: toBool(query.onSale),
       availability: query.availability as ProductListFilters['availability'],
       sort: query.sort as ProductListFilters['sort'],
+      priceTierKey: query.priceTierKey,
       page: query.page ? Number(query.page) : undefined,
       pageSize: query.pageSize ? Number(query.pageSize) : undefined,
     };
